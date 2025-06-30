@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TheSizNexus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, #0d0d0d, #001f3f);
+      color: #00d4ff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .hero {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      flex-direction: column;
+      padding: 40px 20px 0;
+    }
+
+    .hero h1 {
+      font-weight: 700;
+      font-size: 4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin: 0;
+      animation: glow 2s ease-in-out infinite alternate;
+      text-shadow: 0 0 5px #00d4ff, 0 0 15px #00d4ff, 0 0 30px #00d4ff, 0 0 40px #00d4ff;
+    }
+
+    .hero p {
+      font-weight: 500;
+      font-size: 1.5rem;
+      max-width: 600px;
+      margin-top: 1rem;
+      color: #66f0ffcc;
+      letter-spacing: 0.05em;
+      animation: fadeIn 3s ease-in-out;
+    }
+
+    .hero a.button {
+      margin-top: 2rem;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      background-color: #007BFF;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background 0.3s ease;
+      animation: fadeIn 4s ease-in-out;
+      display: inline-block;
+    }
+
+    .hero a.button:hover {
+      background-color: #0056b3;
+    }
+
+    .info-section {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      padding: 40px 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+      animation: slideIn 1.5s ease;
+    }
+
+    .bubble {
+      background-color: #020b17;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 0 20px rgba(0, 213, 255, 0.1);
+      color: #d0faff;
+      transition: 0.3s ease;
+      animation: pulseGlow 4s infinite alternate;
+    }
+
+    .bubble:hover {
+      box-shadow: 0 0 25px rgba(0, 213, 255, 0.3);
+    }
+
+    .bubble h2 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+      color: #00d4ff;
+    }
+
+    .bubble ul {
+      list-style-type: disc;
+      padding-left: 1.2rem;
+    }
+
+    .bubble li {
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    .discord-button {
+      margin-top: 1.5rem;
+      display: inline-block;
+      background: #00c3ff;
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 0 15px rgba(0, 213, 255, 0.6);
+      transition: 0.2s ease;
+    }
+
+    .discord-button:hover {
+      background: #00aacc;
+      box-shadow: 0 0 25px rgba(0, 213, 255, 0.8);
+    }
+
+    footer {
+      background-color: #00152b;
+      padding: 20px 10px;
+      text-align: center;
+      font-size: 1rem;
+      color: #0099ffcc;
+      letter-spacing: 0.05em;
+      border-top: 1px solid #003366;
+      user-select: none;
+    }
+
+    footer .contact {
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #00d4ff;
+    }
+
+    footer .contact a {
+      color: #00d4ff;
+      text-decoration: underline;
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 5px #00d4ff, 0 0 15px #00d4ff, 0 0 30px #00d4ff, 0 0 40px #00d4ff;
+      }
+      to {
+        text-shadow: 0 0 15px #00ffff, 0 0 25px #00ffff, 0 0 40px #00ffff, 0 0 60px #00ffff;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 20px rgba(0, 213, 255, 0.1); }
+      100% { box-shadow: 0 0 30px rgba(0, 213, 255, 0.3); }
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>TheSizNexus</h1>
+    <p>[+] - [$iz] is a Multi-Dimensional clan. Players who put [$iz] in their names are part of the clan.</p>
+    <a href="about.html" class="button">Intel Feed</a>
+  </div>
+
+  <div class="info-section">
+    <div class="bubble">
+      <h2>About Us</h2>
+      <ul>
+        <li><strong>Who are we?</strong> – $iz is a Multi-Dimensional clan that players can join by adding $iz to their names.</li>
+        <li><strong>What will you get?</strong> – Join a community of players across many games.</li>
+        <li><strong>What can you do?</strong> – Participate in missions, events, or tryouts for higher ranks.</li>
+      </ul>
+      <a href="https://discord.gg/RkRAfHH4C7" class="discord-button" target="_blank">Join us on Discord</a>
+    </div>
+
+    <div class="bubble">
+      <h2>Projects</h2>
+      <ul>
+        <li><strong>Game advancements</strong> – New rooms, tools, and game content.</li>
+        <li><strong>Clan events</strong> – Raids, tournaments, and ranked sessions weekly.</li>
+        <li><strong>Intel Gathering</strong> – Strategic insights to help members improve play.</li>
+      </ul>
+    </div>
+
+    <div class="bubble">
+      <h2>Ranks</h2>
+      <ul>
+        <li><strong>[$iz]</strong> – Basic clan tag for all members.</li>
+        <li><strong>[$iz-X]</strong> – Elite members with proven skills and activity.</li>
+        <li><strong>[$iz†]</strong> – Command staff / Clan leaders.</li>
+      </ul>
+    </div>
+
+    <div class="bubble">
+      <h2>Clan Rules</h2>
+      <ul>
+        <li>Respect all members and allies.</li>
+        <li>No hacking, exploiting, or unfair gameplay.</li>
+        <li>Follow the chain of command and Discord guidelines.</li>
+      </ul>
+    </div>
+
+    <div class="bubble">
+      <h2>How to Join</h2>
+      <ul>
+        <li>Use the tag [$iz] in your in-game name.</li>
+        <li>Join our <a href="https://discord.gg/RkRAfHH4C7" target="_blank" style="color:#00d4ff; text-decoration:underline;">Discord server</a>.</li>
+        <li>Introduce yourself and request a rank assignment.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    <div class="contact">
+      Join our Discord: 
+      <a href="https://discord.gg/RkRAfHH4C7" target="_blank" rel="noopener noreferrer">
+        https://discord.gg/RkRAfHH4C7
+      </a>
+    </div>
+    <div>© 2025 $iz | All rights reserved.</div>
+  </footer>
+</body>
+</html>
+
