@@ -10,13 +10,12 @@
   <meta name="description" content="The official $iz Clan site – join the Multi-Dimensional elite, see ranks, rules, and connect on Discord.">
   <meta property="og:title" content="TheSizNexus">
   <meta property="og:description" content="Join the Multi-Dimensional clan. Rise through the ranks.">
-  <meta property="og:image" content="https://yourdomain.com/banner.jpg"> <!-- replace with actual image if needed -->
+  <meta property="og:image" content="https://yourdomain.com/banner.jpg">
+
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 
   <style>
-    html {
-      scroll-behavior: smooth;
-    }
-
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
@@ -27,7 +26,12 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
-
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
     nav {
       background: #001930;
       padding: 1rem;
@@ -36,7 +40,6 @@
       top: 0;
       z-index: 100;
     }
-
     nav a {
       margin: 0 1rem;
       color: #00d4ff;
@@ -44,11 +47,7 @@
       font-weight: 500;
       font-size: 1.1rem;
     }
-
-    nav a:hover {
-      text-decoration: underline;
-    }
-
+    nav a:hover { text-decoration: underline; }
     .hero {
       flex-grow: 1;
       display: flex;
@@ -58,7 +57,6 @@
       flex-direction: column;
       padding: 40px 20px 0;
     }
-
     .hero h1 {
       font-weight: 700;
       font-size: 4rem;
@@ -68,7 +66,6 @@
       animation: glow 2s ease-in-out infinite alternate;
       text-shadow: 0 0 5px #00d4ff, 0 0 15px #00d4ff, 0 0 30px #00d4ff, 0 0 40px #00d4ff;
     }
-
     .hero p {
       font-weight: 500;
       font-size: 1.5rem;
@@ -78,7 +75,6 @@
       letter-spacing: 0.05em;
       animation: fadeIn 3s ease-in-out;
     }
-
     .info-section {
       display: flex;
       flex-direction: column;
@@ -88,7 +84,6 @@
       margin: 0 auto;
       animation: slideIn 1.5s ease;
     }
-
     .bubble {
       background-color: #020b17;
       border-radius: 12px;
@@ -98,27 +93,19 @@
       transition: 0.3s ease;
       animation: pulseGlow 4s infinite alternate;
     }
-
     .bubble:hover {
       box-shadow: 0 0 25px rgba(0, 213, 255, 0.3);
     }
-
     .bubble h2 {
       font-size: 1.8rem;
       margin-bottom: 15px;
       color: #00d4ff;
     }
-
     .bubble ul {
       list-style-type: disc;
       padding-left: 1.2rem;
     }
-
-    .bubble li {
-      margin-bottom: 10px;
-      line-height: 1.6;
-    }
-
+    .bubble li { margin-bottom: 10px; line-height: 1.6; }
     .discord-button {
       margin-top: 1.5rem;
       display: inline-block;
@@ -131,12 +118,10 @@
       box-shadow: 0 0 15px rgba(0, 213, 255, 0.6);
       transition: 0.2s ease;
     }
-
     .discord-button:hover {
       background: #00aacc;
       box-shadow: 0 0 25px rgba(0, 213, 255, 0.8);
     }
-
     footer {
       background-color: #00152b;
       padding: 20px 10px;
@@ -147,65 +132,42 @@
       border-top: 1px solid #003366;
       user-select: none;
     }
-
     footer .contact {
       margin-bottom: 8px;
       font-weight: 600;
       color: #00d4ff;
     }
-
     footer .contact a {
       color: #00d4ff;
       text-decoration: underline;
     }
-
     @keyframes glow {
-      from {
-        text-shadow: 0 0 5px #00d4ff, 0 0 15px #00d4ff, 0 0 30px #00d4ff, 0 0 40px #00d4ff;
-      }
-      to {
-        text-shadow: 0 0 15px #00ffff, 0 0 25px #00ffff, 0 0 40px #00ffff, 0 0 60px #00ffff;
-      }
+      from { text-shadow: 0 0 5px #00d4ff, 0 0 15px #00d4ff; }
+      to { text-shadow: 0 0 15px #00ffff, 0 0 40px #00ffff; }
     }
-
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(30px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes slideIn {
       from { opacity: 0; transform: translateY(50px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes pulseGlow {
       0% { box-shadow: 0 0 20px rgba(0, 213, 255, 0.1); }
       100% { box-shadow: 0 0 30px rgba(0, 213, 255, 0.3); }
     }
-
     @media (max-width: 768px) {
-      .hero h1 {
-        font-size: 2.5rem;
-      }
-
-      .hero p {
-        font-size: 1.2rem;
-      }
-
-      nav a {
-        display: inline-block;
-        margin: 0.5rem;
-      }
-
-      .bubble h2 {
-        font-size: 1.5rem;
-      }
+      .hero h1 { font-size: 2.5rem; }
+      .hero p { font-size: 1.2rem; }
+      nav a { display: inline-block; margin: 0.5rem; }
+      .bubble h2 { font-size: 1.5rem; }
     }
   </style>
 </head>
 <body>
+  <div id="particles-js"></div>
 
-  <!-- Navigation -->
   <nav>
     <a href="#home">Home</a>
     <a href="about.html">Intel Feed</a>
@@ -213,13 +175,11 @@
     <a href="#join">Join</a>
   </nav>
 
-  <!-- Hero Section -->
   <div class="hero" id="home">
     <h1>TheSizNexus</h1>
     <p>[+] - [$iz] is a Multi-Dimensional clan. Players who put [$iz] in their names are part of the clan.</p>
   </div>
 
-  <!-- Info Sections -->
   <div class="info-section">
     <div class="bubble">
       <h2>About Us</h2>
@@ -242,7 +202,7 @@
 
     <div class="bubble">
       <h2>Featured Member</h2>
-      <p><strong>[$!z] Death </strong> – Led last week's raid with 75% success. Keep grinding, leaders are watching!</p>
+      <p><strong id="featured-name">[$!z] Death</strong> – <span id="featured-desc">Led last week's raid with 75% success.</span></p>
     </div>
 
     <div class="bubble">
@@ -264,10 +224,9 @@
     </div>
   </div>
 
-  <!-- Footer -->
   <footer>
     <div class="contact">
-      Join our Discord: 
+      Join our Discord:
       <a href="https://discord.gg/RkRAfHH4C7" target="_blank" rel="noopener noreferrer">
         https://discord.gg/RkRAfHH4C7
       </a>
@@ -275,5 +234,37 @@
     <div>© 2023-2025 $iz | All rights reserved.</div>
   </footer>
 
+  <script>
+    // Featured Member Rotator
+    const members = [
+      { name: "[$!z] Death", desc: "Led last week's raid with 75% success." },
+      { name: "[$!z] Ghost", desc: "MVP of Clan War #3." },
+      { name: "[$!z] Nova", desc: "Top Strategist - Intel Feed Contributor." }
+    ];
+    let index = 0;
+    setInterval(() => {
+      const member = members[index];
+      document.getElementById("featured-name").innerText = member.name;
+      document.getElementById("featured-desc").innerText = member.desc;
+      index = (index + 1) % members.length;
+    }, 5000);
+
+    // Load particles.js
+    particlesJS("particles-js", {
+      particles: {
+        number: { value: 60 },
+        color: { value: "#00d4ff" },
+        shape: { type: "circle" },
+        opacity: { value: 0.5 },
+        size: { value: 2 },
+        move: { enable: true, speed: 1 }
+      },
+      interactivity: {
+        events: {
+          onhover: { enable: true, mode: "repulse" }
+        }
+      }
+    });
+  </script>
 </body>
 </html>
