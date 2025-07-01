@@ -77,7 +77,6 @@
       animation: fadeIn 3s ease-in-out;
     }
 
-    /* ✅ New Ticker (Optimized) */
     .ticker-wrapper {
       background: #00152b;
       color: #00d4ff;
@@ -168,36 +167,67 @@
       border-top: 1px solid #003366;
       user-select: none;
     }
-    footer .contact {
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #00d4ff;
-    }
-    footer .contact a {
-      color: #00d4ff;
-      text-decoration: underline;
-    }
+    footer .contact { margin-bottom: 8px; font-weight: 600; color: #00d4ff; }
+    footer .contact a { color: #00d4ff; text-decoration: underline; }
 
-    @keyframes glow {
-      from { text-shadow: 0 0 5px #00d4ff, 0 0 15px #00d4ff; }
-      to { text-shadow: 0 0 15px #00ffff, 0 0 40px #00ffff; }
+    @keyframes glow { from { text-shadow: 0 0 5px #00d4ff; } to { text-shadow: 0 0 15px #00ffff; } }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(30px);} to {opacity:1;transform:translateY(0);} }
+    @keyframes slideIn { from { opacity:0; transform:translateY(50px);} to {opacity:1; transform:translateY(0);} }
+    @keyframes pulseGlow { 0% { box-shadow:0 0 20px rgba(0,213,255,0.1);} 100% { box-shadow:0 0 30px rgba(0,213,255,0.3);} }
+
+    /* 🔧 New: Profile Circle + Dropdown */
+    .profile-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 200;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+    .profile-button {
+      width: 40px;
+      height: 40px;
+      background: #00d4ff;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0,212,255,0.5);
     }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(50px); }
-      to { opacity: 1; transform: translateY(0); }
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 0;
+      flex-direction: column;
+      background: #001f3f;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0,213,255,0.3);
+      overflow: hidden;
+      z-index: 999;
     }
-    @keyframes pulseGlow {
-      0% { box-shadow: 0 0 20px rgba(0, 213, 255, 0.1); }
-      100% { box-shadow: 0 0 30px rgba(0, 213, 255, 0.3); }
+    .dropdown-menu a {
+      padding: 12px 16px;
+      color: #00d4ff;
+      text-decoration: none;
+      font-weight: bold;
+      background: #001f3f;
+      transition: background 0.2s;
+    }
+    .dropdown-menu a:hover {
+      background: #003d66;
     }
   </style>
 </head>
 <body>
   <div id="particles-js"></div>
+
+  <!-- Profile Circle & Dropdown -->
+  <div class="profile-container">
+    <button class="profile-button" id="profileButton"></button>
+    <div class="dropdown-menu" id="dropdownMenu">
+      <a href="#">Search for Players</a>
+      <a href="#">Settings</a>
+      <a href="#" id="logoutBtn">Log Out</a>
+    </div>
+  </div>
 
   <nav>
     <a href="#home">Home</a>
@@ -211,7 +241,6 @@
     <p>[+] - [$iz] is a Multi-Dimensional clan. Players who put [$iz] in their names are part of the clan.</p>
   </div>
 
-  <!-- ✅ Optimized Ticker -->
   <div class="ticker-wrapper">
     <div class="ticker-content">🔊 Welcome to the Nexus — New raid coming Saturday! Stay tuned for missions.</div>
   </div>
@@ -226,7 +255,6 @@
       </ul>
       <a href="https://discord.gg/RkRAfHH4C7" class="discord-button" target="_blank">Join us on Discord</a>
     </div>
-
     <div class="bubble" id="projects">
       <h2>Projects</h2>
       <ul>
@@ -235,7 +263,6 @@
         <li><strong>Intel Gathering</strong> – Strategic insights to help members improve play.</li>
       </ul>
     </div>
-
     <div class="bubble">
       <h2>Ranks</h2>
       <div class="ranks">
@@ -246,12 +273,10 @@
         <div class="rank">Nexus Core</div>
       </div>
     </div>
-
     <div class="bubble">
       <h2>Featured Member</h2>
       <p><strong id="featured-name">[$!z] Death</strong> – <span id="featured-desc">Led last week's raid with 75% success.</span></p>
     </div>
-
     <div class="bubble">
       <h2>Upcoming Events</h2>
       <ul>
@@ -260,7 +285,6 @@
         <li>🎮 Clan War – Coming Soon</li>
       </ul>
     </div>
-
     <div class="bubble" id="join">
       <h2>How to Join</h2>
       <ul>
@@ -282,19 +306,6 @@
   </footer>
 
   <script>
-    const members = [
-      { name: "[$!z] Death", desc: "Led last week's raid with 75% success." },
-      { name: "[$!z] Ghost", desc: "MVP of Clan War #3." },
-      { name: "[$!z] Nova", desc: "Top Strategist - Intel Feed Contributor." }
-    ];
-    let index = 0;
-    setInterval(() => {
-      const member = members[index];
-      document.getElementById("featured-name").innerText = member.name;
-      document.getElementById("featured-desc").innerText = member.desc;
-      index = (index + 1) % members.length;
-    }, 5000);
-
     particlesJS("particles-js", {
       particles: {
         number: { value: 60 },
@@ -305,9 +316,44 @@
         move: { enable: true, speed: 1 }
       },
       interactivity: {
-        events: {
-          onhover: { enable: true, mode: "repulse" }
-        }
+        events: { onhover: { enable: true, mode: "repulse" } }
+      }
+    });
+
+    const members = [
+      { name: "[$!z] Death", desc: "Led last week's raid with 75% success." },
+      { name: "[$!z] Ghost", desc: "MVP of Clan War #3." },
+      { name: "[$!z] Nova", desc: "Top Strategist - Intel Feed Contributor." }
+    ];
+    let index = 0;
+    setInterval(() => {
+      const m = members[index];
+      document.getElementById("featured-name").innerText = m.name;
+      document.getElementById("featured-desc").innerText = m.desc;
+      index = (index + 1) % members.length;
+    }, 5000);
+
+    const profileBtn = document.getElementById("profileButton");
+    const dropdown = document.getElementById("dropdownMenu");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    profileBtn.addEventListener("click", () => {
+      if (localStorage.getItem("loggedIn") !== "true") {
+        window.location.href = "reciever.html";
+      } else {
+        dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+      }
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("loggedIn");
+      dropdown.style.display = "none";
+      alert("Logged out.");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!document.querySelector(".profile-container").contains(e.target)) {
+        dropdown.style.display = "none";
       }
     });
 
