@@ -75,6 +75,18 @@
       letter-spacing: 0.05em;
       animation: fadeIn 3s ease-in-out;
     }
+    #ticker {
+      background: #00152b;
+      color: #00d4ff;
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+      animation: tickerMove 20s linear infinite;
+    }
+    @keyframes tickerMove {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
     .info-section {
       display: flex;
       flex-direction: column;
@@ -122,6 +134,19 @@
       background: #00aacc;
       box-shadow: 0 0 25px rgba(0, 213, 255, 0.8);
     }
+    .ranks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .rank {
+      background: #001f3f;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-weight: bold;
+      color: #00f0ff;
+      box-shadow: 0 0 10px rgba(0,213,255,0.3);
+    }
     footer {
       background-color: #00152b;
       padding: 20px 10px;
@@ -157,12 +182,6 @@
       0% { box-shadow: 0 0 20px rgba(0, 213, 255, 0.1); }
       100% { box-shadow: 0 0 30px rgba(0, 213, 255, 0.3); }
     }
-    @media (max-width: 768px) {
-      .hero h1 { font-size: 2.5rem; }
-      .hero p { font-size: 1.2rem; }
-      nav a { display: inline-block; margin: 0.5rem; }
-      .bubble h2 { font-size: 1.5rem; }
-    }
   </style>
 </head>
 <body>
@@ -179,6 +198,8 @@
     <h1>TheSizNexus</h1>
     <p>[+] - [$iz] is a Multi-Dimensional clan. Players who put [$iz] in their names are part of the clan.</p>
   </div>
+
+  <div id="ticker">🔊 Welcome to the Nexus — New raid coming Saturday! Stay tuned for missions.</div>
 
   <div class="info-section">
     <div class="bubble">
@@ -198,6 +219,17 @@
         <li><strong>Clan events</strong> – Raids, tournaments, and ranked sessions weekly.</li>
         <li><strong>Intel Gathering</strong> – Strategic insights to help members improve play.</li>
       </ul>
+    </div>
+
+    <div class="bubble">
+      <h2>Ranks</h2>
+      <div class="ranks">
+        <div class="rank">Recruit</div>
+        <div class="rank">Operative</div>
+        <div class="rank">Agent</div>
+        <div class="rank">Commander</div>
+        <div class="rank">Nexus Core</div>
+      </div>
     </div>
 
     <div class="bubble">
@@ -235,7 +267,6 @@
   </footer>
 
   <script>
-    // Featured Member Rotator
     const members = [
       { name: "[$!z] Death", desc: "Led last week's raid with 75% success." },
       { name: "[$!z] Ghost", desc: "MVP of Clan War #3." },
@@ -249,7 +280,6 @@
       index = (index + 1) % members.length;
     }, 5000);
 
-    // Load particles.js
     particlesJS("particles-js", {
       particles: {
         number: { value: 60 },
@@ -265,6 +295,14 @@
         }
       }
     });
+
+    // Welcome Message
+    if (localStorage.getItem("visited")) {
+      console.log("Welcome back, Operative.");
+    } else {
+      alert("First time? Welcome to The $iz Nexus.");
+      localStorage.setItem("visited", true);
+    }
   </script>
 </body>
 </html>
