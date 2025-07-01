@@ -3,138 +3,155 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>About - TheSizNexus</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <title>$iz Intel Feed</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet" />
+
   <style>
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(135deg, #0d0d0d, #001f3f);
+      background: linear-gradient(135deg, #0a0a0a, #002244);
       color: #00d4ff;
-      padding: 40px 20px;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      animation: fadeIn 1.5s ease-in-out;
+      min-height: 100vh;
     }
 
-    .container {
-      max-width: 900px;
-      width: 100%;
-    }
-
-    h1, h2 {
+    nav {
+      background: #001930;
+      padding: 1rem;
       text-align: center;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
-    h1 {
+    nav a {
+      margin: 0 1rem;
+      color: #00d4ff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+
+    header h1 {
       font-size: 3rem;
-      margin-bottom: 20px;
-      animation: glow 2s ease-in-out infinite alternate;
-      text-shadow:
-        0 0 5px #00d4ff,
-        0 0 15px #00d4ff,
-        0 0 30px #00d4ff,
-        0 0 40px #00d4ff;
+      font-weight: 700;
+      margin: 0;
+      text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff;
     }
 
-    h2 {
-      margin-top: 40px;
+    .intel-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .intel-card {
+      background-color: #020b17;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0, 213, 255, 0.1);
+      transition: box-shadow 0.3s;
+    }
+
+    .intel-card:hover {
+      box-shadow: 0 0 25px rgba(0, 213, 255, 0.3);
+    }
+
+    .intel-card h2 {
       font-size: 1.8rem;
-      color: #66f0ff;
-      border-bottom: 2px solid #00d4ff44;
-      padding-bottom: 8px;
+      margin-bottom: 10px;
+      color: #00d4ff;
     }
 
-    p {
+    .intel-card p {
       font-size: 1.1rem;
       line-height: 1.6;
-      color: #aadfff;
-      margin-top: 15px;
+      color: #c6f7ff;
     }
 
-    section {
-      margin-bottom: 40px;
+    footer {
+      background-color: #00152b;
+      padding: 20px 10px;
+      text-align: center;
+      font-size: 1rem;
+      color: #0099ffcc;
+      letter-spacing: 0.05em;
+      border-top: 1px solid #003366;
+      margin-top: auto;
     }
 
-    .back-button {
-      display: inline-block;
-      margin: 40px auto 0;
-      padding: 0.75rem 1.5rem;
-      background-color: #007BFF;
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-      border-radius: 8px;
-      transition: background 0.3s ease;
+    footer a {
+      color: #00d4ff;
+      text-decoration: underline;
     }
 
-    .back-button:hover {
-      background-color: #0056b3;
-      box-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff;
-    }
-
-    @keyframes glow {
-      from {
-        text-shadow:
-          0 0 5px #00d4ff,
-          0 0 15px #00d4ff,
-          0 0 30px #00d4ff,
-          0 0 40px #00d4ff;
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 2.2rem;
       }
-      to {
-        text-shadow:
-          0 0 15px #00ffff,
-          0 0 25px #00ffff,
-          0 0 40px #00ffff,
-          0 0 60px #00ffff;
-      }
-    }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      .intel-card h2 {
+        font-size: 1.4rem;
+      }
+
+      .intel-card p {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>TheSizNexus Protocol</h1>
 
-    <section id="what">
-      <h2>What is [$iz]?</h2>
-      <p>
-        [$iz] is a Multi-Dimensional Clan — meaning we exist across multiple games and platforms. Our players wear the [$iz] tag with pride as a symbol of loyalty, skill, and community.
-      </p>
-      <p>
-        Whether you're a warrior in PvP, a strategist in RPGs, or a silent operator in stealth games — there’s a dimension for you.
-      </p>
-    </section>
+  <!-- Navigation -->
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="#briefings">Briefings</a>
+    <a href="#recruitment">Recruitment</a>
+  </nav>
 
-    <section id="join">
-      <h2>How to Join</h2>
-      <p>
-        Joining is simple. Add the [$iz] tag to your name and introduce yourself on our <a href="https://discord.gg/RkRAfHH4C7" target="_blank" style="color: #66f0ff;">Discord server</a>.
-      </p>
-      <p>
-        Our moderators will guide you through verification. Once verified, you’re officially part of the Clan.
-      </p>
-    </section>
+  <!-- Page Header -->
+  <header>
+    <h1>$iz Intel Feed</h1>
+    <p>Stay up to date with the latest operations, logs, and clan briefings.</p>
+  </header>
 
-    <section id="missions">
-      <h2>Clan Missions & Tryouts</h2>
-      <p>
-        Special missions and rank tryouts happen regularly. Ranks are earned based on activity, performance, and contributions to the Clan.
-      </p>
-      <p>
-        Higher ranks unlock leadership roles, team coordination tasks, and decision-making privileges for upcoming events.
-      </p>
-    </section>
+  <!-- Intel Content -->
+  <main class="intel-container">
+    <section class="intel-card">
+      <h2>📡 Recent Clan Intel</h2>
+      <p>Operation Nightfall will be executed soon on July 10. Our raid teams will try to breache into the enemy's control points in under 4 minutes. </section>
 
-    <a href="index.html" class="back-button">&larr; Back to Intel Feed.</a>
-  </div>
+    <section class="intel-card">
+      <h2>📘 Mission Logs</h2>
+      <p> No Missions have been given out yet, Maintainance in process   </section>
+
+    <section class="intel-card" id="briefings">
+      <h2>🧠 Weekly Briefings</h2>
+      <p> No Weekly Briefing yet, although we will be updating this weekly, so that our member know what to be doing during different weeks, and different months as well. </section>
+
+    <section class="intel-card" id="recruitment">
+      <h2>🎯 Recruitment Updates</h2>
+      <p> No Recruitments have been online this month, we will be doing Recruitment Events soon, in different dimesions.  </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div>Back to <a href="index.html">Home</a> | Join us on <a href="https://discord.gg/RkRAfHH4C7" target="_blank">Discord</a></div>
+    <div>© 2023-2025 $iz | Intel Secure</div>
+  </footer>
+
 </body>
 </html>
