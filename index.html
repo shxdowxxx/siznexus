@@ -30,46 +30,190 @@
   <meta property="og:image" content="https://yourdomain.com/banner.jpg">
 
   <style>
-    /* Global Styles */
-    html { scroll-behavior: smooth; }
+    /* ===== GLOBAL STYLES & VARIABLES ===== */
+    :root {
+      --color-primary: #00d4ff;
+      --color-secondary: #00aacc;
+      --color-dark: #0d0d0d;
+      --color-darker: #001f3f;
+      --color-text: #d0faff;
+      --color-text-light: #66f0ff;
+      --transition: all 0.3s ease-in-out;
+    }
+
+    html { 
+      scroll-behavior: smooth; 
+    }
+    
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(135deg, #0d0d0d, #001f3f);
-      color: #00d4ff;
+      background: linear-gradient(135deg, var(--color-dark), var(--color-darker));
+      color: var(--color-primary);
       display: flex;
       flex-direction: column;
       min-height: 100vh;
       overflow-x: hidden;
     }
     
-    /* Particles Background */
+    /* ===== PARTICLES BACKGROUND ===== */
     #particles-js {
       position: fixed;
       width: 100%;
       height: 100%;
       z-index: -1;
+      opacity: 0.3; /* More subtle particles */
     }
-    
-    /* Navigation */
+
+    /* ===== NAVIGATION ===== */
     nav {
-      background: #001930;
+      background: var(--color-darker);
       padding: 1rem;
       text-align: center;
       position: sticky;
       top: 0;
       z-index: 100;
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
+    
+    .nav-content {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 1200px;
+      justify-content: center;
+      position: relative;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+    }
+    
     nav a {
-      margin: 0 1rem;
-      color: #00d4ff;
+      color: var(--color-primary);
       text-decoration: none;
       font-weight: 500;
       font-size: 1.1rem;
+      position: relative;
+      padding: 0.5rem 0;
     }
-    nav a:hover { text-decoration: underline; }
     
-    /* Hero Section */
+    nav a:hover { 
+      text-decoration: none; 
+    }
+    
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--color-primary);
+      transition: var(--transition);
+    }
+    
+    nav a:hover::after {
+      width: 100%;
+    }
+
+    /* ===== PROFILE BUTTON (FIXED IN NAV) ===== */
+    .profile-container {
+      position: absolute;
+      right: 20px;
+      z-index: 200;
+    }
+    
+    .profile-button {
+      width: 36px; /* Slightly smaller */
+      height: 36px;
+      background: black;
+      border-radius: 50%;
+      border: 2px solid var(--color-primary);
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0,212,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      overflow: hidden;
+    }
+    
+    .profile-button img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: none;
+      object-fit: cover;
+    }
+    
+    .profile-button i {
+      color: var(--color-primary);
+      font-size: 16px; /* Slightly smaller */
+      transition: var(--transition);
+    }
+    
+    .profile-button:hover {
+      box-shadow: 0 0 15px rgba(0,212,255,0.8);
+      transform: scale(1.1);
+    }
+    
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 45px;
+      right: 0;
+      flex-direction: column;
+      background: rgba(0, 31, 63, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0,213,255,0.3);
+      overflow: hidden;
+      z-index: 999;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+    }
+    
+    .dropdown-menu a {
+      padding: 10px 16px;
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: bold;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+    }
+    
+    .dropdown-menu a::before {
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .dropdown-menu a:nth-child(1)::before {
+      content: "\f002"; /* search icon */
+    }
+    
+    .dropdown-menu a:nth-child(2)::before {
+      content: "\f013"; /* settings icon */
+    }
+    
+    .dropdown-menu a:nth-child(3)::before {
+      content: "\f2f5"; /* sign-out icon */
+    }
+    
+    .dropdown-menu a:hover {
+      background: rgba(0, 61, 102, 0.5);
+      padding-left: 20px;
+    }
+
+    /* ===== HERO SECTION ===== */
     .hero {
       flex-grow: 1;
       display: flex;
@@ -78,44 +222,57 @@
       text-align: center;
       flex-direction: column;
       padding: 40px 20px 0;
+      position: relative;
     }
+    
     .hero h1 {
       font-weight: 700;
-      font-size: 4rem;
+      font-size: clamp(2.5rem, 8vw, 4rem);
       text-transform: uppercase;
       letter-spacing: 0.2em;
       margin: 0;
       animation: glow 2s ease-in-out infinite alternate;
-      text-shadow: 0 0 5px #00d4ff, 0 0 15px #00d4ff, 0 0 30px #00d4ff, 0 0 40px #00d4ff;
+      text-shadow: 0 0 5px var(--color-primary), 
+                   0 0 15px var(--color-primary), 
+                   0 0 30px var(--color-primary), 
+                   0 0 40px var(--color-primary);
     }
+    
     .hero p {
       font-weight: 500;
-      font-size: 1.5rem;
+      font-size: clamp(1rem, 4vw, 1.5rem);
       max-width: 600px;
       margin-top: 1rem;
-      color: #66f0ffcc;
+      color: var(--color-text-light);
       letter-spacing: 0.05em;
       animation: fadeIn 3s ease-in-out;
     }
-    
-    /* Ticker */
+
+    /* ===== TICKER ===== */
     .ticker-wrapper {
-      background: #00152b;
-      color: #00d4ff;
+      background: rgba(0, 21, 43, 0.8);
+      color: var(--color-primary);
       overflow: hidden;
       white-space: nowrap;
       width: 100%;
       padding: 10px 0;
       font-weight: bold;
       position: relative;
+      backdrop-filter: blur(3px);
     }
+    
     .ticker-content {
       display: inline-block;
       padding-left: 100%;
       animation: scrollTicker 15s linear infinite;
+      cursor: pointer;
     }
     
-    /* Info Sections */
+    .ticker-content:hover {
+      animation-play-state: paused;
+    }
+
+    /* ===== INFO SECTIONS ===== */
     .info-section {
       display: flex;
       flex-direction: column;
@@ -125,178 +282,367 @@
       margin: 0 auto;
       animation: slideIn 1.5s ease;
     }
+    
     .bubble {
-      background-color: #020b17;
+      background-color: rgba(2, 11, 23, 0.8);
       border-radius: 12px;
       padding: 30px;
       box-shadow: 0 0 20px rgba(0, 213, 255, 0.1);
-      color: #d0faff;
-      transition: 0.3s ease;
+      color: var(--color-text);
+      transition: var(--transition);
       animation: pulseGlow 4s infinite alternate;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(0, 212, 255, 0.1);
     }
+    
     .bubble:hover {
       box-shadow: 0 0 25px rgba(0, 213, 255, 0.3);
+      transform: translateY(-5px);
     }
+    
     .bubble h2 {
       font-size: 1.8rem;
       margin-bottom: 15px;
-      color: #00d4ff;
+      color: var(--color-primary);
+      position: relative;
+      display: inline-block;
     }
-    .bubble ul {
-      list-style-type: disc;
-      padding-left: 1.2rem;
-    }
-    .bubble li { margin-bottom: 10px; line-height: 1.6; }
     
-    /* Buttons */
+    .bubble h2::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--color-primary), transparent);
+    }
+    
+    .bubble ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    
+    .bubble li { 
+      margin-bottom: 10px; 
+      line-height: 1.6;
+      padding-left: 1.2rem;
+      position: relative;
+    }
+    
+    .bubble li::before {
+      content: '▹';
+      position: absolute;
+      left: 0;
+      color: var(--color-primary);
+    }
+
+    /* ===== BUTTONS ===== */
     .discord-button {
       margin-top: 1.5rem;
       display: inline-block;
-      background: #00c3ff;
+      background: var(--color-primary);
       color: #000;
       padding: 12px 24px;
       border-radius: 10px;
       font-weight: bold;
       text-decoration: none;
       box-shadow: 0 0 15px rgba(0, 213, 255, 0.6);
-      transition: 0.2s ease;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
     }
+    
+    .discord-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: 0.5s;
+      z-index: -1;
+    }
+    
     .discord-button:hover {
-      background: #00aacc;
+      background: var(--color-secondary);
       box-shadow: 0 0 25px rgba(0, 213, 255, 0.8);
     }
     
-    /* Ranks */
+    .discord-button:hover::before {
+      left: 100%;
+    }
+
+    /* ===== RANKS ===== */
     .ranks {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
     }
+    
     .rank {
-      background: #001f3f;
+      background: rgba(0, 31, 63, 0.5);
       padding: 10px 15px;
       border-radius: 8px;
       font-weight: bold;
-      color: #00f0ff;
+      color: var(--color-primary);
       box-shadow: 0 0 10px rgba(0,213,255,0.3);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(0, 212, 255, 0.2);
     }
     
-    /* Footer */
+    .rank::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        to bottom right,
+        transparent 45%,
+        var(--color-primary) 50%,
+        transparent 55%
+      );
+      transform: rotate(30deg);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .rank:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 20px rgba(0,213,255,0.5);
+    }
+    
+    .rank:hover::after {
+      animation: shine 1.5s infinite;
+      opacity: 0.8;
+    }
+
+    /* ===== ACHIEVEMENTS ===== */
+    .achievements {
+      display: flex;
+      gap: 8px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .achievement-badge {
+      background: rgba(0, 31, 63, 0.7);
+      color: var(--color-primary);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      border: 1px solid var(--color-primary);
+      transition: var(--transition);
+    }
+    
+    .achievement-badge:hover {
+      background: var(--color-primary);
+      color: #000;
+      transform: translateY(-2px);
+    }
+
+    /* ===== PROGRESS TRACKER ===== */
+    .progress-tracker {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 31, 63, 0.8);
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid var(--color-primary);
+      backdrop-filter: blur(5px);
+      z-index: 100;
+      transition: var(--transition);
+    }
+    
+    .progress-tracker:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(0,213,255,0.3);
+    }
+    
+    .progress-bar {
+      height: 5px;
+      background: var(--color-primary);
+      width: 0%;
+      transition: width 0.5s ease;
+      margin-top: 10px;
+      border-radius: 5px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: progressShine 2s infinite;
+    }
+
+    /* ===== FOOTER ===== */
     footer {
-      background-color: #00152b;
+      background-color: rgba(0, 21, 43, 0.8);
       padding: 20px 10px;
       text-align: center;
       font-size: 1rem;
-      color: #0099ffcc;
+      color: rgba(0, 153, 255, 0.8);
       letter-spacing: 0.05em;
-      border-top: 1px solid #003366;
+      border-top: 1px solid rgba(0, 51, 102, 0.5);
       user-select: none;
+      backdrop-filter: blur(5px);
+      margin-top: 2rem;
     }
-    footer .contact { margin-bottom: 8px; font-weight: 600; color: #00d4ff; }
-    footer .contact a { color: #00d4ff; text-decoration: underline; }
     
-    /* Profile Dropdown */
-    .profile-container {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      z-index: 200;
+    footer .contact { 
+      margin-bottom: 8px; 
+      font-weight: 600; 
+      color: var(--color-primary);
     }
-    .profile-button {
-      width: 42px;
-      height: 42px;
-      background: black;
-      border-radius: 50%;
-      border: 2px solid #00d4ff;
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(0,212,255,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: box-shadow 0.3s ease;
-      overflow: hidden;
+    
+    footer .contact a { 
+      color: var(--color-primary); 
+      text-decoration: underline;
+      transition: var(--transition);
     }
-    .profile-button img {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      display: none;
-    }
-    .profile-button i {
-      color: #00d4ff;
-      font-size: 18px;
-    }
-    .profile-button:hover {
-      box-shadow: 0 0 20px rgba(0,212,255,0.8);
-    }
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: 50px;
-      right: 0;
-      flex-direction: column;
-      background: #001f3f;
-      border-radius: 8px;
-      box-shadow: 0 0 15px rgba(0,213,255,0.3);
-      overflow: hidden;
-      z-index: 999;
-    }
-    .dropdown-menu a {
-      padding: 12px 16px;
-      color: #00d4ff;
+    
+    footer .contact a:hover {
+      text-shadow: 0 0 10px var(--color-primary);
       text-decoration: none;
-      font-weight: bold;
-      background: #001f3f;
-      transition: background 0.2s;
     }
-    .dropdown-menu a:hover {
-      background: #003d66;
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes glow { 
+      from { text-shadow: 0 0 5px var(--color-primary); } 
+      to { text-shadow: 0 0 15px var(--color-primary), 0 0 30px var(--color-primary); } 
     }
     
-    /* Animations */
-    @keyframes glow { 
-      from { text-shadow: 0 0 5px #00d4ff; } 
-      to { text-shadow: 0 0 15px #00ffff; } 
-    }
     @keyframes fadeIn { 
       from { opacity:0; transform:translateY(30px);} 
       to {opacity:1;transform:translateY(0);} 
     }
+    
     @keyframes slideIn { 
       from { opacity:0; transform:translateY(50px);} 
       to {opacity:1; transform:translateY(0);} 
     }
+    
     @keyframes pulseGlow { 
       0% { box-shadow:0 0 20px rgba(0,213,255,0.1);} 
       100% { box-shadow:0 0 30px rgba(0,213,255,0.3);} 
     }
+    
     @keyframes scrollTicker {
       0% { transform: translateX(0%); }
       100% { transform: translateX(-100%); }
+    }
+    
+    @keyframes shine {
+      0% { transform: translateX(-100%) rotate(30deg); }
+      100% { transform: translateX(100%) rotate(30deg); }
+    }
+    
+    @keyframes progressShine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* ===== THEME SELECTOR ===== */
+    .theme-selector {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+    
+    .theme-selector button {
+      background: rgba(0, 31, 63, 0.8);
+      color: var(--color-primary);
+      border: 1px solid var(--color-primary);
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: var(--transition);
+      backdrop-filter: blur(5px);
+    }
+    
+    .theme-selector button:hover {
+      background: var(--color-primary);
+      color: #000;
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.5rem;
+        letter-spacing: 0.1em;
+      }
+      
+      .hero p {
+        font-size: 1.2rem;
+      }
+      
+      nav a {
+        font-size: 1rem;
+      }
+      
+      .bubble {
+        padding: 20px;
+      }
+      
+      .progress-tracker, .theme-selector {
+        bottom: 10px;
+      }
+      
+      .progress-tracker {
+        right: 10px;
+      }
+      
+      .theme-selector {
+        left: 10px;
+      }
+      
+      .profile-container {
+        right: 10px;
+      }
     }
   </style>
 </head>
 <body oncontextmenu="return false">
   <div id="particles-js"></div>
 
-  <!-- Profile Circle & Dropdown -->
-  <div class="profile-container">
-    <button class="profile-button" id="profileButton">
-      <img id="userAvatar" src="" alt="Profile">
-      <i class="fas fa-user" id="defaultIcon"></i>
-    </button>
-    <div class="dropdown-menu" id="dropdownMenu">
-      <a href="#">Search for Players</a>
-      <a href="#">Settings</a>
-      <a href="#" id="logoutBtn">Log Out</a>
-    </div>
-  </div>
-
   <nav>
-    <a href="#home">Home</a>
-    <a href="about.html">Intel Feed</a>
-    <a href="#projects">Projects</a>
-    <a href="#join">Join</a>
+    <div class="nav-content">
+      <div class="nav-links">
+        <a href="#home">Home</a>
+        <a href="about.html">Intel Feed</a>
+        <a href="#projects">Projects</a>
+        <a href="#join">Join</a>
+      </div>
+      
+      <!-- Profile Circle - Now fixed in nav -->
+      <div class="profile-container">
+        <button class="profile-button" id="profileButton">
+          <img id="userAvatar" src="" alt="Profile">
+          <i class="fas fa-user" id="defaultIcon"></i>
+        </button>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <a href="#">Search for Players</a>
+          <a href="#">Settings</a>
+          <a href="#" id="logoutBtn">Log Out</a>
+        </div>
+      </div>
+    </div>
   </nav>
 
   <div class="hero" id="home">
@@ -339,13 +685,16 @@
     <div class="bubble">
       <h2>Featured Member</h2>
       <p><strong id="featured-name">[$!z] Death</strong> – <span id="featured-desc">Led last week's raid with 75% success.</span></p>
+      <div class="achievements" id="member-achievements">
+        <!-- Achievements will be added by JavaScript -->
+      </div>
     </div>
     <div class="bubble">
       <h2>Upcoming Events</h2>
       <ul>
-        <li>🎯 Raid Night – Coming Soon</li>
-        <li>⚔️ Tryouts – Coming Soon</li>
-        <li>🎮 Clan War – Coming Soon</li>
+        <li>🎯 Raid Night – <span class="event-countdown" data-date="2023-12-15T20:00:00"></span></li>
+        <li>⚔️ Tryouts – <span class="event-countdown" data-date="2023-12-22T18:00:00"></span></li>
+        <li>🎮 Clan War – <span class="event-countdown" data-date="2023-12-29T19:00:00"></span></li>
       </ul>
     </div>
     <div class="bubble" id="join">
@@ -356,6 +705,18 @@
         <li>Introduce yourself and request a rank assignment.</li>
       </ul>
     </div>
+  </div>
+
+  <!-- Progress Tracker -->
+  <div class="progress-tracker">
+    Clan Progress: <span id="clan-level">Level 1</span>
+    <div class="progress-bar" id="clan-progress"></div>
+  </div>
+
+  <!-- Theme Selector -->
+  <div class="theme-selector">
+    <button onclick="setTheme('cyberpunk')">Cyberpunk</button>
+    <button onclick="setTheme('matrix')">Matrix</button>
   </div>
 
   <footer>
@@ -369,54 +730,188 @@
   </footer>
 
   <script>
-    // Particles.js Configuration
+    // ===== PARTICLES.JS CONFIGURATION (SMALLER PARTICLES) =====
     particlesJS("particles-js", {
       particles: {
-        number: { value: 60 },
+        number: { 
+          value: 80,
+          density: {
+            enable: true,
+            value_area: 800
+          }
+        },
         color: { value: "#00d4ff" },
         shape: { type: "circle" },
-        opacity: { value: 0.5 },
-        size: { value: 2 },
-        move: { enable: true, speed: 1 }
+        opacity: { 
+          value: 0.3,  // More transparent
+          random: true 
+        },
+        size: { 
+          value: 1,  // Smaller particles
+          random: true 
+        },
+        move: { 
+          enable: true, 
+          speed: 0.5,  // Slower movement
+          direction: "none",
+          random: true,
+          straight: false,
+          out_mode: "bounce"
+        }
       },
       interactivity: {
-        events: { onhover: { enable: true, mode: "repulse" } }
+        events: { 
+          onhover: { 
+            enable: true, 
+            mode: "repulse",
+            distance: 100
+          } 
+        }
       }
     });
 
-    // Featured Members Rotation
+    // ===== FEATURED MEMBERS ROTATION =====
     const members = [
-      { name: "[$!z] Death", desc: "Led last week's raid with 75% success." },
-      { name: "[$!z] Ghost", desc: "MVP of Clan War #3." },
-      { name: "[$!z] Nova", desc: "Top Strategist - Intel Feed Contributor." }
+      { 
+        name: "[$!z] Death", 
+        desc: "Led last week's raid with 75% success.",
+        achievements: ["Top Raider", "Strategist", "5x MVP"]
+      },
+      { 
+        name: "[$!z] Ghost", 
+        desc: "MVP of Clan War #3.",
+        achievements: ["Stealth Expert", "3x MVP", "Intel Master"]
+      },
+      { 
+        name: "[$!z] Nova", 
+        desc: "Top Strategist - Intel Feed Contributor.",
+        achievements: ["Tactician", "2x MVP", "Analyst"]
+      }
     ];
+    
     let index = 0;
-    setInterval(() => {
-      const m = members[index];
-      document.getElementById("featured-name").innerText = m.name;
-      document.getElementById("featured-desc").innerText = m.desc;
-      index = (index + 1) % members.length;
-    }, 5000);
+    
+    function rotateMember() {
+      const member = members[index];
+      const nameEl = document.getElementById("featured-name");
+      const descEl = document.getElementById("featured-desc");
+      const achievementsEl = document.getElementById("member-achievements");
+      
+      // Fade out
+      nameEl.style.animation = "fadeOut 0.5s forwards";
+      descEl.style.animation = "fadeOut 0.5s forwards";
+      
+      setTimeout(() => {
+        // Update content
+        nameEl.textContent = member.name;
+        descEl.textContent = member.desc;
+        
+        // Render achievements
+        achievementsEl.innerHTML = member.achievements
+          .map(ach => `<span class="achievement-badge">${ach}</span>`)
+          .join("");
+        
+        // Fade in
+        nameEl.style.animation = "fadeIn 0.5s forwards";
+        descEl.style.animation = "fadeIn 0.5s forwards";
+        
+        index = (index + 1) % members.length;
+      }, 500);
+    }
+    
+    // Start rotation
+    setInterval(rotateMember, 8000);
+    rotateMember(); // Initial call
 
-    // Profile Dropdown Functionality
+    // ===== CLAN PROGRESS SYSTEM =====
+    function updateClanProgress() {
+      // Simulate progress - in real app, this would come from your database
+      const progress = Math.min(100, Math.floor(Math.random() * 100));
+      document.getElementById("clan-progress").style.width = `${progress}%`;
+      
+      const level = Math.floor(progress / 20) + 1;
+      document.getElementById("clan-level").textContent = `Level ${level}`;
+    }
+    
+    // Update progress every 3 seconds (simulated)
+    setInterval(updateClanProgress, 3000);
+    updateClanProgress(); // Initial call
+
+    // ===== EVENT COUNTDOWN TIMERS =====
+    function updateCountdowns() {
+      const now = new Date();
+      document.querySelectorAll('.event-countdown').forEach(el => {
+        const eventDate = new Date(el.getAttribute('data-date'));
+        const diff = eventDate - now;
+        
+        if (diff <= 0) {
+          el.textContent = "Happening now!";
+          return;
+        }
+        
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        
+        el.textContent = `${days}d ${hours}h`;
+      });
+    }
+    
+    // Update countdowns every minute
+    setInterval(updateCountdowns, 1000 * 60);
+    updateCountdowns(); // Initial call
+
+    // ===== THEME SYSTEM =====
+    const themes = {
+      cyberpunk: {
+        '--color-primary': '#00d4ff',
+        '--color-secondary': '#00aacc',
+        '--color-dark': '#0d0d0d',
+        '--color-darker': '#001f3f'
+      },
+      matrix: {
+        '--color-primary': '#00ff41',
+        '--color-secondary': '#008f11',
+        '--color-dark': '#000000',
+        '--color-darker': '#001a00'
+      }
+    };
+    
+    function setTheme(themeName) {
+      const theme = themes[themeName];
+      Object.keys(theme).forEach(key => {
+        document.documentElement.style.setProperty(key, theme[key]);
+      });
+      
+      localStorage.setItem('selectedTheme', themeName);
+    }
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem('selectedTheme') || 'cyberpunk';
+    setTheme(savedTheme);
+
+    // ===== PROFILE DROPDOWN FUNCTIONALITY =====
     const profileBtn = document.getElementById('profileButton');
     const dropdown = document.getElementById('dropdownMenu');
-
-    profileBtn.addEventListener('click', () => {
+    
+    profileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
     });
-
-    document.addEventListener('click', (e) => {
-      if (!profileBtn.contains(e.target) && !dropdown.contains(e.target)) {
-        dropdown.style.display = 'none';
-      }
+    
+    document.addEventListener('click', () => {
+      dropdown.style.display = 'none';
+    });
+    
+    // Prevent dropdown from closing when clicking inside it
+    dropdown.addEventListener('click', (e) => {
+      e.stopPropagation();
     });
 
-    // Firebase Auth State Listener
+    // ===== FIREBASE AUTH =====
     firebase.auth().onAuthStateChanged(user => {
       const avatar = document.getElementById('userAvatar');
       const defaultIcon = document.getElementById('defaultIcon');
-
+    
       if (user) {
         if (user.photoURL) {
           avatar.src = user.photoURL;
@@ -426,7 +921,7 @@
           avatar.style.display = 'none';
           defaultIcon.style.display = 'block';
         }
-
+    
         document.getElementById('logoutBtn').addEventListener('click', () => {
           firebase.auth().signOut().then(() => {
             window.location.reload();
@@ -438,15 +933,54 @@
       }
     });
 
-    // First Visit Check
+    // ===== FIRST VISIT CHECK =====
     if (localStorage.getItem("visited")) {
       console.log("Welcome back, Operative.");
     } else {
-      alert("First time? Welcome to The $iz Nexus.");
+      // Create a more engaging welcome
+      const welcomeMsg = document.createElement('div');
+      welcomeMsg.style.position = 'fixed';
+      welcomeMsg.style.top = '0';
+      welcomeMsg.style.left = '0';
+      welcomeMsg.style.right = '0';
+      welcomeMsg.style.bottom = '0';
+      welcomeMsg.style.backgroundColor = 'rgba(0,0,0,0.9)';
+      welcomeMsg.style.display = 'flex';
+      welcomeMsg.style.flexDirection = 'column';
+      welcomeMsg.style.justifyContent = 'center';
+      welcomeMsg.style.alignItems = 'center';
+      welcomeMsg.style.zIndex = '1000';
+      welcomeMsg.style.color = '#00d4ff';
+      welcomeMsg.style.fontSize = '2rem';
+      welcomeMsg.style.textAlign = 'center';
+      welcomeMsg.style.padding = '20px';
+      welcomeMsg.innerHTML = `
+        <h1 style="animation: glow 1s infinite alternate">WELCOME TO THE NEXUS</h1>
+        <p>Initiate sequence complete</p>
+        <p>Access granted</p>
+        <button onclick="this.parentNode.remove()" style="
+          background: #00d4ff;
+          color: #000;
+          border: none;
+          padding: 10px 20px;
+          margin-top: 20px;
+          font-size: 1rem;
+          cursor: pointer;
+          border-radius: 5px;
+        ">ENTER</button>
+      `;
+      document.body.appendChild(welcomeMsg);
+      
       localStorage.setItem("visited", true);
     }
 
-    // Disable Developer Tools
+    // ===== TICKER INTERACTION =====
+    document.querySelector('.ticker-content').addEventListener('click', function() {
+      this.style.animationPlayState = 
+        this.style.animationPlayState === 'paused' ? 'running' : 'paused';
+    });
+
+    // ===== DISABLE DEVELOPER TOOLS =====
     document.onkeydown = function(e) {
       if (
         e.keyCode === 123 || // F12
