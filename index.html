@@ -669,4 +669,17 @@
     });
   </script>
 </body>
+<body oncontextmenu="return false">
+<script>
+  document.onkeydown = function(e) {
+    if (
+      e.keyCode === 123 || // F12
+      (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) || // Ctrl+Shift+I/J/C
+      (e.ctrlKey && e.key.toUpperCase() === 'U') // Ctrl+U
+    ) {
+      e.preventDefault();
+      return false;
+    }
+  };
+</script>
 </html>
