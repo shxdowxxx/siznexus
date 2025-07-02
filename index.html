@@ -683,3 +683,40 @@
   };
 </script>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Navigation Bar</title>
+    <!-- Include the external CSS file -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="desktop-view"> <!-- Default to desktop view -->
+
+    <!-- Navigation Menu -->
+    <nav class="navbar">
+        <!-- Hamburger menu button (visible only on mobile) -->
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
+        
+        <!-- Menu Items for Desktop -->
+        <div class="menu">
+            <a href="#">Home</a>
+            <a href="#">About</a>
+            <a href="#">Services</a>
+            <a href="#">Contact</a>
+        </div>
+
+        <!-- Mobile Menu (hidden by default) -->
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="#">Home</a>
+            <a href="#">About</a>
+            <a href="#">Services</a>
+            <a href="#">Contact</a>
+        </div>
+    </nav>
+
+    <!-- JavaScript file (to handle the menu toggle and device detection) -->
+    <script src="script.js"></script>
+</body>
+</html>
