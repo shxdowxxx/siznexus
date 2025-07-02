@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- Enhanced viewport meta tag to prevent zooming -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no"/>
   <title>TheSizNexus</title>
   
   <!-- External Resources -->
@@ -39,10 +40,12 @@
       --color-text: #d0faff;
       --color-text-light: #66f0ff;
       --transition: all 0.3s ease-in-out;
+      --mobile-padding: 10px; /* Added for mobile */
     }
 
     html { 
       scroll-behavior: smooth; 
+      -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape */
     }
     
     body {
@@ -54,6 +57,7 @@
       flex-direction: column;
       min-height: 100vh;
       overflow-x: hidden;
+      touch-action: manipulation; /* Disable double-tap zoom */
     }
     
     /* ===== PARTICLES BACKGROUND ===== */
@@ -62,7 +66,7 @@
       width: 100%;
       height: 100%;
       z-index: -1;
-      opacity: 0.3; /* More subtle particles */
+      opacity: 0.3;
     }
 
     /* ===== NAVIGATION ===== */
@@ -121,7 +125,7 @@
       width: 100%;
     }
 
-    /* ===== PROFILE BUTTON (FIXED IN NAV) ===== */
+    /* ===== PROFILE BUTTON ===== */
     .profile-container {
       position: absolute;
       right: 20px;
@@ -129,7 +133,7 @@
     }
     
     .profile-button {
-      width: 36px; /* Slightly smaller */
+      width: 36px;
       height: 36px;
       background: black;
       border-radius: 50%;
@@ -153,7 +157,7 @@
     
     .profile-button i {
       color: var(--color-primary);
-      font-size: 16px; /* Slightly smaller */
+      font-size: 16px;
       transition: var(--transition);
     }
     
@@ -197,15 +201,15 @@
     }
     
     .dropdown-menu a:nth-child(1)::before {
-      content: "\f002"; /* search icon */
+      content: "\f002";
     }
     
     .dropdown-menu a:nth-child(2)::before {
-      content: "\f013"; /* settings icon */
+      content: "\f013";
     }
     
     .dropdown-menu a:nth-child(3)::before {
-      content: "\f2f5"; /* sign-out icon */
+      content: "\f2f5";
     }
     
     .dropdown-menu a:hover {
@@ -581,27 +585,65 @@
       color: #000;
     }
 
-    /* ===== RESPONSIVE DESIGN ===== */
+    /* ===== MOBILE-SPECIFIC STYLES ===== */
     @media (max-width: 768px) {
+      /* Navigation adjustments */
+      nav {
+        padding: 0.5rem;
+      }
+      
+      .nav-links {
+        gap: 0.5rem;
+      }
+      
+      nav a {
+        font-size: 0.9rem;
+        padding: 0.3rem 0;
+      }
+      
+      .profile-container {
+        right: 10px;
+      }
+      
+      .profile-button {
+        width: 32px;
+        height: 32px;
+      }
+      
+      /* Hero section */
+      .hero {
+        padding: 20px 10px 0;
+      }
+      
       .hero h1 {
-        font-size: 2.5rem;
+        font-size: 2rem;
         letter-spacing: 0.1em;
       }
       
       .hero p {
-        font-size: 1.2rem;
+        font-size: 1rem;
+        padding: 0 10px;
       }
       
-      nav a {
-        font-size: 1rem;
+      /* Info sections */
+      .info-section {
+        padding: 20px 10px;
+        gap: 1.5rem;
       }
       
       .bubble {
         padding: 20px;
       }
       
+      .bubble h2 {
+        font-size: 1.4rem;
+      }
+      
+      /* Progress tracker & theme selector */
       .progress-tracker, .theme-selector {
         bottom: 10px;
+        font-size: 0.8rem;
+        padding: 10px;
       }
       
       .progress-tracker {
@@ -610,10 +652,83 @@
       
       .theme-selector {
         left: 10px;
+        flex-direction: column;
+        gap: 5px;
       }
       
-      .profile-container {
-        right: 10px;
+      .theme-selector button {
+        padding: 3px 8px;
+        font-size: 0.8rem;
+      }
+      
+      /* Ranks and achievements */
+      .ranks {
+        gap: 8px;
+      }
+      
+      .rank {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+      }
+      
+      .achievement-badge {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+      }
+      
+      /* Ticker */
+      .ticker-wrapper {
+        font-size: 0.9rem;
+      }
+      
+      /* Footer */
+      footer {
+        padding: 15px 5px;
+        font-size: 0.8rem;
+      }
+      
+      footer .contact {
+        margin-bottom: 5px;
+      }
+    }
+
+    /* ===== VERY SMALL DEVICES (PHONES) ===== */
+    @media (max-width: 480px) {
+      .hero h1 {
+        font-size: 1.8rem;
+      }
+      
+      .nav-links {
+        gap: 0.3rem;
+      }
+      
+      nav a {
+        font-size: 0.8rem;
+      }
+      
+      .dropdown-menu {
+        top: 40px;
+      }
+      
+      .dropdown-menu a {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+      }
+      
+      .discord-button {
+        padding: 10px 18px;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* ===== TABLET STYLES ===== */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .hero h1 {
+        font-size: 3rem;
+      }
+      
+      .info-section {
+        max-width: 800px;
       }
     }
   </style>
@@ -630,7 +745,7 @@
         <a href="#join">Join</a>
       </div>
       
-      <!-- Profile Circle - Now fixed in nav -->
+      <!-- Profile Circle -->
       <div class="profile-container">
         <button class="profile-button" id="profileButton">
           <img id="userAvatar" src="" alt="Profile">
@@ -730,29 +845,73 @@
   </footer>
 
   <script>
-    // ===== PARTICLES.JS CONFIGURATION (SMALLER PARTICLES) =====
+    // ===== DEVICE DETECTION =====
+    const isMobile = {
+      Android: function() {
+        return navigator.userAgent.match(/Android/i);
+      },
+      BlackBerry: function() {
+        return navigator.userAgent.match(/BlackBerry/i);
+      },
+      iOS: function() {
+        return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+      },
+      Opera: function() {
+        return navigator.userAgent.match(/Opera Mini/i);
+      },
+      Windows: function() {
+        return navigator.userAgent.match(/IEMobile/i) || navigator.userAgent.match(/WPDesktop/i);
+      },
+      any: function() {
+        return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+      }
+    };
+
+    // Apply mobile-specific adjustments
+    if (isMobile.any()) {
+      document.body.classList.add('mobile-device');
+      
+      // Disable zoom gestures
+      document.addEventListener('gesturestart', function(e) {
+        e.preventDefault();
+      });
+      
+      // Prevent double-tap zoom
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', function(event) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+          event.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, false);
+    } else {
+      document.body.classList.add('desktop-device');
+    }
+
+    // ===== PARTICLES.JS CONFIGURATION =====
     particlesJS("particles-js", {
       particles: {
         number: { 
-          value: 80,
+          value: isMobile.any() ? 40 : 80, // Fewer particles on mobile
           density: {
             enable: true,
-            value_area: 800
+            value_area: isMobile.any() ? 400 : 800
           }
         },
         color: { value: "#00d4ff" },
         shape: { type: "circle" },
         opacity: { 
-          value: 0.3,  // More transparent
+          value: 0.3,
           random: true 
         },
         size: { 
-          value: 1,  // Smaller particles
+          value: isMobile.any() ? 0.8 : 1, // Smaller particles on mobile
           random: true 
         },
         move: { 
           enable: true, 
-          speed: 0.5,  // Slower movement
+          speed: isMobile.any() ? 0.3 : 0.5, // Slower movement on mobile
           direction: "none",
           random: true,
           straight: false,
@@ -762,7 +921,7 @@
       interactivity: {
         events: { 
           onhover: { 
-            enable: true, 
+            enable: !isMobile.any(), // Disable hover effects on mobile
             mode: "repulse",
             distance: 100
           } 
@@ -825,7 +984,6 @@
 
     // ===== CLAN PROGRESS SYSTEM =====
     function updateClanProgress() {
-      // Simulate progress - in real app, this would come from your database
       const progress = Math.min(100, Math.floor(Math.random() * 100));
       document.getElementById("clan-progress").style.width = `${progress}%`;
       
@@ -937,7 +1095,6 @@
     if (localStorage.getItem("visited")) {
       console.log("Welcome back, Operative.");
     } else {
-      // Create a more engaging welcome
       const welcomeMsg = document.createElement('div');
       welcomeMsg.style.position = 'fixed';
       welcomeMsg.style.top = '0';
@@ -951,7 +1108,7 @@
       welcomeMsg.style.alignItems = 'center';
       welcomeMsg.style.zIndex = '1000';
       welcomeMsg.style.color = '#00d4ff';
-      welcomeMsg.style.fontSize = '2rem';
+      welcomeMsg.style.fontSize = isMobile.any() ? '1.5rem' : '2rem';
       welcomeMsg.style.textAlign = 'center';
       welcomeMsg.style.padding = '20px';
       welcomeMsg.innerHTML = `
@@ -980,7 +1137,7 @@
         this.style.animationPlayState === 'paused' ? 'running' : 'paused';
     });
 
-    // ===== DISABLE DEVELOPER TOOLS =====
+    // ===== DISABLE DEVELOPER TOOLS (LIMITED EFFECTIVENESS) =====
     document.onkeydown = function(e) {
       if (
         e.keyCode === 123 || // F12
@@ -991,6 +1148,20 @@
         return false;
       }
     };
+    
+    // Additional protection against right-click
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    // Protection against dragging images
+    document.addEventListener('dragstart', function(e) {
+      if (e.target.tagName === 'IMG') {
+        e.preventDefault();
+        return false;
+      }
+    });
   </script>
 </body>
 </html>
