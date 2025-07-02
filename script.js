@@ -52,3 +52,44 @@ logoutBtn.addEventListener("click", () => {
 
 // Close dropdown if clicked outside
 document.a
+.profile-container {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 50%;
+  background-color: #1e1e1e;
+  cursor: pointer;
+}
+
+.profile-button img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 50px;
+  background-color: #1e1e1e;
+  padding: 10px;
+  border-radius: 5px;
+  min-width: 180px;
+}
+
+.dropdown-menu a {
+  color: #fff;
+  text-decoration: none;
+  margin: 5px 0;
+}
+
+.dropdown-menu a:hover {
+  background-color: #333;
+}
