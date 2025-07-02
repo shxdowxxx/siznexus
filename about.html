@@ -211,6 +211,16 @@
       background: #001a33;
     }
     
+    /* Darker map tiles for abandoned aesthetic */
+    .leaflet-tile {
+      filter: 
+        hue-rotate(120deg) 
+        saturate(1.8) 
+        brightness(0.5) 
+        contrast(1.4) 
+        sepia(0.3);
+    }
+    
     .map-controls {
       position: absolute;
       top: 10px;
@@ -239,11 +249,6 @@
     .map-controls button:hover {
       background: var(--color-primary);
       color: #000;
-    }
-    
-    /* Custom map tiles style */
-    .leaflet-tile {
-      filter: hue-rotate(180deg) saturate(1.5) brightness(0.7) contrast(1.2);
     }
     
     .leaflet-control-attribution {
@@ -614,134 +619,133 @@
   <div class="intel-container">
     <div class="intel-header">
       <h1>INTEL FEED</h1>
-      <p>Classified mission briefings and strategic updates</p>
+      <p>Classified mission briefings from Hashima Exclusion Zone</p>
     </div>
     
     <!-- Interactive Map Section -->
     <div class="map-container">
       <div id="intelMap"></div>
       <div class="map-controls">
-        <button id="addMarkerBtn" title="Add new intel marker"><i class="fas fa-map-marker-alt"></i></button>
-        <button id="drawPolygonBtn" title="Draw danger zone"><i class="fas fa-draw-polygon"></i></button>
+        <button id="addMarkerBtn" title="Add new intel marker"><i class="fas fa-radiation"></i></button>
+        <button id="drawPolygonBtn" title="Mark restricted area"><i class="fas fa-skull-crossbones"></i></button>
         <button id="clearMapBtn" title="Clear all markings"><i class="fas fa-trash"></i></button>
       </div>
     </div>
     
     <div class="intel-search">
-      <input type="text" placeholder="Search intel reports...">
+      <input type="text" placeholder="Search abandoned zone reports...">
       <button><i class="fas fa-search"></i></button>
     </div>
     
     <div class="intel-filters">
       <button class="filter-btn active" data-filter="all">All Intel</button>
-      <button class="filter-btn" data-filter="critical">Critical</button>
-      <button class="filter-btn" data-filter="alert">Alerts</button>
-      <button class="filter-btn" data-filter="info">Info</button>
-      <button class="filter-btn" data-filter="mission">Missions</button>
+      <button class="filter-btn" data-filter="critical">Biohazards</button>
+      <button class="filter-btn" data-filter="alert">Structural</button>
+      <button class="filter-btn" data-filter="info">Artifacts</button>
+      <button class="filter-btn" data-filter="mission">Scavengers</button>
     </div>
     
     <div class="intel-grid">
       <!-- Intel Card 1 - Critical -->
-      <div class="intel-card critical" data-category="critical" data-location="[34.0522, -118.2437]">
+      <div class="intel-card critical" data-category="critical" data-location="[32.6285, 129.7378]">
         <div class="intel-meta">
           <span><i class="fas fa-clock"></i> 2 hours ago</span>
-          <span class="intel-priority priority-critical">CRITICAL</span>
+          <span class="intel-priority priority-critical">BIOHAZARD</span>
         </div>
-        <h3>Enemy Movement Detected</h3>
+        <h3>Chemical Leak in Factory B</h3>
         <div class="intel-content">
-          Hostile forces have been spotted near Sector 7. All operatives in the area should exercise extreme caution. 
-          Possible ambush points identified at coordinates X: 347, Y: 892.
+          Highly toxic methyl isocyanate detected in the ruins of Factory B. 
+          All operatives must avoid Sector 12 until decon team arrives.
         </div>
         <div class="intel-tags">
-          <span class="intel-tag">Sector 7</span>
-          <span class="intel-tag">Hostiles</span>
-          <span class="intel-tag">Urgent</span>
+          <span class="intel-tag">Sector 12</span>
+          <span class="intel-tag">Toxic</span>
+          <span class="intel-tag">Hazmat Required</span>
         </div>
       </div>
       
       <!-- Intel Card 2 - Alert -->
-      <div class="intel-card alert" data-category="alert" data-location="[34.0532, -118.2427]">
+      <div class="intel-card alert" data-category="alert" data-location="[32.6272, 129.7391]">
         <div class="intel-meta">
           <span><i class="fas fa-clock"></i> 5 hours ago</span>
-          <span class="intel-priority priority-high">HIGH</span>
+          <span class="intel-priority priority-high">STRUCTURAL</span>
         </div>
-        <h3>Upcoming Clan War</h3>
+        <h3>Collapsed Mine Shaft</h3>
         <div class="intel-content">
-          Preparation for Clan War #4 begins tomorrow at 20:00 UTC. Mandatory briefing for all Commanders and Agents.
-          Review the new battle strategies in the secured documents.
+          Primary access shaft to underground network has collapsed. 
+          Possible alternate routes through the eastern maintenance tunnels.
         </div>
         <div class="intel-tags">
-          <span class="intel-tag">Clan War</span>
-          <span class="intel-tag">Event</span>
+          <span class="intel-tag">Mine Shaft 3</span>
+          <span class="intel-tag">Structural Hazard</span>
         </div>
       </div>
       
       <!-- Intel Card 3 - Info -->
-      <div class="intel-card info" data-category="info" data-location="[34.0512, -118.2447]">
+      <div class="intel-card info" data-category="info" data-location="[32.6268, 129.7365]">
         <div class="intel-meta">
           <span><i class="fas fa-clock"></i> 1 day ago</span>
-          <span class="intel-priority priority-medium">MEDIUM</span>
+          <span class="intel-priority priority-medium">ARTIFACT</span>
         </div>
-        <h3>New Recruit Analysis</h3>
+        <h3>Pre-Collapse Data Cache</h3>
         <div class="intel-content">
-          12 new recruits have joined this week. Performance metrics show 4 with exceptional potential. 
-          Full breakdown available to Nexus Core members.
+          Intact server bank discovered in the admin building. 
+          Recovered 78% of corporate records from 1974-1991 period.
         </div>
         <div class="intel-tags">
-          <span class="intel-tag">Recruits</span>
-          <span class="intel-tag">Analysis</span>
+          <span class="intel-tag">Admin Building</span>
+          <span class="intel-tag">Data Recovery</span>
         </div>
       </div>
       
       <!-- Intel Card 4 - Mission -->
-      <div class="intel-card mission" data-category="mission" data-location="[34.0502, -118.2457]">
+      <div class="intel-card mission" data-category="mission" data-location="[32.6259, 129.7402]">
         <div class="intel-meta">
           <span><i class="fas fa-clock"></i> 2 days ago</span>
-          <span class="intel-priority priority-medium">MEDIUM</span>
+          <span class="intel-priority priority-high">SCAVENGERS</span>
         </div>
-        <h3>Operation Silent Strike</h3>
+        <h3>Raider Activity Increasing</h3>
         <div class="intel-content">
-          Mission parameters for the upcoming stealth operation. Team assignments and drop points have been finalized. 
-          Encrypted mission files available to participants.
+          "Bone Crusher" gang spotted establishing foothold in the northern dormitories. 
+          Estimated 12-15 armed individuals. Extreme caution advised.
         </div>
         <div class="intel-tags">
-          <span class="intel-tag">Mission</span>
-          <span class="intel-tag">Stealth</span>
-          <span class="intel-tag">Encrypted</span>
+          <span class="intel-tag">Dormitory Block</span>
+          <span class="intel-tag">Hostile Presence</span>
         </div>
       </div>
       
-      <!-- Intel Card 5 - Info -->
-      <div class="intel-card info" data-category="info" data-location="[34.0492, -118.2467]">
+      <!-- Intel Card 5 - Critical -->
+      <div class="intel-card critical" data-category="critical" data-location="[32.6293, 129.7358]">
         <div class="intel-meta">
           <span><i class="fas fa-clock"></i> 3 days ago</span>
-          <span class="intel-priority priority-medium">MEDIUM</span>
+          <span class="intel-priority priority-critical">RADIATION</span>
         </div>
-        <h3>Weapon Cache Discovered</h3>
+        <h3>Reactor Core Breach</h3>
         <div class="intel-content">
-          Operative [$!z] Ghost has located a hidden weapon cache in the Northern District. Contains rare tier weapons. 
-          Extraction team required - sign up in the mission log.
+          Geiger counters detecting 450 mR/hr near the old power plant. 
+          Mandatory Level A suits required within 200m radius.
         </div>
         <div class="intel-tags">
-          <span class="intel-tag">Loot</span>
-          <span class="intel-tag">Weapons</span>
+          <span class="intel-tag">Power Plant</span>
+          <span class="intel-tag">Extreme Danger</span>
         </div>
       </div>
       
-      <!-- Intel Card 6 - Critical -->
-      <div class="intel-card critical" data-category="critical" data-location="[34.0482, -118.2477]">
+      <!-- Intel Card 6 - Info -->
+      <div class="intel-card info" data-category="info" data-location="[32.6247, 129.7386]">
         <div class="intel-meta">
           <span><i class="fas fa-clock"></i> 4 days ago</span>
-          <span class="intel-priority priority-critical">CRITICAL</span>
+          <span class="intel-priority priority-medium">ARTIFACT</span>
         </div>
-        <h3>Security Breach</h3>
+        <h3>Weapons Cache Found</h3>
         <div class="intel-content">
-          Unauthorized access detected in the main database. All members should change their authentication codes immediately. 
-          Suspected origin: rival clan Nightshade.
+          Sealed armory discovered beneath the cafeteria. Contains: 
+          4 Type-94 pulse rifles, 12 plasma grenades (expired), and 3 intact security drones.
         </div>
         <div class="intel-tags">
-          <span class="intel-tag">Security</span>
-          <span class="intel-tag">Urgent</span>
+          <span class="intel-tag">Cafeteria</span>
+          <span class="intel-tag">Weapons</span>
         </div>
       </div>
     </div>
@@ -753,9 +757,9 @@
       <span class="close-modal">&times;</span>
       <div class="intel-meta">
         <span><i class="fas fa-clock"></i> <span id="modal-time">2 hours ago</span></span>
-        <span class="intel-priority priority-critical">CRITICAL</span>
+        <span class="intel-priority priority-critical">BIOHAZARD</span>
       </div>
-      <h2 id="modal-title">Enemy Movement Detected</h2>
+      <h2 id="modal-title">Chemical Leak in Factory B</h2>
       <div class="intel-content" id="modal-content">
         Detailed content will appear here...
       </div>
@@ -763,16 +767,16 @@
         <!-- Tags will be inserted here -->
       </div>
       <div class="intel-comments">
-        <h3>Agent Comments</h3>
+        <h3>Agent Reports</h3>
         <div class="comment-list">
           <div class="comment">
-            <strong>[$!z] Death:</strong> Confirmed sighting at 19:30 UTC. Moving in teams of 3.
+            <strong>[$!z] HAZMAT:</strong> Confirmed MIC concentration of 12ppm - lethal within 2 minutes of exposure.
           </div>
           <div class="comment">
-            <strong>[$!z] Nova:</strong> Thermal scans show possible heavy weapons.
+            <strong>[$!z] GHOST:</strong> Source appears to be ruptured Tank #7 in the northwest corner.
           </div>
         </div>
-        <textarea placeholder="Add your analysis..." id="commentInput"></textarea>
+        <textarea placeholder="Add field report..." id="commentInput"></textarea>
         <button class="discord-button" id="submitComment">Submit Report</button>
       </div>
     </div>
@@ -791,7 +795,7 @@
 
   <!-- Progress Tracker from main page -->
   <div class="progress-tracker">
-    Clan Progress: <span id="clan-level">Level 1</span>
+    Expedition Progress: <span id="clan-level">Level 1</span>
     <div class="progress-bar" id="clan-progress"></div>
   </div>
 
@@ -802,188 +806,173 @@
   </div>
 
   <script>
-    // ===== INITIALIZE PARTICLES.JS =====
-    particlesJS("particles-js", {
-      particles: {
-        number: { value: 80, density: { enable: true, value_area: 800 } },
-        color: { value: "#00d4ff" },
-        shape: { type: "circle" },
-        opacity: { value: 0.3, random: true },
-        size: { value: 1, random: true },
-        move: { enable: true, speed: 0.5, direction: "none", random: true, straight: false, out_mode: "bounce" }
-      },
-      interactivity: {
-        events: { onhover: { enable: true, mode: "repulse", distance: 100 } }
-      }
-    });
-
-    // ===== INITIALIZE INTERACTIVE MAP =====
-    const map = L.map('intelMap').setView([34.0522, -118.2437], 15);
-    
-    // Custom map style to match cyberpunk theme
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      className: 'map-tiles'
-    }).addTo(map);
-    
-    // Custom markers with different colors
-    const criticalIcon = L.divIcon({
-      html: '<i class="fas fa-skull" style="color: #ff0000; font-size: 24px;"></i>',
-      className: 'custom-icon',
-      iconSize: [24, 24]
-    });
-    
-    const alertIcon = L.divIcon({
-      html: '<i class="fas fa-exclamation-triangle" style="color: #ffcc00; font-size: 24px;"></i>',
-      className: 'custom-icon',
-      iconSize: [24, 24]
-    });
-    
-    const infoIcon = L.divIcon({
-      html: '<i class="fas fa-info-circle" style="color: #00d4ff; font-size: 24px;"></i>',
-      className: 'custom-icon',
-      iconSize: [24, 24]
-    });
-    
-    const missionIcon = L.divIcon({
-      html: '<i class="fas fa-crosshairs" style="color: #aa00ff; font-size: 24px;"></i>',
-      className: 'custom-icon',
-      iconSize: [24, 24]
-    });
-    
-    // Add markers for each intel card
-    document.querySelectorAll('.intel-card').forEach(card => {
-      const location = JSON.parse(card.dataset.location);
-      let icon;
-      
-      if (card.classList.contains('critical')) icon = criticalIcon;
-      else if (card.classList.contains('alert')) icon = alertIcon;
-      else if (card.classList.contains('mission')) icon = missionIcon;
-      else icon = infoIcon;
-      
-      const marker = L.marker(location, { icon }).addTo(map);
-      
-      // Bind popup with card title
-      marker.bindPopup(`<strong>${card.querySelector('h3').textContent}</strong><br>${card.querySelector('.intel-content').textContent.substring(0, 100)}...`);
-      
-      // Click event to highlight card when marker is clicked
-      marker.on('click', function() {
-        // Remove any existing highlights
-        document.querySelectorAll('.intel-card').forEach(c => {
-          c.style.boxShadow = 'none';
-        });
-        
-        // Highlight the corresponding card
-        card.style.boxShadow = '0 0 20px rgba(0,213,255,0.8)';
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Wait for DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // ===== INITIALIZE PARTICLES.JS =====
+      particlesJS("particles-js", {
+        particles: {
+          number: { value: 80, density: { enable: true, value_area: 800 } },
+          color: { value: "#00d4ff" },
+          shape: { type: "circle" },
+          opacity: { value: 0.3, random: true },
+          size: { value: 1, random: true },
+          move: { enable: true, speed: 0.5, direction: "none", random: true, straight: false, out_mode: "bounce" }
+        },
+        interactivity: {
+          events: { onhover: { enable: true, mode: "repulse", distance: 100 } }
+        }
       });
-    });
-    
-    // ===== MAP EDITING TOOLS =====
-    let drawnItems = new L.FeatureGroup();
-    map.addLayer(drawnItems);
-    
-    let drawControl;
-    let isAddingMarker = false;
-    
-    document.getElementById('addMarkerBtn').addEventListener('click', function() {
-      if (isAddingMarker) {
-        isAddingMarker = false;
-        this.style.background = '';
-        map.off('click');
-      } else {
-        isAddingMarker = true;
-        this.style.background = 'var(--color-primary)';
-        this.style.color = '#000';
-        
-        map.on('click', function(e) {
-          // Create new marker
-          const marker = L.marker(e.latlng, { 
-            icon: L.divIcon({
-              html: '<i class="fas fa-map-marker-alt" style="color: #00d4ff; font-size: 24px;"></i>',
-              className: 'custom-icon',
-              iconSize: [24, 24]
-            }),
-            draggable: true
-          }).addTo(map);
-          
-          // Add to drawn items layer
-          drawnItems.addLayer(marker);
-          
-          // Create popup for editing
-          marker.bindPopup(`
-            <div style="color: black; font-family: Arial;">
-              <h4>New Intel Marker</h4>
-              <textarea placeholder="Enter intel description..." rows="3" style="width: 100%;"></textarea>
-              <button onclick="saveIntelMarker(this)">Save</button>
-            </div>
-          `).openPopup();
+
+      // ===== INITIALIZE INTERACTIVE MAP =====
+      try {
+        const map = L.map('intelMap', {
+          preferCanvas: true,
+          zoomControl: false
+        }).setView([32.6278, 129.7383], 16);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          maxZoom: 18,
+          minZoom: 12
+        }).addTo(map);
+
+        L.control.zoom({
+          position: 'topright'
+        }).addTo(map);
+
+        // Custom hazard icons
+        const biohazardIcon = L.divIcon({
+          html: '<i class="fas fa-biohazard" style="color: #ff0000; font-size: 24px;"></i>',
+          className: 'custom-icon',
+          iconSize: [24, 24]
         });
-      }
-    });
-    
-    document.getElementById('drawPolygonBtn').addEventListener('click', function() {
-      // Simple polygon drawing implementation
-      alert("Polygon drawing mode activated. Click on the map to add points, double-click to finish.");
-      
-      let polygonPoints = [];
-      let polygon;
-      
-      function onMapClick(e) {
-        polygonPoints.push(e.latlng);
         
-        if (polygon) map.removeLayer(polygon);
+        const structureIcon = L.divIcon({
+          html: '<i class="fas fa-building-crack" style="color: #ffcc00; font-size: 24px;"></i>',
+          className: 'custom-icon',
+          iconSize: [24, 24]
+        });
         
-        if (polygonPoints.length > 1) {
-          polygon = L.polygon(polygonPoints, {
-            color: '#ff0000',
-            fillOpacity: 0.3
-          }).addTo(map);
-        }
-      }
-      
-      function onDoubleClick() {
-        if (polygonPoints.length > 2) {
-          drawnItems.addLayer(polygon);
-          polygon.bindPopup("Danger Zone").openPopup();
-        }
+        const artifactIcon = L.divIcon({
+          html: '<i class="fas fa-cube" style="color: #00d4ff; font-size: 24px;"></i>',
+          className: 'custom-icon',
+          iconSize: [24, 24]
+        });
         
-        // Clean up
-        map.off('click', onMapClick);
-        map.off('dblclick', onDoubleClick);
-        polygonPoints = [];
-      }
-      
-      map.on('click', onMapClick);
-      map.on('dblclick', onDoubleClick);
-    });
-    
-    document.getElementById('clearMapBtn').addEventListener('click', function() {
-      if (confirm("Clear all custom markings?")) {
-        drawnItems.clearLayers();
-      }
-    });
-    
-    // ===== INTEL FILTERING SYSTEM =====
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        // Update active button
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
+        const scavengerIcon = L.divIcon({
+          html: '<i class="fas fa-skull" style="color: #aa00ff; font-size: 24px;"></i>',
+          className: 'custom-icon',
+          iconSize: [24, 24]
+        });
+
+        // Add markers for each intel card
+        document.querySelectorAll('.intel-card').forEach(card => {
+          const location = JSON.parse(card.dataset.location);
+          let icon;
+          
+          if (card.classList.contains('critical')) icon = biohazardIcon;
+          else if (card.classList.contains('alert')) icon = structureIcon;
+          else if (card.classList.contains('mission')) icon = scavengerIcon;
+          else icon = artifactIcon;
+          
+          const marker = L.marker(location, { icon }).addTo(map);
+          
+          // Bind popup with card title
+          marker.bindPopup(`<strong>${card.querySelector('h3').textContent}</strong><br>${card.querySelector('.intel-content').textContent.substring(0, 100)}...`);
+          
+          // Click event to highlight card when marker is clicked
+          marker.on('click', function() {
+            document.querySelectorAll('.intel-card').forEach(c => {
+              c.style.boxShadow = 'none';
+            });
+            card.style.boxShadow = '0 0 20px rgba(0,213,255,0.8)';
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
+        });
         
-        const filter = this.dataset.filter;
-        const cards = document.querySelectorAll('.intel-card');
+        // ===== MAP EDITING TOOLS =====
+        let drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
         
-        cards.forEach(card => {
-          if (filter === 'all' || card.dataset.category === filter) {
-            card.style.display = 'block';
-            card.style.animation = 'slideIn 0.5s ease';
-          } else {
-            card.style.display = 'none';
+        document.getElementById('addMarkerBtn').addEventListener('click', function() {
+          alert("Mark hazard zones by clicking on the map. Use the skull icon for biohazards.");
+          
+          map.on('click', function(e) {
+            const marker = L.marker(e.latlng, { 
+              icon: L.divIcon({
+                html: '<i class="fas fa-radiation" style="color: #ff0000; font-size: 24px;"></i>',
+                className: 'custom-icon',
+                iconSize: [24, 24]
+              }),
+              draggable: true
+            }).addTo(map);
+            
+            drawnItems.addLayer(marker);
+            marker.bindPopup(`
+              <div style="color: black; font-family: Arial;">
+                <h4>New Hazard Marker</h4>
+                <select style="width:100%;margin:5px 0;">
+                  <option>Biohazard</option>
+                  <option>Structural</option>
+                  <option>Scavengers</option>
+                </select>
+                <textarea placeholder="Enter hazard details..." rows="3" style="width: 100%;"></textarea>
+                <button onclick="saveIntelMarker(this)">Save</button>
+              </div>
+            `).openPopup();
+          });
+        });
+        
+        document.getElementById('drawPolygonBtn').addEventListener('click', function() {
+          alert("Mark restricted areas by clicking points on the map. Double-click to finish.");
+          
+          let polygonPoints = [];
+          let polygon;
+          
+          function onMapClick(e) {
+            polygonPoints.push(e.latlng);
+            if (polygon) map.removeLayer(polygon);
+            if (polygonPoints.length > 1) {
+              polygon = L.polygon(polygonPoints, {
+                color: '#ff0000',
+                fillOpacity: 0.3,
+                dashArray: '10,5'
+              }).addTo(map);
+            }
+          }
+          
+          function onDoubleClick() {
+            if (polygonPoints.length > 2) {
+              drawnItems.addLayer(polygon);
+              polygon.bindPopup("RESTRICTED ZONE").openPopup();
+            }
+            map.off('click', onMapClick);
+            map.off('dblclick', onDoubleClick);
+            polygonPoints = [];
+          }
+          
+          map.on('click', onMapClick);
+          map.on('dblclick', onDoubleClick);
+        });
+        
+        document.getElementById('clearMapBtn').addEventListener('click', function() {
+          if (confirm("Clear all custom hazard markings?")) {
+            drawnItems.clearLayers();
           }
         });
-      });
-    });
-    
-    // ===== INTEL SEARCH FUNCTIONALITY =====
-    const searchInput
+      } catch (e) {
+        console.error("Map initialization failed:", e);
+        document.getElementById('intelMap').innerHTML = 
+          '<div style="color:red;padding:20px;text-align:center;">' +
+          'Map failed to load. Please check your internet connection.</div>';
+      }
+
+      // ===== INTEL FILTERING SYSTEM =====
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          
+          const filter = this.dataset.filter;
+          document.querySelectorAll('.intel-card').forEach(card => {
+            card.style.display = (
