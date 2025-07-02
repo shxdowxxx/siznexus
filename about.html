@@ -823,6 +823,20 @@
         }
       });
 
+      // ===== PROFILE DROPDOWN FUNCTIONALITY =====
+      const profileButton = document.getElementById('profileButton');
+      const dropdownMenu = document.getElementById('dropdownMenu');
+
+      profileButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdownMenu.style.display = dropdownMenu.style.display === 'flex' ? 'none' : 'flex';
+      });
+
+      // Close dropdown when clicking elsewhere
+      document.addEventListener('click', function() {
+        dropdownMenu.style.display = 'none';
+      });
+
       // ===== INITIALIZE INTERACTIVE MAP =====
       try {
         const map = L.map('intelMap', {
@@ -975,4 +989,116 @@
           
           const filter = this.dataset.filter;
           document.querySelectorAll('.intel-card').forEach(card => {
-            card.style.display = (
+            if (filter === 'all' || card.classList.contains(filter)) {
+              card.style.display = 'block';
+              card.style.animation = 'slideIn 0.5s ease';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // ===== INTEL SEARCH FUNCTIONALITY =====
+      const searchInput = document.querySelector('.intel-search input');
+      const searchButton = document.querySelector('.intel-search button');
+
+      searchButton.addEventListener('click', performSearch);
+      searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') performSearch();
+      });
+
+      function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase();
+        if (searchTerm.trim() === '') return;
+        
+        document.querySelectorAll('.intel-card').forEach(card => {
+          const title = card.querySelector('h3').textContent.toLowerCase();
+          const content = card.querySelector('.intel-content').textContent.toLowerCase();
+          const tags = Array.from(card.querySelectorAll('.intel-tag')).map(tag => tag.textContent.toLowerCase());
+          
+          if (title.includes(searchTerm) || content.includes(searchTerm) || tags.some(tag => tag.includes(searchTerm))) {
+            card.style.display = 'block';
+            card.style.animation = 'slideIn 0.5s ease';
+            card.style.boxShadow = '0 0 20px rgba(0,213,255,0.8)';
+            setTimeout(() => { card.style.boxShadow = ''; }, 2000);
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      }
+
+      // ===== INTEL MODAL FUNCTIONALITY =====
+      const modal = document.getElementById('intelModal');
+      const closeModal = document.querySelector('.close-modal');
+      const intelCards = document.querySelectorAll('.intel-card');
+
+      intelCards.forEach(card => {
+        card.addEventListener('click', function() {
+          const title = this.querySelector('h3').textContent;
+          const content = this.querySelector('.intel-content').textContent;
+          const time = this.querySelector('.intel-meta span:first-child').textContent;
+          const priority = this.querySelector('.intel-priority').textContent;
+          const priorityClass = this.querySelector('.intel-priority').className;
+          const tags = Array.from(this.querySelectorAll('.intel-tag')).map(tag => tag.textContent);
+          
+          document.getElementById('modal-title').textContent = title;
+          document.getElementById('modal-content').textContent = content;
+          document.getElementById('modal-time').textContent = time;
+          
+          const modalPriority = document.querySelector('.modal-content .intel-priority');
+          modalPriority.textContent = priority;
+          modalPriority.className = priorityClass;
+          
+          const modalTags = document.getElementById('modal-tags');
+          modalTags.innerHTML = '';
+          tags.forEach(tag => {
+            const tagElement = document.createElement('span');
+            tagElement.className = 'intel-tag';
+            tagElement.textContent = tag;
+            modalTags.appendChild(tagElement);
+          });
+          
+          modal.style.display = 'block';
+        });
+      });
+
+      closeModal.addEventListener('click', function() {
+        modal.style.display = 'none';
+      });
+
+      window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+
+      // ===== PROGRESS TRACKER ANIMATION =====
+      const progressBar = document.getElementById('clan-progress');
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        progress += Math.random() * 5;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(progressInterval);
+        }
+        progressBar.style.width = `${progress}%`;
+      }, 500);
+
+      // ===== THEME SELECTOR FUNCTIONALITY =====
+      function setTheme(theme) {
+        const root = document.documentElement;
+        if (theme === 'cyberpunk') {
+          root.style.setProperty('--color-primary', '#00d4ff');
+          root.style.setProperty('--color-secondary', '#00aacc');
+          root.style.setProperty('--color-text-light', '#66f0ff');
+        } else if (theme === 'matrix') {
+          root.style.setProperty('--color-primary', '#00ff41');
+          root.style.setProperty('--color-secondary', '#008f11');
+          root.style.setProperty('--color-text-light', '#00ff41');
+        }
+      }
+    });
+  </script>
+</body>
+</html>
