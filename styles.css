@@ -1,46 +1,105 @@
-/* Global styles for both desktop and mobile */
+/* Global styles for body */
 body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
-/* Desktop-specific styles (screens larger than 768px) */
-@media (min-width: 768px) {
-  /* Desktop Styles */
-  .menu {
-    display: flex;
-    justify-content: space-around;
-    padding: 20px;
-  }
-
-  .menu a {
-    font-size: 18px;
-    color: black;
-    text-decoration: none;
-    padding: 10px;
-  }
-}
-
-/* Mobile-specific styles (screens smaller than 768px) */
-@media (max-width: 767px) {
-  /* Mobile Styles */
-  .menu {
-    display: block;
-    text-align: center;
+/* Default styles for both desktop and mobile */
+.navbar {
+    position: relative;
     background-color: #333;
+    color: white;
     padding: 10px;
-  }
+}
 
-  .menu a {
-    font-size: 16px;
+.menu a, .mobile-menu a {
     color: white;
     text-decoration: none;
-    display: block;
-    padding: 10px;
-  }
+    padding: 15px;
+    font-size: 18px;
+}
 
-  .menu a:hover {
-    background-color: #555;
-  }
+.menu {
+    display: flex;
+    justify-content: space-around;
+}
+
+.mobile-menu {
+    display: none; /* Hidden by default, only visible in mobile view */
+    background-color: #333;
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    width: 200px;
+}
+
+.mobile-menu a {
+    display: block;
+    text-align: center;
+    padding: 10px;
+}
+
+.hamburger {
+    font-size: 30px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: none; /* Hidden by default, only visible in mobile view */
+}
+
+/* Desktop Styles (screens larger than 768px) */
+@media (min-width: 768px) {
+    .hamburger {
+        display: none; /* Hide hamburger menu on desktop */
+    }
+
+    .menu {
+        display: flex;
+        justify-content: space-around;
+    }
+
+    .menu a:hover {
+        background-color: #3498db;
+        color: white;
+        transform: scale(1.1);
+        transition: all 0.3s ease-in-out;
+    }
+}
+
+/* Mobile Styles (screens smaller than 768px) */
+@media (max-width: 767px) {
+    .menu {
+        display: none; /* Hide desktop menu */
+    }
+
+    .hamburger {
+        display: block; /* Show hamburger on mobile */
+    }
+
+    .mobile-menu {
+        display: none; /* Hidden by default */
+    }
+
+    .mobile-menu a:hover {
+        background-color: #555;
+    }
+
+    /* Animation for mobile menu */
+    .mobile-menu.active {
+        display: block;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
 }
