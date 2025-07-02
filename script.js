@@ -28,3 +28,27 @@ if (isMobileDevice()) {
 } else {
     document.body.classList.add('desktop-view');
 }
+const profileBtn = document.getElementById("profileButton");
+const dropdown = document.getElementById("dropdownMenu");
+const logoutBtn = document.getElementById("logoutBtn");
+
+// Simulating logged in state (you can replace this with real Firebase logic later)
+localStorage.setItem("loggedIn", "false"); // Change to "true" for testing logged-in state
+
+profileBtn.addEventListener("click", () => {
+  if (localStorage.getItem("loggedIn") !== "true") {
+    alert("You are not logged in. Redirecting to login...");
+    window.location.href = "receiver.html"; // Replace with your actual login page
+  } else {
+    dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
+  }
+});
+
+logoutBtn.addEventListener("click", () => {
+  localStorage.removeItem("loggedIn");
+  dropdown.style.display = "none";
+  alert("Logged out.");
+});
+
+// Close dropdown if clicked outside
+document.a
