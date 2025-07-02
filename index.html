@@ -4,7 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TheSizNexus</title>
+  
+  <!-- External Resources -->
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
 
   <!-- SEO & Social Sharing -->
   <meta name="description" content="The official $iz Clan site – join the Multi-Dimensional elite, see ranks, rules, and connect on Discord.">
@@ -12,9 +29,8 @@
   <meta property="og:description" content="Join the Multi-Dimensional clan. Rise through the ranks.">
   <meta property="og:image" content="https://yourdomain.com/banner.jpg">
 
-  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-
   <style>
+    /* Global Styles */
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
@@ -26,12 +42,16 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
+    
+    /* Particles Background */
     #particles-js {
       position: fixed;
       width: 100%;
       height: 100%;
       z-index: -1;
     }
+    
+    /* Navigation */
     nav {
       background: #001930;
       padding: 1rem;
@@ -48,7 +68,8 @@
       font-size: 1.1rem;
     }
     nav a:hover { text-decoration: underline; }
-
+    
+    /* Hero Section */
     .hero {
       flex-grow: 1;
       display: flex;
@@ -76,7 +97,8 @@
       letter-spacing: 0.05em;
       animation: fadeIn 3s ease-in-out;
     }
-
+    
+    /* Ticker */
     .ticker-wrapper {
       background: #00152b;
       color: #00d4ff;
@@ -92,11 +114,8 @@
       padding-left: 100%;
       animation: scrollTicker 15s linear infinite;
     }
-    @keyframes scrollTicker {
-      0% { transform: translateX(0%); }
-      100% { transform: translateX(-100%); }
-    }
-
+    
+    /* Info Sections */
     .info-section {
       display: flex;
       flex-direction: column;
@@ -128,6 +147,8 @@
       padding-left: 1.2rem;
     }
     .bubble li { margin-bottom: 10px; line-height: 1.6; }
+    
+    /* Buttons */
     .discord-button {
       margin-top: 1.5rem;
       display: inline-block;
@@ -144,6 +165,8 @@
       background: #00aacc;
       box-shadow: 0 0 25px rgba(0, 213, 255, 0.8);
     }
+    
+    /* Ranks */
     .ranks {
       display: flex;
       flex-wrap: wrap;
@@ -157,6 +180,8 @@
       color: #00f0ff;
       box-shadow: 0 0 10px rgba(0,213,255,0.3);
     }
+    
+    /* Footer */
     footer {
       background-color: #00152b;
       padding: 20px 10px;
@@ -169,13 +194,8 @@
     }
     footer .contact { margin-bottom: 8px; font-weight: 600; color: #00d4ff; }
     footer .contact a { color: #00d4ff; text-decoration: underline; }
-
-    @keyframes glow { from { text-shadow: 0 0 5px #00d4ff; } to { text-shadow: 0 0 15px #00ffff; } }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(30px);} to {opacity:1;transform:translateY(0);} }
-    @keyframes slideIn { from { opacity:0; transform:translateY(50px);} to {opacity:1; transform:translateY(0);} }
-    @keyframes pulseGlow { 0% { box-shadow:0 0 20px rgba(0,213,255,0.1);} 100% { box-shadow:0 0 30px rgba(0,213,255,0.3);} }
-
-    /* 🔧 New: Profile Circle + Dropdown */
+    
+    /* Profile Dropdown */
     .profile-container {
       position: absolute;
       top: 20px;
@@ -183,13 +203,31 @@
       z-index: 200;
     }
     .profile-button {
-      width: 40px;
-      height: 40px;
-      background: #00d4ff;
+      width: 42px;
+      height: 42px;
+      background: black;
       border-radius: 50%;
-      border: none;
+      border: 2px solid #00d4ff;
       cursor: pointer;
-      box-shadow: 0 0 10px rgba(0,212,255,0.5);
+      box-shadow: 0 0 10px rgba(0,212,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: box-shadow 0.3s ease;
+      overflow: hidden;
+    }
+    .profile-button img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: none;
+    }
+    .profile-button i {
+      color: #00d4ff;
+      font-size: 18px;
+    }
+    .profile-button:hover {
+      box-shadow: 0 0 20px rgba(0,212,255,0.8);
     }
     .dropdown-menu {
       display: none;
@@ -214,14 +252,39 @@
     .dropdown-menu a:hover {
       background: #003d66;
     }
+    
+    /* Animations */
+    @keyframes glow { 
+      from { text-shadow: 0 0 5px #00d4ff; } 
+      to { text-shadow: 0 0 15px #00ffff; } 
+    }
+    @keyframes fadeIn { 
+      from { opacity:0; transform:translateY(30px);} 
+      to {opacity:1;transform:translateY(0);} 
+    }
+    @keyframes slideIn { 
+      from { opacity:0; transform:translateY(50px);} 
+      to {opacity:1; transform:translateY(0);} 
+    }
+    @keyframes pulseGlow { 
+      0% { box-shadow:0 0 20px rgba(0,213,255,0.1);} 
+      100% { box-shadow:0 0 30px rgba(0,213,255,0.3);} 
+    }
+    @keyframes scrollTicker {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-100%); }
+    }
   </style>
 </head>
-<body>
+<body oncontextmenu="return false">
   <div id="particles-js"></div>
 
   <!-- Profile Circle & Dropdown -->
   <div class="profile-container">
-    <button class="profile-button" id="profileButton"></button>
+    <button class="profile-button" id="profileButton">
+      <img id="userAvatar" src="" alt="Profile">
+      <i class="fas fa-user" id="defaultIcon"></i>
+    </button>
     <div class="dropdown-menu" id="dropdownMenu">
       <a href="#">Search for Players</a>
       <a href="#">Settings</a>
@@ -306,6 +369,7 @@
   </footer>
 
   <script>
+    // Particles.js Configuration
     particlesJS("particles-js", {
       particles: {
         number: { value: 60 },
@@ -320,6 +384,7 @@
       }
     });
 
+    // Featured Members Rotation
     const members = [
       { name: "[$!z] Death", desc: "Led last week's raid with 75% success." },
       { name: "[$!z] Ghost", desc: "MVP of Clan War #3." },
@@ -333,302 +398,7 @@
       index = (index + 1) % members.length;
     }, 5000);
 
-    const profileBtn = document.getElementById("profileButton");
-    const dropdown = document.getElementById("dropdownMenu");
-    const logoutBtn = document.getElementById("logoutBtn");
-
-    profileBtn.addEventListener("click", () => {
-      if (localStorage.getItem("loggedIn") !== "true") {
-        window.location.href = "reciever.html";
-      } else {
-        dropdown.style.display = dropdown.style.display === "flex" ? "none" : "flex";
-      }
-    });
-
-    logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("loggedIn");
-      dropdown.style.display = "none";
-      alert("Logged out.");
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!document.querySelector(".profile-container").contains(e.target)) {
-        dropdown.style.display = "none";
-      }
-    });
-
-    if (localStorage.getItem("visited")) {
-      console.log("Welcome back, Operative.");
-    } else {
-      alert("First time? Welcome to The $iz Nexus.");
-      localStorage.setItem("visited", true);
-    }
-  </script>
-</body>
-</html>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TheSizNexus</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      appId: "YOUR_APP_ID"
-    };
-    firebase.initializeApp(firebaseConfig);
-  </script>
-
-  <!-- SEO & Social Sharing -->
-  <meta name="description" content="The official $iz Clan site – join the Multi-Dimensional elite, see ranks, rules, and connect on Discord.">
-  <meta property="og:title" content="TheSizNexus">
-  <meta property="og:description" content="Join the Multi-Dimensional clan. Rise through the ranks.">
-  <meta property="og:image" content="https://yourdomain.com/banner.jpg">
-
-  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-
-  <style>
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(135deg, #0d0d0d, #001f3f);
-      color: #00d4ff;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    #particles-js {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-    }
-    nav {
-      background: #001930;
-      padding: 1rem;
-      text-align: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    nav a {
-      margin: 0 1rem;
-      color: #00d4ff;
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 1.1rem;
-    }
-    nav a:hover { text-decoration: underline; }
-
-    .hero {
-      flex-grow: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      flex-direction: column;
-      padding: 40px 20px 0;
-    }
-    .hero h1 {
-      font-weight: 700;
-      font-size: 4rem;
-      text-transform: uppercase;
-      letter-spacing: 0.2em;
-      margin: 0;
-      animation: glow 2s ease-in-out infinite alternate;
-      text-shadow: 0 0 5px #00d4ff, 0 0 15px #00d4ff, 0 0 30px #00d4ff, 0 0 40px #00d4ff;
-    }
-    .hero p {
-      font-weight: 500;
-      font-size: 1.5rem;
-      max-width: 600px;
-      margin-top: 1rem;
-      color: #66f0ffcc;
-      letter-spacing: 0.05em;
-      animation: fadeIn 3s ease-in-out;
-    }
-
-    .ticker-wrapper {
-      background: #00152b;
-      color: #00d4ff;
-      overflow: hidden;
-      white-space: nowrap;
-      width: 100%;
-      padding: 10px 0;
-      font-weight: bold;
-      position: relative;
-    }
-    .ticker-content {
-      display: inline-block;
-      padding-left: 100%;
-      animation: scrollTicker 15s linear infinite;
-    }
-    @keyframes scrollTicker {
-      0% { transform: translateX(0%); }
-      100% { transform: translateX(-100%); }
-    }
-
-    .info-section {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-      padding: 40px 20px;
-      max-width: 1000px;
-      margin: 0 auto;
-      animation: slideIn 1.5s ease;
-    }
-    .bubble {
-      background-color: #020b17;
-      border-radius: 12px;
-      padding: 30px;
-      box-shadow: 0 0 20px rgba(0, 213, 255, 0.1);
-      color: #d0faff;
-      transition: 0.3s ease;
-      animation: pulseGlow 4s infinite alternate;
-    }
-    .bubble:hover {
-      box-shadow: 0 0 25px rgba(0, 213, 255, 0.3);
-    }
-    .bubble h2 {
-      font-size: 1.8rem;
-      margin-bottom: 15px;
-      color: #00d4ff;
-    }
-    .bubble ul {
-      list-style-type: disc;
-      padding-left: 1.2rem;
-    }
-    .bubble li { margin-bottom: 10px; line-height: 1.6; }
-    .discord-button {
-      margin-top: 1.5rem;
-      display: inline-block;
-      background: #00c3ff;
-      color: #000;
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-weight: bold;
-      text-decoration: none;
-      box-shadow: 0 0 15px rgba(0, 213, 255, 0.6);
-      transition: 0.2s ease;
-    }
-    .discord-button:hover {
-      background: #00aacc;
-      box-shadow: 0 0 25px rgba(0, 213, 255, 0.8);
-    }
-    .ranks {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .rank {
-      background: #001f3f;
-      padding: 10px 15px;
-      border-radius: 8px;
-      font-weight: bold;
-      color: #00f0ff;
-      box-shadow: 0 0 10px rgba(0,213,255,0.3);
-    }
-    footer {
-      background-color: #00152b;
-      padding: 20px 10px;
-      text-align: center;
-      font-size: 1rem;
-      color: #0099ffcc;
-      letter-spacing: 0.05em;
-      border-top: 1px solid #003366;
-      user-select: none;
-    }
-    footer .contact { margin-bottom: 8px; font-weight: 600; color: #00d4ff; }
-    footer .contact a { color: #00d4ff; text-decoration: underline; }
-
-    @keyframes glow { from { text-shadow: 0 0 5px #00d4ff; } to { text-shadow: 0 0 15px #00ffff; } }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(30px);} to {opacity:1;transform:translateY(0);} }
-    @keyframes slideIn { from { opacity:0; transform:translateY(50px);} to {opacity:1; transform:translateY(0);} }
-    @keyframes pulseGlow { 0% { box-shadow:0 0 20px rgba(0,213,255,0.1);} 100% { box-shadow:0 0 30px rgba(0,213,255,0.3);} }
-
-    .profile-container {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      z-index: 200;
-    }
-    .profile-button {
-      width: 42px;
-      height: 42px;
-      background: black;
-      border-radius: 50%;
-      border: 2px solid #00d4ff;
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(0,212,255,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: box-shadow 0.3s ease;
-      overflow: hidden;
-    }
-    .profile-button img {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      display: none;
-    }
-    .profile-button i {
-      color: #00d4ff;
-      font-size: 18px;
-    }
-    .profile-button:hover {
-      box-shadow: 0 0 20px rgba(0,212,255,0.8);
-    }
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: 50px;
-      right: 0;
-      flex-direction: column;
-      background: #001f3f;
-      border-radius: 8px;
-      box-shadow: 0 0 15px rgba(0,213,255,0.3);
-      overflow: hidden;
-      z-index: 999;
-    }
-    .dropdown-menu a {
-      padding: 12px 16px;
-      color: #00d4ff;
-      text-decoration: none;
-      font-weight: bold;
-      background: #001f3f;
-      transition: background 0.2s;
-    }
-    .dropdown-menu a:hover {
-      background: #003d66;
-    }
-  </style>
-</head>
-<body>
-  <div id="particles-js"></div>
-
-  <!-- Profile Circle & Dropdown -->
-  <div class="profile-container">
-    <button class="profile-button" id="profileButton">
-      <img id="userAvatar" src="" alt="Profile">
-      <i class="fas fa-user" id="defaultIcon"></i>
-    </button>
-    <div class="dropdown-menu" id="dropdownMenu">
-      <a href="#">Search for Players</a>
-      <a href="#">Settings</a>
-      <a href="#" id="logoutBtn">Log Out</a>
-    </div>
-  </div>
-
-  <script>
+    // Profile Dropdown Functionality
     const profileBtn = document.getElementById('profileButton');
     const dropdown = document.getElementById('dropdownMenu');
 
@@ -642,6 +412,7 @@
       }
     });
 
+    // Firebase Auth State Listener
     firebase.auth().onAuthStateChanged(user => {
       const avatar = document.getElementById('userAvatar');
       const defaultIcon = document.getElementById('defaultIcon');
@@ -661,80 +432,31 @@
             window.location.reload();
           });
         });
-
       } else {
         avatar.style.display = 'none';
         defaultIcon.style.display = 'block';
       }
     });
+
+    // First Visit Check
+    if (localStorage.getItem("visited")) {
+      console.log("Welcome back, Operative.");
+    } else {
+      alert("First time? Welcome to The $iz Nexus.");
+      localStorage.setItem("visited", true);
+    }
+
+    // Disable Developer Tools
+    document.onkeydown = function(e) {
+      if (
+        e.keyCode === 123 || // F12
+        (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) || // Ctrl+Shift+I/J/C
+        (e.ctrlKey && e.key.toUpperCase() === 'U') // Ctrl+U
+      ) {
+        e.preventDefault();
+        return false;
+      }
+    };
   </script>
 </body>
-<body oncontextmenu="return false">
-<script>
-  document.onkeydown = function(e) {
-    if (
-      e.keyCode === 123 || // F12
-      (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) || // Ctrl+Shift+I/J/C
-      (e.ctrlKey && e.key.toUpperCase() === 'U') // Ctrl+U
-    ) {
-      e.preventDefault();
-      return false;
-    }
-  };
-</script>
 </html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Navigation Bar</title>
-    <!-- Include the external CSS file -->
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body class="desktop-view"> <!-- Default to desktop view -->
-
-    <!-- Navigation Menu -->
-    <nav class="navbar">
-        <!-- Hamburger menu button (visible only on mobile) -->
-        <button class="hamburger" onclick="toggleMenu()">☰</button>
-        
-        <!-- Menu Items for Desktop -->
-        <div class="menu">
-            <a href="#">Home</a>
-            <a href="#">About</a>
-            <a href="#">Services</a>
-            <a href="#">Contact</a>
-        </div>
-
-        <!-- Mobile Menu (hidden by default) -->
-        <div class="mobile-menu" id="mobileMenu">
-            <a href="#">Home</a>
-            <a href="#">About</a>
-            <a href="#">Services</a>
-            <a href="#">Contact</a>
-        </div>
-    </nav>
-
-    <!-- JavaScript file (to handle the menu toggle and device detection) -->
-    <script src="script.js"></script>
-</body>
-</html>
-<!-- Profile Button (Circle + Dropdown) -->
-<div class="profile-container">
-    <button class="profile-button" id="profileButton">
-        <img id="userAvatar" src="https://via.placeholder.com/50" alt="Profile">
-        <i class="fas fa-user"></i>
-    </button>
-    <div class="dropdown-menu" id="dropdownMenu">
-        <a href="#">Search for Players</a>
-        <a href="#">Settings</a>
-        <a href="#" id="logoutBtn">Log Out</a>
-    </div>
-</div>
-
-<!-- Featured Members Section -->
-<section class="featured-member">
-    <h3 id="featured-name">Loading...</h3>
-    <p id="featured-desc">Loading...</p>
-</section>
