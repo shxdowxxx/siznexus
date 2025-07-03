@@ -2,16 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Intel Feed | TheSizNexus</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-  <!-- LeafletJS for interactive map -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    /* ===== REUSE MAIN PAGE STYLES ===== */
     :root {
       --color-primary: #00d4ff;
       --color-secondary: #00aacc;
@@ -31,6 +29,11 @@
       flex-direction: column;
       min-height: 100vh;
       overflow-x: hidden;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
     
     #particles-js {
@@ -41,7 +44,6 @@
       opacity: 0.3;
     }
 
-    /* ===== NAVIGATION (MATCHING MAIN PAGE) ===== */
     nav {
       background: var(--color-darker);
       padding: 1rem;
@@ -99,7 +101,6 @@
       width: 100%;
     }
 
-    /* ===== PROFILE BUTTON (FROM MAIN PAGE) ===== */
     .profile-container {
       position: absolute;
       right: 20px;
@@ -167,7 +168,6 @@
       font-size: 0.9rem;
     }
     
-    /* ===== INTEL-SPECIFIC STYLES ===== */
     .intel-container {
       max-width: 1200px;
       margin: 2rem auto;
@@ -194,7 +194,6 @@
       font-size: 1.2rem;
     }
     
-    /* ===== MAP CONTAINER ===== */
     .map-container {
       height: 400px;
       margin-bottom: 2rem;
@@ -211,7 +210,6 @@
       background: #001a33;
     }
     
-    /* Darker map tiles for abandoned aesthetic */
     .leaflet-tile {
       filter: 
         hue-rotate(120deg) 
@@ -257,7 +255,6 @@
       font-family: 'Orbitron', sans-serif !important;
     }
     
-    /* ===== INTEL FILTERS ===== */
     .intel-filters {
       display: flex;
       gap: 10px;
@@ -283,7 +280,6 @@
       box-shadow: 0 0 15px var(--color-primary);
     }
     
-    /* ===== INTEL CARDS ===== */
     .intel-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -396,7 +392,6 @@
       border: 1px solid var(--color-primary);
     }
     
-    /* ===== INTEL DETAIL MODAL ===== */
     .intel-modal {
       display: none;
       position: fixed;
@@ -436,7 +431,6 @@
       color: var(--color-text-light);
     }
     
-    /* ===== INTEL SEARCH ===== */
     .intel-search {
       margin: 2rem auto;
       max-width: 600px;
@@ -470,7 +464,6 @@
       cursor: pointer;
     }
     
-    /* ===== FOOTER (MATCHING MAIN PAGE) ===== */
     footer {
       background-color: rgba(0, 21, 43, 0.8);
       padding: 20px 10px;
@@ -501,7 +494,6 @@
       text-decoration: none;
     }
     
-    /* ===== PROGRESS TRACKER (FROM MAIN PAGE) ===== */
     .progress-tracker {
       position: fixed;
       bottom: 20px;
@@ -531,7 +523,6 @@
       overflow: hidden;
     }
     
-    /* ===== THEME SELECTOR (FROM MAIN PAGE) ===== */
     .theme-selector {
       position: fixed;
       bottom: 20px;
@@ -552,12 +543,10 @@
       backdrop-filter: blur(5px);
     }
     
-    /* ===== ANIMATIONS (FROM MAIN PAGE) ===== */
     @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
     @keyframes slideIn { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
     @keyframes glow { from { text-shadow: 0 0 5px var(--color-primary); } to { text-shadow: 0 0 15px var(--color-primary), 0 0 30px var(--color-primary); } }
     
-    /* ===== RESPONSIVE ADJUSTMENTS ===== */
     @media (max-width: 768px) {
       .intel-grid {
         grid-template-columns: 1fr;
@@ -587,12 +576,70 @@
         right: 10px;
       }
     }
+
+    @media (max-width: 480px) {
+      .nav-links {
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+      }
+
+      nav a {
+        padding: 0.5rem;
+        font-size: 1rem;
+      }
+
+      .intel-card {
+        padding: 15px;
+      }
+
+      .intel-card h3 {
+        font-size: 1.1rem;
+      }
+
+      .intel-content {
+        font-size: 0.9rem;
+      }
+
+      .map-controls button {
+        padding: 8px 12px;
+        font-size: 1rem;
+      }
+
+      .modal-content {
+        margin: 1rem;
+        padding: 1.5rem;
+      }
+
+      .progress-tracker {
+        display: none;
+      }
+
+      .theme-selector {
+        flex-direction: column;
+        bottom: 60px;
+      }
+    }
+
+    @media (hover: none) {
+      .intel-card:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      .intel-card:hover::before {
+        transform: scaleX(0);
+      }
+
+      button, .filter-btn, .intel-card {
+        -webkit-tap-highlight-color: transparent;
+      }
+    }
   </style>
 </head>
-<body oncontextmenu="return false">
+<body>
   <div id="particles-js"></div>
 
-  <!-- Navigation matching main page -->
   <nav>
     <div class="nav-content">
       <div class="nav-links">
@@ -622,7 +669,6 @@
       <p>Classified mission briefings from Hashima Exclusion Zone</p>
     </div>
     
-    <!-- Interactive Map Section -->
     <div class="map-container">
       <div id="intelMap"></div>
       <div class="map-controls">
@@ -646,7 +692,6 @@
     </div>
     
     <div class="intel-grid">
-      <!-- Intel Card 1 - Critical -->
       <div class="intel-card critical" data-category="critical" data-location="[32.6285, 129.7378]">
         <div class="intel-meta">
           <span><i class="fas fa-clock"></i> 2 hours ago</span>
@@ -664,7 +709,6 @@
         </div>
       </div>
       
-      <!-- Intel Card 2 - Alert -->
       <div class="intel-card alert" data-category="alert" data-location="[32.6272, 129.7391]">
         <div class="intel-meta">
           <span><i class="fas fa-clock"></i> 5 hours ago</span>
@@ -681,7 +725,6 @@
         </div>
       </div>
       
-      <!-- Intel Card 3 - Info -->
       <div class="intel-card info" data-category="info" data-location="[32.6268, 129.7365]">
         <div class="intel-meta">
           <span><i class="fas fa-clock"></i> 1 day ago</span>
@@ -698,7 +741,6 @@
         </div>
       </div>
       
-      <!-- Intel Card 4 - Mission -->
       <div class="intel-card mission" data-category="mission" data-location="[32.6259, 129.7402]">
         <div class="intel-meta">
           <span><i class="fas fa-clock"></i> 2 days ago</span>
@@ -715,7 +757,6 @@
         </div>
       </div>
       
-      <!-- Intel Card 5 - Critical -->
       <div class="intel-card critical" data-category="critical" data-location="[32.6293, 129.7358]">
         <div class="intel-meta">
           <span><i class="fas fa-clock"></i> 3 days ago</span>
@@ -732,7 +773,6 @@
         </div>
       </div>
       
-      <!-- Intel Card 6 - Info -->
       <div class="intel-card info" data-category="info" data-location="[32.6247, 129.7386]">
         <div class="intel-meta">
           <span><i class="fas fa-clock"></i> 4 days ago</span>
@@ -751,7 +791,6 @@
     </div>
   </div>
 
-  <!-- Intel Detail Modal -->
   <div class="intel-modal" id="intelModal">
     <div class="modal-content">
       <span class="close-modal">&times;</span>
@@ -764,7 +803,6 @@
         Detailed content will appear here...
       </div>
       <div class="intel-tags" id="modal-tags">
-        <!-- Tags will be inserted here -->
       </div>
       <div class="intel-comments">
         <h3>Agent Reports</h3>
@@ -782,7 +820,6 @@
     </div>
   </div>
 
-  <!-- Footer matching main page -->
   <footer>
     <div class="contact">
       Join our Discord:
@@ -793,195 +830,65 @@
     <div>© 2023-2025 $iz | All rights reserved.</div>
   </footer>
 
-  <!-- Progress Tracker from main page -->
   <div class="progress-tracker">
     Expedition Progress: <span id="clan-level">Level 1</span>
     <div class="progress-bar" id="clan-progress"></div>
   </div>
 
-  <!-- Theme Selector from main page -->
   <div class="theme-selector">
     <button onclick="setTheme('cyberpunk')">Cyberpunk</button>
     <button onclick="setTheme('matrix')">Matrix</button>
   </div>
 
   <script>
-    // Wait for DOM to be fully loaded
+    // Simplified initialization
     document.addEventListener('DOMContentLoaded', function() {
-      // ===== INITIALIZE PARTICLES.JS =====
-      particlesJS("particles-js", {
-        particles: {
-          number: { value: 80, density: { enable: true, value_area: 800 } },
-          color: { value: "#00d4ff" },
-          shape: { type: "circle" },
-          opacity: { value: 0.3, random: true },
-          size: { value: 1, random: true },
-          move: { enable: true, speed: 0.5, direction: "none", random: true, straight: false, out_mode: "bounce" }
-        },
-        interactivity: {
-          events: { onhover: { enable: true, mode: "repulse", distance: 100 } }
-        }
-      });
+      // Initialize particles.js with basic config
+      if (typeof particlesJS !== 'undefined') {
+        particlesJS("particles-js", {
+          particles: {
+            number: { value: 80, density: { enable: true, value_area: 800 } },
+            color: { value: "#00d4ff" },
+            shape: { type: "circle" },
+            opacity: { value: 0.3, random: true },
+            size: { value: 3, random: true },
+            move: { enable: true, speed: 0.5 }
+          }
+        });
+      }
 
-      // ===== PROFILE DROPDOWN FUNCTIONALITY =====
+      // Profile dropdown functionality
       const profileButton = document.getElementById('profileButton');
       const dropdownMenu = document.getElementById('dropdownMenu');
 
-      profileButton.addEventListener('click', function(e) {
-        e.stopPropagation();
-        dropdownMenu.style.display = dropdownMenu.style.display === 'flex' ? 'none' : 'flex';
-      });
+      if (profileButton && dropdownMenu) {
+        profileButton.addEventListener('click', function(e) {
+          e.stopPropagation();
+          dropdownMenu.style.display = dropdownMenu.style.display === 'flex' ? 'none' : 'flex';
+        });
 
-      // Close dropdown when clicking elsewhere
-      document.addEventListener('click', function() {
-        dropdownMenu.style.display = 'none';
-      });
+        document.addEventListener('click', function() {
+          dropdownMenu.style.display = 'none';
+        });
+      }
 
-      // ===== INITIALIZE INTERACTIVE MAP =====
-      try {
-        const map = L.map('intelMap', {
-          preferCanvas: true,
-          zoomControl: false
-        }).setView([32.6278, 129.7383], 16);
-
+      // Initialize map if container exists
+      const mapContainer = document.getElementById('intelMap');
+      if (mapContainer && typeof L !== 'undefined') {
+        const map = L.map('intelMap').setView([32.6278, 129.7383], 16);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-          maxZoom: 18,
-          minZoom: 12
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
-
-        L.control.zoom({
-          position: 'topright'
-        }).addTo(map);
-
-        // Custom hazard icons
-        const biohazardIcon = L.divIcon({
-          html: '<i class="fas fa-biohazard" style="color: #ff0000; font-size: 24px;"></i>',
-          className: 'custom-icon',
-          iconSize: [24, 24]
-        });
-        
-        const structureIcon = L.divIcon({
-          html: '<i class="fas fa-building-crack" style="color: #ffcc00; font-size: 24px;"></i>',
-          className: 'custom-icon',
-          iconSize: [24, 24]
-        });
-        
-        const artifactIcon = L.divIcon({
-          html: '<i class="fas fa-cube" style="color: #00d4ff; font-size: 24px;"></i>',
-          className: 'custom-icon',
-          iconSize: [24, 24]
-        });
-        
-        const scavengerIcon = L.divIcon({
-          html: '<i class="fas fa-skull" style="color: #aa00ff; font-size: 24px;"></i>',
-          className: 'custom-icon',
-          iconSize: [24, 24]
-        });
 
         // Add markers for each intel card
         document.querySelectorAll('.intel-card').forEach(card => {
           const location = JSON.parse(card.dataset.location);
-          let icon;
-          
-          if (card.classList.contains('critical')) icon = biohazardIcon;
-          else if (card.classList.contains('alert')) icon = structureIcon;
-          else if (card.classList.contains('mission')) icon = scavengerIcon;
-          else icon = artifactIcon;
-          
-          const marker = L.marker(location, { icon }).addTo(map);
-          
-          // Bind popup with card title
-          marker.bindPopup(`<strong>${card.querySelector('h3').textContent}</strong><br>${card.querySelector('.intel-content').textContent.substring(0, 100)}...`);
-          
-          // Click event to highlight card when marker is clicked
-          marker.on('click', function() {
-            document.querySelectorAll('.intel-card').forEach(c => {
-              c.style.boxShadow = 'none';
-            });
-            card.style.boxShadow = '0 0 20px rgba(0,213,255,0.8)';
-            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          });
+          const marker = L.marker(location).addTo(map);
+          marker.bindPopup(`<strong>${card.querySelector('h3').textContent}</strong>`);
         });
-        
-        // ===== MAP EDITING TOOLS =====
-        let drawnItems = new L.FeatureGroup();
-        map.addLayer(drawnItems);
-        
-        document.getElementById('addMarkerBtn').addEventListener('click', function() {
-          alert("Mark hazard zones by clicking on the map. Use the skull icon for biohazards.");
-          
-          map.on('click', function(e) {
-            const marker = L.marker(e.latlng, { 
-              icon: L.divIcon({
-                html: '<i class="fas fa-radiation" style="color: #ff0000; font-size: 24px;"></i>',
-                className: 'custom-icon',
-                iconSize: [24, 24]
-              }),
-              draggable: true
-            }).addTo(map);
-            
-            drawnItems.addLayer(marker);
-            marker.bindPopup(`
-              <div style="color: black; font-family: Arial;">
-                <h4>New Hazard Marker</h4>
-                <select style="width:100%;margin:5px 0;">
-                  <option>Biohazard</option>
-                  <option>Structural</option>
-                  <option>Scavengers</option>
-                </select>
-                <textarea placeholder="Enter hazard details..." rows="3" style="width: 100%;"></textarea>
-                <button onclick="saveIntelMarker(this)">Save</button>
-              </div>
-            `).openPopup();
-          });
-        });
-        
-        document.getElementById('drawPolygonBtn').addEventListener('click', function() {
-          alert("Mark restricted areas by clicking points on the map. Double-click to finish.");
-          
-          let polygonPoints = [];
-          let polygon;
-          
-          function onMapClick(e) {
-            polygonPoints.push(e.latlng);
-            if (polygon) map.removeLayer(polygon);
-            if (polygonPoints.length > 1) {
-              polygon = L.polygon(polygonPoints, {
-                color: '#ff0000',
-                fillOpacity: 0.3,
-                dashArray: '10,5'
-              }).addTo(map);
-            }
-          }
-          
-          function onDoubleClick() {
-            if (polygonPoints.length > 2) {
-              drawnItems.addLayer(polygon);
-              polygon.bindPopup("RESTRICTED ZONE").openPopup();
-            }
-            map.off('click', onMapClick);
-            map.off('dblclick', onDoubleClick);
-            polygonPoints = [];
-          }
-          
-          map.on('click', onMapClick);
-          map.on('dblclick', onDoubleClick);
-        });
-        
-        document.getElementById('clearMapBtn').addEventListener('click', function() {
-          if (confirm("Clear all custom hazard markings?")) {
-            drawnItems.clearLayers();
-          }
-        });
-      } catch (e) {
-        console.error("Map initialization failed:", e);
-        document.getElementById('intelMap').innerHTML = 
-          '<div style="color:red;padding:20px;text-align:center;">' +
-          'Map failed to load. Please check your internet connection.</div>';
       }
 
-      // ===== INTEL FILTERING SYSTEM =====
+      // Intel filtering system
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
           document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -989,104 +896,52 @@
           
           const filter = this.dataset.filter;
           document.querySelectorAll('.intel-card').forEach(card => {
-            if (filter === 'all' || card.classList.contains(filter)) {
-              card.style.display = 'block';
-              card.style.animation = 'slideIn 0.5s ease';
-            } else {
-              card.style.display = 'none';
-            }
+            card.style.display = (filter === 'all' || card.classList.contains(filter)) ? 'block' : 'none';
           });
         });
       });
 
-      // ===== INTEL SEARCH FUNCTIONALITY =====
-      const searchInput = document.querySelector('.intel-search input');
-      const searchButton = document.querySelector('.intel-search button');
-
-      searchButton.addEventListener('click', performSearch);
-      searchInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') performSearch();
-      });
-
-      function performSearch() {
-        const searchTerm = searchInput.value.toLowerCase();
-        if (searchTerm.trim() === '') return;
-        
-        document.querySelectorAll('.intel-card').forEach(card => {
-          const title = card.querySelector('h3').textContent.toLowerCase();
-          const content = card.querySelector('.intel-content').textContent.toLowerCase();
-          const tags = Array.from(card.querySelectorAll('.intel-tag')).map(tag => tag.textContent.toLowerCase());
-          
-          if (title.includes(searchTerm) || content.includes(searchTerm) || tags.some(tag => tag.includes(searchTerm))) {
-            card.style.display = 'block';
-            card.style.animation = 'slideIn 0.5s ease';
-            card.style.boxShadow = '0 0 20px rgba(0,213,255,0.8)';
-            setTimeout(() => { card.style.boxShadow = ''; }, 2000);
-          } else {
-            card.style.display = 'none';
-          }
-        });
-      }
-
-      // ===== INTEL MODAL FUNCTIONALITY =====
+      // Modal functionality
       const modal = document.getElementById('intelModal');
       const closeModal = document.querySelector('.close-modal');
       const intelCards = document.querySelectorAll('.intel-card');
 
-      intelCards.forEach(card => {
-        card.addEventListener('click', function() {
-          const title = this.querySelector('h3').textContent;
-          const content = this.querySelector('.intel-content').textContent;
-          const time = this.querySelector('.intel-meta span:first-child').textContent;
-          const priority = this.querySelector('.intel-priority').textContent;
-          const priorityClass = this.querySelector('.intel-priority').className;
-          const tags = Array.from(this.querySelectorAll('.intel-tag')).map(tag => tag.textContent);
-          
-          document.getElementById('modal-title').textContent = title;
-          document.getElementById('modal-content').textContent = content;
-          document.getElementById('modal-time').textContent = time;
-          
-          const modalPriority = document.querySelector('.modal-content .intel-priority');
-          modalPriority.textContent = priority;
-          modalPriority.className = priorityClass;
-          
-          const modalTags = document.getElementById('modal-tags');
-          modalTags.innerHTML = '';
-          tags.forEach(tag => {
-            const tagElement = document.createElement('span');
-            tagElement.className = 'intel-tag';
-            tagElement.textContent = tag;
-            modalTags.appendChild(tagElement);
+      if (modal && closeModal) {
+        intelCards.forEach(card => {
+          card.addEventListener('click', function() {
+            document.getElementById('modal-title').textContent = this.querySelector('h3').textContent;
+            document.getElementById('modal-content').textContent = this.querySelector('.intel-content').textContent;
+            modal.style.display = 'block';
           });
-          
-          modal.style.display = 'block';
         });
-      });
 
-      closeModal.addEventListener('click', function() {
-        modal.style.display = 'none';
-      });
-
-      window.addEventListener('click', function(event) {
-        if (event.target === modal) {
+        closeModal.addEventListener('click', function() {
           modal.style.display = 'none';
-        }
-      });
+        });
 
-      // ===== PROGRESS TRACKER ANIMATION =====
+        window.addEventListener('click', function(event) {
+          if (event.target === modal) {
+            modal.style.display = 'none';
+          }
+        });
+      }
+
+      // Progress tracker animation
       const progressBar = document.getElementById('clan-progress');
-      let progress = 0;
-      const progressInterval = setInterval(() => {
-        progress += Math.random() * 5;
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(progressInterval);
-        }
-        progressBar.style.width = `${progress}%`;
-      }, 500);
+      if (progressBar) {
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+          progress += Math.random() * 5;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(progressInterval);
+          }
+          progressBar.style.width = `${progress}%`;
+        }, 500);
+      }
 
-      // ===== THEME SELECTOR FUNCTIONALITY =====
-      function setTheme(theme) {
+      // Theme selector
+      window.setTheme = function(theme) {
         const root = document.documentElement;
         if (theme === 'cyberpunk') {
           root.style.setProperty('--color-primary', '#00d4ff');
@@ -1098,6 +953,20 @@
           root.style.setProperty('--color-text-light', '#00ff41');
         }
       }
+    });
+
+    // Prevent zooming on mobile
+    document.addEventListener('gesturestart', function(e) {
+      e.preventDefault();
+    });
+
+    document.addEventListener('touchmove', function(e) {
+      if (e.scale !== 1) { e.preventDefault(); }
+    }, { passive: false });
+
+    // Basic right-click prevention
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
     });
   </script>
 </body>
