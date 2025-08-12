@@ -447,6 +447,29 @@
             margin-top: 0;
             color: var(--color-primary);
         }
+        /* Sci-Fi Scrollbar Styles */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 31, 63, 0.5);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-primary);
+            border-radius: 5px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 5px rgba(0, 212, 255, 0.5);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-secondary);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+        }
+        .commission-modal-content {
+            scrollbar-width: thin;
+            scrollbar-color: var(--color-primary) rgba(0, 31, 63, 0.5);
+        }
         @media (max-width: 768px) {
             nav {
                 padding: .5rem
