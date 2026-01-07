@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TheSizNexus - Sign In / Sign Up</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
   <style>
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(135deg, #0d0d0d, #001f3f);
-      color: #00d4ff;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #050b1e, #0b1430);
+      color: #d7defc;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
@@ -25,7 +25,7 @@
       z-index: -1;
     }
     header, footer {
-      background-color: #00172b;
+      background-color: #0a1434;
       text-align: center;
       padding: 10px 20px;
       font-size: 1rem;
@@ -38,7 +38,7 @@
       font-size: 1.2rem;
     }
     nav a {
-      color: #00d4ff;
+      color: #4b6bff;
       text-decoration: none;
     }
     nav a:hover {
@@ -56,21 +56,21 @@
     h1 {
       font-weight: 700;
       font-size: 3rem;
-      text-transform: uppercase;
-      letter-spacing: 0.2em;
+      text-transform: none;
+      letter-spacing: 0.08em;
       margin: 0 0 10px;
-      animation: glow 2s ease-in-out infinite alternate;
+      animation: none;
     }
     .subtitle {
       font-size: 1.2rem;
       margin-bottom: 20px;
-      color: #66f0ffcc;
+      color: #a9b8ffcc;
     }
     form {
-      background: #020b17;
+      background: #0c142f;
       padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0, 213, 255, 0.1);
+      box-shadow: 0 0 20px rgba(75, 107, 255, 0.1);
       width: 100%;
       max-width: 400px;
     }
@@ -85,7 +85,7 @@
     form button {
       width: 100%;
       padding: 12px;
-      background-color: #00d4ff;
+      background-color: #4b6bff;
       color: #000;
       font-weight: bold;
       border: none;
@@ -94,7 +94,7 @@
       transition: 0.3s;
     }
     form button:hover {
-      background-color: #00aacc;
+      background-color: #6f86ff;
     }
     .links {
       margin-top: 20px;
@@ -102,36 +102,36 @@
     .links a {
       display: inline-block;
       margin: 0 10px;
-      color: #00d4ff;
+      color: #4b6bff;
       text-decoration: underline;
       font-weight: 500;
     }
     .discord-button {
       margin-top: 30px;
-      background: #00c3ff;
+      background: #4b6bff;
       color: #000;
       padding: 12px 24px;
       border-radius: 10px;
       font-weight: bold;
       text-decoration: none;
-      box-shadow: 0 0 15px rgba(0, 213, 255, 0.6);
+      box-shadow: 0 0 15px rgba(75, 107, 255, 0.6);
       transition: 0.2s ease;
     }
     .discord-button:hover {
-      background: #00aacc;
-      box-shadow: 0 0 25px rgba(0, 213, 255, 0.8);
+      background: #6f86ff;
+      box-shadow: 0 0 25px rgba(75, 107, 255, 0.8);
     }
     .back-home {
       margin-top: 20px;
       font-size: 0.9rem;
     }
     footer a {
-      color: #00d4ff;
+      color: #4b6bff;
       text-decoration: underline;
     }
     @keyframes glow {
-      from { text-shadow: 0 0 5px #00d4ff, 0 0 15px #00d4ff; }
-      to { text-shadow: 0 0 15px #00ffff, 0 0 40px #00ffff; }
+      from { text-shadow: none; }
+      to { text-shadow: 0 0 15px #7f95ff, 0 0 40px #7f95ff; }
     }
   </style>
 </head>
@@ -140,22 +140,22 @@
 
   <header>
     <nav>
-      <a href="#">Intel Receiver</a>
+      <a href="#">Member Access</a>
       <a href="https://discord.gg/RkRAfHH4C7" target="_blank">Join Discord</a>
       <a href="#">Rights</a>
     </nav>
   </header>
 
   <div class="container">
-    <h1>Intel Receiver</h1>
-    <p class="subtitle">Sign in to become a part of the [$iz] clan, and check out updates, other people, and more stuff coming soon for the clan.</p>
+    <h1>Member Access</h1>
+    <p class="subtitle">Sign in to access member resources, updates, and upcoming releases from TheSizNexus.</p>
 
     <form>
       <input type="text" placeholder="Username" required />
       <input type="email" placeholder="Email" required />
       <input type="password" placeholder="Password" required />
       <button type="submit">Sign Up</button>
-      <button type="submit" style="margin-top:10px; background:#001f3f; color:#00d4ff;">Log In</button>
+      <button type="submit" style="margin-top:10px; background:#0b1430; color:#4b6bff;">Log In</button>
     </form>
 
     <div class="links">
@@ -174,7 +174,7 @@
     particlesJS("particles-js", {
       particles: {
         number: { value: 60 },
-        color: { value: "#00d4ff" },
+        color: { value: "#4b6bff" },
         shape: { type: "circle" },
         opacity: { value: 0.5 },
         size: { value: 2 },
