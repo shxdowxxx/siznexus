@@ -1,176 +1,170 @@
-/**
- * Main application scripts for TheSizNexus
- * @file scripts.js
- * @version 2.0
- */
+const intelItems = [
+  {
+    title: 'Site rework completed',
+    category: 'announcement',
+    date: '2026-03-30',
+    summary: 'Main interface redesigned to a faster, cleaner intel dashboard architecture.'
+  },
+  {
+    title: 'How to join and rank up',
+    category: 'guide',
+    date: '2026-03-29',
+    summary: 'Read onboarding checklist, complete entry steps, then request role verification.'
+  },
+  {
+    title: 'Operation Nightwatch',
+    category: 'operation',
+    date: '2026-03-28',
+    summary: 'Weekly squad event focused on map control, comm discipline, and recovery drills.'
+  },
+  {
+    title: 'Credential safety update',
+    category: 'security',
+    date: '2026-03-27',
+    summary: 'Never share passwords or access keys. Use unique credentials for every platform.'
+  },
+  {
+    title: 'Intel etiquette standards',
+    category: 'guide',
+    date: '2026-03-24',
+    summary: 'Tag sources, keep reports concise, and attach clear mission impact statements.'
+  }
+];
 
-// Constants
-const CONFIG = {
-    MOBILE_BREAKPOINT: 767,
-    OFFICIAL_DOMAIN: "thesiznexus.org",
-    RESIZE_DEBOUNCE_DELAY: 100,
-    UNAUTHORIZED_STYLES: `
-        body { 
-            background-color: #000; 
-            color: #f00; 
-            font-family: monospace; 
-            text-align: center; 
-            padding: 100px; 
-            margin: 0;
-        }
-        a { 
-            color: #0ff; 
-            text-decoration: underline; 
-        }
-    `
+const operations = [
+  { name: 'Comms Relay', status: 'online', details: 'Voice coordination and briefing updates are active.' },
+  { name: 'Loadout Audit', status: 'monitoring', details: 'Template cleanup in progress for shared item kits.' },
+  { name: 'Legacy Index', status: 'offline', details: 'Old records are being migrated to knowledge base cards.' }
+];
+
+const knowledgeBase = [
+  {
+    title: 'Recruit Onboarding',
+    body: 'Entry requirements, behavior standards, and first-week training objectives.'
+  },
+  {
+    title: 'Operations Playbook',
+    body: 'Squad roles, callouts, and recovery loops to increase raid consistency.'
+  },
+  {
+    title: 'Content Contribution Guide',
+    body: 'How to submit guides and updates in a structured, searchable format.'
+  }
+];
+
+const dom = {
+  intelList: document.getElementById('intelList'),
+  opsGrid: document.getElementById('opsGrid'),
+  kbGrid: document.getElementById('kbGrid'),
+  snapshot: document.getElementById('snapshot'),
+  searchInput: document.getElementById('searchInput'),
+  categoryFilter: document.getElementById('categoryFilter'),
+  menuBtn: document.getElementById('menuBtn'),
+  primaryNav: document.getElementById('primaryNav')
 };
 
-// DOM Elements
-const DOM = {
-    mobileMenu: document.getElementById('mobileMenu'),
-    menuButton: document.querySelector('[aria-controls="mobileMenu"]')
-};
+const formatDate = (iso) => new Date(`${iso}T00:00:00Z`).toLocaleDateString(undefined, {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric'
+});
 
-// Utility Functions
-const Utils = {
-    /**
-     * Check if current device is mobile
-     * @returns {boolean}
-     */
-    isMobileDevice: () => window.innerWidth <= CONFIG.MOBILE_BREAKPOINT,
+function renderIntel(items) {
+  dom.intelList.innerHTML = '';
 
-    /**
-     * Debounce function to limit how often a function is called
-     * @param {Function} func - Function to debounce
-     * @param {number} delay - Delay in milliseconds
-     * @returns {Function}
-     */
-    debounce: (func, delay) => {
-        let timeoutId;
-        return (...args) => {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => func.apply(this, args), delay);
-        };
-    },
+  if (!items.length) {
+    dom.intelList.innerHTML = '<p>No intel matches your current filter.</p>';
+    return;
+  }
 
-    /**
-     * Display unauthorized clone warning
-     */
-    showUnauthorizedWarning: () => {
-        document.body.innerHTML = `
-            <style>${CONFIG.UNAUTHORIZED_STYLES}</style>
-            <h1>This site is a clone and is unauthorized.</h1>
-            <p>Visit the official version at <a href="https://${CONFIG.OFFICIAL_DOMAIN}" rel="noopener noreferrer">${CONFIG.OFFICIAL_DOMAIN}</a></p>
-        `;
-        document.title = "Unauthorized Clone";
-    }
-};
+  const cards = items
+    .sort((a, b) => (a.date < b.date ? 1 : -1))
+    .map((item) => `
+      <article class="intel-item">
+        <span class="badge badge--${item.category}">${item.category}</span>
+        <h3>${item.title}</h3>
+        <p>${item.summary}</p>
+        <p class="meta">${formatDate(item.date)}</p>
+      </article>
+    `)
+    .join('');
 
-// View Management
-const ViewManager = {
-    /**
-     * Toggle mobile menu visibility
-     */
-    toggleMenu: () => {
-        try {
-            if (DOM.mobileMenu) {
-                DOM.mobileMenu.classList.toggle('active');
-                
-                if (DOM.menuButton) {
-                    const isExpanded = DOM.mobileMenu.classList.contains('active');
-                    DOM.menuButton.setAttribute('aria-expanded', isExpanded);
-                    
-                    // Update button text for screen readers
-                    const buttonText = isExpanded ? 'Close menu' : 'Open menu';
-                    DOM.menuButton.setAttribute('aria-label', buttonText);
-                }
-            }
-        } catch (error) {
-            console.error('Error toggling menu:', error);
-        }
-    },
+  dom.intelList.innerHTML = cards;
+}
 
-    /**
-     * Handle view changes between mobile and desktop
-     */
-    handleViewChange: () => {
-        try {
-            const isMobile = Utils.isMobileDevice();
-            document.body.classList.toggle('mobile-view', isMobile);
-            document.body.classList.toggle('desktop-view', !isMobile);
+function renderOps() {
+  dom.opsGrid.innerHTML = operations
+    .map((op) => `
+      <article class="ops-card">
+        <h3>${op.name}</h3>
+        <p class="status status--${op.status}">● ${op.status.toUpperCase()}</p>
+        <p>${op.details}</p>
+      </article>
+    `)
+    .join('');
+}
 
-            // Ensure mobile menu is closed when switching to desktop
-            if (!isMobile && DOM.mobileMenu) {
-                DOM.mobileMenu.classList.remove('active');
-                if (DOM.menuButton) {
-                    DOM.menuButton.setAttribute('aria-expanded', 'false');
-                }
-            }
-        } catch (error) {
-            console.error('Error handling view change:', error);
-        }
-    }
-};
+function renderKnowledgeBase() {
+  dom.kbGrid.innerHTML = knowledgeBase
+    .map((entry) => `
+      <article class="kb-card">
+        <h3>${entry.title}</h3>
+        <p>${entry.body}</p>
+      </article>
+    `)
+    .join('');
+}
 
-// Security Check
-const Security = {
-    /**
-     * Verify if running on official domain
-     * @returns {boolean}
-     */
-    isOfficialDomain: () => {
-        try {
-            return window.location.hostname === CONFIG.OFFICIAL_DOMAIN || 
-                   window.location.hostname.endsWith('.' + CONFIG.OFFICIAL_DOMAIN);
-        } catch (error) {
-            console.error('Domain verification failed:', error);
-            return false;
-        }
-    }
-};
+function renderSnapshot() {
+  const totalIntel = intelItems.length;
+  const openOps = operations.filter((item) => item.status !== 'offline').length;
+  const guides = intelItems.filter((item) => item.category === 'guide').length;
 
-// Main Application Initialization
-const App = {
-    init: () => {
-        try {
-            // Security check
-            if (!Security.isOfficialDomain()) {
-                Utils.showUnauthorizedWarning();
-                return;
-            }
+  dom.snapshot.innerHTML = `
+    <li>Intel entries: <strong>${totalIntel}</strong></li>
+    <li>Active operations: <strong>${openOps}</strong></li>
+    <li>Guide records: <strong>${guides}</strong></li>
+  `;
+}
 
-            // Initial setup
-            ViewManager.handleViewChange();
+function applyFilters() {
+  const search = dom.searchInput.value.trim().toLowerCase();
+  const category = dom.categoryFilter.value;
 
-            // Event listeners
-            window.addEventListener('resize', 
-                Utils.debounce(ViewManager.handleViewChange, CONFIG.RESIZE_DEBOUNCE_DELAY)
-            );
+  const filtered = intelItems.filter((item) => {
+    const matchesCategory = category === 'all' || item.category === category;
+    const haystack = `${item.title} ${item.summary}`.toLowerCase();
+    const matchesSearch = search.length === 0 || haystack.includes(search);
+    return matchesCategory && matchesSearch;
+  });
 
-            if (DOM.menuButton) {
-                DOM.menuButton.addEventListener('click', ViewManager.toggleMenu);
-                DOM.menuButton.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        ViewManager.toggleMenu();
-                    }
-                });
-            }
+  renderIntel(filtered);
+}
 
-            // Additional initialization can go here
-            console.log('Application initialized successfully');
-            
-        } catch (error) {
-            console.error('Application initialization failed:', error);
-        }
-    }
-};
+function initMenu() {
+  dom.menuBtn.addEventListener('click', () => {
+    const isOpen = dom.primaryNav.classList.toggle('open');
+    dom.menuBtn.setAttribute('aria-expanded', String(isOpen));
+  });
 
-// Start the application
-document.addEventListener('DOMContentLoaded', App.init);
+  dom.primaryNav.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      dom.primaryNav.classList.remove('open');
+      dom.menuBtn.setAttribute('aria-expanded', 'false');
+    });
+  });
+}
 
-/**
- * Copyright Notice
- * © 2023-2025 $iz. All designs, layouts, and content are property of $iz. 
- * Do not duplicate or redistribute without permission.
- */
+function init() {
+  renderSnapshot();
+  renderIntel(intelItems);
+  renderOps();
+  renderKnowledgeBase();
+
+  dom.searchInput.addEventListener('input', applyFilters);
+  dom.categoryFilter.addEventListener('change', applyFilters);
+
+  initMenu();
+}
+
+document.addEventListener('DOMContentLoaded', init);
