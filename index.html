@@ -1344,71 +1344,73 @@ footer .contact a:hover{text-decoration:underline;}
   <div>© 2023–2025 $iz — All rights reserved</div>
 </footer>
 
+<script>
+/* ── SECURITY ───────────────────────────────── */
+document.onkeydown=function(e){if(123==e.keyCode||e.ctrlKey&&e.shiftKey&&(73==e.keyCode||74==e.keyCode||67==e.keyCode)||e.ctrlKey&&85==e.keyCode)return!1};
+document.addEventListener("contextmenu",e=>{e.preventDefault();return!1});
+document.addEventListener("dragstart",e=>{"IMG"==e.target.tagName&&e.preventDefault()});
 
+/* ── SPLASH ─────────────────────────────────── */
+(function(){
+  const bar=document.getElementById('splashBar'),txt=document.getElementById('splashText');
+  const msgs=['INITIALIZING NEXUS...','LOADING CORPORATION DATA...','ESTABLISHING CONNECTION...','ACCESS GRANTED'];
+  let pct=0,mi=0;
+  const iv=setInterval(()=>{
+    pct+=Math.random()*8+2;if(pct>100)pct=100;
+    bar.style.width=pct+'%';
+    const ni=Math.floor(pct/25);
+    if(ni!==mi&&ni<msgs.length){mi=ni;txt.textContent=msgs[ni];}
+    if(pct>=100){clearInterval(iv);txt.textContent='ACCESS GRANTED';setTimeout(()=>document.getElementById('splash').classList.add('hidden'),600);}
+  },60);
+})();
 
+/* ── PARTICLES ───────────────────────────────── */
+particlesJS("particles-js",{particles:{number:{value:window.innerWidth<768?30:60,density:{enable:true,value_area:window.innerWidth<768?400:800}},color:{value:"#00d4ff"},shape:{type:"circle"},opacity:{value:.2,random:true},size:{value:window.innerWidth<768?.8:1.2,random:true},line_linked:{enable:true,distance:150,color:"#00d4ff",opacity:.07,width:1},move:{enable:true,speed:window.innerWidth<768?.3:.5,direction:"none",random:true}},interactivity:{events:{onhover:{enable:window.innerWidth>=768,mode:"repulse"}}}});
 
+/* ── STATS COUNTER ───────────────────────────── */
+function animateCounters(){document.querySelectorAll('.stat-number[data-target]').forEach(el=>{const target=+el.dataset.target;let cur=0;const step=Math.max(1,Math.ceil(target/30));const iv=setInterval(()=>{cur+=step;if(cur>=target){cur=target;clearInterval(iv);}el.textContent=cur;},40);});}
+const statsObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){animateCounters();statsObs.disconnect();}});},{threshold:.5});
+const statsBarEl=document.querySelector('.stats-bar');if(statsBarEl)statsObs.observe(statsBarEl);
 
+/* ── FEATURED MEMBER ─────────────────────────── */
+const featuredData=[{name:"No Operative Selected",desc:"No operative has been featured yet.",achievements:["???","???","???"]}];
+function updateFeatured(){const e=featuredData[Math.floor(Math.random()*featuredData.length)];document.getElementById("featured-name").textContent=e.name;document.getElementById("featured-desc").textContent=e.desc;document.getElementById("member-achievements").innerHTML=e.achievements.map(a=>`<span class="achievement-badge">${a}</span>`).join("");}
+setInterval(updateFeatured,8000);updateFeatured();
 
-/* ── BUILD MEMBER CARD ───────────────────────── */
+/* ── FIREBASE ────────────────────────────────── */
+const auth=firebase.auth(),db=firebase.firestore();
+const googleProvider=new firebase.auth.GoogleAuthProvider(),githubProvider=new firebase.auth.GithubAuthProvider();
+let currentUser=null,currentUserData=null;
+
+/* ── HELPERS ─────────────────────────────────── */
+function initials(name){if(!name)return'?';return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+
+function setNavAvatar(user,data){
+  const av=document.getElementById("userAvatar"),ic=document.getElementById("defaultIcon");
+  const url=data?.photoURL||user?.photoURL||'';
+  if(user&&url){av.src=url;av.style.cssText="display:block;width:100%;height:100%;object-fit:cover;object-position:center;border-radius:50%;position:absolute;top:0;left:0;";ic.style.display="none";}
+  else{av.style.display="none";ic.style.display="block";}
+}
+
+/* ── MEMBER CARDS ────────────────────────────── */
 function buildMemberCard(u,isSelf){
-  const div=document.createElement("div");
-  div.className="friend-card";
-  div.dataset.uid=u.id;
-
-  const photoURL=u.photoURL||'';
-  const name=u.displayName||'Unknown';
-  const bio=u.bio||'No bio set';
-  const status=u.status||'offline';
-  const rank=u.rank||'Member';
-
-  div.innerHTML=`
-    <div class="friend-avatar-wrap">
-      ${photoURL
-        ? `<img class="friend-avatar" src="${photoURL}" alt="${name}">`
-        : `<div class="friend-avatar-placeholder">${initials(name)}</div>`}
-    </div>
-    <div class="friend-info">
-      <h3 class="friend-name">${name}${isSelf?' <span style="font-size:.6rem;color:var(--color-text-muted);font-family:var(--font-mono);">[YOU]</span>':''}</h3>
-      <p class="friend-bio">${bio}</p>
-      <div class="friend-footer">
-        <span class="friend-status status-${status}">${status}</span>
-        <span class="friend-rank">${rank}</span>
-      </div>
-    </div>`;
-
-  div.addEventListener('click',()=>{
-    if(isSelf) openMyProfile();
-    else openViewProfile(u);
-  });
+  const div=document.createElement("div");div.className="friend-card";div.dataset.uid=u.id;
+  const photo=u.photoURL||'',name=u.displayName||'Unknown',bio=u.bio||'No bio set',status=u.status||'offline',rank=u.rank||'Member';
+  div.innerHTML=`<div class="friend-avatar-wrap">${photo?`<img class="friend-avatar" src="${photo}" alt="${name}">`:`<div class="friend-avatar-placeholder">${initials(name)}</div>`}</div><div class="friend-info"><h3 class="friend-name">${name}${isSelf?' <span style="font-size:.6rem;color:var(--color-text-muted);font-family:var(--font-mono);">[YOU]</span>':''}</h3><p class="friend-bio">${bio}</p><div class="friend-footer"><span class="friend-status status-${status}">${status}</span><span class="friend-rank">${rank}</span></div></div>`;
+  div.addEventListener('click',()=>{if(isSelf)openMyProfile();else openViewProfile(u);});
   return div;
 }
 
-/* ── DISPLAY MEMBERS ─────────────────────────── */
 function displayMembers(users){
-  const g=document.getElementById("usersGrid");
-  g.innerHTML="";
-  if(!users.length){
-    g.innerHTML=`<p style="font-family:var(--font-mono);font-size:.8rem;color:var(--color-text-muted);grid-column:1/-1;text-align:center;padding:20px 0;">No members found.</p>`;
-    return;
-  }
-  users.forEach(u=>{
-    const isSelf=currentUser&&u.id===currentUser.uid;
-    g.appendChild(buildMemberCard(u,isSelf));
-  });
+  const g=document.getElementById("usersGrid");g.innerHTML="";
+  if(!users.length){g.innerHTML=`<p style="font-family:var(--font-mono);font-size:.8rem;color:var(--color-text-muted);grid-column:1/-1;text-align:center;padding:20px 0;">No members found.</p>`;return;}
+  users.forEach(u=>g.appendChild(buildMemberCard(u,currentUser&&u.id===currentUser.uid)));
 }
 
 function loadAllUsers(){
   db.collection("users").get().then(snap=>{
-    const users=[];
-    snap.forEach(d=>{const u=d.data();u.id=d.id;users.push(u);});
-    // sort: self first, then alphabetical
-    users.sort((a,b)=>{
-      if(currentUser){
-        if(a.id===currentUser.uid)return -1;
-        if(b.id===currentUser.uid)return 1;
-      }
-      return (a.displayName||'').localeCompare(b.displayName||'');
-    });
+    const users=[];snap.forEach(d=>{const u=d.data();u.id=d.id;users.push(u);});
+    users.sort((a,b)=>{if(currentUser){if(a.id===currentUser.uid)return-1;if(b.id===currentUser.uid)return 1;}return(a.displayName||'').localeCompare(b.displayName||'');});
     displayMembers(users);
   });
 }
@@ -1416,114 +1418,59 @@ function loadAllUsers(){
 function searchMembers(){
   const q=document.getElementById("searchUsers").value.trim().toLowerCase();
   if(!q)return loadAllUsers();
-  db.collection("users").get().then(snap=>{
-    const users=[];
-    snap.forEach(d=>{
-      const u=d.data();u.id=d.id;
-      if((u.displayName||'').toLowerCase().includes(q))users.push(u);
-    });
-    displayMembers(users);
-  });
+  db.collection("users").get().then(snap=>{const users=[];snap.forEach(d=>{const u=d.data();u.id=d.id;if((u.displayName||'').toLowerCase().includes(q))users.push(u);});displayMembers(users);});
 }
 
-/* ── VIEW ANOTHER USER'S PROFILE ─────────────── */
+/* ── VIEW PROFILE ────────────────────────────── */
 function openViewProfile(u){
   const content=document.getElementById("profileContent");
-  const myFriends=currentUserData?.friends||[];
-  const isFriend=myFriends.includes(u.id);
-  const isLoggedIn=!!currentUser;
-
-  const photoURL=u.photoURL||'';
-  const name=u.displayName||'Unknown';
-
-  content.innerHTML=`
-    <div class="view-profile-header">
-      <div class="view-profile-avatar-wrap">
-        ${photoURL
-          ? `<img src="${photoURL}" alt="${name}">`
-          : `<div class="view-profile-avatar-placeholder">${initials(name)}</div>`}
-      </div>
-      <div class="view-profile-info">
-        <p class="view-profile-name">${name}</p>
-        <p class="view-profile-rank">${u.rank||'Member'} · <span class="friend-status status-${u.status||'offline'}" style="font-size:.65rem;">${u.status||'offline'}</span></p>
-        ${isLoggedIn&&currentUser.uid!==u.id?`
-        <div class="profile-action-row">
-          ${isFriend
-            ? `<button class="btn-sm danger" id="unfriendBtn"><i class="fas fa-user-minus"></i> Remove</button>`
-            : `<button class="btn-sm" id="addFriendBtn"><i class="fas fa-user-plus"></i> Connect</button>`}
-        </div>`:''}
-      </div>
-    </div>
-    <div class="view-profile-bio">${u.bio||'This operative has not set a bio yet.'}</div>`;
-
+  const isFriend=(currentUserData?.friends||[]).includes(u.id);
+  const isLoggedIn=!!currentUser,photo=u.photoURL||'',name=u.displayName||'Unknown';
+  content.innerHTML=`<div class="view-profile-header"><div class="view-profile-avatar-wrap">${photo?`<img src="${photo}" alt="${name}">`:`<div class="view-profile-avatar-placeholder">${initials(name)}</div>`}</div><div class="view-profile-info"><p class="view-profile-name">${name}</p><p class="view-profile-rank">${u.rank||'Member'} &middot; <span class="friend-status status-${u.status||'offline'}" style="font-size:.65rem;">${u.status||'offline'}</span></p>${isLoggedIn&&currentUser.uid!==u.id?`<div class="profile-action-row">${isFriend?`<button class="btn-sm danger" id="unfriendBtn"><i class="fas fa-user-minus"></i> Remove</button>`:`<button class="btn-sm" id="addFriendBtn"><i class="fas fa-user-plus"></i> Connect</button>`}</div>`:''}</div></div><div class="view-profile-bio">${u.bio||'This operative has not set a bio yet.'}</div>`;
   document.getElementById("profileModal").style.display="flex";
-
   if(isLoggedIn&&currentUser.uid!==u.id){
-    const addBtn=document.getElementById("addFriendBtn");
-    const removeBtn=document.getElementById("unfriendBtn");
-    if(addBtn) addBtn.addEventListener('click',()=>addFriend(u.id,name));
-    if(removeBtn) removeBtn.addEventListener('click',()=>removeFriend(u.id,name));
+    const ab=document.getElementById("addFriendBtn"),rb=document.getElementById("unfriendBtn");
+    if(ab)ab.addEventListener('click',()=>addFriend(u.id,name));
+    if(rb)rb.addEventListener('click',()=>removeFriend(u.id,name));
   }
 }
 
 /* ── FRIEND SYSTEM ───────────────────────────── */
 async function addFriend(uid,name){
   if(!currentUser)return;
-  const myRef=db.collection("users").doc(currentUser.uid);
-  await myRef.update({friends:firebase.firestore.FieldValue.arrayUnion(uid)});
-  // refresh local data
-  const snap=await myRef.get();
-  currentUserData=snap.data();
+  const ref=db.collection("users").doc(currentUser.uid);
+  await ref.update({friends:firebase.firestore.FieldValue.arrayUnion(uid)});
+  currentUserData=(await ref.get()).data();
   document.getElementById("profileModal").style.display="none";
-  showToast(`Connected with ${name}!`);
-  loadAllUsers();
+  showToast(`Connected with ${name}!`);loadAllUsers();
 }
 
 async function removeFriend(uid,name){
   if(!currentUser)return;
-  const myRef=db.collection("users").doc(currentUser.uid);
-  await myRef.update({friends:firebase.firestore.FieldValue.arrayRemove(uid)});
-  const snap=await myRef.get();
-  currentUserData=snap.data();
+  const ref=db.collection("users").doc(currentUser.uid);
+  await ref.update({friends:firebase.firestore.FieldValue.arrayRemove(uid)});
+  currentUserData=(await ref.get()).data();
   document.getElementById("profileModal").style.display="none";
   document.getElementById("myProfileModal").style.display="none";
-  showToast(`Removed ${name} from connections.`);
-  loadAllUsers();
+  showToast(`Removed ${name} from connections.`);loadAllUsers();
 }
 
 /* ── MY PROFILE MODAL ────────────────────────── */
 async function openMyProfile(){
   if(!currentUser)return;
-  const snap=await db.collection("users").doc(currentUser.uid).get();
-  currentUserData=snap.data()||{};
-  const data=currentUserData;
-
-  document.getElementById("myProfileDisplayName").textContent=data.displayName||currentUser.email;
-  document.getElementById("myProfileRank").textContent=data.rank||'Member';
-  document.getElementById("editDisplayName").value=data.displayName||'';
-  document.getElementById("editBio").value=data.bio||'';
-  document.getElementById("editPhotoURL").value=data.photoURL||'';
+  currentUserData=(await db.collection("users").doc(currentUser.uid).get()).data()||{};
+  const d=currentUserData;
+  document.getElementById("myProfileDisplayName").textContent=d.displayName||currentUser.email;
+  document.getElementById("myProfileRank").textContent=d.rank||'Member';
+  document.getElementById("editDisplayName").value=d.displayName||'';
+  document.getElementById("editBio").value=d.bio||'';
+  document.getElementById("editPhotoURL").value=d.photoURL||'';
   document.getElementById("profileSaveSuccess").style.display="none";
-
-  // avatar preview
-  const imgEl=document.getElementById("editAvatarImg");
-  const phEl=document.getElementById("editAvatarPlaceholder");
-  if(data.photoURL){
-    imgEl.src=data.photoURL;imgEl.style.display="block";phEl.style.display="none";
-  } else {
-    imgEl.style.display="none";phEl.style.display="flex";
-    phEl.textContent=initials(data.displayName||currentUser.email);
-  }
-
-  // live preview on URL change
-  document.getElementById("editPhotoURL").oninput=function(){
-    if(this.value){imgEl.src=this.value;imgEl.style.display="block";phEl.style.display="none";}
-    else{imgEl.style.display="none";phEl.style.display="flex";}
-  };
-
-  // friends list
-  await renderMyFriendsList(data.friends||[]);
-
+  const imgEl=document.getElementById("editAvatarImg"),phEl=document.getElementById("editAvatarPlaceholder");
+  if(d.photoURL){imgEl.src=d.photoURL;imgEl.style.display="block";phEl.style.display="none";}
+  else{imgEl.style.display="none";phEl.style.display="flex";phEl.textContent=initials(d.displayName||currentUser.email);}
+  document.getElementById("editPhotoURL").oninput=function(){if(this.value){imgEl.src=this.value;imgEl.style.display="block";phEl.style.display="none";}else{imgEl.style.display="none";phEl.style.display="flex";}};
+  await renderMyFriendsList(d.friends||[]);
   document.getElementById("myProfileModal").style.display="flex";
 }
 
@@ -1531,31 +1478,14 @@ async function renderMyFriendsList(friendIds){
   const inner=document.getElementById("friendsListInner");
   document.getElementById("friendCount").textContent=friendIds.length;
   inner.innerHTML="";
-  if(!friendIds.length){
-    inner.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);">No connections yet. Find operatives in Corp Members.</p>`;
-    return;
-  }
+  if(!friendIds.length){inner.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);">No connections yet. Find operatives in Corp Members.</p>`;return;}
   for(const fid of friendIds){
     try{
-      const fsnap=await db.collection("users").doc(fid).get();
-      if(!fsnap.exists)continue;
-      const fd=fsnap.data();
-      const row=document.createElement("div");
-      row.className="mini-friend-row";
-      row.innerHTML=`
-        <div class="mini-avatar">${fd.photoURL?`<img src="${fd.photoURL}" alt="">`:`${initials(fd.displayName)}`}</div>
-        <span class="mini-friend-name">${fd.displayName||'Unknown'}</span>
-        <button class="mini-unfriend" data-uid="${fid}" data-name="${fd.displayName||'this user'}">Remove</button>`;
-      row.querySelector('.mini-friend-name').addEventListener('click',()=>{
-        document.getElementById("myProfileModal").style.display="none";
-        openViewProfile({...fd,id:fid});
-      });
-      row.querySelector('.mini-unfriend').addEventListener('click',async(e)=>{
-        e.stopPropagation();
-        const uid=e.target.dataset.uid,name=e.target.dataset.name;
-        await removeFriend(uid,name);
-        await openMyProfile();
-      });
+      const snap=await db.collection("users").doc(fid).get();if(!snap.exists)continue;
+      const fd=snap.data();const row=document.createElement("div");row.className="mini-friend-row";
+      row.innerHTML=`<div class="mini-avatar">${fd.photoURL?`<img src="${fd.photoURL}" alt="">`:`${initials(fd.displayName)}`}</div><span class="mini-friend-name">${fd.displayName||'Unknown'}</span><button class="mini-unfriend" data-uid="${fid}" data-name="${fd.displayName||'this user'}">Remove</button>`;
+      row.querySelector('.mini-friend-name').addEventListener('click',()=>{document.getElementById("myProfileModal").style.display="none";openViewProfile({...fd,id:fid});});
+      row.querySelector('.mini-unfriend').addEventListener('click',async(e)=>{e.stopPropagation();await removeFriend(e.target.dataset.uid,e.target.dataset.name);await openMyProfile();});
       inner.appendChild(row);
     }catch(err){console.error(err);}
   }
@@ -1567,391 +1497,78 @@ document.getElementById("saveProfileBtn").addEventListener('click',async()=>{
   const newName=document.getElementById("editDisplayName").value.trim();
   const newBio=document.getElementById("editBio").value.trim();
   const newPhoto=document.getElementById("editPhotoURL").value.trim();
-  const updates={};
+  const updates={bio:newBio};
   if(newName)updates.displayName=newName;
-  updates.bio=newBio;
-  if(newPhoto)updates.photoURL=newPhoto;
-  else updates.photoURL=firebase.firestore.FieldValue.delete();
+  if(newPhoto)updates.photoURL=newPhoto;else updates.photoURL='';
   try{
     await db.collection("users").doc(currentUser.uid).update(updates);
-    const snap=await db.collection("users").doc(currentUser.uid).get();
-    currentUserData=snap.data();
+    currentUserData=(await db.collection("users").doc(currentUser.uid).get()).data();
     setNavAvatar(currentUser,currentUserData);
     document.getElementById("myProfileDisplayName").textContent=currentUserData.displayName||currentUser.email;
-    document.getElementById("profileSaveSuccess").style.display="block";
-    setTimeout(()=>document.getElementById("profileSaveSuccess").style.display="none",3000);
+    const s=document.getElementById("profileSaveSuccess");s.style.display="block";setTimeout(()=>s.style.display="none",3000);
   }catch(err){console.error(err);}
 });
 
-/* ── TOAST NOTIFICATION ──────────────────────── */
+/* ── TOAST ───────────────────────────────────── */
 function showToast(msg){
   let t=document.getElementById('nexusToast');
-  if(!t){
-    t=document.createElement('div');
-    t.id='nexusToast';
-    t.style.cssText=`position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-      background:rgba(0,14,28,.97);border:1px solid var(--color-primary);
-      color:var(--color-primary);padding:10px 22px;border-radius:4px;
-      font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;
-      z-index:9000;box-shadow:0 0 20px rgba(0,212,255,.3);
-      transition:opacity .3s ease;pointer-events:none;`;
-    document.body.appendChild(t);
-  }
-  t.textContent=msg;t.style.opacity='1';
-  clearTimeout(t._to);
-  t._to=setTimeout(()=>t.style.opacity='0',3000);
+  if(!t){t=document.createElement('div');t.id='nexusToast';t.style.cssText="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(0,14,28,.97);border:1px solid var(--color-primary);color:var(--color-primary);padding:10px 22px;border-radius:4px;font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;z-index:9000;box-shadow:0 0 20px rgba(0,212,255,.3);transition:opacity .3s ease;pointer-events:none;";document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';clearTimeout(t._to);t._to=setTimeout(()=>t.style.opacity='0',3000);
 }
 
 /* ── AUTH STATE ──────────────────────────────── */
 auth.onAuthStateChanged(async user=>{
   currentUser=user;
-  const logoutBtn=document.getElementById("logoutBtn");
-  const loginBtn=document.getElementById("loginBtn");
-  const myProfileBtn=document.getElementById("myProfileBtn");
+  const logoutBtn=document.getElementById("logoutBtn"),loginBtn=document.getElementById("loginBtn"),myProfileBtn=document.getElementById("myProfileBtn");
   if(user){
-    try{
-      const snap=await db.collection("users").doc(user.uid).get();
-      currentUserData=snap.exists?snap.data():null;
-      setNavAvatar(user,currentUserData);
-      db.collection("users").doc(user.uid).update({lastActive:firebase.firestore.FieldValue.serverTimestamp(),status:"online"});
-    }catch(e){}
-    logoutBtn.style.display="flex";
-    loginBtn.style.display="none";
-    myProfileBtn.style.display="flex";
+    try{const snap=await db.collection("users").doc(user.uid).get();currentUserData=snap.exists?snap.data():null;setNavAvatar(user,currentUserData);db.collection("users").doc(user.uid).update({lastActive:firebase.firestore.FieldValue.serverTimestamp(),status:"online"});}catch(e){}
+    logoutBtn.style.display="flex";loginBtn.style.display="none";myProfileBtn.style.display="flex";
   }else{
-    currentUserData=null;
-    document.getElementById("userAvatar").style.display="none";
-    document.getElementById("defaultIcon").style.display="block";
-    logoutBtn.style.display="none";
-    loginBtn.style.display="flex";
-    myProfileBtn.style.display="none";
+    currentUserData=null;document.getElementById("userAvatar").style.display="none";document.getElementById("defaultIcon").style.display="block";
+    logoutBtn.style.display="none";loginBtn.style.display="flex";myProfileBtn.style.display="none";
   }
 });
 
-/* ── REGISTER ────────────────────────────────── */
-document.getElementById("loginForm").addEventListener("submit",function(e){
-  e.preventDefault();
-  auth.signInWithEmailAndPassword(document.getElementById("loginEmail").value,document.getElementById("loginPassword").value)
-    .then(()=>document.getElementById("loginModal").style.display="none")
-    .catch(err=>showError(err.message));
-});
+/* ── AUTH FORMS ──────────────────────────────── */
+document.getElementById("loginForm").addEventListener("submit",function(e){e.preventDefault();auth.signInWithEmailAndPassword(document.getElementById("loginEmail").value,document.getElementById("loginPassword").value).then(()=>document.getElementById("loginModal").style.display="none").catch(err=>showError(err.message));});
 
 document.getElementById("registerForm").addEventListener("submit",function(e){
-  e.preventDefault();
-  const pw=document.getElementById("registerPassword").value;
-  const cpw=document.getElementById("confirmPassword").value;
+  e.preventDefault();const pw=document.getElementById("registerPassword").value,cpw=document.getElementById("confirmPassword").value;
   if(pw!==cpw)return showError("Passwords don't match");
-  auth.createUserWithEmailAndPassword(document.getElementById("registerEmail").value,pw)
-    .then(uc=>db.collection("users").doc(uc.user.uid).set({
-      displayName:uc.user.email.split("@")[0],
-      email:uc.user.email,
-      photoURL:'',
-      rank:"Member",
-      bio:"",
-      status:"online",
-      friends:[],
-      createdAt:firebase.firestore.FieldValue.serverTimestamp()
-    }))
-    .then(()=>document.getElementById("loginModal").style.display="none")
-    .catch(err=>showError(err.message));
+  auth.createUserWithEmailAndPassword(document.getElementById("registerEmail").value,pw).then(uc=>db.collection("users").doc(uc.user.uid).set({displayName:uc.user.email.split("@")[0],email:uc.user.email,photoURL:'',rank:"Member",bio:"",status:"online",friends:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()})).then(()=>document.getElementById("loginModal").style.display="none").catch(err=>showError(err.message));
 });
 
-document.getElementById("googleLogin").addEventListener("click",function(){
-  auth.signInWithPopup(googleProvider).then(r=>{
-    if(r.additionalUserInfo.isNewUser)
-      return db.collection("users").doc(r.user.uid).set({
-        displayName:r.user.displayName,email:r.user.email,
-        photoURL:r.user.photoURL||'',rank:"Member",bio:"",
-        status:"online",friends:[],
-        createdAt:firebase.firestore.FieldValue.serverTimestamp()
-      });
-  }).then(()=>document.getElementById("loginModal").style.display="none")
-    .catch(err=>showError(err.message));
-});
+document.getElementById("googleLogin").addEventListener("click",()=>{auth.signInWithPopup(googleProvider).then(r=>{if(r.additionalUserInfo.isNewUser)return db.collection("users").doc(r.user.uid).set({displayName:r.user.displayName,email:r.user.email,photoURL:r.user.photoURL||'',rank:"Member",bio:"",status:"online",friends:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()});}).then(()=>document.getElementById("loginModal").style.display="none").catch(err=>showError(err.message));});
 
-document.getElementById("githubLogin").addEventListener("click",function(){
-  auth.signInWithPopup(githubProvider).then(r=>{
-    if(r.additionalUserInfo.isNewUser)
-      return db.collection("users").doc(r.user.uid).set({
-        displayName:r.user.displayName||(r.user.email||'').split("@")[0],
-        email:r.user.email,photoURL:r.user.photoURL||'',
-        rank:"Member",bio:"",status:"online",friends:[],
-        createdAt:firebase.firestore.FieldValue.serverTimestamp()
-      });
-  }).then(()=>document.getElementById("loginModal").style.display="none")
-    .catch(err=>showError(err.message));
-});
+document.getElementById("githubLogin").addEventListener("click",()=>{auth.signInWithPopup(githubProvider).then(r=>{if(r.additionalUserInfo.isNewUser)return db.collection("users").doc(r.user.uid).set({displayName:r.user.displayName||(r.user.email||'').split("@")[0],email:r.user.email,photoURL:r.user.photoURL||'',rank:"Member",bio:"",status:"online",friends:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()});}).then(()=>document.getElementById("loginModal").style.display="none").catch(err=>showError(err.message));});
 
-document.getElementById("logoutBtn").addEventListener("click",e=>{
-  e.preventDefault();
-  if(currentUser){
-    db.collection("users").doc(currentUser.uid).update({status:"offline"}).then(()=>auth.signOut());
-  }
-});
+document.getElementById("logoutBtn").addEventListener("click",e=>{e.preventDefault();if(currentUser){db.collection("users").doc(currentUser.uid).update({status:"offline"}).then(()=>auth.signOut());}});
 
-function showError(msg){
-  const el=document.getElementById("errorMessage");
-  el.textContent=msg;el.style.display="block";
-}
+function showError(msg){const el=document.getElementById("errorMessage");el.textContent=msg;el.style.display="block";}
 
 /* ── TOGGLE FORM ─────────────────────────────── */
-document.getElementById("toggleForm").addEventListener("click",function(){
-  const lf=document.getElementById("loginForm"),rf=document.getElementById("registerForm");
-  const isLogin=lf.style.display!=="none";
-  lf.style.display=isLogin?"none":"flex";
-  rf.style.display=isLogin?"flex":"none";
-  document.getElementById("modalTitle").textContent=isLogin?"Create Account":"Access Nexus";
-  this.textContent=isLogin?"Already have an account? Login here":"Don't have an account? Register here";
-  document.getElementById("errorMessage").style.display="none";
-});
+document.getElementById("toggleForm").addEventListener("click",function(){const lf=document.getElementById("loginForm"),rf=document.getElementById("registerForm"),isLogin=lf.style.display!=="none";lf.style.display=isLogin?"none":"flex";rf.style.display=isLogin?"flex":"none";document.getElementById("modalTitle").textContent=isLogin?"Create Account":"Access Nexus";this.textContent=isLogin?"Already have an account? Login here":"Don't have an account? Register here";document.getElementById("errorMessage").style.display="none";});
 
 /* ── HAMBURGER ───────────────────────────────── */
-document.getElementById("hamburger").addEventListener("click",function(){
-  this.classList.toggle("open");
-  document.getElementById("mobileMenu").classList.toggle("open");
-});
+document.getElementById("hamburger").addEventListener("click",function(){this.classList.toggle("open");document.getElementById("mobileMenu").classList.toggle("open");});
 
-/* ── PROFILE DROPDOWN ────────────────────────── */
-document.getElementById("profileButton").addEventListener("click",function(e){
-  e.stopPropagation();
-  const d=document.getElementById("dropdownMenu");
-  d.style.display=d.style.display==="flex"?"none":"flex";
-});
+/* ── DROPDOWN ────────────────────────────────── */
+document.getElementById("profileButton").addEventListener("click",function(e){e.stopPropagation();const d=document.getElementById("dropdownMenu");d.style.display=d.style.display==="flex"?"none":"flex";});
 document.addEventListener("click",()=>document.getElementById("dropdownMenu").style.display="none");
-
-document.getElementById("loginBtn").addEventListener("click",e=>{
-  e.preventDefault();document.getElementById("loginModal").style.display="flex";
-});
-document.getElementById("myProfileBtn").addEventListener("click",e=>{
-  e.preventDefault();
-  document.getElementById("dropdownMenu").style.display="none";
-  openMyProfile();
-});
-document.getElementById("viewMembersBtn").addEventListener("click",e=>{
-  e.preventDefault();
-  document.getElementById("userDirectory").style.display="flex";
-  loadAllUsers();
-});
+document.getElementById("loginBtn").addEventListener("click",e=>{e.preventDefault();document.getElementById("loginModal").style.display="flex";});
+document.getElementById("myProfileBtn").addEventListener("click",e=>{e.preventDefault();document.getElementById("dropdownMenu").style.display="none";openMyProfile();});
+document.getElementById("viewMembersBtn").addEventListener("click",e=>{e.preventDefault();document.getElementById("userDirectory").style.display="flex";loadAllUsers();});
 
 /* ── CLOSE MODALS ────────────────────────────── */
 document.getElementById("closeModal").addEventListener("click",()=>document.getElementById("loginModal").style.display="none");
 document.getElementById("closeDirectory").addEventListener("click",()=>document.getElementById("userDirectory").style.display="none");
 document.getElementById("closeProfile").addEventListener("click",()=>document.getElementById("profileModal").style.display="none");
 document.getElementById("closeMyProfile").addEventListener("click",()=>document.getElementById("myProfileModal").style.display="none");
-
-/* close on backdrop click */
-['loginModal','userDirectory','profileModal','myProfileModal'].forEach(id=>{
-  document.getElementById(id).addEventListener('click',function(e){
-    if(e.target===this)this.style.display="none";
-  });
-});
+['loginModal','userDirectory','profileModal','myProfileModal'].forEach(id=>{document.getElementById(id).addEventListener('click',function(e){if(e.target===this)this.style.display="none";});});
 
 /* ── SEARCH ──────────────────────────────────── */
 document.getElementById("searchUsers").addEventListener("input",()=>searchMembers());
 document.getElementById("searchUsers").addEventListener("keyup",e=>{if(e.key==="Enter")searchMembers();});
-</script>
-
-/* ── SPLASH ─────────────────────────────────── */
-(function(){
-  const bar=document.getElementById('splashBar');
-  const txt=document.getElementById('splashText');
-  const msgs=['INITIALIZING NEXUS...','LOADING CORPORATION DATA...','ESTABLISHING CONNECTION...','ACCESS GRANTED'];
-  let pct=0,mi=0;
-  const iv=setInterval(()=>{
-    pct+=Math.random()*8+2;
-    if(pct>100)pct=100;
-    bar.style.width=pct+'%';
-    const ni=Math.floor(pct/25);
-    if(ni!==mi&&ni<msgs.length){mi=ni;txt.textContent=msgs[ni];}
-    if(pct>=100){
-      clearInterval(iv);
-      txt.textContent='ACCESS GRANTED';
-      setTimeout(()=>document.getElementById('splash').classList.add('hidden'),600);
-    }
-  },60);
-})();
-
-/* ── PARTICLES ───────────────────────────────── */
-particlesJS("particles-js",{
-  particles:{
-    number:{value:window.innerWidth<768?30:60,density:{enable:true,value_area:window.innerWidth<768?400:800}},
-    color:{value:"#00d4ff"},shape:{type:"circle"},
-    opacity:{value:.2,random:true},
-    size:{value:window.innerWidth<768?.8:1.2,random:true},
-    line_linked:{enable:true,distance:150,color:"#00d4ff",opacity:.07,width:1},
-    move:{enable:true,speed:window.innerWidth<768?.3:.5,direction:"none",random:true}
-  },
-  interactivity:{events:{onhover:{enable:window.innerWidth>=768,mode:"repulse"}}}
-});
-
-/* ── STATS COUNTER ───────────────────────────── */
-function animateCounters(){
-  document.querySelectorAll('.stat-number[data-target]').forEach(el=>{
-    const target=+el.dataset.target;
-    let cur=0;
-    const step=Math.max(1,Math.ceil(target/30));
-    const iv=setInterval(()=>{
-      cur+=step;
-      if(cur>=target){cur=target;clearInterval(iv);}
-      el.textContent=cur;
-    },40);
-  });
-}
-const statsObs=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{if(e.isIntersecting){animateCounters();statsObs.disconnect();}});
-},{threshold:.5});
-const statsBar=document.querySelector('.stats-bar');
-if(statsBar)statsObs.observe(statsBar);
-
-/* ── FEATURED MEMBER ─────────────────────────── */
-const f2=[
-  {name:"No Player ID",desc:"No Player Has Been Chosen.",achievements:["???","???","???"]},
-  {name:"No Player ID",desc:"No Player Has Been Chosen.",achievements:["???","???","???"]},
-  {name:"No Player ID",desc:"No Player Has Been Chosen.",achievements:["???","???","???"]}
-];
-function updateFeatured(){
-  const e=f2[Math.floor(Math.random()*f2.length)];
-  document.getElementById("featured-name").textContent=e.name;
-  document.getElementById("featured-desc").textContent=e.desc;
-  document.getElementById("member-achievements").innerHTML=
-    e.achievements.map(a=>`<span class="achievement-badge">${a}</span>`).join("");
-}
-setInterval(updateFeatured,8000);updateFeatured();
-
-
-/* ── FIREBASE ────────────────────────────────── */
-const d1=firebase.auth(),e1=firebase.firestore();
-const g1=new firebase.auth.GoogleAuthProvider,h1=new firebase.auth.GithubAuthProvider;
-
-function displayFriends(users){
-  const g=document.getElementById("usersGrid");
-  g.innerHTML="";
-  users.forEach(u=>{
-    const c=document.createElement("div");
-    c.className="friend-card";
-    c.innerHTML=`<img src="${u.photoURL||'https://via.placeholder.com/250x140/071a2e/00d4ff?text='+encodeURIComponent(u.displayName||'User')}" alt="${u.displayName||''}" class="friend-avatar">
-    <div class="friend-info">
-      <h3 class="friend-name">${u.displayName||'Unknown'}</h3>
-      <p class="friend-bio">${u.bio||'No bio available'}</p>
-      <span class="friend-status status-${u.status||'offline'}">${u.status||'offline'}</span>
-    </div>`;
-    g.appendChild(c);
-  });
-}
-function loadAllUsers(){
-  e1.collection("users").get().then(snap=>{
-    const users=[];
-    snap.forEach(d=>{const u=d.data();u.id=d.id;users.push(u);});
-    displayFriends(users);
-  });
-}
-function searchFriends(){
-  const q=document.getElementById("searchUsers").value.toLowerCase();
-  if(!q)return loadAllUsers();
-  e1.collection("users").where("displayName",">=",q).where("displayName","<=",q+"\uf8ff").get()
-    .then(snap=>{
-      const users=[];
-      snap.forEach(d=>{const u=d.data();u.id=d.id;users.push(u);});
-      displayFriends(users);
-    });
-}
-
-d1.onAuthStateChanged(user=>{
-  const av=document.getElementById("userAvatar"),ic=document.getElementById("defaultIcon");
-  if(user){
-    if(user.photoURL){av.src=user.photoURL;av.style.display="block";ic.style.display="none";}
-    document.getElementById("logoutBtn").style.display="flex";
-    document.getElementById("loginBtn").style.display="none";
-    e1.collection("users").doc(user.uid).update({lastActive:firebase.firestore.FieldValue.serverTimestamp()});
-  }else{
-    av.style.display="none";ic.style.display="block";
-    document.getElementById("logoutBtn").style.display="none";
-    document.getElementById("loginBtn").style.display="flex";
-  }
-});
-
-document.getElementById("loginForm").addEventListener("submit",function(e){
-  e.preventDefault();
-  d1.signInWithEmailAndPassword(document.getElementById("loginEmail").value,document.getElementById("loginPassword").value)
-    .then(()=>document.getElementById("loginModal").style.display="none")
-    .catch(err=>{showError(err.message);});
-});
-document.getElementById("registerForm").addEventListener("submit",function(e){
-  e.preventDefault();
-  const pw=document.getElementById("registerPassword").value,cpw=document.getElementById("confirmPassword").value;
-  if(pw!==cpw)return showError("Passwords don't match");
-  d1.createUserWithEmailAndPassword(document.getElementById("registerEmail").value,pw)
-    .then(uc=>e1.collection("users").doc(uc.user.uid).set({
-      displayName:uc.user.email.split("@")[0],email:uc.user.email,rank:"Recruit",
-      stats:{raids:0,wins:0,losses:0},createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-      friends:[],bio:"",status:"offline"
-    }))
-    .then(()=>document.getElementById("loginModal").style.display="none")
-    .catch(err=>{showError(err.message);});
-});
-document.getElementById("googleLogin").addEventListener("click",function(){
-  d1.signInWithPopup(g1).then(r=>{
-    if(r.additionalUserInfo.isNewUser)
-      return e1.collection("users").doc(r.user.uid).set({
-        displayName:r.user.displayName,email:r.user.email,photoURL:r.user.photoURL,
-        rank:"Recruit",stats:{raids:0,wins:0,losses:0},
-        createdAt:firebase.firestore.FieldValue.serverTimestamp(),friends:[],bio:"",status:"offline"
-      });
-  }).then(()=>document.getElementById("loginModal").style.display="none")
-    .catch(err=>{showError(err.message);});
-});
-document.getElementById("githubLogin").addEventListener("click",function(){
-  d1.signInWithPopup(h1).then(r=>{
-    if(r.additionalUserInfo.isNewUser)
-      return e1.collection("users").doc(r.user.uid).set({
-        displayName:r.user.displayName||(r.user.email||"").split("@")[0],email:r.user.email,
-        rank:"Recruit",stats:{raids:0,wins:0,losses:0},
-        createdAt:firebase.firestore.FieldValue.serverTimestamp(),friends:[],bio:"",status:"offline"
-      });
-  }).then(()=>document.getElementById("loginModal").style.display="none")
-    .catch(err=>{showError(err.message);});
-});
-document.getElementById("logoutBtn").addEventListener("click",e=>{e.preventDefault();d1.signOut();});
-
-function showError(msg){
-  const el=document.getElementById("errorMessage");
-  el.textContent=msg;el.style.display="block";
-}
-
-/* ── TOGGLE FORM ─────────────────────────────── */
-document.getElementById("toggleForm").addEventListener("click",function(){
-  const lf=document.getElementById("loginForm"),rf=document.getElementById("registerForm");
-  const isLogin="none"!==lf.style.display;
-  lf.style.display=isLogin?"none":"flex";
-  rf.style.display=isLogin?"flex":"none";
-  document.getElementById("modalTitle").textContent=isLogin?"Create Account":"Access Nexus";
-  this.textContent=isLogin?"Already have an account? Login here":"Don't have an account? Register here";
-  document.getElementById("errorMessage").style.display="none";
-});
-
-/* ── HAMBURGER ───────────────────────────────── */
-document.getElementById("hamburger").addEventListener("click",function(){
-  this.classList.toggle("open");
-  document.getElementById("mobileMenu").classList.toggle("open");
-});
-
-/* ── PROFILE DROPDOWN ────────────────────────── */
-document.getElementById("profileButton").addEventListener("click",function(e){
-  e.stopPropagation();
-  const d=document.getElementById("dropdownMenu");
-  d.style.display=d.style.display==="flex"?"none":"flex";
-});
-document.addEventListener("click",()=>document.getElementById("dropdownMenu").style.display="none");
-document.getElementById("loginBtn").addEventListener("click",e=>{e.preventDefault();document.getElementById("loginModal").style.display="flex";});
-document.getElementById("viewMembersBtn").addEventListener("click",e=>{
-  e.preventDefault();
-  document.getElementById("userDirectory").style.display="flex";
-  loadAllUsers();
-});
-document.getElementById("closeModal").addEventListener("click",()=>document.getElementById("loginModal").style.display="none");
-document.getElementById("closeDirectory").addEventListener("click",()=>document.getElementById("userDirectory").style.display="none");
-document.getElementById("closeProfile").addEventListener("click",()=>document.getElementById("profileModal").style.display="none");
-document.getElementById("searchUsers").addEventListener("keyup",e=>{if(e.key==="Enter")searchFriends();});
 </script>
 </body>
 <!-- © 2023–2025 $iz. All designs, layouts, and content are property of $iz. Do not duplicate or redistribute without permission. -->
