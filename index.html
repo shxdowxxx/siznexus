@@ -1151,10 +1151,10 @@ footer .contact a:hover{text-decoration:underline;}
           <i class="fas fa-user" id="defaultIcon"></i>
         </button>
         <div class="dropdown-menu" id="dropdownMenu">
-          <a href="#" id="myProfileBtn"><i class="fas fa-id-card" style="font-size:12px;width:14px"></i> My Profile</a>
+          <a href="#" id="myProfileBtn" style="display:none"><i class="fas fa-id-card" style="font-size:12px;width:14px"></i> My Profile</a>
           <a href="#" id="viewMembersBtn"><i class="fas fa-users" style="font-size:12px;width:14px"></i> View Members</a>
-          <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt" style="font-size:12px;width:14px"></i> Log Out</a>
-          <a href="#" id="loginBtn" style="display:none"><i class="fas fa-sign-in-alt" style="font-size:12px;width:14px"></i> Log In</a>
+          <a href="#" id="logoutBtn" style="display:none"><i class="fas fa-sign-out-alt" style="font-size:12px;width:14px"></i> Log Out</a>
+          <a href="#" id="loginBtn"><i class="fas fa-sign-in-alt" style="font-size:12px;width:14px"></i> Log In</a>
         </div>
       </div>
     </div>
@@ -1407,10 +1407,18 @@ function displayMembers(users){
   users.forEach(u=>g.appendChild(buildMemberCard(u,currentUser&&u.id===currentUser.uid)));
 }
 
+let membersUnsubscribe=null;
+
 function loadAllUsers(){
-  db.collection("users").get().then(snap=>{
-    const users=[];snap.forEach(d=>{const u=d.data();u.id=d.id;users.push(u);});
-    users.sort((a,b)=>{if(currentUser){if(a.id===currentUser.uid)return-1;if(b.id===currentUser.uid)return 1;}return(a.displayName||'').localeCompare(b.displayName||'');});
+  // Cancel any previous listener
+  if(membersUnsubscribe)membersUnsubscribe();
+  membersUnsubscribe=db.collection("users").onSnapshot(snap=>{
+    const users=[];
+    snap.forEach(d=>{const u=d.data();u.id=d.id;users.push(u);});
+    users.sort((a,b)=>{
+      if(currentUser){if(a.id===currentUser.uid)return -1;if(b.id===currentUser.uid)return 1;}
+      return(a.displayName||'').localeCompare(b.displayName||'');
+    });
     displayMembers(users);
   });
 }
@@ -1519,13 +1527,39 @@ function showToast(msg){
 /* ── AUTH STATE ──────────────────────────────── */
 auth.onAuthStateChanged(async user=>{
   currentUser=user;
-  const logoutBtn=document.getElementById("logoutBtn"),loginBtn=document.getElementById("loginBtn"),myProfileBtn=document.getElementById("myProfileBtn");
+  const logoutBtn=document.getElementById("logoutBtn");
+  const loginBtn=document.getElementById("loginBtn");
+  const myProfileBtn=document.getElementById("myProfileBtn");
   if(user){
-    try{const snap=await db.collection("users").doc(user.uid).get();currentUserData=snap.exists?snap.data():null;setNavAvatar(user,currentUserData);db.collection("users").doc(user.uid).update({lastActive:firebase.firestore.FieldValue.serverTimestamp(),status:"online"});}catch(e){}
-    logoutBtn.style.display="flex";loginBtn.style.display="none";myProfileBtn.style.display="flex";
+    try{
+      const snap=await db.collection("users").doc(user.uid).get();
+      currentUserData=snap.exists?snap.data():null;
+      // If no Firestore doc yet (e.g. first Google/GitHub login race), create one
+      if(!snap.exists){
+        await db.collection("users").doc(user.uid).set({
+          displayName:user.displayName||user.email.split("@")[0],
+          email:user.email,photoURL:user.photoURL||'',
+          rank:"Member",bio:"",status:"online",friends:[],
+          createdAt:firebase.firestore.FieldValue.serverTimestamp()
+        });
+        currentUserData=(await db.collection("users").doc(user.uid).get()).data();
+      }
+      setNavAvatar(user,currentUserData);
+      db.collection("users").doc(user.uid).update({
+        lastActive:firebase.firestore.FieldValue.serverTimestamp(),
+        status:"online"
+      }).catch(()=>{});
+    }catch(e){console.error("Auth state error:",e);}
+    logoutBtn.style.display="flex";
+    loginBtn.style.display="none";
+    myProfileBtn.style.display="flex";
   }else{
-    currentUserData=null;document.getElementById("userAvatar").style.display="none";document.getElementById("defaultIcon").style.display="block";
-    logoutBtn.style.display="none";loginBtn.style.display="flex";myProfileBtn.style.display="none";
+    currentUserData=null;
+    document.getElementById("userAvatar").style.display="none";
+    document.getElementById("defaultIcon").style.display="block";
+    logoutBtn.style.display="none";
+    loginBtn.style.display="flex";
+    myProfileBtn.style.display="none";
   }
 });
 
@@ -1542,7 +1576,17 @@ document.getElementById("googleLogin").addEventListener("click",()=>{auth.signIn
 
 document.getElementById("githubLogin").addEventListener("click",()=>{auth.signInWithPopup(githubProvider).then(r=>{if(r.additionalUserInfo.isNewUser)return db.collection("users").doc(r.user.uid).set({displayName:r.user.displayName||(r.user.email||'').split("@")[0],email:r.user.email,photoURL:r.user.photoURL||'',rank:"Member",bio:"",status:"online",friends:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()});}).then(()=>document.getElementById("loginModal").style.display="none").catch(err=>showError(err.message));});
 
-document.getElementById("logoutBtn").addEventListener("click",e=>{e.preventDefault();if(currentUser){db.collection("users").doc(currentUser.uid).update({status:"offline"}).then(()=>auth.signOut());}});
+document.getElementById("logoutBtn").addEventListener("click",e=>{
+  e.preventDefault();
+  const u=auth.currentUser;
+  if(u){
+    db.collection("users").doc(u.uid).update({status:"offline"})
+      .catch(()=>{})
+      .finally(()=>auth.signOut());
+  } else {
+    auth.signOut();
+  }
+});
 
 function showError(msg){const el=document.getElementById("errorMessage");el.textContent=msg;el.style.display="block";}
 
@@ -1561,7 +1605,10 @@ document.getElementById("viewMembersBtn").addEventListener("click",e=>{e.prevent
 
 /* ── CLOSE MODALS ────────────────────────────── */
 document.getElementById("closeModal").addEventListener("click",()=>document.getElementById("loginModal").style.display="none");
-document.getElementById("closeDirectory").addEventListener("click",()=>document.getElementById("userDirectory").style.display="none");
+document.getElementById("closeDirectory").addEventListener("click",()=>{
+  document.getElementById("userDirectory").style.display="none";
+  if(membersUnsubscribe){membersUnsubscribe();membersUnsubscribe=null;}
+});
 document.getElementById("closeProfile").addEventListener("click",()=>document.getElementById("profileModal").style.display="none");
 document.getElementById("closeMyProfile").addEventListener("click",()=>document.getElementById("myProfileModal").style.display="none");
 ['loginModal','userDirectory','profileModal','myProfileModal'].forEach(id=>{document.getElementById(id).addEventListener('click',function(e){if(e.target===this)this.style.display="none";});});
