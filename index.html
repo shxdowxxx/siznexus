@@ -211,6 +211,15 @@ nav a:hover::after{width:100%;}
 
 /* Profile */
 .profile-container{position:relative;}
+.profile-button img{
+  width:100%;height:100%;
+  border-radius:50%;
+  display:none;
+  object-fit:cover;
+  object-position:center;
+  position:absolute;
+  top:0;left:0;
+}
 .profile-button{
   width:34px;height:34px;
   background:rgba(0,212,255,.05);
@@ -218,9 +227,10 @@ nav a:hover::after{width:100%;}
   border:1px solid rgba(0,212,255,.3);
   cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  transition:var(--transition);overflow:hidden;
+  transition:var(--transition);
+  overflow:hidden;
+  position:relative;
 }
-.profile-button img{width:100%;height:100%;border-radius:50%;display:none;object-fit:cover;}
 .profile-button i{color:var(--color-primary);font-size:14px;}
 .profile-button:hover{border-color:var(--color-primary);box-shadow:var(--glow-sm);transform:scale(1.08);}
 .dropdown-menu{
@@ -746,28 +756,225 @@ nav a:hover::after{width:100%;}
 #searchUsers:focus{outline:none;border-color:var(--color-primary);}
 .friends-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-  gap:12px;margin-top:20px;
-  max-height:400px;overflow-y:auto;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:12px;margin-top:16px;
+  max-height:420px;overflow-y:auto;
+  padding-right:4px;
 }
 .friend-card{
   background:rgba(0,20,40,.8);
-  border-radius:4px;overflow:hidden;
+  border-radius:6px;overflow:hidden;
   transition:var(--transition);border:var(--border);
+  cursor:pointer;display:flex;flex-direction:column;
 }
-.friend-card:hover{transform:translateY(-3px);box-shadow:var(--glow-sm);}
-.friend-avatar{width:100%;height:140px;object-fit:cover;}
+.friend-card:hover{transform:translateY(-3px);box-shadow:var(--glow-sm);border-color:rgba(0,212,255,.35);}
+.friend-avatar-wrap{
+  width:100%;aspect-ratio:1/1;
+  overflow:hidden;background:rgba(0,212,255,.04);
+  display:flex;align-items:center;justify-content:center;
+}
+.friend-avatar{
+  width:100%;height:100%;
+  object-fit:cover;object-position:center;
+  display:block;
+}
+.friend-avatar-placeholder{
+  width:56px;height:56px;border-radius:50%;
+  background:rgba(0,212,255,.1);
+  border:1px solid rgba(0,212,255,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;font-weight:700;
+  color:var(--color-primary);
+}
 .friend-info{padding:12px;}
-.friend-name{font-size:.85rem;margin:0 0 4px;color:var(--color-primary);font-weight:700;}
-.friend-bio{font-size:.75rem;font-family:var(--font-mono);color:#aaa;margin:0 0 10px;}
+.friend-name{font-size:.82rem;margin:0 0 4px;color:var(--color-primary);font-weight:700;letter-spacing:.05em;}
+.friend-bio{font-size:.72rem;font-family:var(--font-mono);color:var(--color-text-muted);margin:0 0 8px;line-height:1.5;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.friend-footer{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;}
 .friend-status{
   display:inline-block;padding:2px 8px;
-  border-radius:2px;font-size:.65rem;
+  border-radius:2px;font-size:.62rem;
   font-family:var(--font-mono);letter-spacing:.05em;
 }
-.status-online{background:rgba(76,175,80,.2);color:#4CAF50;border:1px solid rgba(76,175,80,.3);}
-.status-offline{background:rgba(244,67,54,.1);color:#f44336;border:1px solid rgba(244,67,54,.2);}
+.status-online{background:rgba(76,175,80,.15);color:#4CAF50;border:1px solid rgba(76,175,80,.3);}
+.status-offline{background:rgba(244,67,54,.08);color:#f44336;border:1px solid rgba(244,67,54,.2);}
 .status-away{background:rgba(255,152,0,.1);color:#ff9800;border:1px solid rgba(255,152,0,.2);}
+.friend-rank{
+  font-family:var(--font-mono);font-size:.62rem;
+  color:var(--color-text-muted);letter-spacing:.05em;
+}
+
+/* ── VIEW PROFILE MODAL ─────────────────────────── */
+.view-profile-avatar-wrap{
+  width:90px;height:90px;border-radius:50%;
+  overflow:hidden;border:2px solid rgba(0,212,255,.3);
+  flex-shrink:0;background:rgba(0,212,255,.06);
+  display:flex;align-items:center;justify-content:center;
+}
+.view-profile-avatar-wrap img{
+  width:100%;height:100%;
+  object-fit:cover;object-position:center;
+}
+.view-profile-avatar-placeholder{
+  font-size:2rem;font-weight:700;
+  color:var(--color-primary);
+}
+.view-profile-header{
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:18px;
+}
+.view-profile-info{flex:1;}
+.view-profile-name{
+  font-size:1rem;font-weight:700;
+  color:var(--color-primary);
+  letter-spacing:.08em;margin:0 0 4px;
+}
+.view-profile-rank{
+  font-family:var(--font-mono);font-size:.75rem;
+  color:var(--color-text-muted);margin:0 0 6px;
+}
+.view-profile-bio{
+  font-family:var(--font-mono);font-size:.8rem;
+  color:var(--color-text-muted);line-height:1.7;
+  border-top:1px solid rgba(0,212,255,.1);
+  padding-top:12px;margin-top:4px;
+}
+.profile-action-row{
+  display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;
+}
+.btn-sm{
+  padding:7px 14px;font-size:.7rem;
+  letter-spacing:.1em;border-radius:3px;
+  font-family:var(--font-main);font-weight:700;
+  cursor:pointer;transition:var(--transition);
+  border:1px solid var(--color-primary);
+  background:transparent;color:var(--color-primary);
+  display:inline-flex;align-items:center;gap:6px;
+}
+.btn-sm:hover{background:var(--color-primary);color:#000;}
+.btn-sm.secondary{
+  border-color:rgba(0,212,255,.25);
+  color:var(--color-text-muted);
+}
+.btn-sm.secondary:hover{border-color:var(--color-primary);color:var(--color-primary);background:transparent;}
+.btn-sm.danger{border-color:rgba(255,68,68,.4);color:#f55;}
+.btn-sm.danger:hover{background:rgba(255,68,68,.12);color:#f55;}
+
+/* ── MY PROFILE / EDIT MODAL ──────────────────────── */
+.edit-avatar-wrap{
+  position:relative;width:80px;height:80px;
+  border-radius:50%;overflow:hidden;
+  border:2px solid rgba(0,212,255,.3);
+  cursor:pointer;flex-shrink:0;
+  background:rgba(0,212,255,.06);
+  display:flex;align-items:center;justify-content:center;
+}
+.edit-avatar-wrap img{
+  width:100%;height:100%;
+  object-fit:cover;object-position:center;
+  display:block;
+}
+.edit-avatar-placeholder{
+  font-size:1.6rem;font-weight:700;color:var(--color-primary);
+}
+.edit-avatar-overlay{
+  position:absolute;inset:0;
+  background:rgba(0,0,0,.55);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .2s;
+  font-size:.6rem;letter-spacing:.08em;
+  color:#fff;font-family:var(--font-mono);
+  text-align:center;
+}
+.edit-avatar-wrap:hover .edit-avatar-overlay{opacity:1;}
+.edit-profile-header{
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:20px;
+}
+.edit-profile-name-wrap{flex:1;}
+.edit-profile-name-wrap p{
+  margin:0 0 4px;font-size:.75rem;
+  font-family:var(--font-mono);color:var(--color-text-muted);
+}
+.edit-profile-name-wrap strong{
+  color:var(--color-primary);font-size:.95rem;letter-spacing:.06em;
+}
+textarea.input-field{
+  width:100%;padding:10px 12px;
+  border-radius:3px;
+  border:1px solid rgba(0,212,255,.2);
+  background:rgba(0,0,0,.4);
+  color:var(--color-text);
+  font-family:var(--font-mono);font-size:.82rem;
+  transition:var(--transition);
+  resize:vertical;min-height:80px;
+  line-height:1.6;
+}
+textarea.input-field:focus{
+  outline:none;border-color:var(--color-primary);
+  box-shadow:0 0 0 2px rgba(0,212,255,.1);
+}
+input.input-field{
+  width:100%;padding:10px 12px;
+  border-radius:3px;
+  border:1px solid rgba(0,212,255,.2);
+  background:rgba(0,0,0,.4);
+  color:var(--color-text);
+  font-family:var(--font-mono);font-size:.82rem;
+  transition:var(--transition);
+}
+input.input-field:focus{
+  outline:none;border-color:var(--color-primary);
+  box-shadow:0 0 0 2px rgba(0,212,255,.1);
+}
+.field-label{
+  font-family:var(--font-mono);font-size:.68rem;
+  color:var(--color-text-muted);letter-spacing:.1em;
+  text-transform:uppercase;margin-bottom:5px;display:block;
+}
+.field-group{margin-bottom:14px;}
+.success-msg{
+  color:#4CAF50;font-family:var(--font-mono);
+  font-size:.75rem;text-align:center;
+  padding:8px;background:rgba(76,175,80,.06);
+  border:1px solid rgba(76,175,80,.2);border-radius:3px;
+  display:none;margin-top:8px;
+}
+/* friends list inside profile modal */
+.friends-list-section{margin-top:16px;border-top:1px solid rgba(0,212,255,.1);padding-top:14px;}
+.friends-list-title{
+  font-size:.7rem;letter-spacing:.18em;
+  color:var(--color-text-muted);font-family:var(--font-mono);
+  margin:0 0 10px;text-transform:uppercase;
+}
+.mini-friend-row{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 0;
+  border-bottom:1px solid rgba(0,212,255,.05);
+  cursor:pointer;transition:var(--transition);
+}
+.mini-friend-row:last-child{border-bottom:none;}
+.mini-friend-row:hover{padding-left:4px;}
+.mini-avatar{
+  width:30px;height:30px;border-radius:50%;
+  overflow:hidden;border:1px solid rgba(0,212,255,.2);
+  background:rgba(0,212,255,.06);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;font-weight:700;color:var(--color-primary);
+}
+.mini-avatar img{width:100%;height:100%;object-fit:cover;object-position:center;}
+.mini-friend-name{
+  font-size:.78rem;color:var(--color-text-light);
+  font-family:var(--font-mono);flex:1;
+}
+.mini-unfriend{
+  font-size:.65rem;color:rgba(255,68,68,.6);
+  cursor:pointer;padding:2px 6px;
+  border:1px solid rgba(255,68,68,.2);border-radius:2px;
+  font-family:var(--font-mono);transition:var(--transition);
+  background:none;
+}
+.mini-unfriend:hover{color:#f55;border-color:#f55;background:rgba(255,68,68,.08);}
 
 /* ─── FOOTER ─────────────────────────────────────────── */
 footer{
@@ -864,8 +1071,9 @@ footer .contact a:hover{text-decoration:underline;}
   </div>
 </div>
 
+<!-- MEMBER DIRECTORY -->
 <div class="modal" id="userDirectory">
-  <div class="modal-container" style="max-width:800px">
+  <div class="modal-container" style="max-width:860px">
     <button class="close-btn" id="closeDirectory">&#x2715;</button>
     <h2>Corp Members</h2>
     <input type="text" id="searchUsers" placeholder="Search members...">
@@ -873,10 +1081,53 @@ footer .contact a:hover{text-decoration:underline;}
   </div>
 </div>
 
+<!-- VIEW OTHER USER'S PROFILE -->
 <div class="modal" id="profileModal">
-  <div class="modal-container" style="max-width:600px">
+  <div class="modal-container" style="max-width:480px">
     <button class="close-btn" id="closeProfile">&#x2715;</button>
     <div id="profileContent"></div>
+  </div>
+</div>
+
+<!-- MY PROFILE / EDIT -->
+<div class="modal" id="myProfileModal">
+  <div class="modal-container" style="max-width:480px">
+    <button class="close-btn" id="closeMyProfile">&#x2715;</button>
+    <h2>My Profile</h2>
+    <div class="edit-profile-header">
+      <div class="edit-avatar-wrap" id="editAvatarBtn" title="Click to change photo">
+        <img id="editAvatarImg" src="" alt="avatar">
+        <div class="edit-avatar-placeholder" id="editAvatarPlaceholder"></div>
+        <div class="edit-avatar-overlay">CHANGE<br>PHOTO</div>
+      </div>
+      <div class="edit-profile-name-wrap">
+        <p>Display Name</p>
+        <strong id="myProfileDisplayName"></strong>
+        <p style="margin-top:6px;">Rank</p>
+        <strong id="myProfileRank" style="color:var(--color-text-muted);font-size:.8rem;"></strong>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Display Name</label>
+      <input type="text" id="editDisplayName" class="input-field" maxlength="30" placeholder="Your display name">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Bio</label>
+      <textarea id="editBio" class="input-field" maxlength="160" placeholder="Tell the corp about yourself..."></textarea>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Photo URL</label>
+      <input type="url" id="editPhotoURL" class="input-field" placeholder="https://...">
+    </div>
+    <button class="btn-primary" id="saveProfileBtn" style="width:100%;justify-content:center;margin-top:4px;">
+      <i class="fas fa-save"></i> Save Changes
+    </button>
+    <div class="success-msg" id="profileSaveSuccess">Profile updated successfully!</div>
+    <!-- Friends list -->
+    <div class="friends-list-section" id="myFriendsList">
+      <p class="friends-list-title">My Connections (<span id="friendCount">0</span>)</p>
+      <div id="friendsListInner"></div>
+    </div>
   </div>
 </div>
 
@@ -900,8 +1151,8 @@ footer .contact a:hover{text-decoration:underline;}
           <i class="fas fa-user" id="defaultIcon"></i>
         </button>
         <div class="dropdown-menu" id="dropdownMenu">
+          <a href="#" id="myProfileBtn"><i class="fas fa-id-card" style="font-size:12px;width:14px"></i> My Profile</a>
           <a href="#" id="viewMembersBtn"><i class="fas fa-users" style="font-size:12px;width:14px"></i> View Members</a>
-          <a href="#"><i class="fas fa-cog" style="font-size:12px;width:14px"></i> Settings</a>
           <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt" style="font-size:12px;width:14px"></i> Log Out</a>
           <a href="#" id="loginBtn" style="display:none"><i class="fas fa-sign-in-alt" style="font-size:12px;width:14px"></i> Log In</a>
         </div>
@@ -1090,16 +1341,415 @@ footer .contact a:hover{text-decoration:underline;}
     Discord: <a href="https://discord.gg/73Mb3syadB" target="_blank">discord.gg/73Mb3syadB</a>
   </div>
   <div class="footer-divider"></div>
-  <div>© 2023–2026 Siz — All rights reserved</div>
+  <div>© 2023–2025 $iz — All rights reserved</div>
 </footer>
 
-<script>
-/* ── SECURITY ───────────────────────────────── */
-document.onkeydown=function(e){
-  if(123==e.keyCode||e.ctrlKey&&e.shiftKey&&(73==e.keyCode||74==e.keyCode||67==e.keyCode)||e.ctrlKey&&85==e.keyCode)return!1
-};
-document.addEventListener("contextmenu",e=>{e.preventDefault();return!1});
-document.addEventListener("dragstart",e=>{"IMG"==e.target.tagName&&e.preventDefault()});
+
+
+
+
+
+/* ── BUILD MEMBER CARD ───────────────────────── */
+function buildMemberCard(u,isSelf){
+  const div=document.createElement("div");
+  div.className="friend-card";
+  div.dataset.uid=u.id;
+
+  const photoURL=u.photoURL||'';
+  const name=u.displayName||'Unknown';
+  const bio=u.bio||'No bio set';
+  const status=u.status||'offline';
+  const rank=u.rank||'Member';
+
+  div.innerHTML=`
+    <div class="friend-avatar-wrap">
+      ${photoURL
+        ? `<img class="friend-avatar" src="${photoURL}" alt="${name}">`
+        : `<div class="friend-avatar-placeholder">${initials(name)}</div>`}
+    </div>
+    <div class="friend-info">
+      <h3 class="friend-name">${name}${isSelf?' <span style="font-size:.6rem;color:var(--color-text-muted);font-family:var(--font-mono);">[YOU]</span>':''}</h3>
+      <p class="friend-bio">${bio}</p>
+      <div class="friend-footer">
+        <span class="friend-status status-${status}">${status}</span>
+        <span class="friend-rank">${rank}</span>
+      </div>
+    </div>`;
+
+  div.addEventListener('click',()=>{
+    if(isSelf) openMyProfile();
+    else openViewProfile(u);
+  });
+  return div;
+}
+
+/* ── DISPLAY MEMBERS ─────────────────────────── */
+function displayMembers(users){
+  const g=document.getElementById("usersGrid");
+  g.innerHTML="";
+  if(!users.length){
+    g.innerHTML=`<p style="font-family:var(--font-mono);font-size:.8rem;color:var(--color-text-muted);grid-column:1/-1;text-align:center;padding:20px 0;">No members found.</p>`;
+    return;
+  }
+  users.forEach(u=>{
+    const isSelf=currentUser&&u.id===currentUser.uid;
+    g.appendChild(buildMemberCard(u,isSelf));
+  });
+}
+
+function loadAllUsers(){
+  db.collection("users").get().then(snap=>{
+    const users=[];
+    snap.forEach(d=>{const u=d.data();u.id=d.id;users.push(u);});
+    // sort: self first, then alphabetical
+    users.sort((a,b)=>{
+      if(currentUser){
+        if(a.id===currentUser.uid)return -1;
+        if(b.id===currentUser.uid)return 1;
+      }
+      return (a.displayName||'').localeCompare(b.displayName||'');
+    });
+    displayMembers(users);
+  });
+}
+
+function searchMembers(){
+  const q=document.getElementById("searchUsers").value.trim().toLowerCase();
+  if(!q)return loadAllUsers();
+  db.collection("users").get().then(snap=>{
+    const users=[];
+    snap.forEach(d=>{
+      const u=d.data();u.id=d.id;
+      if((u.displayName||'').toLowerCase().includes(q))users.push(u);
+    });
+    displayMembers(users);
+  });
+}
+
+/* ── VIEW ANOTHER USER'S PROFILE ─────────────── */
+function openViewProfile(u){
+  const content=document.getElementById("profileContent");
+  const myFriends=currentUserData?.friends||[];
+  const isFriend=myFriends.includes(u.id);
+  const isLoggedIn=!!currentUser;
+
+  const photoURL=u.photoURL||'';
+  const name=u.displayName||'Unknown';
+
+  content.innerHTML=`
+    <div class="view-profile-header">
+      <div class="view-profile-avatar-wrap">
+        ${photoURL
+          ? `<img src="${photoURL}" alt="${name}">`
+          : `<div class="view-profile-avatar-placeholder">${initials(name)}</div>`}
+      </div>
+      <div class="view-profile-info">
+        <p class="view-profile-name">${name}</p>
+        <p class="view-profile-rank">${u.rank||'Member'} · <span class="friend-status status-${u.status||'offline'}" style="font-size:.65rem;">${u.status||'offline'}</span></p>
+        ${isLoggedIn&&currentUser.uid!==u.id?`
+        <div class="profile-action-row">
+          ${isFriend
+            ? `<button class="btn-sm danger" id="unfriendBtn"><i class="fas fa-user-minus"></i> Remove</button>`
+            : `<button class="btn-sm" id="addFriendBtn"><i class="fas fa-user-plus"></i> Connect</button>`}
+        </div>`:''}
+      </div>
+    </div>
+    <div class="view-profile-bio">${u.bio||'This operative has not set a bio yet.'}</div>`;
+
+  document.getElementById("profileModal").style.display="flex";
+
+  if(isLoggedIn&&currentUser.uid!==u.id){
+    const addBtn=document.getElementById("addFriendBtn");
+    const removeBtn=document.getElementById("unfriendBtn");
+    if(addBtn) addBtn.addEventListener('click',()=>addFriend(u.id,name));
+    if(removeBtn) removeBtn.addEventListener('click',()=>removeFriend(u.id,name));
+  }
+}
+
+/* ── FRIEND SYSTEM ───────────────────────────── */
+async function addFriend(uid,name){
+  if(!currentUser)return;
+  const myRef=db.collection("users").doc(currentUser.uid);
+  await myRef.update({friends:firebase.firestore.FieldValue.arrayUnion(uid)});
+  // refresh local data
+  const snap=await myRef.get();
+  currentUserData=snap.data();
+  document.getElementById("profileModal").style.display="none";
+  showToast(`Connected with ${name}!`);
+  loadAllUsers();
+}
+
+async function removeFriend(uid,name){
+  if(!currentUser)return;
+  const myRef=db.collection("users").doc(currentUser.uid);
+  await myRef.update({friends:firebase.firestore.FieldValue.arrayRemove(uid)});
+  const snap=await myRef.get();
+  currentUserData=snap.data();
+  document.getElementById("profileModal").style.display="none";
+  document.getElementById("myProfileModal").style.display="none";
+  showToast(`Removed ${name} from connections.`);
+  loadAllUsers();
+}
+
+/* ── MY PROFILE MODAL ────────────────────────── */
+async function openMyProfile(){
+  if(!currentUser)return;
+  const snap=await db.collection("users").doc(currentUser.uid).get();
+  currentUserData=snap.data()||{};
+  const data=currentUserData;
+
+  document.getElementById("myProfileDisplayName").textContent=data.displayName||currentUser.email;
+  document.getElementById("myProfileRank").textContent=data.rank||'Member';
+  document.getElementById("editDisplayName").value=data.displayName||'';
+  document.getElementById("editBio").value=data.bio||'';
+  document.getElementById("editPhotoURL").value=data.photoURL||'';
+  document.getElementById("profileSaveSuccess").style.display="none";
+
+  // avatar preview
+  const imgEl=document.getElementById("editAvatarImg");
+  const phEl=document.getElementById("editAvatarPlaceholder");
+  if(data.photoURL){
+    imgEl.src=data.photoURL;imgEl.style.display="block";phEl.style.display="none";
+  } else {
+    imgEl.style.display="none";phEl.style.display="flex";
+    phEl.textContent=initials(data.displayName||currentUser.email);
+  }
+
+  // live preview on URL change
+  document.getElementById("editPhotoURL").oninput=function(){
+    if(this.value){imgEl.src=this.value;imgEl.style.display="block";phEl.style.display="none";}
+    else{imgEl.style.display="none";phEl.style.display="flex";}
+  };
+
+  // friends list
+  await renderMyFriendsList(data.friends||[]);
+
+  document.getElementById("myProfileModal").style.display="flex";
+}
+
+async function renderMyFriendsList(friendIds){
+  const inner=document.getElementById("friendsListInner");
+  document.getElementById("friendCount").textContent=friendIds.length;
+  inner.innerHTML="";
+  if(!friendIds.length){
+    inner.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);">No connections yet. Find operatives in Corp Members.</p>`;
+    return;
+  }
+  for(const fid of friendIds){
+    try{
+      const fsnap=await db.collection("users").doc(fid).get();
+      if(!fsnap.exists)continue;
+      const fd=fsnap.data();
+      const row=document.createElement("div");
+      row.className="mini-friend-row";
+      row.innerHTML=`
+        <div class="mini-avatar">${fd.photoURL?`<img src="${fd.photoURL}" alt="">`:`${initials(fd.displayName)}`}</div>
+        <span class="mini-friend-name">${fd.displayName||'Unknown'}</span>
+        <button class="mini-unfriend" data-uid="${fid}" data-name="${fd.displayName||'this user'}">Remove</button>`;
+      row.querySelector('.mini-friend-name').addEventListener('click',()=>{
+        document.getElementById("myProfileModal").style.display="none";
+        openViewProfile({...fd,id:fid});
+      });
+      row.querySelector('.mini-unfriend').addEventListener('click',async(e)=>{
+        e.stopPropagation();
+        const uid=e.target.dataset.uid,name=e.target.dataset.name;
+        await removeFriend(uid,name);
+        await openMyProfile();
+      });
+      inner.appendChild(row);
+    }catch(err){console.error(err);}
+  }
+}
+
+/* ── SAVE PROFILE ────────────────────────────── */
+document.getElementById("saveProfileBtn").addEventListener('click',async()=>{
+  if(!currentUser)return;
+  const newName=document.getElementById("editDisplayName").value.trim();
+  const newBio=document.getElementById("editBio").value.trim();
+  const newPhoto=document.getElementById("editPhotoURL").value.trim();
+  const updates={};
+  if(newName)updates.displayName=newName;
+  updates.bio=newBio;
+  if(newPhoto)updates.photoURL=newPhoto;
+  else updates.photoURL=firebase.firestore.FieldValue.delete();
+  try{
+    await db.collection("users").doc(currentUser.uid).update(updates);
+    const snap=await db.collection("users").doc(currentUser.uid).get();
+    currentUserData=snap.data();
+    setNavAvatar(currentUser,currentUserData);
+    document.getElementById("myProfileDisplayName").textContent=currentUserData.displayName||currentUser.email;
+    document.getElementById("profileSaveSuccess").style.display="block";
+    setTimeout(()=>document.getElementById("profileSaveSuccess").style.display="none",3000);
+  }catch(err){console.error(err);}
+});
+
+/* ── TOAST NOTIFICATION ──────────────────────── */
+function showToast(msg){
+  let t=document.getElementById('nexusToast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='nexusToast';
+    t.style.cssText=`position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+      background:rgba(0,14,28,.97);border:1px solid var(--color-primary);
+      color:var(--color-primary);padding:10px 22px;border-radius:4px;
+      font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;
+      z-index:9000;box-shadow:0 0 20px rgba(0,212,255,.3);
+      transition:opacity .3s ease;pointer-events:none;`;
+    document.body.appendChild(t);
+  }
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._to);
+  t._to=setTimeout(()=>t.style.opacity='0',3000);
+}
+
+/* ── AUTH STATE ──────────────────────────────── */
+auth.onAuthStateChanged(async user=>{
+  currentUser=user;
+  const logoutBtn=document.getElementById("logoutBtn");
+  const loginBtn=document.getElementById("loginBtn");
+  const myProfileBtn=document.getElementById("myProfileBtn");
+  if(user){
+    try{
+      const snap=await db.collection("users").doc(user.uid).get();
+      currentUserData=snap.exists?snap.data():null;
+      setNavAvatar(user,currentUserData);
+      db.collection("users").doc(user.uid).update({lastActive:firebase.firestore.FieldValue.serverTimestamp(),status:"online"});
+    }catch(e){}
+    logoutBtn.style.display="flex";
+    loginBtn.style.display="none";
+    myProfileBtn.style.display="flex";
+  }else{
+    currentUserData=null;
+    document.getElementById("userAvatar").style.display="none";
+    document.getElementById("defaultIcon").style.display="block";
+    logoutBtn.style.display="none";
+    loginBtn.style.display="flex";
+    myProfileBtn.style.display="none";
+  }
+});
+
+/* ── REGISTER ────────────────────────────────── */
+document.getElementById("loginForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  auth.signInWithEmailAndPassword(document.getElementById("loginEmail").value,document.getElementById("loginPassword").value)
+    .then(()=>document.getElementById("loginModal").style.display="none")
+    .catch(err=>showError(err.message));
+});
+
+document.getElementById("registerForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  const pw=document.getElementById("registerPassword").value;
+  const cpw=document.getElementById("confirmPassword").value;
+  if(pw!==cpw)return showError("Passwords don't match");
+  auth.createUserWithEmailAndPassword(document.getElementById("registerEmail").value,pw)
+    .then(uc=>db.collection("users").doc(uc.user.uid).set({
+      displayName:uc.user.email.split("@")[0],
+      email:uc.user.email,
+      photoURL:'',
+      rank:"Member",
+      bio:"",
+      status:"online",
+      friends:[],
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    }))
+    .then(()=>document.getElementById("loginModal").style.display="none")
+    .catch(err=>showError(err.message));
+});
+
+document.getElementById("googleLogin").addEventListener("click",function(){
+  auth.signInWithPopup(googleProvider).then(r=>{
+    if(r.additionalUserInfo.isNewUser)
+      return db.collection("users").doc(r.user.uid).set({
+        displayName:r.user.displayName,email:r.user.email,
+        photoURL:r.user.photoURL||'',rank:"Member",bio:"",
+        status:"online",friends:[],
+        createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
+  }).then(()=>document.getElementById("loginModal").style.display="none")
+    .catch(err=>showError(err.message));
+});
+
+document.getElementById("githubLogin").addEventListener("click",function(){
+  auth.signInWithPopup(githubProvider).then(r=>{
+    if(r.additionalUserInfo.isNewUser)
+      return db.collection("users").doc(r.user.uid).set({
+        displayName:r.user.displayName||(r.user.email||'').split("@")[0],
+        email:r.user.email,photoURL:r.user.photoURL||'',
+        rank:"Member",bio:"",status:"online",friends:[],
+        createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
+  }).then(()=>document.getElementById("loginModal").style.display="none")
+    .catch(err=>showError(err.message));
+});
+
+document.getElementById("logoutBtn").addEventListener("click",e=>{
+  e.preventDefault();
+  if(currentUser){
+    db.collection("users").doc(currentUser.uid).update({status:"offline"}).then(()=>auth.signOut());
+  }
+});
+
+function showError(msg){
+  const el=document.getElementById("errorMessage");
+  el.textContent=msg;el.style.display="block";
+}
+
+/* ── TOGGLE FORM ─────────────────────────────── */
+document.getElementById("toggleForm").addEventListener("click",function(){
+  const lf=document.getElementById("loginForm"),rf=document.getElementById("registerForm");
+  const isLogin=lf.style.display!=="none";
+  lf.style.display=isLogin?"none":"flex";
+  rf.style.display=isLogin?"flex":"none";
+  document.getElementById("modalTitle").textContent=isLogin?"Create Account":"Access Nexus";
+  this.textContent=isLogin?"Already have an account? Login here":"Don't have an account? Register here";
+  document.getElementById("errorMessage").style.display="none";
+});
+
+/* ── HAMBURGER ───────────────────────────────── */
+document.getElementById("hamburger").addEventListener("click",function(){
+  this.classList.toggle("open");
+  document.getElementById("mobileMenu").classList.toggle("open");
+});
+
+/* ── PROFILE DROPDOWN ────────────────────────── */
+document.getElementById("profileButton").addEventListener("click",function(e){
+  e.stopPropagation();
+  const d=document.getElementById("dropdownMenu");
+  d.style.display=d.style.display==="flex"?"none":"flex";
+});
+document.addEventListener("click",()=>document.getElementById("dropdownMenu").style.display="none");
+
+document.getElementById("loginBtn").addEventListener("click",e=>{
+  e.preventDefault();document.getElementById("loginModal").style.display="flex";
+});
+document.getElementById("myProfileBtn").addEventListener("click",e=>{
+  e.preventDefault();
+  document.getElementById("dropdownMenu").style.display="none";
+  openMyProfile();
+});
+document.getElementById("viewMembersBtn").addEventListener("click",e=>{
+  e.preventDefault();
+  document.getElementById("userDirectory").style.display="flex";
+  loadAllUsers();
+});
+
+/* ── CLOSE MODALS ────────────────────────────── */
+document.getElementById("closeModal").addEventListener("click",()=>document.getElementById("loginModal").style.display="none");
+document.getElementById("closeDirectory").addEventListener("click",()=>document.getElementById("userDirectory").style.display="none");
+document.getElementById("closeProfile").addEventListener("click",()=>document.getElementById("profileModal").style.display="none");
+document.getElementById("closeMyProfile").addEventListener("click",()=>document.getElementById("myProfileModal").style.display="none");
+
+/* close on backdrop click */
+['loginModal','userDirectory','profileModal','myProfileModal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){
+    if(e.target===this)this.style.display="none";
+  });
+});
+
+/* ── SEARCH ──────────────────────────────────── */
+document.getElementById("searchUsers").addEventListener("input",()=>searchMembers());
+document.getElementById("searchUsers").addEventListener("keyup",e=>{if(e.key==="Enter")searchMembers();});
+</script>
 
 /* ── SPLASH ─────────────────────────────────── */
 (function(){
@@ -1304,5 +1954,5 @@ document.getElementById("closeProfile").addEventListener("click",()=>document.ge
 document.getElementById("searchUsers").addEventListener("keyup",e=>{if(e.key==="Enter")searchFriends();});
 </script>
 </body>
-<!-- © 2023–2026 $iz. All designs, layouts, and content are property of $iz. Do not duplicate or redistribute without permission. -->
+<!-- © 2023–2025 $iz. All designs, layouts, and content are property of $iz. Do not duplicate or redistribute without permission. -->
 </html>
