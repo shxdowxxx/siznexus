@@ -477,6 +477,8 @@ footer .contact a:hover{text-decoration:underline;}
 .rank-badge-dev{color:#2d6680;}
 .rank-badge-mod{color:#245470;}
 .rank-badge-member{color:#1d4560;}
+.rank-badge-beta{color:#3a7fa0;}
+.rank-badge-unaffiliated{color:#555;font-style:italic;}
 .rank-badge-guest{color:#888;font-style:italic;}
 
 /* ── NOTIFICATION TABS ── */
@@ -693,7 +695,7 @@ footer .contact a:hover{text-decoration:underline;}
 <div class="modal" id="adminModal">
   <div class="modal-container">
     <button class="close-btn" id="closeAdmin">&#x2715;</button>
-    <h2><i class="fas fa-shield-alt" style="margin-right:8px;font-size:.85rem;color:#f55;"></i>Admin Panel</h2>
+    <h2><i class="fas fa-shield-alt" style="margin-right:8px;font-size:.85rem;color:#00d4ff;filter:drop-shadow(0 0 6px rgba(0,212,255,.8));"></i>Admin Panel</h2>
     <div class="admin-tabs">
       <button class="admin-tab active" data-tab="roles"><i class="fas fa-id-badge"></i> Roles</button>
       <button class="admin-tab" data-tab="announce"><i class="fas fa-bullhorn"></i> Announce</button>
@@ -729,6 +731,7 @@ footer .contact a:hover{text-decoration:underline;}
     <div class="msg-notif-name" id="msgNotifName"></div>
     <div class="msg-notif-preview" id="msgNotifPreview"></div>
   </div>
+  <button id="msgToastDismiss" style="background:none;border:none;color:var(--color-text-muted);font-size:.85rem;cursor:pointer;padding:2px 4px;flex-shrink:0;line-height:1;margin-left:4px;" title="Dismiss">&#x2715;</button>
 </div>
 
 <!-- NOTIFICATIONS -->
@@ -792,7 +795,7 @@ footer .contact a:hover{text-decoration:underline;}
         </button>
         <div class="dropdown-menu" id="dropdownMenu">
           <a href="#" id="myProfileBtn" style="display:none"><i class="fas fa-id-card" style="font-size:12px;width:14px"></i> My Profile</a>
-          <a href="#" id="adminPanelBtn" style="display:none"><i class="fas fa-shield-alt" style="font-size:12px;width:14px;color:#f55;"></i> Admin Panel</a>
+          <a href="#" id="adminPanelBtn" style="display:none"><i class="fas fa-shield-alt" style="font-size:12px;width:14px;color:#00d4ff;filter:drop-shadow(0 0 4px rgba(0,212,255,.7));"></i> Admin Panel</a>
           <a href="#" id="viewMembersBtn"><i class="fas fa-users" style="font-size:12px;width:14px"></i> View Members</a>
           <a href="#" id="logoutBtn" style="display:none"><i class="fas fa-sign-out-alt" style="font-size:12px;width:14px"></i> Log Out</a>
           <a href="#" id="loginBtn"><i class="fas fa-sign-in-alt" style="font-size:12px;width:14px"></i> Log In</a>
@@ -1098,12 +1101,21 @@ async function openViewProfile(u){
       pendingReceived=recvSnap.docs.some(d=>d.data().status==='pending');
     }catch(e){console.error('openViewProfile lookup:',e);}
   }
+  const viewerIsGuest=currentUser?.isAnonymous||currentUserData?.isAnonymous;
   let actions='';
   if(isLoggedIn&&currentUser.uid!==u.id){
-    if(isFriend) actions=`<button class="btn-sm danger" id="vpUnfriend"><i class="fas fa-user-minus"></i> Remove</button><button class="btn-sm" id="vpMsg"><i class="fas fa-comment"></i> Message</button>`;
-    else if(pendingSent) actions=`<button class="btn-sm secondary" disabled><i class="fas fa-clock"></i> Request Sent</button>`;
-    else if(pendingReceived) actions=`<button class="btn-sm" id="vpAccept"><i class="fas fa-check"></i> Accept Request</button>`;
-    else actions=`<button class="btn-sm" id="vpSendReq"><i class="fas fa-user-plus"></i> Send Request</button>`;
+    if(viewerIsGuest){
+      // Guests see a prompt to register instead of friend/message buttons
+      actions=`<button class="btn-sm secondary" id="vpGuestPrompt" style="font-size:.65rem;"><i class="fas fa-user-plus"></i> Connect — Free Account Required</button>`;
+    }else if(isFriend){
+      actions=`<button class="btn-sm danger" id="vpUnfriend"><i class="fas fa-user-minus"></i> Remove</button><button class="btn-sm" id="vpMsg"><i class="fas fa-comment"></i> Message</button>`;
+    }else if(pendingSent){
+      actions=`<button class="btn-sm secondary" disabled><i class="fas fa-clock"></i> Request Sent</button>`;
+    }else if(pendingReceived){
+      actions=`<button class="btn-sm" id="vpAccept"><i class="fas fa-check"></i> Accept Request</button>`;
+    }else{
+      actions=`<button class="btn-sm" id="vpSendReq"><i class="fas fa-user-plus"></i> Send Request</button>`;
+    }
   }
   // Always render profile — even if relationship check failed above
   content.innerHTML=`
@@ -1118,6 +1130,7 @@ async function openViewProfile(u){
     <div class="view-profile-bio">${esc(u.bio||'This operative has not set a bio yet.')}</div>`;
   openModal('profileModal');
   if(isLoggedIn&&currentUser.uid!==u.id){
+    document.getElementById('vpGuestPrompt')?.addEventListener('click',()=>{closeModal('profileModal');promptGuestRegister('Create a free account to connect with operatives and send messages.');});
     document.getElementById('vpSendReq')?.addEventListener('click',()=>sendFriendRequest(u.id,name));
     document.getElementById('vpAccept')?.addEventListener('click',()=>acceptFriendRequest(u.id,name));
     document.getElementById('vpUnfriend')?.addEventListener('click',()=>removeFriend(u.id,name));
@@ -1126,8 +1139,33 @@ async function openViewProfile(u){
 }
 
 /* ── FRIEND REQUEST SYSTEM ── */
+/* ── GUEST REGISTER PROMPT ── */
+function promptGuestRegister(reason){
+  // Reuse the login modal but switch straight to register view with a banner
+  clearError();
+  const lf=document.getElementById('loginForm'),rf=document.getElementById('registerForm');
+  lf.style.display='none';rf.style.display='flex';
+  document.getElementById('modalTitle').textContent='Create Account';
+  document.getElementById('toggleForm').textContent='Already have an account? Login here';
+  document.getElementById('forgotLinkWrap').style.display='none';
+  // Show reason as info message (reuse error el with different style)
+  const el=document.getElementById('errorMessage');
+  el.textContent=reason||'Create a free account to access all features.';
+  el.style.display='block';
+  el.style.color='var(--color-primary)';
+  el.style.borderColor='rgba(0,212,255,.3)';
+  el.style.background='rgba(0,212,255,.05)';
+  openModal('loginModal');
+}
+
 async function sendFriendRequest(toUid,toName){
   if(!currentUser)return;
+  // Guests cannot send friend requests
+  if(currentUser.isAnonymous||currentUserData?.isAnonymous){
+    closeModal('profileModal');
+    promptGuestRegister('Create a free account to connect with other operatives and send friend requests.');
+    return;
+  }
   const btn=document.getElementById('vpSendReq');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';}
   try{
@@ -1214,6 +1252,8 @@ function rankClass(rank){
   if(r==='co-administrator')return'rank-badge-coadmin';
   if(r==='developer')return'rank-badge-dev';
   if(r==='moderator')return'rank-badge-mod';
+  if(r==='beta tester')return'rank-badge-beta';
+  if(r==='unaffiliated')return'rank-badge-unaffiliated';
   if(r==='guest')return'rank-badge-guest';
   return'rank-badge-member';
 }
@@ -1298,11 +1338,17 @@ async function loadMsgNotifTab(){
       const item=document.createElement('div');
       item.className='notif-item'+(n.read?'':' unread');
       item.style.cursor='pointer';
-      item.innerHTML=`<div class="notif-av">${avHtml(n.fromPhoto,n.fromName)}</div><div class="notif-info"><div class="notif-text"><strong>${esc(n.fromName||'Someone')}</strong> sent you a message.</div><div class="notif-text" style="margin-top:3px;font-size:.7rem;color:var(--color-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(n.preview||'')}</div><div class="notif-actions" style="margin-top:5px;"><span style="font-family:var(--font-mono);font-size:.62rem;color:rgba(0,212,255,.3);">${n.createdAt?fmtDate(n.createdAt):''}</span></div></div>${!n.read?'<div class="ann-unread-dot"></div>':''}`;
-      item.addEventListener('click',async()=>{
-        // Mark read
+      item.innerHTML=`<div class="notif-av">${avHtml(n.fromPhoto,n.fromName)}</div><div class="notif-info"><div class="notif-text"><strong>${esc(n.fromName||'Someone')}</strong> sent you a message.</div><div class="notif-text" style="margin-top:3px;font-size:.7rem;color:var(--color-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(n.preview||'')}</div><div class="notif-actions" style="margin-top:5px;"><span style="font-family:var(--font-mono);font-size:.62rem;color:rgba(0,212,255,.3);">${n.createdAt?fmtDate(n.createdAt):''}</span></div></div>${!n.read?'<div class="ann-unread-dot"></div>':''}<button class="notif-dismiss" data-id="${d.id}" title="Dismiss" style="background:none;border:none;color:var(--color-text-muted);font-size:.8rem;cursor:pointer;padding:2px 4px;flex-shrink:0;line-height:1;transition:var(--transition);" onmouseover="this.style.color='#f55'" onmouseout="this.style.color='var(--color-text-muted)'">&#x2715;</button>`;
+      item.querySelector('.notif-dismiss').addEventListener('click',async e=>{
+        e.stopPropagation();
+        await db.collection('notifications').doc(e.currentTarget.dataset.id).delete().catch(()=>{});
+        item.style.transition='opacity .2s';item.style.opacity='0';
+        setTimeout(()=>item.remove(),200);
+        updateNotifBadge();
+      });
+      item.addEventListener('click',async e=>{
+        if(e.target.classList.contains('notif-dismiss'))return;
         await db.collection('notifications').doc(d.id).update({read:true}).catch(()=>{});
-        // Open chat — need sender data
         const senderSnap=await db.collection('users').doc(n.fromUid).get();
         if(senderSnap.exists){closeModal('notifModal');openChat({...senderSnap.data(),id:n.fromUid});}
       });
@@ -1330,7 +1376,16 @@ async function loadAnnNotifTab(){
     snap.forEach(d=>{
       const a=d.data();
       const item=document.createElement('div');item.className='ann-item';
-      item.innerHTML=`<div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${esc(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>`;
+      item.style.position='relative';
+      item.innerHTML=`<button class="notif-dismiss" title="Dismiss" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--color-text-muted);font-size:.8rem;cursor:pointer;padding:2px 4px;line-height:1;transition:var(--transition);" onmouseover="this.style.color='#f55'" onmouseout="this.style.color='var(--color-text-muted)'">&#x2715;</button><div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${esc(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>`;
+      item.querySelector('.notif-dismiss').addEventListener('click',async()=>{
+        // Mark the user's announcement notification as read+dismissed
+        db.collection('notifications').where('to','==',currentUser.uid).where('type','==','announcement').get()
+          .then(s=>s.docs.forEach(nd=>db.collection('notifications').doc(nd.id).update({read:true}).catch(()=>{}))).catch(()=>{});
+        item.style.transition='opacity .2s';item.style.opacity='0';
+        setTimeout(()=>item.remove(),200);
+        updateNotifBadge();
+      });
       list.appendChild(item);
     });
     updateNotifBadge();
@@ -1341,12 +1396,20 @@ async function loadAnnNotifTab(){
       list.innerHTML='';
       const docs=snap2.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));
       if(!docs.length){list.innerHTML='<div class="notif-empty">No announcements yet.</div>';return;}
-      docs.forEach(d=>{const a=d.data();const item=document.createElement('div');item.className='ann-item';item.innerHTML=`<div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${esc(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>`;list.appendChild(item);});
+      docs.forEach(d=>{const a=d.data();const item=document.createElement('div');item.className='ann-item';item.style.position='relative';item.innerHTML=`<button class="notif-dismiss" title="Dismiss" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--color-text-muted);font-size:.8rem;cursor:pointer;padding:2px 4px;line-height:1;">&#x2715;</button><div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${esc(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>`;item.querySelector('.notif-dismiss').addEventListener('click',()=>{item.style.transition='opacity .2s';item.style.opacity='0';setTimeout(()=>item.remove(),200);updateNotifBadge();});list.appendChild(item);});
     }catch(e2){list.innerHTML=`<div class="notif-empty" style="color:#f55;">Error: ${e2.code||e2.message}</div>`;}
   }
 }
 
-document.getElementById('notifBtn').addEventListener('click',e=>{e.stopPropagation();if(currentUser)openNotifications();else{showToast('Log in to view notifications.');}});
+document.getElementById('notifBtn').addEventListener('click',e=>{
+  e.stopPropagation();
+  if(!currentUser){showToast('Log in to view notifications.');return;}
+  if(currentUser.isAnonymous||currentUserData?.isAnonymous){
+    promptGuestRegister('Create a free account to get notifications, add friends, and message people.');
+    return;
+  }
+  openNotifications();
+});
 
 /* ── MESSAGE POPUP TOAST ── */
 let msgToastTimer=null;
@@ -1358,7 +1421,8 @@ function showMsgToast(senderName,senderPhoto,preview,senderUid){
   toast.classList.add('show');
   clearTimeout(msgToastTimer);
   msgToastTimer=setTimeout(()=>toast.classList.remove('show'),5000);
-  toast.onclick=async()=>{
+  toast.onclick=async e=>{
+    if(e.target.id==='msgToastDismiss'){toast.classList.remove('show');return;}
     toast.classList.remove('show');
     const snap=await db.collection('users').doc(senderUid).get();
     if(snap.exists)openChat({...snap.data(),id:senderUid});
@@ -1370,6 +1434,11 @@ let currentChatUid=null;
 
 async function openChat(otherUser){
   if(!currentUser)return;
+  // Guests cannot message
+  if(currentUser.isAnonymous||currentUserData?.isAnonymous){
+    promptGuestRegister('Create a free account to message other operatives.');
+    return;
+  }
   // Verify friendship using cached data first, fall back to fresh fetch
   const friends=(currentUserData?.friends)||[];
   if(!friends.includes(otherUser.id)){
@@ -1465,7 +1534,7 @@ async function openMyProfile(){
     const d=currentUserData;
     const isGuest=currentUser.isAnonymous||d.isAnonymous;
     document.getElementById('myProfileDisplayName').textContent=(d.displayName||'Guest')+' '+(isGuest?'':'');
-    document.getElementById('myProfileRank').textContent=isGuest?'Guest (Anonymous)':d.rank||'Member';
+    document.getElementById('myProfileRank').textContent=isGuest?(d.rank||'Unaffiliated'):d.rank||'Member';
     document.getElementById('editDisplayName').value=d.displayName||'';
     document.getElementById('editBio').value=d.bio||'';
     document.getElementById('editPhotoURL').value=d.photoURL||'';
@@ -1565,7 +1634,16 @@ auth.onAuthStateChanged(async user=>{
       if(notifUnsubscribe)notifUnsubscribe();
       // notifications listener set above
     }catch(e){console.error(e);}
-    logoutBtn.style.display='flex';loginBtn.style.display='none';myProfileBtn.style.display='flex';notifBtn.classList.add('show');
+    logoutBtn.style.display='flex';loginBtn.style.display='none';myProfileBtn.style.display='flex';
+    // Guests get a dimmed bell that prompts register instead of opening notifications
+    notifBtn.classList.add('show');
+    if(currentUserData?.isAnonymous){
+      notifBtn.style.opacity='.4';
+      notifBtn.title='Create an account to get notifications';
+    }else{
+      notifBtn.style.opacity='';
+      notifBtn.title='Notifications';
+    }
     // Show/hide admin button
     document.getElementById('adminPanelBtn').style.display=(user.uid===OWNER_UID||isAdmin(currentUserData))?'flex':'none';
     // Single listener for all unread notifications (friend requests + messages + announcements)
@@ -1597,7 +1675,13 @@ window.addEventListener('beforeunload',()=>{if(currentUser)db.collection('users'
 
 /* ── AUTH FORMS ── */
 function showError(msg){const el=document.getElementById('errorMessage');el.textContent=msg;el.style.display='block';}
-function clearError(){document.getElementById('errorMessage').style.display='none';}
+function clearError(){
+  const el=document.getElementById('errorMessage');
+  el.style.display='none';
+  el.style.color='#ff4444';
+  el.style.borderColor='rgba(255,68,68,.2)';
+  el.style.background='rgba(255,68,68,.05)';
+}
 
 document.getElementById('loginForm').addEventListener('submit',async e=>{
   e.preventDefault();clearError();const btn=e.target.querySelector('button[type=submit]');
@@ -1634,7 +1718,7 @@ document.getElementById('anonLogin').addEventListener('click',async()=>{
     const guestNum=Math.floor(Math.random()*9000)+1000;
     await db.collection('users').doc(r.user.uid).set({
       displayName:`Guest#${guestNum}`,email:'',photoURL:'',
-      rank:'Guest',bio:'Anonymous operative.',status:'online',friends:[],isAnonymous:true,
+      rank:'Unaffiliated',bio:'Browsing as guest.',status:'online',friends:[],isAnonymous:true,
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     },{merge:true});
     closeModal('loginModal');
@@ -1729,7 +1813,7 @@ document.getElementById('intelFeedMobile').addEventListener('click',e=>{
 
 
 /* ── ADMIN PANEL ── */
-const RANKS_LIST=['Member','Moderator','Developer','Co-Administrator','Administrator','Founder'];
+const RANKS_LIST=['Unaffiliated','Member','Beta Tester','Moderator','Developer','Co-Administrator','Administrator','Founder'];
 
 async function openAdminPanel(){
   if(!currentUser||!isAdmin(currentUserData)){showToast('Access denied.');return;}
