@@ -857,6 +857,7 @@ async function openViewProfile(u){
     else if(pendingReceived) actions=`<button class="btn-sm" id="vpAccept"><i class="fas fa-check"></i> Accept Request</button>`;
     else actions=`<button class="btn-sm" id="vpSendReq"><i class="fas fa-user-plus"></i> Send Request</button>`;
   }
+  // Always render profile — even if relationship check failed above
   content.innerHTML=`
     <div class="view-profile-header">
       <div class="view-profile-avatar-wrap">${photo?`<img src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`<div class="view-profile-avatar-placeholder">${initials(name)}</div>`}</div>
@@ -879,16 +880,24 @@ async function openViewProfile(u){
 /* ── FRIEND REQUEST SYSTEM ── */
 async function sendFriendRequest(toUid,toName){
   if(!currentUser)return;
+  const btn=document.getElementById('vpSendReq');
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';}
   try{
-    const ex=await db.collection('friendRequests').where('from','==',currentUser.uid).where('to','==',toUid).get();
-    if(ex.docs.some(d=>d.data().status==='pending')){showToast('Request already sent!');return;}
     await db.collection('friendRequests').add({
-      from:currentUser.uid,fromName:currentUserData?.displayName||currentUser.email,fromPhoto:currentUserData?.photoURL||'',
-      to:toUid,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      from:currentUser.uid,
+      fromName:currentUserData?.displayName||'Unknown',
+      fromPhoto:currentUserData?.photoURL||'',
+      to:toUid,
+      status:'pending',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
     closeModal('profileModal');
     showToast(`Friend request sent to ${toName}!`);
-  }catch(err){console.error(err);showToast('Failed to send request.');}
+  }catch(err){
+    console.error('sendFriendRequest error:',err);
+    showToast(`Error: ${err.code==='permission-denied'?'Permission denied — check Firestore rules.':err.message}`);
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-user-plus"></i> Send Request';}
+  }
 }
 
 async function acceptFriendRequest(fromUid,fromName){
@@ -905,7 +914,7 @@ async function acceptFriendRequest(fromUid,fromName){
     closeModal('profileModal');
     showToast(`You are now connected with ${fromName}!`);
     updateNotifBadge();
-  }catch(err){console.error(err);showToast('Failed to accept request.');}
+  }catch(err){console.error('acceptFriendRequest error:',err);showToast(`Error: ${err.code==='permission-denied'?'Permission denied — check Firestore rules.':err.message}`);}
 }
 
 async function declineFriendRequest(reqId){
@@ -956,7 +965,7 @@ async function openNotifications(){
       item.querySelector('[data-rid]').addEventListener('click',async function(){await declineFriendRequest(this.dataset.rid);});
       list.appendChild(item);
     });
-  }catch(err){console.error(err);list.innerHTML='<div class="notif-empty" style="color:#f55;">Failed to load. Make sure Firestore indexes are set up.</div>';}
+  }catch(err){console.error('Notifications error:',err);list.innerHTML=`<div class="notif-empty" style="color:#f55;">Error: ${err.code||err.message}.<br><span style="font-size:.65rem;opacity:.7;">Check console for details.</span></div>`;}
 }
 
 document.getElementById('notifBtn').addEventListener('click',e=>{e.stopPropagation();if(currentUser)openNotifications();else{showToast('Log in to view notifications.');}});
@@ -979,9 +988,11 @@ async function openChat(otherUser){
   document.getElementById('msgInput').value='';
   openModal('msgModal');
   const cid=chatId(currentUser.uid,otherUser.id);
+  // Ensure chat doc exists with participants before subscribing (needed for security rules)
+  db.collection('chats').doc(cid).set({participants:[currentUser.uid,otherUser.id]},{merge:true}).catch(()=>{});
   msgUnsubscribe=db.collection('chats').doc(cid).collection('messages').orderBy('createdAt','asc').onSnapshot(snap=>{
     renderMessages(snap.docs);
-  },err=>console.error('Chat error:',err));
+  },err=>{console.error('Chat error:',err);document.getElementById('msgBody').innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;text-align:center;margin:auto;">Error loading messages: ${err.code==='permission-denied'?'Permission denied — check Firestore rules.':err.message}</p>`;});
 }
 
 function renderMessages(docs){
@@ -1011,9 +1022,10 @@ async function sendMessage(){
   input.value='';
   const cid=chatId(currentUser.uid,currentChatUid);
   try{
-    await db.collection('chats').doc(cid).collection('messages').add({senderUid:currentUser.uid,senderName:currentUserData?.displayName||currentUser.email,text,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    // Write chat metadata first so the participants array exists before the message subcollection is written
     await db.collection('chats').doc(cid).set({participants:[currentUser.uid,currentChatUid],lastMessage:text,lastAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
-  }catch(err){console.error(err);showToast('Failed to send message.');}
+    await db.collection('chats').doc(cid).collection('messages').add({senderUid:currentUser.uid,senderName:currentUserData?.displayName||currentUser.email||'Unknown',text,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+  }catch(err){console.error('sendMessage error:',err);showToast(`Error: ${err.code==='permission-denied'?'Permission denied — check Firestore rules.':err.message}`);}
 }
 document.getElementById('msgSendBtn').addEventListener('click',sendMessage);
 document.getElementById('msgInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
