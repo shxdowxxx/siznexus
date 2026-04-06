@@ -839,13 +839,16 @@ async function openViewProfile(u){
   const photo=u.photoURL||'',name=u.displayName||'Unknown';
   let isFriend=false,pendingSent=false,pendingReceived=false;
   if(isLoggedIn&&currentUser.uid!==u.id){
-    const meSnap=await db.collection('users').doc(currentUser.uid).get();
-    currentUserData=meSnap.data();
-    isFriend=(currentUserData?.friends||[]).includes(u.id);
-    const sent=await db.collection('friendRequests').where('from','==',currentUser.uid).where('to','==',u.id).where('status','==','pending').get();
-    pendingSent=!sent.empty;
-    const recv=await db.collection('friendRequests').where('from','==',u.id).where('to','==',currentUser.uid).where('status','==','pending').get();
-    pendingReceived=!recv.empty;
+    try{
+      const meSnap=await db.collection('users').doc(currentUser.uid).get();
+      currentUserData=meSnap.data();
+      isFriend=(currentUserData?.friends||[]).includes(u.id);
+      // Only 2-field queries (no 3-field compound) — no index required, filter status client-side
+      const sentSnap=await db.collection('friendRequests').where('from','==',currentUser.uid).where('to','==',u.id).get();
+      pendingSent=sentSnap.docs.some(d=>d.data().status==='pending');
+      const recvSnap=await db.collection('friendRequests').where('from','==',u.id).where('to','==',currentUser.uid).get();
+      pendingReceived=recvSnap.docs.some(d=>d.data().status==='pending');
+    }catch(e){console.error('openViewProfile lookup:',e);}
   }
   let actions='';
   if(isLoggedIn&&currentUser.uid!==u.id){
@@ -877,8 +880,8 @@ async function openViewProfile(u){
 async function sendFriendRequest(toUid,toName){
   if(!currentUser)return;
   try{
-    const ex=await db.collection('friendRequests').where('from','==',currentUser.uid).where('to','==',toUid).where('status','==','pending').get();
-    if(!ex.empty){showToast('Request already sent!');return;}
+    const ex=await db.collection('friendRequests').where('from','==',currentUser.uid).where('to','==',toUid).get();
+    if(ex.docs.some(d=>d.data().status==='pending')){showToast('Request already sent!');return;}
     await db.collection('friendRequests').add({
       from:currentUser.uid,fromName:currentUserData?.displayName||currentUser.email,fromPhoto:currentUserData?.photoURL||'',
       to:toUid,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()
@@ -891,9 +894,10 @@ async function sendFriendRequest(toUid,toName){
 async function acceptFriendRequest(fromUid,fromName){
   if(!currentUser)return;
   try{
-    const reqSnap=await db.collection('friendRequests').where('from','==',fromUid).where('to','==',currentUser.uid).where('status','==','pending').get();
+    const reqSnap=await db.collection('friendRequests').where('from','==',fromUid).where('to','==',currentUser.uid).get();
+    // only process pending ones
     const batch=db.batch();
-    reqSnap.forEach(d=>batch.update(d.ref,{status:'accepted'}));
+    reqSnap.docs.filter(d=>d.data().status==='pending').forEach(d=>batch.update(d.ref,{status:'accepted'}));
     batch.update(db.collection('users').doc(currentUser.uid),{friends:firebase.firestore.FieldValue.arrayUnion(fromUid)});
     batch.update(db.collection('users').doc(fromUid),{friends:firebase.firestore.FieldValue.arrayUnion(currentUser.uid)});
     await batch.commit();
@@ -925,9 +929,10 @@ async function removeFriend(uid,name){
 /* ── NOTIFICATIONS ── */
 async function updateNotifBadge(){
   if(!currentUser)return;
-  const snap=await db.collection('friendRequests').where('to','==',currentUser.uid).where('status','==','pending').get();
+  const snap=await db.collection('friendRequests').where('to','==',currentUser.uid).get();
+  const count=snap.docs.filter(d=>d.data().status==='pending').length;
   const badge=document.getElementById('notifBadge');
-  if(snap.size>0){badge.textContent=snap.size;badge.classList.add('show');}else{badge.classList.remove('show');}
+  if(count>0){badge.textContent=count;badge.classList.add('show');}else{badge.classList.remove('show');}
 }
 
 async function openNotifications(){
@@ -935,10 +940,15 @@ async function openNotifications(){
   list.innerHTML='<div class="loading-spinner" style="grid-column:unset;"></div>';
   openModal('notifModal');
   try{
-    const snap=await db.collection('friendRequests').where('to','==',currentUser.uid).where('status','==','pending').orderBy('createdAt','desc').get();
+    // Two-field query only — no composite index needed. Filter + sort client-side.
+    const snap=await db.collection('friendRequests').where('to','==',currentUser.uid).get();
+    const pending=snap.docs.filter(d=>d.data().status==='pending').sort((a,b)=>{
+      const ta=a.data().createdAt?.toMillis?.()||0,tb=b.data().createdAt?.toMillis?.()||0;
+      return tb-ta;
+    });
     list.innerHTML='';
-    if(snap.empty){list.innerHTML='<div class="notif-empty">No new notifications.</div>';return;}
-    snap.forEach(d=>{
+    if(!pending.length){list.innerHTML='<div class="notif-empty">No new notifications.</div>';return;}
+    pending.forEach(d=>{
       const req=d.data(),reqId=d.id;
       const item=document.createElement('div');item.className='notif-item';
       item.innerHTML=`<div class="notif-av">${avHtml(req.fromPhoto,req.fromName)}</div><div class="notif-info"><div class="notif-text"><strong>${esc(req.fromName||'Someone')}</strong> sent you a connection request.</div><div class="notif-actions"><button class="btn-sm" style="padding:5px 10px;font-size:.65rem;" data-uid="${req.from}" data-name="${esc(req.fromName||'them')}"><i class="fas fa-check"></i> Accept</button><button class="btn-sm danger" style="padding:5px 10px;font-size:.65rem;" data-rid="${reqId}"><i class="fas fa-times"></i> Decline</button></div></div>`;
@@ -1109,7 +1119,7 @@ auth.onAuthStateChanged(async user=>{
       db.collection('users').doc(user.uid).update({lastActive:firebase.firestore.FieldValue.serverTimestamp(),status:'online'}).catch(()=>{});
       updateNotifBadge();
       if(notifUnsubscribe)notifUnsubscribe();
-      notifUnsubscribe=db.collection('friendRequests').where('to','==',user.uid).where('status','==','pending').onSnapshot(()=>updateNotifBadge());
+      notifUnsubscribe=db.collection('friendRequests').where('to','==',user.uid).onSnapshot(()=>updateNotifBadge());
     }catch(e){console.error(e);}
     logoutBtn.style.display='flex';loginBtn.style.display='none';myProfileBtn.style.display='flex';notifBtn.classList.add('show');
   }else{
@@ -1206,9 +1216,18 @@ document.getElementById('toggleForm').addEventListener('click',function(){
 
 document.getElementById('logoutBtn').addEventListener('click',async e=>{
   e.preventDefault();const u=auth.currentUser;
-  if(u)try{await db.collection('users').doc(u.uid).update({status:'offline'});}catch(_){}
   if(msgUnsubscribe){msgUnsubscribe();msgUnsubscribe=null;}
   if(notifUnsubscribe){notifUnsubscribe();notifUnsubscribe=null;}
+  if(u){
+    const isGuest=u.isAnonymous;
+    try{await db.collection('users').doc(u.uid).update({status:'offline'});}catch(_){}
+    if(isGuest){
+      try{await db.collection('users').doc(u.uid).delete();}catch(_){}
+      try{await u.delete();}catch(_){}
+      showToast('Guest session ended.');
+      return;
+    }
+  }
   await auth.signOut();showToast('Signed out successfully.');
 });
 
