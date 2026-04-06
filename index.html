@@ -298,28 +298,137 @@ input.input-field::placeholder,textarea.input-field::placeholder{color:rgba(74,1
 .notif-empty{font-family:var(--font-mono);font-size:.78rem;color:var(--color-text-muted);text-align:center;padding:28px 0;}
 
 /* MESSAGING */
-#msgModal .modal-container{max-width:520px;padding:0;display:flex;flex-direction:column;height:520px;max-height:90vh;overflow:hidden;}
-.msg-header{padding:16px 20px;border-bottom:var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;}
-.msg-header-av{width:36px;height:36px;border-radius:50%;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--color-primary);overflow:hidden;flex-shrink:0;}
+#msgModal{align-items:flex-end;}
+#msgModal .modal-container{
+  max-width:480px;width:100%;padding:0;
+  display:flex;flex-direction:column;
+  height:72vh;max-height:640px;
+  overflow:hidden;
+  border-radius:12px 12px 0 0;
+  margin:0;
+}
+.msg-header{
+  padding:12px 16px;
+  border-bottom:var(--border);
+  display:flex;align-items:center;gap:10px;
+  flex-shrink:0;
+  background:rgba(0,10,22,.98);
+}
+.msg-header-back{
+  width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  background:none;border:none;
+  color:var(--color-text-muted);font-size:.9rem;
+  cursor:pointer;flex-shrink:0;
+  transition:var(--transition);
+  border-radius:50%;
+}
+.msg-header-back:hover{color:var(--color-primary);}
+.msg-header-av{
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:700;color:var(--color-primary);
+  overflow:hidden;flex-shrink:0;
+}
 .msg-header-av img{width:100%;height:100%;object-fit:cover;}
-.msg-header-info{flex:1;}
-.msg-header-name{font-size:.85rem;font-weight:700;color:var(--color-primary);letter-spacing:.06em;}
-.msg-header-status{font-family:var(--font-mono);font-size:.65rem;color:var(--color-text-muted);}
-.msg-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;}
-.msg-body::-webkit-scrollbar{width:3px;}
-.msg-body::-webkit-scrollbar-thumb{background:rgba(0,212,255,.15);border-radius:2px;}
-.msg-bubble{max-width:76%;padding:8px 12px;border-radius:4px;font-family:var(--font-mono);font-size:.78rem;line-height:1.6;word-break:break-word;}
-.msg-bubble.mine{align-self:flex-end;background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.22);color:var(--color-text);}
-.msg-bubble.theirs{align-self:flex-start;background:rgba(0,20,40,.8);border:1px solid rgba(0,212,255,.08);color:var(--color-text-muted);}
-.msg-time{font-size:.59rem;color:rgba(0,212,255,.28);margin-top:3px;display:block;text-align:right;}
+.msg-header-info{flex:1;min-width:0;}
+.msg-header-name{
+  font-size:.82rem;font-weight:700;
+  color:var(--color-primary);letter-spacing:.05em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.msg-header-status{
+  font-family:var(--font-mono);font-size:.6rem;
+  color:var(--color-text-muted);
+  display:flex;align-items:center;gap:4px;
+}
+.msg-header-status::before{
+  content:'';width:5px;height:5px;border-radius:50%;
+  background:var(--color-text-muted);flex-shrink:0;
+}
+.msg-header-status.online::before{background:#4CAF50;box-shadow:0 0 4px #4CAF50;}
+.msg-body{
+  flex:1;overflow-y:auto;
+  padding:12px 14px;
+  display:flex;flex-direction:column;gap:6px;
+  background:rgba(4,12,22,.95);
+}
+.msg-body::-webkit-scrollbar{width:2px;}
+.msg-body::-webkit-scrollbar-thumb{background:rgba(0,212,255,.12);border-radius:2px;}
+/* Bubble grouping — tighten gap between same-sender messages */
+.msg-bubble+.msg-bubble.mine,
+.msg-bubble+.msg-bubble.theirs{margin-top:1px;}
+.msg-bubble{
+  max-width:72%;padding:7px 11px 5px;
+  border-radius:12px;
+  font-family:var(--font-mono);font-size:.77rem;line-height:1.55;
+  word-break:break-word;position:relative;
+}
+.msg-bubble.mine{
+  align-self:flex-end;
+  background:rgba(0,180,220,.15);
+  border:1px solid rgba(0,212,255,.2);
+  color:var(--color-text);
+  border-bottom-right-radius:3px;
+}
+.msg-bubble.theirs{
+  align-self:flex-start;
+  background:rgba(0,20,40,.9);
+  border:1px solid rgba(0,212,255,.07);
+  color:var(--color-text-muted);
+  border-bottom-left-radius:3px;
+}
+.msg-time{
+  font-size:.56rem;color:rgba(0,212,255,.22);
+  margin-top:2px;display:block;text-align:right;
+}
 .msg-bubble.theirs .msg-time{text-align:left;}
-.msg-date-div{text-align:center;font-family:var(--font-mono);font-size:.6rem;color:rgba(0,212,255,.18);letter-spacing:.1em;padding:4px 0;}
-.msg-footer{padding:12px 16px;border-top:var(--border);display:flex;gap:8px;flex-shrink:0;}
-.msg-input{flex:1;padding:9px 12px;border-radius:3px;border:1px solid rgba(0,212,255,.2);background:rgba(0,0,0,.4);color:var(--color-text);font-family:var(--font-mono);font-size:.82rem;transition:var(--transition);}
-.msg-input:focus{outline:none;border-color:var(--color-primary);}
-.msg-input::placeholder{color:rgba(74,143,168,.35);}
-.msg-send{padding:9px 14px;border-radius:3px;border:1px solid var(--color-primary);background:transparent;color:var(--color-primary);font-family:var(--font-mono);font-size:.75rem;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:5px;white-space:nowrap;}
-.msg-send:hover{background:var(--color-primary);color:#000;}
+.msg-date-div{
+  text-align:center;font-family:var(--font-mono);
+  font-size:.58rem;color:rgba(0,212,255,.2);
+  letter-spacing:.1em;padding:6px 0;
+  display:flex;align-items:center;gap:8px;
+}
+.msg-date-div::before,.msg-date-div::after{
+  content:'';flex:1;height:1px;
+  background:rgba(0,212,255,.07);
+}
+.msg-footer{
+  padding:8px 12px;
+  padding-bottom:max(8px, env(safe-area-inset-bottom));
+  border-top:var(--border);
+  display:flex;align-items:center;gap:8px;
+  flex-shrink:0;
+  background:rgba(0,10,22,.98);
+}
+.msg-input{
+  flex:1;padding:9px 14px;
+  border-radius:20px;
+  border:1px solid rgba(0,212,255,.18);
+  background:rgba(0,0,0,.5);
+  color:var(--color-text);
+  font-family:var(--font-mono);font-size:.8rem;
+  transition:var(--transition);
+  -webkit-appearance:none;
+}
+.msg-input:focus{outline:none;border-color:rgba(0,212,255,.5);background:rgba(0,0,0,.7);}
+.msg-input::placeholder{color:rgba(74,143,168,.3);}
+.msg-send{
+  width:36px;height:36px;
+  border-radius:50%;
+  border:none;
+  background:var(--color-primary);
+  color:#000;
+  font-size:.85rem;
+  cursor:pointer;transition:var(--transition);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.msg-send:hover{background:var(--color-text-light);transform:scale(1.08);}
+.msg-send:active{transform:scale(.95);}
+/* Hide the text label on send button — icon only */
+.msg-send .send-label{display:none;}
 
 /* SPINNER */
 .loading-spinner{display:flex;align-items:center;justify-content:center;padding:30px;grid-column:1/-1;}
@@ -347,7 +456,18 @@ footer .contact a:hover{text-decoration:underline;}
   .info-section{padding:0 0 40px;grid-template-columns:1fr;}
   .bubble{padding:24px 20px;}
   .friends-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
-  #msgModal .modal-container{height:100vh;max-height:100vh;border-radius:0;}
+  #msgModal{align-items:flex-end !important;}
+  #msgModal .modal-container{
+    height:82vh;max-height:82vh;
+    border-radius:14px 14px 0 0;
+    margin:0;width:100%;max-width:100%;
+  }
+  .msg-bubble{max-width:82%;}
+  .msg-header{padding:10px 14px;}
+}
+/* Hide top-right X on msg modal — back chevron handles it on mobile */
+@media(max-width:768px){
+  #msgModal .close-btn{display:none;}
 }
 /* FORGOT PASSWORD LINK */
 .forgot-link{text-align:right;margin-top:-6px;}
@@ -508,6 +628,7 @@ footer .contact a:hover{text-decoration:underline;}
   <div class="modal-container">
     <button class="close-btn" id="closeMsgModal" style="z-index:2;">&#x2715;</button>
     <div class="msg-header">
+      <button class="msg-header-back" id="msgBackBtn" aria-label="Close chat"><i class="fas fa-chevron-down"></i></button>
       <div class="msg-header-av" id="msgHeaderAv"></div>
       <div class="msg-header-info">
         <div class="msg-header-name" id="msgHeaderName">—</div>
@@ -517,7 +638,7 @@ footer .contact a:hover{text-decoration:underline;}
     <div class="msg-body" id="msgBody"></div>
     <div class="msg-footer">
       <input type="text" class="msg-input" id="msgInput" placeholder="Type a message..." maxlength="500" autocomplete="off">
-      <button class="msg-send" id="msgSendBtn"><i class="fas fa-paper-plane"></i> Send</button>
+      <button class="msg-send" id="msgSendBtn" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
     </div>
   </div>
 </div>
@@ -781,7 +902,9 @@ document.getElementById('closeDirectory').addEventListener('click',()=>{closeMod
 document.getElementById('closeProfile').addEventListener('click',()=>closeModal('profileModal'));
 document.getElementById('closeMyProfile').addEventListener('click',()=>closeModal('myProfileModal'));
 document.getElementById('closeNotif').addEventListener('click',()=>closeModal('notifModal'));
-document.getElementById('closeMsgModal').addEventListener('click',()=>{closeModal('msgModal');if(msgUnsubscribe){msgUnsubscribe();msgUnsubscribe=null;}currentChatUid=null;});
+function closeMsgChat(){closeModal('msgModal');if(msgUnsubscribe){msgUnsubscribe();msgUnsubscribe=null;}currentChatUid=null;}
+document.getElementById('closeMsgModal').addEventListener('click',closeMsgChat);
+document.getElementById('msgBackBtn').addEventListener('click',closeMsgChat);
 
 /* ── ACTIVE MEMBERS PANEL ── */
 function startActiveMembersListener(){
@@ -903,36 +1026,56 @@ async function sendFriendRequest(toUid,toName){
 async function acceptFriendRequest(fromUid,fromName){
   if(!currentUser)return;
   try{
+    // 1. Mark the request as accepted (user owns the 'to' field so this is allowed)
     const reqSnap=await db.collection('friendRequests').where('from','==',fromUid).where('to','==',currentUser.uid).get();
-    // only process pending ones
-    const batch=db.batch();
-    reqSnap.docs.filter(d=>d.data().status==='pending').forEach(d=>batch.update(d.ref,{status:'accepted'}));
-    batch.update(db.collection('users').doc(currentUser.uid),{friends:firebase.firestore.FieldValue.arrayUnion(fromUid)});
-    batch.update(db.collection('users').doc(fromUid),{friends:firebase.firestore.FieldValue.arrayUnion(currentUser.uid)});
-    await batch.commit();
+    const pendingDocs=reqSnap.docs.filter(d=>d.data().status==='pending');
+    for(const d of pendingDocs){
+      await db.collection('friendRequests').doc(d.id).update({status:'accepted'});
+    }
+    // 2. Add to current user's friends (own doc — always allowed)
+    await db.collection('users').doc(currentUser.uid).update({
+      friends:firebase.firestore.FieldValue.arrayUnion(fromUid)
+    });
+    // 3. Add to the other user's friends (allowed by the new rule: only 'friends' field changes)
+    await db.collection('users').doc(fromUid).update({
+      friends:firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+    });
     currentUserData=(await db.collection('users').doc(currentUser.uid).get()).data();
     closeModal('profileModal');
+    closeModal('notifModal');
     showToast(`You are now connected with ${fromName}!`);
     updateNotifBadge();
-  }catch(err){console.error('acceptFriendRequest error:',err);showToast(`Error: ${err.code==='permission-denied'?'Permission denied — check Firestore rules.':err.message}`);}
+  }catch(err){
+    console.error('acceptFriendRequest error:',err);
+    showToast(err.code==='permission-denied'
+      ?'Permission denied — make sure you published the updated Firestore rules.'
+      :`Error: ${err.message}`);
+  }
 }
 
 async function declineFriendRequest(reqId){
-  try{await db.collection('friendRequests').doc(reqId).update({status:'declined'});showToast('Request declined.');updateNotifBadge();openNotifications();}
-  catch(err){console.error(err);}
+  try{
+    await db.collection('friendRequests').doc(reqId).update({status:'declined'});
+    showToast('Request declined.');
+    updateNotifBadge();
+    openNotifications();
+  }catch(err){console.error('declineFriendRequest error:',err);}
 }
 
 async function removeFriend(uid,name){
   if(!currentUser)return;
   try{
-    const batch=db.batch();
-    batch.update(db.collection('users').doc(currentUser.uid),{friends:firebase.firestore.FieldValue.arrayRemove(uid)});
-    batch.update(db.collection('users').doc(uid),{friends:firebase.firestore.FieldValue.arrayRemove(currentUser.uid)});
-    await batch.commit();
+    // Each write only touches 'friends' on each respective doc
+    await db.collection('users').doc(currentUser.uid).update({
+      friends:firebase.firestore.FieldValue.arrayRemove(uid)
+    });
+    await db.collection('users').doc(uid).update({
+      friends:firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+    }).catch(()=>{}); // non-critical if this one fails
     currentUserData=(await db.collection('users').doc(currentUser.uid).get()).data();
     closeModal('profileModal');closeModal('myProfileModal');
     showToast(`Removed ${name} from connections.`);
-  }catch(err){console.error(err);showToast('Failed to remove.');}
+  }catch(err){console.error('removeFriend error:',err);showToast('Failed to remove.');}
 }
 
 /* ── NOTIFICATIONS ── */
@@ -975,24 +1118,34 @@ let currentChatUid=null;
 
 async function openChat(otherUser){
   if(!currentUser)return;
-  const meSnap=await db.collection('users').doc(currentUser.uid).get();
-  const meData=meSnap.data();
-  if(!(meData?.friends||[]).includes(otherUser.id)){showToast('You can only message connections.');return;}
+  // Verify friendship using cached data first, fall back to fresh fetch
+  const friends=(currentUserData?.friends)||[];
+  if(!friends.includes(otherUser.id)){
+    // Re-fetch in case cache is stale
+    const meSnap=await db.collection('users').doc(currentUser.uid).get();
+    currentUserData=meSnap.data();
+    if(!(currentUserData?.friends||[]).includes(otherUser.id)){
+      showToast('You can only message connections.');return;
+    }
+  }
   currentChatUid=otherUser.id;
   if(msgUnsubscribe){msgUnsubscribe();msgUnsubscribe=null;}
   const hav=document.getElementById('msgHeaderAv');
   hav.innerHTML=avHtml(otherUser.photoURL,otherUser.displayName);
   document.getElementById('msgHeaderName').textContent=otherUser.displayName||'Unknown';
-  document.getElementById('msgHeaderStatus').textContent=(otherUser.status||'offline').toUpperCase();
+  const statusEl=document.getElementById('msgHeaderStatus');
+  statusEl.textContent=(otherUser.status||'offline');
+  statusEl.className='msg-header-status'+(otherUser.status==='online'?' online':'');
   document.getElementById('msgBody').innerHTML='<div class="loading-spinner" style="grid-column:unset;align-self:center;margin:auto;"></div>';
   document.getElementById('msgInput').value='';
   openModal('msgModal');
   const cid=chatId(currentUser.uid,otherUser.id);
-  // Ensure chat doc exists with participants before subscribing (needed for security rules)
-  db.collection('chats').doc(cid).set({participants:[currentUser.uid,otherUser.id]},{merge:true}).catch(()=>{});
   msgUnsubscribe=db.collection('chats').doc(cid).collection('messages').orderBy('createdAt','asc').onSnapshot(snap=>{
     renderMessages(snap.docs);
-  },err=>{console.error('Chat error:',err);document.getElementById('msgBody').innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;text-align:center;margin:auto;">Error loading messages: ${err.code==='permission-denied'?'Permission denied — check Firestore rules.':err.message}</p>`;});
+  },err=>{
+    console.error('Chat listener error:',err);
+    document.getElementById('msgBody').innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;text-align:center;margin:auto;">Could not load messages (${err.code||err.message}). Make sure Firestore rules are published.</p>`;
+  });
 }
 
 function renderMessages(docs){
@@ -1017,15 +1170,26 @@ async function sendMessage(){
   if(!currentUser||!currentChatUid)return;
   const input=document.getElementById('msgInput');
   const text=input.value.trim();if(!text)return;
-  const meSnap=await db.collection('users').doc(currentUser.uid).get();
-  if(!(meSnap.data()?.friends||[]).includes(currentChatUid)){showToast('You can only message connections.');return;}
   input.value='';
   const cid=chatId(currentUser.uid,currentChatUid);
   try{
-    // Write chat metadata first so the participants array exists before the message subcollection is written
-    await db.collection('chats').doc(cid).set({participants:[currentUser.uid,currentChatUid],lastMessage:text,lastAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
-    await db.collection('chats').doc(cid).collection('messages').add({senderUid:currentUser.uid,senderName:currentUserData?.displayName||currentUser.email||'Unknown',text,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-  }catch(err){console.error('sendMessage error:',err);showToast(`Error: ${err.code==='permission-denied'?'Permission denied — check Firestore rules.':err.message}`);}
+    await db.collection('chats').doc(cid).collection('messages').add({
+      senderUid:currentUser.uid,
+      senderName:currentUserData?.displayName||'Unknown',
+      text,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Update last message preview on the chat doc (non-blocking)
+    db.collection('chats').doc(cid).set({
+      participants:[currentUser.uid,currentChatUid],
+      lastMessage:text,
+      lastAt:firebase.firestore.FieldValue.serverTimestamp()
+    },{merge:true}).catch(()=>{});
+  }catch(err){
+    console.error('sendMessage error:',err);
+    input.value=text; // restore text so user doesn't lose their message
+    showToast(`Could not send message (${err.code==='permission-denied'?'Permission denied — check Firestore rules':err.message})`);
+  }
 }
 document.getElementById('msgSendBtn').addEventListener('click',sendMessage);
 document.getElementById('msgInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
