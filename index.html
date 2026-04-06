@@ -469,6 +469,80 @@ footer .contact a:hover{text-decoration:underline;}
 @media(max-width:768px){
   #msgModal .close-btn{display:none;}
 }
+
+/* ── RANK BADGE COLORS ── */
+.rank-badge-founder{color:#00d4ff;text-shadow:0 0 10px rgba(0,212,255,.9),0 0 22px rgba(0,212,255,.55);}
+.rank-badge-admin{color:#4a9eca;text-shadow:0 0 5px rgba(74,158,202,.35);}
+.rank-badge-coadmin{color:#3a7fa0;text-shadow:0 0 4px rgba(58,127,160,.3);}
+.rank-badge-dev{color:#2d6680;}
+.rank-badge-mod{color:#245470;}
+.rank-badge-member{color:#1d4560;}
+.rank-badge-guest{color:#888;font-style:italic;}
+
+/* ── NOTIFICATION TABS ── */
+.notif-tabs{display:flex;gap:0;margin-bottom:14px;border-bottom:var(--border);}
+.notif-tab{flex:1;padding:8px 0;text-align:center;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;color:var(--color-text-muted);cursor:pointer;transition:var(--transition);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;}
+.notif-tab.active{color:var(--color-primary);border-bottom-color:var(--color-primary);}
+.notif-tab:hover{color:var(--color-primary);}
+
+/* ── ANNOUNCEMENT ITEMS ── */
+.ann-item{padding:12px 14px;background:rgba(0,212,255,.03);border:1px solid rgba(0,212,255,.08);border-left:3px solid var(--color-primary);border-radius:4px;margin-bottom:8px;transition:var(--transition);}
+.ann-item.unread{background:rgba(0,212,255,.07);border-color:rgba(0,212,255,.2);}
+.ann-item-title{font-size:.8rem;font-weight:700;color:var(--color-primary);letter-spacing:.06em;margin-bottom:4px;}
+.ann-item-body{font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);line-height:1.6;}
+.ann-item-meta{font-family:var(--font-mono);font-size:.62rem;color:rgba(0,212,255,.3);margin-top:6px;display:flex;justify-content:space-between;align-items:center;}
+.ann-unread-dot{width:7px;height:7px;border-radius:50%;background:var(--color-primary);box-shadow:var(--glow-sm);flex-shrink:0;}
+
+/* ── MSG NOTIFICATION TOAST ── */
+.msg-notif-toast{
+  position:fixed;top:70px;right:16px;
+  background:rgba(0,14,28,.97);
+  border:1px solid rgba(0,212,255,.3);
+  border-radius:8px;
+  padding:10px 14px;
+  display:flex;align-items:center;gap:10px;
+  z-index:8000;
+  box-shadow:var(--glow-md);
+  cursor:pointer;
+  transform:translateX(calc(100% + 20px));
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  max-width:260px;
+  min-width:200px;
+}
+.msg-notif-toast.show{transform:translateX(0);}
+.msg-notif-av{width:32px;height:32px;border-radius:50%;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--color-primary);overflow:hidden;flex-shrink:0;}
+.msg-notif-av img{width:100%;height:100%;object-fit:cover;}
+.msg-notif-info{flex:1;min-width:0;}
+.msg-notif-name{font-size:.72rem;font-weight:700;color:var(--color-primary);letter-spacing:.04em;}
+.msg-notif-preview{font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+
+/* ── ADMIN PANEL ── */
+#adminModal .modal-container{max-width:680px;}
+.admin-tabs{display:flex;gap:0;margin-bottom:18px;border-bottom:var(--border);}
+.admin-tab{flex:1;padding:9px 0;text-align:center;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.1em;color:var(--color-text-muted);cursor:pointer;transition:var(--transition);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;}
+.admin-tab.active{color:var(--color-primary);border-bottom-color:var(--color-primary);}
+.admin-panel-section{display:none;}
+.admin-panel-section.active{display:block;}
+.admin-user-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(0,212,255,.05);}
+.admin-user-row:last-child{border-bottom:none;}
+.admin-user-av{width:30px;height:30px;border-radius:50%;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.15);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--color-primary);overflow:hidden;flex-shrink:0;}
+.admin-user-av img{width:100%;height:100%;object-fit:cover;}
+.admin-user-name{font-family:var(--font-mono);font-size:.78rem;color:var(--color-text-light);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.admin-rank-select{background:rgba(0,0,0,.4);border:1px solid rgba(0,212,255,.2);color:var(--color-text);font-family:var(--font-mono);font-size:.7rem;padding:4px 8px;border-radius:3px;cursor:pointer;transition:var(--transition);}
+.admin-rank-select:focus{outline:none;border-color:var(--color-primary);}
+.admin-save-rank{padding:4px 10px;font-size:.65rem;letter-spacing:.08em;border-radius:3px;border:1px solid var(--color-primary);background:transparent;color:var(--color-primary);font-family:var(--font-mono);cursor:pointer;transition:var(--transition);white-space:nowrap;}
+.admin-save-rank:hover{background:var(--color-primary);color:#000;}
+.ann-compose{display:flex;flex-direction:column;gap:10px;}
+.ann-compose input,.ann-compose textarea{width:100%;padding:9px 12px;border-radius:3px;border:1px solid rgba(0,212,255,.2);background:rgba(0,0,0,.4);color:var(--color-text);font-family:var(--font-mono);font-size:.8rem;transition:var(--transition);}
+.ann-compose input:focus,.ann-compose textarea:focus{outline:none;border-color:var(--color-primary);}
+.ann-compose textarea{min-height:80px;resize:vertical;line-height:1.6;}
+.ann-compose input::placeholder,.ann-compose textarea::placeholder{color:rgba(74,143,168,.4);}
+.ann-history-item{padding:10px 12px;background:rgba(0,212,255,.02);border:1px solid rgba(0,212,255,.07);border-radius:4px;margin-bottom:6px;}
+.ann-history-title{font-size:.75rem;font-weight:700;color:var(--color-primary);margin-bottom:2px;}
+.ann-history-body{font-family:var(--font-mono);font-size:.7rem;color:var(--color-text-muted);}
+.ann-history-meta{font-family:var(--font-mono);font-size:.6rem;color:rgba(0,212,255,.25);margin-top:4px;}
+.admin-section-title{font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);letter-spacing:.15em;text-transform:uppercase;margin:0 0 10px;}
+
 /* FORGOT PASSWORD LINK */
 .forgot-link{text-align:right;margin-top:-6px;}
 #forgotLink{font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);cursor:pointer;letter-spacing:.06em;text-decoration:underline;transition:var(--transition);}
@@ -614,12 +688,62 @@ footer .contact a:hover{text-decoration:underline;}
   </div>
 </div>
 
+
+<!-- ADMIN PANEL -->
+<div class="modal" id="adminModal">
+  <div class="modal-container">
+    <button class="close-btn" id="closeAdmin">&#x2715;</button>
+    <h2><i class="fas fa-shield-alt" style="margin-right:8px;font-size:.85rem;color:#f55;"></i>Admin Panel</h2>
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="roles"><i class="fas fa-id-badge"></i> Roles</button>
+      <button class="admin-tab" data-tab="announce"><i class="fas fa-bullhorn"></i> Announce</button>
+      <button class="admin-tab" data-tab="history"><i class="fas fa-history"></i> History</button>
+    </div>
+    <!-- ROLES TAB -->
+    <div class="admin-panel-section active" id="adminTabRoles">
+      <p class="admin-section-title">Manage Member Roles</p>
+      <div id="adminUserList" style="max-height:380px;overflow-y:auto;"></div>
+    </div>
+    <!-- ANNOUNCE TAB -->
+    <div class="admin-panel-section" id="adminTabAnnounce">
+      <p class="admin-section-title">Send Announcement to All Members</p>
+      <div class="ann-compose">
+        <input type="text" id="annTitle" placeholder="Announcement title..." maxlength="80">
+        <textarea id="annBody" placeholder="Write your announcement..." maxlength="500"></textarea>
+        <button class="btn-primary" id="sendAnnBtn" style="justify-content:center;"><i class="fas fa-bullhorn"></i> Send Announcement</button>
+        <div class="success-msg" id="annSentMsg">Announcement sent!</div>
+      </div>
+    </div>
+    <!-- HISTORY TAB -->
+    <div class="admin-panel-section" id="adminTabHistory">
+      <p class="admin-section-title">Past Announcements</p>
+      <div id="annHistoryList" style="max-height:380px;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGE NOTIFICATION TOAST -->
+<div class="msg-notif-toast" id="msgNotifToast">
+  <div class="msg-notif-av" id="msgNotifAv"></div>
+  <div class="msg-notif-info">
+    <div class="msg-notif-name" id="msgNotifName"></div>
+    <div class="msg-notif-preview" id="msgNotifPreview"></div>
+  </div>
+</div>
+
 <!-- NOTIFICATIONS -->
 <div class="modal" id="notifModal">
-  <div class="modal-container" style="max-width:440px">
+  <div class="modal-container" style="max-width:460px">
     <button class="close-btn" id="closeNotif">&#x2715;</button>
     <h2><i class="fas fa-bell" style="margin-right:8px;font-size:.85rem;"></i>Notifications</h2>
-    <div id="notifList" class="notif-list"></div>
+    <div class="notif-tabs">
+      <button class="notif-tab active" data-ntab="requests">Requests</button>
+      <button class="notif-tab" data-ntab="messages">Messages</button>
+      <button class="notif-tab" data-ntab="announcements">Announcements</button>
+    </div>
+    <div id="notifTabRequests"><div id="notifList" class="notif-list"></div></div>
+    <div id="notifTabMessages" style="display:none;"><div id="notifMsgList" class="notif-list"></div></div>
+    <div id="notifTabAnnouncements" style="display:none;"><div id="notifAnnList" class="notif-list"></div></div>
   </div>
 </div>
 
@@ -668,6 +792,7 @@ footer .contact a:hover{text-decoration:underline;}
         </button>
         <div class="dropdown-menu" id="dropdownMenu">
           <a href="#" id="myProfileBtn" style="display:none"><i class="fas fa-id-card" style="font-size:12px;width:14px"></i> My Profile</a>
+          <a href="#" id="adminPanelBtn" style="display:none"><i class="fas fa-shield-alt" style="font-size:12px;width:14px;color:#f55;"></i> Admin Panel</a>
           <a href="#" id="viewMembersBtn"><i class="fas fa-users" style="font-size:12px;width:14px"></i> View Members</a>
           <a href="#" id="logoutBtn" style="display:none"><i class="fas fa-sign-out-alt" style="font-size:12px;width:14px"></i> Log Out</a>
           <a href="#" id="loginBtn"><i class="fas fa-sign-in-alt" style="font-size:12px;width:14px"></i> Log In</a>
@@ -878,7 +1003,7 @@ function showToast(msg){const t=document.getElementById('nexusToast');t.textCont
 function openModal(id){document.getElementById(id).classList.add('active');document.body.style.overflow='hidden';}
 function closeModal(id){document.getElementById(id).classList.remove('active');if(!document.querySelector('.modal.active'))document.body.style.overflow='';}
 
-const ALL_MODALS=['loginModal','userDirectory','profileModal','myProfileModal','notifModal','msgModal','resetModal','intelDevModal'];
+const ALL_MODALS=['loginModal','userDirectory','profileModal','myProfileModal','notifModal','msgModal','resetModal','intelDevModal','adminModal'];
 ALL_MODALS.forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){
     if(e.target===this){
@@ -919,7 +1044,7 @@ function startActiveMembersListener(){
     if(!members.length){list.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);padding:8px 0;">No operatives online right now.</p>';return;}
     members.forEach(u=>{
       const row=document.createElement('div');row.className='active-member-row';
-      row.innerHTML=`<div class="active-dot"></div><div class="active-member-av">${avHtml(u.photoURL,u.displayName)}</div><span class="active-member-name">${esc(u.displayName||'Unknown')}</span><span class="active-member-rank">${esc(u.rank||'Member')}</span>`;
+      row.innerHTML=`<div class="active-dot"></div><div class="active-member-av">${avHtml(u.photoURL,u.displayName)}</div><span class="active-member-name">${esc(u.displayName||'Unknown')}</span><span class="active-member-rank ${rankClass(u.rank)}">${esc(u.rank||'Member')}</span>`;
       row.addEventListener('click',()=>{if(currentUser&&u.id===currentUser.uid)openMyProfile();else openViewProfile(u);});
       list.appendChild(row);
     });
@@ -931,7 +1056,7 @@ startActiveMembersListener();
 function buildMemberCard(u,isSelf){
   const div=document.createElement('div');div.className='friend-card';div.dataset.uid=u.id;
   const photo=u.photoURL||'',name=u.displayName||'Unknown',bio=u.bio||'No bio set',status=u.status||'offline',rank=u.rank||'Member';
-  div.innerHTML=`<div class="friend-avatar-wrap">${photo?`<img class="friend-avatar" src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`<div class="friend-avatar-placeholder">${initials(name)}</div>`}</div><div class="friend-info"><h3 class="friend-name">${esc(name)}${isSelf?' <span style="font-size:.6rem;color:var(--color-text-muted);font-family:var(--font-mono);">[YOU]</span>':''}</h3><p class="friend-bio">${esc(bio)}</p><div class="friend-footer"><span class="friend-status status-${status}">${status}</span><span class="friend-rank">${esc(rank)}</span></div></div>`;
+  div.innerHTML=`<div class="friend-avatar-wrap">${photo?`<img class="friend-avatar" src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`<div class="friend-avatar-placeholder">${initials(name)}</div>`}</div><div class="friend-info"><h3 class="friend-name">${esc(name)}${isSelf?' <span style="font-size:.6rem;color:var(--color-text-muted);font-family:var(--font-mono);">[YOU]</span>':''}</h3><p class="friend-bio">${esc(bio)}</p><div class="friend-footer"><span class="friend-status status-${status}">${status}</span><span class="friend-rank ${rankClass(rank)}">${esc(rank)}</span></div></div>`;
   div.addEventListener('click',()=>{if(isSelf)openMyProfile();else openViewProfile(u);});
   return div;
 }
@@ -986,7 +1111,7 @@ async function openViewProfile(u){
       <div class="view-profile-avatar-wrap">${photo?`<img src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`<div class="view-profile-avatar-placeholder">${initials(name)}</div>`}</div>
       <div class="view-profile-info">
         <p class="view-profile-name">${esc(name)}</p>
-        <p class="view-profile-rank">${esc(u.rank||'Member')} &middot; <span class="friend-status status-${u.status||'offline'}" style="font-size:.65rem;">${u.status||'offline'}</span></p>
+        <p class="view-profile-rank"><span class="${rankClass(u.rank)}">${esc(u.rank||'Member')}</span> &middot; <span class="friend-status status-${u.status||'offline'}" style="font-size:.65rem;">${u.status||'offline'}</span></p>
         ${actions?`<div class="profile-action-row">${actions}</div>`:''}
       </div>
     </div>
@@ -1079,39 +1204,166 @@ async function removeFriend(uid,name){
 }
 
 /* ── NOTIFICATIONS ── */
+const ADMIN_RANKS=['Founder','Administrator','Co-Administrator'];
+const OWNER_UID='QZ62mytbllhPt7wWkv6gKtmz31l1';
+function isAdmin(data){return (currentUser&&currentUser.uid===OWNER_UID)||data&&ADMIN_RANKS.includes(data.rank);}
+function rankClass(rank){
+  const r=(rank||'').toLowerCase();
+  if(r==='founder')return'rank-badge-founder';
+  if(r==='administrator')return'rank-badge-admin';
+  if(r==='co-administrator')return'rank-badge-coadmin';
+  if(r==='developer')return'rank-badge-dev';
+  if(r==='moderator')return'rank-badge-mod';
+  if(r==='guest')return'rank-badge-guest';
+  return'rank-badge-member';
+}
+
+// Unread message notifications — track last-seen message per chat
+let unreadMsgUnsub=null;
+const readMsgTimestamps={}; // chatId -> last read millis (in-memory per session)
+
 async function updateNotifBadge(){
   if(!currentUser)return;
-  const snap=await db.collection('friendRequests').where('to','==',currentUser.uid).get();
-  const count=snap.docs.filter(d=>d.data().status==='pending').length;
-  const badge=document.getElementById('notifBadge');
-  if(count>0){badge.textContent=count;badge.classList.add('show');}else{badge.classList.remove('show');}
+  try{
+    const [reqSnap,msgSnap,annSnap]=await Promise.all([
+      db.collection('friendRequests').where('to','==',currentUser.uid).get(),
+      db.collection('notifications').where('to','==',currentUser.uid).where('type','==','message').where('read','==',false).get(),
+      db.collection('notifications').where('to','==',currentUser.uid).where('type','==','announcement').where('read','==',false).get()
+    ]);
+    const reqCount=reqSnap.docs.filter(d=>d.data().status==='pending').length;
+    const msgCount=msgSnap.size;
+    const annCount=annSnap.size;
+    const total=reqCount+msgCount+annCount;
+    const badge=document.getElementById('notifBadge');
+    if(total>0){badge.textContent=total>9?'9+':total;badge.classList.add('show');}
+    else{badge.classList.remove('show');}
+  }catch(e){console.error('Badge error:',e);}
 }
 
 async function openNotifications(){
-  const list=document.getElementById('notifList');
-  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;"></div>';
   openModal('notifModal');
+  // Load all three tabs, start on requests
+  loadNotifTab('requests');
+  // Set up tab switching
+  document.querySelectorAll('.notif-tab').forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll('.notif-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      loadNotifTab(btn.dataset.ntab);
+    };
+  });
+}
+
+async function loadNotifTab(tab){
+  if(tab==='requests') await loadRequestsTab();
+  else if(tab==='messages') await loadMsgNotifTab();
+  else if(tab==='announcements') await loadAnnNotifTab();
+}
+
+async function loadRequestsTab(){
+  const list=document.getElementById('notifList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  document.getElementById('notifTabRequests').style.display='';
+  document.getElementById('notifTabMessages').style.display='none';
+  document.getElementById('notifTabAnnouncements').style.display='none';
   try{
-    // Two-field query only — no composite index needed. Filter + sort client-side.
     const snap=await db.collection('friendRequests').where('to','==',currentUser.uid).get();
-    const pending=snap.docs.filter(d=>d.data().status==='pending').sort((a,b)=>{
-      const ta=a.data().createdAt?.toMillis?.()||0,tb=b.data().createdAt?.toMillis?.()||0;
-      return tb-ta;
-    });
+    const pending=snap.docs.filter(d=>d.data().status==='pending').sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));
     list.innerHTML='';
-    if(!pending.length){list.innerHTML='<div class="notif-empty">No new notifications.</div>';return;}
+    if(!pending.length){list.innerHTML='<div class="notif-empty">No pending requests.</div>';return;}
     pending.forEach(d=>{
       const req=d.data(),reqId=d.id;
       const item=document.createElement('div');item.className='notif-item';
       item.innerHTML=`<div class="notif-av">${avHtml(req.fromPhoto,req.fromName)}</div><div class="notif-info"><div class="notif-text"><strong>${esc(req.fromName||'Someone')}</strong> sent you a connection request.</div><div class="notif-actions"><button class="btn-sm" style="padding:5px 10px;font-size:.65rem;" data-uid="${req.from}" data-name="${esc(req.fromName||'them')}"><i class="fas fa-check"></i> Accept</button><button class="btn-sm danger" style="padding:5px 10px;font-size:.65rem;" data-rid="${reqId}"><i class="fas fa-times"></i> Decline</button></div></div>`;
-      item.querySelector('[data-uid]').addEventListener('click',async function(){await acceptFriendRequest(this.dataset.uid,this.dataset.name);openNotifications();});
-      item.querySelector('[data-rid]').addEventListener('click',async function(){await declineFriendRequest(this.dataset.rid);});
+      item.querySelector('[data-uid]').addEventListener('click',async function(){await acceptFriendRequest(this.dataset.uid,this.dataset.name);loadRequestsTab();});
+      item.querySelector('[data-rid]').addEventListener('click',async function(){await declineFriendRequest(this.dataset.rid);loadRequestsTab();});
       list.appendChild(item);
     });
-  }catch(err){console.error('Notifications error:',err);list.innerHTML=`<div class="notif-empty" style="color:#f55;">Error: ${err.code||err.message}.<br><span style="font-size:.65rem;opacity:.7;">Check console for details.</span></div>`;}
+  }catch(err){console.error(err);document.getElementById('notifList').innerHTML=`<div class="notif-empty" style="color:#f55;">Error: ${err.code||err.message}</div>`;}
+}
+
+async function loadMsgNotifTab(){
+  const list=document.getElementById('notifMsgList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  document.getElementById('notifTabRequests').style.display='none';
+  document.getElementById('notifTabMessages').style.display='';
+  document.getElementById('notifTabAnnouncements').style.display='none';
+  try{
+    const snap=await db.collection('notifications').where('to','==',currentUser.uid).where('type','==','message').get();
+    const items=snap.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));
+    list.innerHTML='';
+    if(!items.length){list.innerHTML='<div class="notif-empty">No message notifications.</div>';return;}
+    for(const d of items){
+      const n=d.data();
+      const item=document.createElement('div');
+      item.className='notif-item'+(n.read?'':' unread');
+      item.style.cursor='pointer';
+      item.innerHTML=`<div class="notif-av">${avHtml(n.fromPhoto,n.fromName)}</div><div class="notif-info"><div class="notif-text"><strong>${esc(n.fromName||'Someone')}</strong> sent you a message.</div><div class="notif-text" style="margin-top:3px;font-size:.7rem;color:var(--color-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(n.preview||'')}</div><div class="notif-actions" style="margin-top:5px;"><span style="font-family:var(--font-mono);font-size:.62rem;color:rgba(0,212,255,.3);">${n.createdAt?fmtDate(n.createdAt):''}</span></div></div>${!n.read?'<div class="ann-unread-dot"></div>':''}`;
+      item.addEventListener('click',async()=>{
+        // Mark read
+        await db.collection('notifications').doc(d.id).update({read:true}).catch(()=>{});
+        // Open chat — need sender data
+        const senderSnap=await db.collection('users').doc(n.fromUid).get();
+        if(senderSnap.exists){closeModal('notifModal');openChat({...senderSnap.data(),id:n.fromUid});}
+      });
+      list.appendChild(item);
+    }
+    // Mark all as read
+    snap.docs.filter(d=>!d.data().read).forEach(d=>db.collection('notifications').doc(d.id).update({read:true}).catch(()=>{}));
+    updateNotifBadge();
+  }catch(err){console.error(err);list.innerHTML=`<div class="notif-empty" style="color:#f55;">Error: ${err.code||err.message}</div>`;}
+}
+
+async function loadAnnNotifTab(){
+  const list=document.getElementById('notifAnnList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  document.getElementById('notifTabRequests').style.display='none';
+  document.getElementById('notifTabMessages').style.display='none';
+  document.getElementById('notifTabAnnouncements').style.display='';
+  try{
+    const snap=await db.collection('announcements').orderBy('createdAt','desc').limit(20).get();
+    // Mark announcement notifs as read
+    db.collection('notifications').where('to','==',currentUser.uid).where('type','==','announcement').where('read','==',false).get()
+      .then(s=>s.docs.forEach(d=>db.collection('notifications').doc(d.id).update({read:true}).catch(()=>{}))).catch(()=>{});
+    list.innerHTML='';
+    if(snap.empty){list.innerHTML='<div class="notif-empty">No announcements yet.</div>';return;}
+    snap.forEach(d=>{
+      const a=d.data();
+      const item=document.createElement('div');item.className='ann-item';
+      item.innerHTML=`<div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${esc(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>`;
+      list.appendChild(item);
+    });
+    updateNotifBadge();
+  }catch(err){
+    // orderBy may need index — fall back to unsorted
+    try{
+      const snap2=await db.collection('announcements').get();
+      list.innerHTML='';
+      const docs=snap2.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));
+      if(!docs.length){list.innerHTML='<div class="notif-empty">No announcements yet.</div>';return;}
+      docs.forEach(d=>{const a=d.data();const item=document.createElement('div');item.className='ann-item';item.innerHTML=`<div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${esc(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>`;list.appendChild(item);});
+    }catch(e2){list.innerHTML=`<div class="notif-empty" style="color:#f55;">Error: ${e2.code||e2.message}</div>`;}
+  }
 }
 
 document.getElementById('notifBtn').addEventListener('click',e=>{e.stopPropagation();if(currentUser)openNotifications();else{showToast('Log in to view notifications.');}});
+
+/* ── MESSAGE POPUP TOAST ── */
+let msgToastTimer=null;
+function showMsgToast(senderName,senderPhoto,preview,senderUid){
+  const toast=document.getElementById('msgNotifToast');
+  document.getElementById('msgNotifAv').innerHTML=avHtml(senderPhoto,senderName);
+  document.getElementById('msgNotifName').textContent=senderName||'New message';
+  document.getElementById('msgNotifPreview').textContent=preview||'';
+  toast.classList.add('show');
+  clearTimeout(msgToastTimer);
+  msgToastTimer=setTimeout(()=>toast.classList.remove('show'),5000);
+  toast.onclick=async()=>{
+    toast.classList.remove('show');
+    const snap=await db.collection('users').doc(senderUid).get();
+    if(snap.exists)openChat({...snap.data(),id:senderUid});
+  };
+}
 
 /* ── MESSAGING ── */
 let currentChatUid=null;
@@ -1179,15 +1431,26 @@ async function sendMessage(){
       text,
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
-    // Update last message preview on the chat doc (non-blocking)
+    // Update last message preview (non-blocking)
     db.collection('chats').doc(cid).set({
       participants:[currentUser.uid,currentChatUid],
       lastMessage:text,
       lastAt:firebase.firestore.FieldValue.serverTimestamp()
     },{merge:true}).catch(()=>{});
+    // Write a notification for the recipient (non-blocking)
+    db.collection('notifications').add({
+      to:currentChatUid,
+      type:'message',
+      fromUid:currentUser.uid,
+      fromName:currentUserData?.displayName||'Unknown',
+      fromPhoto:currentUserData?.photoURL||'',
+      preview:text.length>60?text.slice(0,60)+'…':text,
+      read:false,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(()=>{});
   }catch(err){
     console.error('sendMessage error:',err);
-    input.value=text; // restore text so user doesn't lose their message
+    input.value=text;
     showToast(`Could not send message (${err.code==='permission-denied'?'Permission denied — check Firestore rules':err.message})`);
   }
 }
@@ -1293,15 +1556,39 @@ auth.onAuthStateChanged(async user=>{
       currentUserData=snap.exists?snap.data():await createUserDoc(user);
       setNavAvatar(user,currentUserData);
       db.collection('users').doc(user.uid).update({lastActive:firebase.firestore.FieldValue.serverTimestamp(),status:'online'}).catch(()=>{});
+      // Auto-ensure owner always has Founder rank
+      if(user.uid===OWNER_UID&&currentUserData?.rank!=='Founder'){
+        db.collection('users').doc(user.uid).update({rank:'Founder'}).catch(()=>{});
+        currentUserData={...currentUserData,rank:'Founder'};
+      }
       updateNotifBadge();
       if(notifUnsubscribe)notifUnsubscribe();
-      notifUnsubscribe=db.collection('friendRequests').where('to','==',user.uid).onSnapshot(()=>updateNotifBadge());
+      // notifications listener set above
     }catch(e){console.error(e);}
     logoutBtn.style.display='flex';loginBtn.style.display='none';myProfileBtn.style.display='flex';notifBtn.classList.add('show');
+    // Show/hide admin button
+    document.getElementById('adminPanelBtn').style.display=(user.uid===OWNER_UID||isAdmin(currentUserData))?'flex':'none';
+    // Single listener for all unread notifications (friend requests + messages + announcements)
+    if(notifUnsubscribe)notifUnsubscribe();
+    notifUnsubscribe=db.collection('notifications').where('to','==',user.uid).where('read','==',false).onSnapshot(snap=>{
+      updateNotifBadge();
+      snap.docChanges().forEach(change=>{
+        if(change.type==='added'){
+          const n=change.doc.data();
+          // Pop-up toast for incoming messages when chat isn't open
+          if(n.type==='message'&&n.fromUid!==currentUser.uid&&currentChatUid!==n.fromUid){
+            showMsgToast(n.fromName,n.fromPhoto,n.preview,n.fromUid);
+          }
+        }
+      });
+    });
+    // Keep friend request listener for badge count too
+    db.collection('friendRequests').where('to','==',user.uid).onSnapshot(()=>updateNotifBadge());
   }else{
     currentUserData=null;
     document.getElementById('userAvatar').style.display='none';document.getElementById('defaultIcon').style.display='block';
     logoutBtn.style.display='none';loginBtn.style.display='flex';myProfileBtn.style.display='none';notifBtn.classList.remove('show');
+    document.getElementById('adminPanelBtn').style.display='none';
     if(notifUnsubscribe){notifUnsubscribe();notifUnsubscribe=null;}
   }
 });
@@ -1439,6 +1726,144 @@ document.getElementById('intelFeedMobile').addEventListener('click',e=>{
   hamburger.classList.remove('open');hamburger.setAttribute('aria-expanded','false');mobileMenu.classList.remove('open');
   openModal('intelDevModal');
 });
+
+
+/* ── ADMIN PANEL ── */
+const RANKS_LIST=['Member','Moderator','Developer','Co-Administrator','Administrator','Founder'];
+
+async function openAdminPanel(){
+  if(!currentUser||!isAdmin(currentUserData)){showToast('Access denied.');return;}
+  openModal('adminModal');
+  loadAdminTab('roles');
+  document.querySelectorAll('.admin-tab').forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      loadAdminTab(btn.dataset.tab);
+    };
+  });
+}
+
+async function loadAdminTab(tab){
+  document.querySelectorAll('.admin-panel-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('adminTab'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
+  if(tab==='roles') await loadAdminRoles();
+  else if(tab==='history') await loadAnnHistory();
+  // announce tab is static form, nothing to load
+}
+
+async function loadAdminRoles(){
+  const list=document.getElementById('adminUserList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  try{
+    const snap=await db.collection('users').get();
+    const users=[];
+    snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous)users.push(u);});
+    users.sort((a,b)=>(a.displayName||'').localeCompare(b.displayName||''));
+    list.innerHTML='';
+    users.forEach(u=>{
+      const row=document.createElement('div');row.className='admin-user-row';
+      const selectId='rankSel_'+u.id;
+      // Owner row — locked, cannot be edited by anyone
+      const isOwnerRow=u.id===OWNER_UID;
+      row.innerHTML=`
+        <div class="admin-user-av">${avHtml(u.photoURL,u.displayName)}</div>
+        <span class="admin-user-name ${rankClass(u.rank)}">${esc(u.displayName||'Unknown')}</span>
+        ${isOwnerRow
+          ? `<span style="font-family:var(--font-mono);font-size:.65rem;color:#ffd700;margin-left:auto;display:flex;align-items:center;gap:5px;"><i class="fas fa-crown"></i> Founder — Protected</span>`
+          : `<select class="admin-rank-select" id="${selectId}">
+              ${RANKS_LIST.map(r=>`<option value="${r}"${r===u.rank?' selected':''}>${r}</option>`).join('')}
+            </select>
+            <button class="admin-save-rank" data-uid="${u.id}" data-sel="${selectId}"><i class="fas fa-check"></i> Save</button>`
+        }`;
+      if(isOwnerRow)return; // no click handler needed
+      row.querySelector('.admin-save-rank').addEventListener('click',async function(){
+        const newRank=document.getElementById(this.dataset.sel).value;
+        this.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+        try{
+          await db.collection('users').doc(this.dataset.uid).update({rank:newRank});
+          this.innerHTML='<i class="fas fa-check"></i> Saved!';
+          // Update name color
+          row.querySelector('.admin-user-name').className='admin-user-name '+rankClass(newRank);
+          setTimeout(()=>{this.innerHTML='<i class="fas fa-check"></i> Save';},1500);
+          showToast(`Rank updated to ${newRank}`);
+        }catch(err){
+          this.innerHTML='<i class="fas fa-times"></i> Error';
+          showToast('Failed: '+err.message);
+        }
+      });
+      list.appendChild(row);
+    });
+  }catch(err){list.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;">Error: ${err.message}</p>`;}
+}
+
+async function loadAnnHistory(){
+  const list=document.getElementById('annHistoryList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  try{
+    const snap=await db.collection('announcements').get();
+    const docs=snap.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));
+    list.innerHTML='';
+    if(!docs.length){list.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);text-align:center;padding:20px 0;">No announcements sent yet.</p>';return;}
+    docs.forEach(d=>{
+      const a=d.data();
+      const item=document.createElement('div');item.className='ann-history-item';
+      item.innerHTML=`<div class="ann-history-title">${esc(a.title||'Untitled')}</div><div class="ann-history-body">${esc(a.body||'')}</div><div class="ann-history-meta">Sent by ${esc(a.authorName||'Admin')} • ${a.createdAt?fmtDate(a.createdAt):''}</div>`;
+      list.appendChild(item);
+    });
+  }catch(err){list.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;">Error: ${err.message}</p>`;}
+}
+
+document.getElementById('sendAnnBtn').addEventListener('click',async()=>{
+  if(!currentUser||!isAdmin(currentUserData)){showToast('Access denied.');return;}
+  const title=document.getElementById('annTitle').value.trim();
+  const body=document.getElementById('annBody').value.trim();
+  if(!title||!body){showToast('Please fill in both title and message.');return;}
+  const btn=document.getElementById('sendAnnBtn');
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sending...';
+  try{
+    // Write announcement doc
+    await db.collection('announcements').add({
+      title,body,
+      authorUid:currentUser.uid,
+      authorName:currentUserData?.displayName||'Admin',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Write notification for every non-anonymous user
+    const usersSnap=await db.collection('users').get();
+    const batch=db.batch();
+    let batchCount=0;
+    usersSnap.docs.forEach(d=>{
+      if(d.id!==currentUser.uid&&!d.data().isAnonymous){
+        const ref=db.collection('notifications').doc();
+        batch.set(ref,{
+          to:d.id,type:'announcement',
+          fromName:currentUserData?.displayName||'Admin',
+          title,preview:body.length>60?body.slice(0,60)+'…':body,
+          read:false,
+          createdAt:firebase.firestore.FieldValue.serverTimestamp()
+        });
+        batchCount++;
+        // Firestore batch limit is 500 — flush and restart if needed
+      }
+    });
+    await batch.commit();
+    document.getElementById('annTitle').value='';
+    document.getElementById('annBody').value='';
+    const s=document.getElementById('annSentMsg');s.style.display='block';
+    setTimeout(()=>s.style.display='none',3000);
+    showToast(`Announcement sent to ${batchCount} member(s)!`);
+  }catch(err){
+    console.error('Announcement error:',err);
+    showToast('Error: '+err.message);
+  }finally{
+    btn.disabled=false;btn.innerHTML='<i class="fas fa-bullhorn"></i> Send Announcement';
+  }
+});
+
+document.getElementById('closeAdmin').addEventListener('click',()=>closeModal('adminModal'));
+document.getElementById('adminPanelBtn').addEventListener('click',e=>{e.preventDefault();dropdownMenu.classList.remove('open');openAdminPanel();});
+
 
 /* ── SEARCH ── */
 let _st=null;
