@@ -1690,7 +1690,7 @@ auth.onAuthStateChanged(async user=>{
     document.getElementById('userAvatar').style.display='none';document.getElementById('defaultIcon').style.display='block';
     logoutBtn.style.display='none';loginBtn.style.display='flex';myProfileBtn.style.display='none';notifBtn.classList.remove('show');
     document.getElementById('adminPanelBtn').style.display='none';
-    applyGuestRestrictions(false);
+    applyGuestRestrictions(true); // logged-out = same restrictions as guest
     if(notifUnsubscribe){notifUnsubscribe();notifUnsubscribe=null;}
   }
 });
@@ -1823,7 +1823,17 @@ profileButton.addEventListener('click',function(e){e.stopPropagation();const o=d
 document.addEventListener('click',()=>{dropdownMenu.classList.remove('open');profileButton.setAttribute('aria-expanded','false');});
 document.getElementById('loginBtn').addEventListener('click',e=>{e.preventDefault();clearError();openModal('loginModal');});
 document.getElementById('myProfileBtn').addEventListener('click',e=>{e.preventDefault();dropdownMenu.classList.remove('open');openMyProfile();});
-document.getElementById('viewMembersBtn').addEventListener('click',e=>{e.preventDefault();dropdownMenu.classList.remove('open');openModal('userDirectory');loadAllUsers();});
+document.getElementById('viewMembersBtn').addEventListener('click',e=>{
+  e.preventDefault();
+  dropdownMenu.classList.remove('open');
+  // Must have a real account to view members
+  if(!currentUser||currentUser.isAnonymous||currentUserData?.isAnonymous){
+    promptGuestRegister('Create a free account to view and connect with other operatives.');
+    return;
+  }
+  openModal('userDirectory');
+  loadAllUsers();
+});
 
 /* ── INTEL FEED — UNDER DEVELOPMENT ── */
 document.getElementById('closeIntelDev').addEventListener('click',()=>closeModal('intelDevModal'));
@@ -1995,6 +2005,12 @@ function applyGuestRestrictions(isGuest){
       e.preventDefault();
       promptGuestRegister("Create a free account to see who's online and connect with other operatives.");
     };
+  }
+
+  // Hide View Members button for guests/logged-out; show for real accounts
+  const viewMembersBtn=document.getElementById('viewMembersBtn');
+  if(viewMembersBtn){
+    viewMembersBtn.style.display=isGuest?'none':'flex';
   }
 }
 
