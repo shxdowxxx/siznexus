@@ -789,6 +789,17 @@ footer .contact a:hover{text-decoration:underline;}
 .dir-filter{padding:4px 10px;font-family:var(--font-mono);font-size:.65rem;border:1px solid rgba(0,212,255,.15);background:transparent;color:var(--color-text-muted);border-radius:3px;cursor:pointer;transition:var(--transition);}
 .dir-filter.active,.dir-filter:hover{border-color:var(--color-primary);color:var(--color-primary);}
 
+.notif-tab-badge{display:inline-block;background:#f55;color:#fff;border-radius:8px;font-size:.55rem;padding:0 5px;margin-left:4px;font-family:var(--font-mono);font-weight:700;vertical-align:middle;min-width:14px;text-align:center;line-height:16px;}
+
+/* Enhanced admin panel */
+.admin-header-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.admin-search{width:100%;padding:8px 12px;border-radius:3px;border:1px solid rgba(0,212,255,.2);background:rgba(0,0,0,.3);color:var(--color-text);font-family:var(--font-mono);font-size:.78rem;margin-bottom:10px;transition:var(--transition);}
+.admin-search:focus{outline:none;border-color:var(--color-primary);}
+.admin-search::placeholder{color:rgba(74,143,168,.4);}
+.admin-stat-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.admin-stat-chip{background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.1);border-radius:4px;padding:6px 12px;font-family:var(--font-mono);font-size:.65rem;color:var(--color-text-muted);}
+.admin-stat-chip strong{color:var(--color-primary);}
+
 /* FORGOT PASSWORD LINK */
 .forgot-link{text-align:right;margin-top:-6px;}
 #forgotLink{font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);cursor:pointer;letter-spacing:.06em;text-decoration:underline;transition:var(--transition);}
@@ -817,28 +828,50 @@ footer .contact a:hover{text-decoration:underline;}
 
 <!-- AUTH MODAL -->
 <div class="modal" id="loginModal">
-  <div class="modal-container">
+  <div class="modal-container" style="max-width:400px;">
     <button class="close-btn" id="closeModal">&#x2715;</button>
-    <h2 id="modalTitle">Access Nexus</h2>
-    <div class="error-message" id="errorMessage"></div>
-    <form class="login-form" id="loginForm" novalidate>
-      <div class="input-group"><label for="loginEmail">Email</label><input type="email" id="loginEmail" autocomplete="email" required></div>
-      <div class="input-group"><label for="loginPassword">Password</label><input type="password" id="loginPassword" autocomplete="current-password" required></div>
-      <button type="submit" class="btn-primary" style="justify-content:center;"><i class="fas fa-sign-in-alt"></i> LOGIN</button>
-    </form>
-    <form class="login-form" id="registerForm" style="display:none" novalidate>
-      <div class="input-group"><label for="registerEmail">Email</label><input type="email" id="registerEmail" autocomplete="email" required></div>
-      <div class="input-group"><label for="registerPassword">Password (min 6 chars)</label><input type="password" id="registerPassword" autocomplete="new-password" minlength="6" required></div>
-      <div class="input-group"><label for="confirmPassword">Confirm Password</label><input type="password" id="confirmPassword" autocomplete="new-password" minlength="6" required></div>
-      <button type="submit" class="btn-primary" style="justify-content:center;"><i class="fas fa-user-plus"></i> REGISTER</button>
-    </form>
-    <div class="toggle-form"><span id="toggleForm">Don't have an account? Register here</span></div>
-    <div class="forgot-link" id="forgotLinkWrap"><span id="forgotLink">Forgot password?</span></div>
-    <div class="auth-divider">OR CONTINUE WITH</div>
-    <div class="social-login">
-      <button type="button" class="social-btn" id="googleLogin"><i class="fab fa-google"></i> Google</button>
-      <button type="button" class="social-btn" id="anonLogin"><i class="fas fa-user-secret"></i> Guest</button>
+    <!-- Auth header with logo -->
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:1.4rem;font-weight:900;color:var(--color-primary);letter-spacing:.12em;text-shadow:var(--glow-sm);margin-bottom:4px;">TheSizNexus</div>
+      <h2 id="modalTitle" style="margin:0;font-size:.85rem;letter-spacing:.2em;color:var(--color-text-muted);font-weight:400;">ACCESS NEXUS</h2>
     </div>
+    <div class="error-message" id="errorMessage"></div>
+    <!-- LOGIN FORM -->
+    <form class="login-form" id="loginForm" novalidate>
+      <div class="input-group">
+        <label for="loginEmail"><i class="fas fa-envelope" style="margin-right:5px;opacity:.5;font-size:.7rem;"></i>Email</label>
+        <input type="email" id="loginEmail" autocomplete="email" required placeholder="operative@nexus.corp">
+      </div>
+      <div class="input-group">
+        <label for="loginPassword"><i class="fas fa-lock" style="margin-right:5px;opacity:.5;font-size:.7rem;"></i>Password</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn-primary" style="justify-content:center;width:100%;margin-top:4px;"><i class="fas fa-sign-in-alt"></i> Login</button>
+    </form>
+    <!-- REGISTER FORM -->
+    <form class="login-form" id="registerForm" style="display:none" novalidate>
+      <div class="input-group">
+        <label for="registerEmail"><i class="fas fa-envelope" style="margin-right:5px;opacity:.5;font-size:.7rem;"></i>Email</label>
+        <input type="email" id="registerEmail" autocomplete="email" required placeholder="operative@nexus.corp">
+      </div>
+      <div class="input-group">
+        <label for="registerPassword"><i class="fas fa-lock" style="margin-right:5px;opacity:.5;font-size:.7rem;"></i>Password <span style="opacity:.5;font-weight:400;">(min 6 chars)</span></label>
+        <input type="password" id="registerPassword" autocomplete="new-password" minlength="6" required placeholder="Create a password">
+      </div>
+      <div class="input-group">
+        <label for="confirmPassword"><i class="fas fa-lock" style="margin-right:5px;opacity:.5;font-size:.7rem;"></i>Confirm Password</label>
+        <input type="password" id="confirmPassword" autocomplete="new-password" minlength="6" required placeholder="Repeat password">
+      </div>
+      <button type="submit" class="btn-primary" style="justify-content:center;width:100%;margin-top:4px;"><i class="fas fa-user-plus"></i> Create Account</button>
+    </form>
+    <div class="toggle-form" style="margin-top:14px;"><span id="toggleForm">Don't have an account? <strong style="color:var(--color-primary);cursor:pointer;">Register here</strong></span></div>
+    <div class="forgot-link" id="forgotLinkWrap" style="text-align:center;margin-top:6px;"><span id="forgotLink" style="font-size:.68rem;">Forgot your password?</span></div>
+    <div class="auth-divider">OR CONTINUE WITH</div>
+    <div class="social-login" style="flex-direction:column;gap:8px;">
+      <button type="button" class="social-btn" id="googleLogin" style="flex:unset;justify-content:center;"><i class="fab fa-google" style="color:#DB4437;"></i> Continue with Google</button>
+      <button type="button" class="social-btn" id="anonLogin" style="flex:unset;justify-content:center;"><i class="fas fa-user-secret" style="opacity:.6;"></i> Browse as Guest</button>
+    </div>
+    <p style="font-family:var(--font-mono);font-size:.6rem;color:rgba(0,212,255,.2);text-align:center;margin-top:14px;line-height:1.5;">By joining you agree to follow corp rules.<br>Guests have limited access.</p>
   </div>
 </div>
 
@@ -1044,15 +1077,16 @@ footer .contact a:hover{text-decoration:underline;}
     <h2><i class="fas fa-shield-alt" style="margin-right:8px;font-size:.85rem;color:#00d4ff;filter:drop-shadow(0 0 6px rgba(0,212,255,.8));"></i>Admin Panel</h2>
     <div class="admin-tabs">
       <button class="admin-tab active" data-tab="roles"><i class="fas fa-id-badge"></i> Roles</button>
+      <button class="admin-tab" data-tab="badges"><i class="fas fa-medal"></i> Badges</button>
       <button class="admin-tab" data-tab="announce"><i class="fas fa-bullhorn"></i> Announce</button>
       <button class="admin-tab" data-tab="history"><i class="fas fa-history"></i> History</button>
       <button class="admin-tab" data-tab="missions"><i class="fas fa-key"></i> Keys</button>
-      <button class="admin-tab" data-tab="badges"><i class="fas fa-medal"></i> Badges</button>
     </div>
     <!-- ROLES TAB -->
     <div class="admin-panel-section active" id="adminTabRoles">
-      <p class="admin-section-title">Manage Member Roles</p>
-      <div id="adminUserList" style="max-height:380px;overflow-y:auto;"></div>
+      <div class="admin-stat-row" id="adminStats"></div>
+      <input type="text" class="admin-search" id="adminUserSearch" placeholder="Search members...">
+      <div id="adminUserList" style="max-height:340px;overflow-y:auto;"></div>
     </div>
     <!-- ANNOUNCE TAB -->
     <div class="admin-panel-section" id="adminTabAnnounce">
@@ -1094,13 +1128,16 @@ footer .contact a:hover{text-decoration:underline;}
 
 <!-- NOTIFICATIONS -->
 <div class="modal" id="notifModal">
-  <div class="modal-container" style="max-width:460px">
+  <div class="modal-container" style="max-width:480px">
     <button class="close-btn" id="closeNotif">&#x2715;</button>
-    <h2><i class="fas fa-bell" style="margin-right:8px;font-size:.85rem;"></i>Notifications</h2>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h2 style="margin:0;display:flex;align-items:center;gap:8px;"><i class="fas fa-bell" style="font-size:.85rem;color:var(--color-primary);"></i>Notifications</h2>
+      <button id="markAllReadBtn" style="background:none;border:1px solid rgba(0,212,255,.15);color:var(--color-text-muted);font-family:var(--font-mono);font-size:.62rem;padding:4px 10px;border-radius:3px;cursor:pointer;transition:var(--transition);" onmouseover="this.style.color='var(--color-primary)';this.style.borderColor='var(--color-primary)'" onmouseout="this.style.color='var(--color-text-muted)';this.style.borderColor='rgba(0,212,255,.15)'">Mark all read</button>
+    </div>
     <div class="notif-tabs">
-      <button class="notif-tab active" data-ntab="requests">Requests</button>
-      <button class="notif-tab" data-ntab="messages">Messages</button>
-      <button class="notif-tab" data-ntab="announcements">Announcements</button>
+      <button class="notif-tab active" data-ntab="requests"><i class="fas fa-user-plus" style="margin-right:4px;"></i>Requests<span id="reqBadge" class="notif-tab-badge"></span></button>
+      <button class="notif-tab" data-ntab="messages"><i class="fas fa-comment" style="margin-right:4px;"></i>Messages<span id="msgNotifBadge" class="notif-tab-badge"></span></button>
+      <button class="notif-tab" data-ntab="announcements"><i class="fas fa-bullhorn" style="margin-right:4px;"></i>Updates</button>
     </div>
     <div id="notifTabRequests"><div id="notifList" class="notif-list"></div></div>
     <div id="notifTabMessages" style="display:none;"><div id="notifMsgList" class="notif-list"></div></div>
@@ -1447,9 +1484,11 @@ function loadAllUsers(){
   if(membersUnsubscribe){membersUnsubscribe();membersUnsubscribe=null;}
   document.getElementById('usersGrid').innerHTML='<div class="loading-spinner"></div>';
   membersUnsubscribe=db.collection('users').onSnapshot(snap=>{
-    const users=[];snap.forEach(d=>{const u=d.data();u.id=d.id;users.push(u);});
+    const users=[];
+    snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous)users.push(u);});
     users.sort((a,b)=>{if(currentUser){if(a.id===currentUser.uid)return -1;if(b.id===currentUser.uid)return 1;}return(a.displayName||'').localeCompare(b.displayName||'');});
     displayMembers(users);
+    updateDirStats(users);
   },err=>{console.error(err);document.getElementById('usersGrid').innerHTML='<p style="font-family:var(--font-mono);font-size:.8rem;color:#f55;grid-column:1/-1;text-align:center;padding:20px 0;">Failed to load members.</p>';});
 }
 function searchMembers(){
@@ -1695,6 +1734,18 @@ async function loadNotifTab(tab){
   if(tab==='requests') await loadRequestsTab();
   else if(tab==='messages') await loadMsgNotifTab();
   else if(tab==='announcements') await loadAnnNotifTab();
+  // Update tab badges
+  try{
+    const [reqSnap,msgSnap]=await Promise.all([
+      db.collection('friendRequests').where('to','==',currentUser.uid).get(),
+      db.collection('notifications').where('to','==',currentUser.uid).where('type','==','message').where('read','==',false).get()
+    ]);
+    const reqCount=reqSnap.docs.filter(d=>d.data().status==='pending').length;
+    const reqBadge=document.getElementById('reqBadge');
+    if(reqBadge)reqBadge.textContent=reqCount>0?reqCount:'';
+    const msgBadge=document.getElementById('msgNotifBadge');
+    if(msgBadge)msgBadge.textContent=msgSnap.size>0?msgSnap.size:'';
+  }catch(_){}
 }
 
 async function loadRequestsTab(){
@@ -1770,13 +1821,22 @@ async function loadAnnNotifTab(){
       .then(s=>s.docs.forEach(d=>db.collection('notifications').doc(d.id).update({read:true}).catch(()=>{}))).catch(()=>{});
     list.innerHTML='';
     if(snap.empty){list.innerHTML='<div class="notif-empty">No announcements yet.</div>';return;}
+    // Get user's dismissed list
+    const dismissed=currentUserData?.dismissedAnnouncements||[];
+    let shownCount=0;
     snap.forEach(d=>{
+      if(dismissed.includes(d.id))return; // skip dismissed
+      shownCount++;
       const a=d.data();
       const item=document.createElement('div');item.className='ann-item';
       item.style.position='relative';
       item.innerHTML=`<button class="notif-dismiss" title="Dismiss" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--color-text-muted);font-size:.8rem;cursor:pointer;padding:2px 4px;line-height:1;transition:var(--transition);" onmouseover="this.style.color='#f55'" onmouseout="this.style.color='var(--color-text-muted)'">&#x2715;</button><div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${esc(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>`;
       item.querySelector('.notif-dismiss').addEventListener('click',async()=>{
-        // Mark the user's announcement notification as read+dismissed
+        // Persist dismissal so it stays gone after reload
+        await db.collection('users').doc(currentUser.uid).update({
+          dismissedAnnouncements:firebase.firestore.FieldValue.arrayUnion(d.id)
+        }).catch(()=>{});
+        if(currentUserData)currentUserData.dismissedAnnouncements=[...(currentUserData.dismissedAnnouncements||[]),d.id];
         db.collection('notifications').where('to','==',currentUser.uid).where('type','==','announcement').get()
           .then(s=>s.docs.forEach(nd=>db.collection('notifications').doc(nd.id).update({read:true}).catch(()=>{}))).catch(()=>{});
         item.style.transition='opacity .2s';item.style.opacity='0';
@@ -1785,6 +1845,7 @@ async function loadAnnNotifTab(){
       });
       list.appendChild(item);
     });
+    if(!shownCount){list.innerHTML='<div class="notif-empty">No announcements. All caught up!</div>';}
     updateNotifBadge();
   }catch(err){
     // orderBy may need index — fall back to unsorted
@@ -1806,6 +1867,23 @@ document.getElementById('notifBtn').addEventListener('click',e=>{
     return;
   }
   openNotifications();
+});
+
+// Mark all read button
+document.getElementById('markAllReadBtn').addEventListener('click',async()=>{
+  if(!currentUser)return;
+  try{
+    const snap=await db.collection('notifications').where('to','==',currentUser.uid).where('read','==',false).get();
+    const batch=db.batch();
+    snap.forEach(d=>batch.update(d.ref,{read:true}));
+    await batch.commit();
+    // Also mark friend requests — just update badge
+    updateNotifBadge();
+    showToast('All notifications marked as read.');
+    // Reload current tab
+    const activeTab=document.querySelector('.notif-tab.active');
+    if(activeTab)loadNotifTab(activeTab.dataset.ntab);
+  }catch(err){console.error(err);}
 });
 
 /* ── MESSAGE POPUP TOAST ── */
@@ -2260,15 +2338,23 @@ document.getElementById('sendResetBtn').addEventListener('click',async()=>{
   const email=document.getElementById('resetEmail').value.trim();
   const errEl=document.getElementById('resetError'),succEl=document.getElementById('resetSuccess');
   errEl.style.display='none';succEl.style.display='none';
-  if(!email){errEl.textContent='Please enter your email.';errEl.style.display='block';return;}
+  if(!email){errEl.textContent='Please enter your email address.';errEl.style.display='block';return;}
   const btn=document.getElementById('sendResetBtn');
   btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sending...';
   try{
-    await auth.sendPasswordResetEmail(email);
+    // Firebase compat SDK — same as sendPasswordResetEmail(getAuth(), email) in modular SDK
+    await firebase.auth().sendPasswordResetEmail(email);
     succEl.style.display='block';
-    setTimeout(()=>closeModal('resetModal'),3500);
+    succEl.textContent='Reset email sent to '+email+'! Check your inbox (and spam folder).';
+    setTimeout(()=>{closeModal('resetModal');succEl.style.display='none';},4000);
   }catch(err){
-    errEl.textContent=err.message;errEl.style.display='block';
+    console.error('Password reset error:',err);
+    const msg={
+      'auth/user-not-found':'No account found with that email.',
+      'auth/invalid-email':'Please enter a valid email address.',
+      'auth/too-many-requests':'Too many attempts. Try again later.'
+    }[err.code]||err.message;
+    errEl.textContent=msg;errEl.style.display='block';
   }finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> Send Reset Email';}
 });
 
@@ -2492,7 +2578,7 @@ async function loadAdminBadges(){
           this.disabled=true;
           if(this.dataset.action==='add'){
             await awardBadge(uid,badge);
-            writeCorpLog('rank',`awarded the ${BADGE_DEFS[badge]?.label||badge} badge to a member`);
+            // Badge award — not logged publicly
           }else{
             await db.collection('users').doc(uid).update({badges:firebase.firestore.FieldValue.arrayRemove(badge)}).catch(e=>showToast(e.message));
           }
@@ -2509,11 +2595,30 @@ async function loadAdminBadges(){
 async function loadAdminRoles(){
   const list=document.getElementById('adminUserList');
   list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  // Wire search
+  const searchEl=document.getElementById('adminUserSearch');
+  if(searchEl&&!searchEl._wired){
+    searchEl._wired=true;
+    searchEl.addEventListener('input',()=>{
+      const q=searchEl.value.trim().toLowerCase();
+      list.querySelectorAll('.admin-user-row').forEach(row=>{
+        const name=row.querySelector('.admin-user-name')?.textContent.toLowerCase()||'';
+        row.style.display=name.includes(q)?'':'none';
+      });
+    });
+  }
   try{
     const snap=await db.collection('users').get();
     const users=[];
     snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous)users.push(u);});
     users.sort((a,b)=>(a.displayName||'').localeCompare(b.displayName||''));
+    // Update stats
+    const statsEl=document.getElementById('adminStats');
+    if(statsEl){
+      const onlineCount=users.filter(u=>u.status==='online').length;
+      const rankCounts={};users.forEach(u=>{rankCounts[u.rank||'Member']=(rankCounts[u.rank||'Member']||0)+1;});
+      statsEl.innerHTML=`<div class="admin-stat-chip">Total: <strong>${users.length}</strong></div><div class="admin-stat-chip" style="color:#4CAF50;">Online: <strong>${onlineCount}</strong></div>${Object.entries(rankCounts).slice(0,3).map(([r,n])=>`<div class="admin-stat-chip">${esc(r)}: <strong>${n}</strong></div>`).join('')}`;
+    }
     list.innerHTML='';
     users.forEach(u=>{
       const row=document.createElement('div');row.className='admin-user-row';
@@ -3266,18 +3371,14 @@ function applyDirFilter(){
   });
 }
 
-// Override displayMembers to update stats and apply filter
-const _origDisplayMembers=displayMembers;
-function displayMembers(users){
-  _origDisplayMembers(users);
-  // Update directory stats
+// Update directory stats (called from loadAllUsers after displayMembers)
+function updateDirStats(users){
   const totalEl=document.getElementById('dirTotalCount');
   const onlineEl=document.getElementById('dirOnlineCount');
   const friendsEl=document.getElementById('dirFriendCount');
-  if(totalEl)totalEl.textContent=users.length;
-  if(onlineEl)onlineEl.textContent=users.filter(u=>u.status==='online').length;
+  if(totalEl)totalEl.textContent=users.filter(u=>!u.isAnonymous).length;
+  if(onlineEl)onlineEl.textContent=users.filter(u=>u.status==='online'&&!u.isAnonymous).length;
   if(friendsEl&&currentUserData)friendsEl.textContent=users.filter(u=>(currentUserData.friends||[]).includes(u.id)).length;
-  // Re-apply filter after render
   setTimeout(applyDirFilter,50);
 }
 </script>
