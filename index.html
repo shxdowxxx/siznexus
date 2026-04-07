@@ -842,6 +842,22 @@ footer .contact a:hover{text-decoration:underline;}
 .mark-all-read-btn:hover{border-color:var(--color-primary);color:var(--color-primary);background:rgba(0,212,255,.08);}
 .mark-all-read-btn i{font-size:.6rem;}
 
+
+/* ── BAN SYSTEM ───────────────────────────────────── */
+.ban-user-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(0,212,255,.05);}
+.ban-user-row:last-child{border-bottom:none;}
+.ban-name{font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-light);flex:1;}
+.ban-rank-label{font-family:var(--font-mono);font-size:.62rem;margin-right:4px;}
+.btn-ban{padding:3px 10px;font-family:var(--font-mono);font-size:.62rem;border:1px solid rgba(244,67,54,.3);background:rgba(244,67,54,.05);color:#f44336;border-radius:3px;cursor:pointer;transition:var(--transition);}
+.btn-ban:hover{background:rgba(244,67,54,.12);border-color:#f44336;}
+.btn-unban-admin{padding:3px 10px;font-family:var(--font-mono);font-size:.62rem;border:1px solid rgba(76,175,80,.3);background:rgba(76,175,80,.05);color:#4CAF50;border-radius:3px;cursor:pointer;transition:var(--transition);}
+.btn-unban-admin:hover{background:rgba(76,175,80,.12);border-color:#4CAF50;}
+.banned-overlay{position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+.banned-overlay-icon{font-size:3rem;color:#f44336;}
+.banned-overlay-title{font-size:1.2rem;font-weight:900;color:#f44336;letter-spacing:.12em;}
+.banned-overlay-msg{font-family:var(--font-mono);font-size:.82rem;color:rgba(255,255,255,.5);text-align:center;max-width:360px;line-height:1.7;}
+.banned-reason-box{font-family:var(--font-mono);font-size:.78rem;color:rgba(244,67,54,.6);border:1px solid rgba(244,67,54,.2);background:rgba(244,67,54,.04);padding:8px 14px;border-radius:4px;max-width:360px;text-align:center;}
+
 /* FORGOT PASSWORD LINK */
 .forgot-link{text-align:right;margin-top:-6px;}
 #forgotLink{font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);cursor:pointer;letter-spacing:.06em;text-decoration:underline;transition:var(--transition);}
@@ -1035,8 +1051,17 @@ footer .contact a:hover{text-decoration:underline;}
     </div>
     <!-- CONNECTIONS TAB -->
     <div class="profile-tab-section" id="profileTabConnections">
-      <input type="text" id="connectionsSearch" class="input-field" placeholder="Search connections..." style="margin-bottom:10px;font-size:.78rem;" autocomplete="off">
-      <div id="friendsListInner" style="display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto;"></div>
+      <div style="display:flex;gap:0;border-bottom:var(--border);margin-bottom:10px;">
+        <button class="conn-sub-tab active" data-ctab="friends" style="flex:1;padding:6px 0;text-align:center;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.08em;color:var(--color-text-muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:var(--transition);">Connections</button>
+        <button class="conn-sub-tab" data-ctab="blocked" style="flex:1;padding:6px 0;text-align:center;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.08em;color:var(--color-text-muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:var(--transition);">Blocked / Hidden</button>
+      </div>
+      <div id="connSubFriends">
+        <input type="text" id="connectionsSearch" class="input-field" placeholder="Search connections..." style="margin-bottom:10px;font-size:.78rem;" autocomplete="off">
+        <div id="friendsListInner" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;"></div>
+      </div>
+      <div id="connSubBlocked" style="display:none;">
+        <div id="blockedListInner" style="display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto;"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1116,7 +1141,10 @@ footer .contact a:hover{text-decoration:underline;}
 <div class="modal" id="adminModal">
   <div class="modal-container">
     <button class="close-btn" id="closeAdmin">&#x2715;</button>
-    <h2><i class="fas fa-shield-alt" style="margin-right:8px;font-size:.85rem;color:#00d4ff;filter:drop-shadow(0 0 6px rgba(0,212,255,.8));"></i>Admin Panel</h2>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <h2 style="margin:0;"><i class="fas fa-shield-alt" style="margin-right:8px;font-size:.85rem;color:#00d4ff;filter:drop-shadow(0 0 6px rgba(0,212,255,.8));"></i>Admin Panel</h2>
+      <span id="adminViewerRank" style="font-family:var(--font-mono);font-size:.62rem;padding:3px 10px;border-radius:3px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.12);"></span>
+    </div>
     <div class="admin-tabs">
       <button class="admin-tab active" data-tab="roles"><i class="fas fa-id-badge"></i> Roles</button>
       <button class="admin-tab" data-tab="badges"><i class="fas fa-medal"></i> Badges</button>
@@ -1124,6 +1152,7 @@ footer .contact a:hover{text-decoration:underline;}
       <button class="admin-tab" data-tab="history"><i class="fas fa-history"></i> History</button>
       <button class="admin-tab" data-tab="missions"><i class="fas fa-key"></i> Keys</button>
       <button class="admin-tab" data-tab="reports"><i class="fas fa-flag" style="color:#ff9800;"></i> Reports</button>
+      <button class="admin-tab" data-tab="bans"><i class="fas fa-gavel" style="color:#f44336;"></i> Bans</button>
     </div>
     <!-- ROLES TAB -->
     <div class="admin-panel-section active" id="adminTabRoles">
@@ -1159,7 +1188,17 @@ footer .contact a:hover{text-decoration:underline;}
     <!-- REPORTS TAB -->
     <div class="admin-panel-section" id="adminTabReports">
       <p class="admin-section-title"><i class="fas fa-flag" style="margin-right:5px;color:#ff9800;"></i>Member Reports — Co-Administrator+ Only</p>
-      <div id="adminReportsList" style="max-height:380px;overflow-y:auto;"></div>
+      <div id="adminReportsList" style="max-height:360px;overflow-y:auto;"></div>
+    </div>
+    <!-- BANS TAB -->
+    <div class="admin-panel-section" id="adminTabBans">
+      <p class="admin-section-title"><i class="fas fa-gavel" style="margin-right:5px;color:#f44336;"></i>Ban Management — Co-Administrator+ Only</p>
+      <div style="margin-bottom:12px;">
+        <input type="text" class="admin-search" id="banSearchInput" placeholder="Search member to ban...">
+        <div id="banUserList" style="max-height:200px;overflow-y:auto;margin-bottom:8px;"></div>
+      </div>
+      <p class="admin-section-title" style="margin-top:8px;border-top:var(--border);padding-top:10px;">Currently Banned</p>
+      <div id="bannedUserList" style="max-height:160px;overflow-y:auto;"></div>
     </div>
   </div>
 </div>
@@ -1773,6 +1812,8 @@ async function removeFriend(uid,name){
 const ADMIN_RANKS=['Founder','Administrator','Co-Administrator'];
 const OWNER_UID='QZ62mytbllhPt7wWkv6gKtmz31l1';
 function isAdmin(data){return (currentUser&&currentUser.uid===OWNER_UID)||data&&ADMIN_RANKS.includes(data.rank);}
+// Panel access: Moderator+ can open panel (with limited tabs)
+function canOpenPanel(data){return (currentUser&&currentUser.uid===OWNER_UID)||data&&[...ADMIN_RANKS,'Developer','Moderator'].includes(data.rank);}
 function rankClass(rank){
   const r=(rank||'').toLowerCase();
   if(r==='founder')return'rank-badge-founder';
@@ -2042,14 +2083,33 @@ function renderMessages(docs){
   if(!docs.length){
     const p=document.createElement('p');p.style.cssText='font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);text-align:center;margin:auto;';p.textContent='No messages yet. Say hello!';body.appendChild(p);return;
   }
+  const canDelete=isCoAdmin(currentUserData);
+  const cid=chatId(currentUser.uid,currentChatUid);
   let lastDate='';
   docs.forEach(d=>{
     const m=d.data(),isMine=m.senderUid===currentUser.uid;
     const ds=m.createdAt?fmtDate(m.createdAt):'';
     if(ds&&ds!==lastDate){lastDate=ds;const div=document.createElement('div');div.className='msg-date-div';div.textContent=ds;body.appendChild(div);}
+    const wrap=document.createElement('div');wrap.style.cssText='position:relative;display:flex;align-items:flex-end;gap:4px;'+(isMine?'justify-content:flex-end;':'');
     const bub=document.createElement('div');bub.className='msg-bubble '+(isMine?'mine':'theirs');
     bub.innerHTML=`${esc(m.text||'')}<span class="msg-time">${fmtTime(m.createdAt)}</span>`;
-    body.appendChild(bub);
+    // Delete button for Co-Admin+ or own messages
+    if(canDelete||isMine){
+      const delBtn=document.createElement('button');
+      delBtn.style.cssText='background:none;border:none;color:rgba(244,67,54,.4);font-size:.6rem;cursor:pointer;padding:2px;opacity:0;transition:opacity .2s;flex-shrink:0;';
+      delBtn.title='Delete message';delBtn.innerHTML='<i class="fas fa-trash"></i>';
+      wrap.addEventListener('mouseenter',()=>{delBtn.style.opacity='1';});
+      wrap.addEventListener('mouseleave',()=>{delBtn.style.opacity='0';});
+      delBtn.addEventListener('click',async()=>{
+        if(!confirm('Delete this message?'))return;
+        await db.collection('chats').doc(cid).collection('messages').doc(d.id).delete().catch(e=>showToast(e.message));
+      });
+      if(isMine)wrap.appendChild(bub),wrap.appendChild(delBtn);
+      else wrap.appendChild(delBtn),wrap.appendChild(bub);
+    }else{
+      wrap.appendChild(bub);
+    }
+    body.appendChild(wrap);
   });
   body.scrollTop=body.scrollHeight;
 }
@@ -2146,7 +2206,10 @@ async function openMyProfile(){
         const secId='profileTab'+tab.dataset.ptab.charAt(0).toUpperCase()+tab.dataset.ptab.slice(1);
         document.getElementById(secId)?.classList.add('active');
         if(tab.dataset.ptab==='preview')renderProfilePreview(d);
-        if(tab.dataset.ptab==='connections')await renderMyFriendsList(d.friends||[]);
+        if(tab.dataset.ptab==='connections'){
+          await renderMyFriendsList(d.friends||[]);
+          wireConnSubTabs(d);
+        }
       };
     });
     // Reset to edit tab
@@ -2157,6 +2220,65 @@ async function openMyProfile(){
     await renderMyFriendsList(d.friends||[]);
     openModal('myProfileModal');
   }catch(err){console.error(err);}
+}
+
+function wireConnSubTabs(d){
+  document.querySelectorAll('.conn-sub-tab').forEach(btn=>{
+    // Set active style
+    const isActive=btn.classList.contains('active');
+    btn.style.color=isActive?'var(--color-primary)':'var(--color-text-muted)';
+    btn.style.borderBottomColor=isActive?'var(--color-primary)':'transparent';
+    btn.onclick=async()=>{
+      document.querySelectorAll('.conn-sub-tab').forEach(b=>{
+        b.classList.remove('active');b.style.color='var(--color-text-muted)';b.style.borderBottomColor='transparent';
+      });
+      btn.classList.add('active');btn.style.color='var(--color-primary)';btn.style.borderBottomColor='var(--color-primary)';
+      const tab=btn.dataset.ctab;
+      document.getElementById('connSubFriends').style.display=tab==='friends'?'':'none';
+      document.getElementById('connSubBlocked').style.display=tab==='blocked'?'':'none';
+      if(tab==='blocked')await renderBlockedList();
+    };
+  });
+}
+
+async function renderBlockedList(){
+  const inner=document.getElementById('blockedListInner');
+  if(!inner)return;
+  const blocked=currentUserData?.blockedUsers||[];
+  inner.innerHTML='';
+  if(!blocked.length){
+    inner.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);text-align:center;padding:20px 0;">No blocked or hidden operatives.</p>';
+    return;
+  }
+  for(const uid of blocked){
+    try{
+      const snap=await db.collection('users').doc(uid).get();
+      const ud=snap.exists?snap.data():{displayName:'Unknown User',rank:'',photoURL:''};
+      const card=document.createElement('div');card.className='connection-card';
+      card.style.borderColor='rgba(244,67,54,.15)';
+      card.innerHTML=`
+        <div class="connection-av" style="border-color:rgba(244,67,54,.3);">
+          ${ud.photoURL?`<img src="${esc(ud.photoURL)}" alt="" loading="lazy">`:`${initials(ud.displayName||'?')}`}
+        </div>
+        <div class="connection-info">
+          <div class="connection-name" style="color:rgba(244,67,54,.7);">${esc(ud.displayName||'Unknown')}</div>
+          <div class="connection-rank ${rankClass(ud.rank)}">${esc(ud.rank||'')}</div>
+          <div class="connection-activity" style="color:rgba(244,67,54,.4);">Blocked</div>
+        </div>
+        <div class="connection-actions">
+          <button class="btn-unblock" style="padding:4px 9px;font-size:.62rem;" data-uid="${uid}" data-name="${esc(ud.displayName||'?')}">
+            <i class="fas fa-unlock"></i> Unblock
+          </button>
+        </div>`;
+      card.querySelector('.btn-unblock').addEventListener('click',async function(){
+        await unblockUser(this.dataset.uid,this.dataset.name);
+        await renderBlockedList();
+        // Refresh currentUserData
+        currentUserData=(await db.collection('users').doc(currentUser.uid).get()).data();
+      });
+      inner.appendChild(card);
+    }catch(_){}
+  }
 }
 
 function renderProfilePreview(d){
@@ -2279,6 +2401,8 @@ auth.onAuthStateChanged(async user=>{
       currentUserData=snap.exists?snap.data():await createUserDoc(user);
       setNavAvatar(user,currentUserData);
       db.collection('users').doc(user.uid).update({lastActive:firebase.firestore.FieldValue.serverTimestamp(),status:'online'}).catch(()=>{});
+      // Check if user is banned before anything else
+      if(!user.isAnonymous)checkBanStatus();
       // Auto-ensure owner always has Founder rank
       if(user.uid===OWNER_UID&&currentUserData?.rank!=='Founder'){
         db.collection('users').doc(user.uid).update({rank:'Founder'}).catch(()=>{});
@@ -2299,7 +2423,7 @@ auth.onAuthStateChanged(async user=>{
       notifBtn.title='Notifications';
     }
     // Show/hide admin button
-    document.getElementById('adminPanelBtn').style.display=(user.uid===OWNER_UID||isAdmin(currentUserData))?'flex':'none';
+    document.getElementById('adminPanelBtn').style.display=(user.uid===OWNER_UID||canOpenPanel(currentUserData))?'flex':'none';
     // Apply guest content restrictions
     applyGuestRestrictions(currentUserData?.isAnonymous||user.isAnonymous);
     // Start idle detection for real accounts
@@ -2524,11 +2648,57 @@ document.getElementById('intelFeedMobile').addEventListener('click',e=>{
 
 /* ── ADMIN PANEL ── */
 const RANKS_LIST=['Unaffiliated','Member','Beta Tester','Moderator','Developer','Co-Administrator','Administrator','Founder'];
+// Rank authority — index in RANKS_LIST = power level (higher = more authority)
+const RANK_POWER={};
+RANKS_LIST.forEach((r,i)=>RANK_POWER[r]=i);
+function myPower(){return currentUser?.uid===OWNER_UID?99:(RANK_POWER[currentUserData?.rank]??0);}
+function rankPower(rank){return RANK_POWER[rank]??0;}
+// Can viewer manage target? Viewer must outrank target AND not promote above themselves
+function canManage(targetRank){
+  if(currentUser?.uid===OWNER_UID)return true;
+  return myPower()>rankPower(targetRank);
+}
+// Ranks a given user can assign (only ranks below themselves, never equal or above)
+function assignableRanks(){
+  const power=myPower();
+  return RANKS_LIST.filter(r=>RANK_POWER[r]<power);
+}
 
 async function openAdminPanel(){
-  if(!currentUser||!isAdmin(currentUserData)){showToast('Access denied.');return;}
+  if(!currentUser||!canOpenPanel(currentUserData)){showToast('Access denied.');return;}
   openModal('adminModal');
-  loadAdminTab('roles');
+  // Show viewer's rank in header
+  const rBadge=document.getElementById('adminViewerRank');
+  if(rBadge){rBadge.textContent=currentUserData?.rank||'';rBadge.className='';rBadge.style.cssText='font-family:var(--font-mono);font-size:.62rem;padding:3px 10px;border-radius:3px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.12);';rBadge.classList.add(rankClass(currentUserData?.rank));}
+  // Determine which tabs this rank can access
+  const rank=currentUserData?.rank||'';
+  const isModerator=['Moderator'].includes(rank);
+  const isDeveloper=['Developer'].includes(rank);
+  const isCoAdminPlus=['Co-Administrator','Administrator','Founder'].includes(rank)||currentUser.uid===OWNER_UID;
+  // Tab visibility rules:
+  // Moderator:       reports, announce(polls only, handled inside)
+  // Developer:       roles, announce, history, keys
+  // Co-Admin+:       all tabs including badges, bans
+  const tabAccess={
+    roles: !isModerator,         // Dev+
+    badges: isCoAdminPlus,       // Co-Admin+
+    announce: true,              // All panel users (content restricted inside)
+    history: !isModerator,       // Dev+
+    missions: !isModerator,      // Dev+
+    reports: isCoAdminPlus,      // Co-Admin+
+    bans: isCoAdminPlus,         // Co-Admin+
+  };
+  // Show/hide tabs
+  document.querySelectorAll('.admin-tab').forEach(btn=>{
+    const tab=btn.dataset.tab;
+    btn.style.display=(tabAccess[tab]===false)?'none':'';
+  });
+  // Default to first visible tab
+  const firstVisible=document.querySelector('.admin-tab:not([style*="display: none"]):not([style*="display:none"])');
+  const defaultTab=firstVisible?.dataset.tab||'announce';
+  document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('active'));
+  firstVisible?.classList.add('active');
+  loadAdminTab(defaultTab);
   document.querySelectorAll('.admin-tab').forEach(btn=>{
     btn.onclick=()=>{
       document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('active'));
@@ -2633,6 +2803,7 @@ async function loadAdminTab(tab){
   else if(tab==='missions')await loadAdminKeys();
   else if(tab==='badges')await loadAdminBadges();
   else if(tab==='reports')await loadAdminReports();
+  else if(tab==='bans')await loadAdminBans();
 }
 
 async function loadAdminBadges(){
@@ -2724,18 +2895,28 @@ async function loadAdminRoles(){
         ${isOwnerRow
           ? `<span style="font-family:var(--font-mono);font-size:.65rem;color:#ffd700;margin-left:auto;display:flex;align-items:center;gap:5px;"><i class="fas fa-crown"></i> Founder — Protected</span>`
           : `<select class="admin-rank-select" id="${selectId}">
-              ${RANKS_LIST.map(r=>`<option value="${r}"${r===u.rank?' selected':''}>${r}</option>`).join('')}
+              ${assignableRanks().map(r=>`<option value="${r}"${r===u.rank?' selected':''}>${r}</option>`).join('')}
             </select>
-            <button class="admin-save-rank" data-uid="${u.id}" data-sel="${selectId}"><i class="fas fa-check"></i> Save</button>`
+            <button class="admin-save-rank" data-uid="${u.id}" data-sel="${selectId}"${!canManage(u.rank)?'disabled title="Cannot manage this rank"':''} ><i class="fas fa-check"></i> Save</button>`
         }`;
       if(isOwnerRow)return; // no click handler needed
+      const targetCurrentRank=u.rank||'Member';
       row.querySelector('.admin-save-rank').addEventListener('click',async function(){
         const newRank=document.getElementById(this.dataset.sel).value;
+        // Security: can only assign ranks strictly below viewer's own rank
+        if(rankPower(newRank)>=myPower()){
+          showToast('You cannot assign a rank equal to or above your own.');
+          return;
+        }
+        // Security: cannot promote someone to equal/above viewer's rank
+        if(rankPower(newRank)>rankPower(targetCurrentRank)&&rankPower(newRank)>=myPower()){
+          showToast('Cannot promote above your own rank.');
+          return;
+        }
         this.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
         try{
           await db.collection('users').doc(this.dataset.uid).update({rank:newRank});
           this.innerHTML='<i class="fas fa-check"></i> Saved!';
-          // Update name color
           row.querySelector('.admin-user-name').className='admin-user-name '+rankClass(newRank);
           setTimeout(()=>{this.innerHTML='<i class="fas fa-check"></i> Save';},1500);
           showToast(`Rank updated to ${newRank}`);
@@ -2767,7 +2948,7 @@ async function loadAnnHistory(){
 }
 
 document.getElementById('sendAnnBtn').addEventListener('click',async()=>{
-  if(!currentUser||!isAdmin(currentUserData)){showToast('Access denied.');return;}
+  if(!currentUser||!isDev(currentUserData)){showToast('Developer+ required to send announcements.');return;}
   const title=document.getElementById('annTitle').value.trim();
   const body=document.getElementById('annBody').value.trim();
   if(!title||!body){showToast('Please fill in both title and message.');return;}
@@ -3351,9 +3532,22 @@ function startCorpChatListener(){
       const wrap=document.createElement('div');wrap.className='corp-msg '+(isMine?'mine':'theirs');
       const showName=m.uid!==lastUid;
       lastUid=m.uid;
-      wrap.innerHTML=`${showName&&!isMine?`<div class="corp-msg-name">${esc(m.displayName||'?')}</div>`:''}
-        <div class="corp-msg-bubble">${esc(m.text||'')}</div>
-        <div class="corp-msg-time">${fmtTime(m.createdAt)}</div>`;
+      const canDelCorpMsg=isCoAdmin(currentUserData)||isMine;
+      let nameHtml=showName&&!isMine?`<div class="corp-msg-name">${esc(m.displayName||'?')}</div>`:'';
+      let delHtml=canDelCorpMsg?`<button class="corp-del-btn" data-id="${d.id}" title="Delete" style="background:none;border:none;color:rgba(244,67,54,.35);font-size:.58rem;cursor:pointer;padding:1px 3px;opacity:0;transition:opacity .2s;align-self:center;flex-shrink:0;"><i class="fas fa-trash"></i></button>`:'';
+      wrap.innerHTML=`${nameHtml}<div class="corp-msg-bubble">${esc(m.text||'')}</div>${delHtml}<div class="corp-msg-time" style="clear:both;">${fmtTime(m.createdAt)}</div>`;
+      if(canDelCorpMsg){
+        const db2=wrap.querySelector('.corp-del-btn');
+        if(db2){
+          wrap.addEventListener('mouseenter',()=>{db2.style.opacity='1';});
+          wrap.addEventListener('mouseleave',()=>{db2.style.opacity='0';});
+          db2.addEventListener('click',async e=>{
+            e.stopPropagation();
+            if(!confirm('Delete this message?'))return;
+            await db.collection('corpChat').doc(db2.dataset.id).delete().catch(e2=>showToast(e2.message));
+          });
+        }
+      }
       body.appendChild(wrap);
     });
     body.scrollTop=body.scrollHeight;
@@ -3588,6 +3782,130 @@ async function loadAdminReports(){
       list.appendChild(card);
     });
   }catch(err){list.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;padding:10px 0;">Error: ${err.message}</p>`;}
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   BAN SYSTEM
+═══════════════════════════════════════════════════════ */
+async function checkBanStatus(){
+  if(!currentUser||currentUser.isAnonymous)return;
+  try{
+    const snap=await db.collection('bans').doc(currentUser.uid).get();
+    if(snap.exists&&snap.data().active){
+      // Show ban screen — user is banned
+      showBannedScreen(snap.data().reason||'You have been banned from TheSizNexus.');
+    }
+  }catch(_){}
+}
+
+function showBannedScreen(reason){
+  // Remove existing if any
+  document.getElementById('bannedScreen')?.remove();
+  const screen=document.createElement('div');
+  screen.id='bannedScreen';screen.className='banned-overlay';
+  screen.innerHTML=`
+    <div class="banned-overlay-icon"><i class="fas fa-gavel"></i></div>
+    <div class="banned-overlay-title">ACCESS DENIED</div>
+    <div class="banned-overlay-msg">Your account has been suspended from TheSizNexus by a staff member.</div>
+    <div class="banned-reason-box"><i class="fas fa-comment-alt" style="margin-right:6px;"></i>${esc(reason)}</div>
+    <p style="font-family:var(--font-mono);font-size:.65rem;color:rgba(255,255,255,.2);margin-top:8px;">If you believe this is a mistake, contact staff on Discord.</p>
+    <a href="https://discord.gg/73Mb3syadB" target="_blank" style="font-family:var(--font-mono);font-size:.75rem;color:#00d4ff;text-decoration:none;"><i class="fab fa-discord" style="margin-right:5px;"></i>Contact on Discord</a>`;
+  document.body.appendChild(screen);
+  // Sign them out after showing screen
+  setTimeout(()=>auth.signOut().catch(()=>{}),2000);
+}
+
+async function banUser(uid, name){
+  if(!isCoAdmin(currentUserData)){showToast('Co-Administrator+ required.');return;}
+  const reason=prompt(`Ban reason for ${name}:`);
+  if(reason===null)return; // cancelled
+  try{
+    await db.collection('bans').doc(uid).set({
+      uid,name,
+      reason:reason||'Banned by staff.',
+      bannedBy:currentUserData?.displayName||'Admin',
+      bannedByUid:currentUser.uid,
+      active:true,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Also mark user doc as banned
+    await db.collection('users').doc(uid).update({isBanned:true}).catch(()=>{});
+    showToast(`${name} has been banned.`);
+    loadAdminBans();
+  }catch(err){showToast('Failed: '+err.message);}
+}
+
+async function unbanUser(uid, name){
+  if(!isCoAdmin(currentUserData)){showToast('Co-Administrator+ required.');return;}
+  try{
+    await db.collection('bans').doc(uid).update({active:false});
+    await db.collection('users').doc(uid).update({isBanned:false}).catch(()=>{});
+    showToast(`${name} has been unbanned.`);
+    loadAdminBans();
+  }catch(err){showToast('Failed: '+err.message);}
+}
+
+async function loadAdminBans(){
+  const banList=document.getElementById('banUserList');
+  const bannedList=document.getElementById('bannedUserList');
+  if(!isCoAdmin(currentUserData)){
+    banList.innerHTML='';
+    bannedList.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;text-align:center;padding:12px 0;"><i class="fas fa-lock" style="margin-right:5px;"></i>Co-Administrator+ access required.</p>';
+    return;
+  }
+  // Wire search
+  const searchEl=document.getElementById('banSearchInput');
+  if(searchEl&&!searchEl._wired){
+    searchEl._wired=true;
+    searchEl.addEventListener('input',async()=>{
+      const q=searchEl.value.trim().toLowerCase();
+      if(!q){banList.innerHTML='';return;}
+      const snap=await db.collection('users').get();
+      banList.innerHTML='';
+      snap.forEach(d=>{
+        const u=d.data();u.id=d.id;
+        if(u.isAnonymous||u.id===currentUser.uid||u.id===OWNER_UID)return;
+        if(!(u.displayName||'').toLowerCase().includes(q))return;
+        const row=document.createElement('div');row.className='ban-user-row';
+        row.innerHTML=`<div class="admin-user-av">${avHtml(u.photoURL,u.displayName)}</div>
+          <span class="ban-name">${esc(u.displayName||'?')}</span>
+          <span class="ban-rank-label ${rankClass(u.rank)}">${esc(u.rank||'Member')}</span>
+          ${u.isBanned?'<span style="font-family:var(--font-mono);font-size:.6rem;color:#f44336;">BANNED</span>':''}
+          <button class="${u.isBanned?'btn-unban-admin':'btn-ban'}" data-uid="${u.id}" data-name="${esc(u.displayName||'?')}" data-banned="${u.isBanned?'1':'0'}">
+            <i class="fas fa-${u.isBanned?'unlock':'gavel'}"></i> ${u.isBanned?'Unban':'Ban'}
+          </button>`;
+        row.querySelector('button').addEventListener('click',async function(){
+          if(this.dataset.banned==='1')await unbanUser(this.dataset.uid,this.dataset.name);
+          else await banUser(this.dataset.uid,this.dataset.name);
+          searchEl.dispatchEvent(new Event('input'));
+        });
+        banList.appendChild(row);
+      });
+    });
+  }
+  // Load currently banned users
+  bannedList.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:12px 0;"></div>';
+  try{
+    const snap=await db.collection('bans').where('active','==',true).get().catch(async()=>db.collection('bans').get());
+    const bans=snap.docs.filter(d=>d.data().active);
+    bannedList.innerHTML='';
+    if(!bans.length){bannedList.innerHTML='<p style="font-family:var(--font-mono);font-size:.72rem;color:var(--color-text-muted);padding:8px 0;">No banned members.</p>';return;}
+    bans.forEach(d=>{
+      const b=d.data();
+      const row=document.createElement('div');row.className='ban-user-row';
+      row.innerHTML=`<div class="admin-user-av" style="background:rgba(244,67,54,.1);border-color:rgba(244,67,54,.3);"><i class="fas fa-ban" style="color:#f44336;font-size:.7rem;"></i></div>
+        <div style="flex:1;">
+          <div class="ban-name">${esc(b.name||'?')}</div>
+          <div style="font-family:var(--font-mono);font-size:.6rem;color:rgba(0,212,255,.3);">Banned by ${esc(b.bannedBy||'?')} &middot; Reason: ${esc(b.reason||'—')}</div>
+        </div>
+        <button class="btn-unban-admin" data-uid="${d.id}" data-name="${esc(b.name||'?')}"><i class="fas fa-unlock"></i> Unban</button>`;
+      row.querySelector('button').addEventListener('click',async function(){
+        await unbanUser(this.dataset.uid,this.dataset.name);
+      });
+      bannedList.appendChild(row);
+    });
+  }catch(err){bannedList.innerHTML=`<p style="font-family:var(--font-mono);font-size:.72rem;color:#f55;">${err.message}</p>`;}
 }
 
 /* ── SEARCH & DIRECTORY ── */
