@@ -800,6 +800,48 @@ footer .contact a:hover{text-decoration:underline;}
 .admin-stat-chip{background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.1);border-radius:4px;padding:6px 12px;font-family:var(--font-mono);font-size:.65rem;color:var(--color-text-muted);}
 .admin-stat-chip strong{color:var(--color-primary);}
 
+
+/* ── REPORT & BLOCK ───────────────────────────── */
+.profile-danger-row{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,212,255,.06);}
+.btn-report{padding:5px 10px;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.06em;border-radius:3px;border:1px solid rgba(255,152,0,.3);background:rgba(255,152,0,.05);color:#ff9800;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:5px;}
+.btn-report:hover{background:rgba(255,152,0,.12);border-color:#ff9800;}
+.btn-block{padding:5px 10px;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.06em;border-radius:3px;border:1px solid rgba(244,67,54,.25);background:rgba(244,67,54,.04);color:#f44336;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:5px;}
+.btn-block:hover{background:rgba(244,67,54,.1);border-color:#f44336;}
+.btn-unblock{padding:5px 10px;font-family:var(--font-mono);font-size:.62rem;border-radius:3px;border:1px solid rgba(76,175,80,.3);background:rgba(76,175,80,.05);color:#4CAF50;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:5px;}
+.btn-unblock:hover{background:rgba(76,175,80,.12);border-color:#4CAF50;}
+
+/* Report modal */
+#reportModal .modal-container{max-width:400px;}
+.report-reason-list{display:flex;flex-direction:column;gap:6px;margin:12px 0;}
+.report-reason-btn{padding:9px 14px;border:1px solid rgba(0,212,255,.12);background:rgba(0,212,255,.02);color:var(--color-text-muted);font-family:var(--font-mono);font-size:.75rem;border-radius:4px;cursor:pointer;text-align:left;transition:var(--transition);}
+.report-reason-btn:hover,.report-reason-btn.selected{border-color:rgba(255,152,0,.4);background:rgba(255,152,0,.06);color:#ff9800;}
+.report-extra{width:100%;padding:8px 12px;border-radius:3px;border:1px solid rgba(0,212,255,.15);background:rgba(0,0,0,.4);color:var(--color-text);font-family:var(--font-mono);font-size:.75rem;resize:vertical;min-height:56px;margin-top:6px;transition:var(--transition);}
+.report-extra:focus{outline:none;border-color:rgba(255,152,0,.4);}
+.report-extra::placeholder{color:rgba(74,143,168,.3);}
+
+/* Blocked profile overlay */
+.blocked-overlay{padding:24px;text-align:center;}
+.blocked-overlay-icon{font-size:2rem;color:rgba(244,67,54,.5);margin-bottom:10px;}
+.blocked-overlay-title{font-size:.85rem;font-weight:700;color:var(--color-text-muted);letter-spacing:.08em;margin-bottom:6px;}
+.blocked-overlay-msg{font-family:var(--font-mono);font-size:.75rem;color:rgba(74,143,168,.6);line-height:1.6;}
+
+/* Admin reports panel */
+.report-card{padding:12px 14px;background:rgba(255,152,0,.03);border:1px solid rgba(255,152,0,.1);border-left:3px solid #ff9800;border-radius:4px;margin-bottom:8px;}
+.report-card-header{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.report-card-reason{font-size:.78rem;font-weight:700;color:#ff9800;letter-spacing:.04em;}
+.report-card-meta{font-family:var(--font-mono);font-size:.65rem;color:rgba(0,212,255,.35);}
+.report-card-detail{font-family:var(--font-mono);font-size:.72rem;color:var(--color-text-muted);margin-top:4px;line-height:1.5;}
+.report-card-actions{display:flex;gap:6px;margin-top:8px;}
+.report-dismiss-btn{padding:3px 10px;font-family:var(--font-mono);font-size:.62rem;border:1px solid rgba(0,212,255,.15);background:transparent;color:var(--color-text-muted);border-radius:3px;cursor:pointer;transition:var(--transition);}
+.report-dismiss-btn:hover{border-color:var(--color-primary);color:var(--color-primary);}
+
+/* Enhanced mark all read button */
+.notif-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;}
+.notif-header-row h2{margin:0;display:flex;align-items:center;gap:8px;}
+.mark-all-read-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.06em;border:1px solid rgba(0,212,255,.18);background:rgba(0,212,255,.04);color:var(--color-text-muted);border-radius:20px;cursor:pointer;transition:var(--transition);white-space:nowrap;}
+.mark-all-read-btn:hover{border-color:var(--color-primary);color:var(--color-primary);background:rgba(0,212,255,.08);}
+.mark-all-read-btn i{font-size:.6rem;}
+
 /* FORGOT PASSWORD LINK */
 .forgot-link{text-align:right;margin-top:-6px;}
 #forgotLink{font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);cursor:pointer;letter-spacing:.06em;text-decoration:underline;transition:var(--transition);}
@@ -1081,6 +1123,7 @@ footer .contact a:hover{text-decoration:underline;}
       <button class="admin-tab" data-tab="announce"><i class="fas fa-bullhorn"></i> Announce</button>
       <button class="admin-tab" data-tab="history"><i class="fas fa-history"></i> History</button>
       <button class="admin-tab" data-tab="missions"><i class="fas fa-key"></i> Keys</button>
+      <button class="admin-tab" data-tab="reports"><i class="fas fa-flag" style="color:#ff9800;"></i> Reports</button>
     </div>
     <!-- ROLES TAB -->
     <div class="admin-panel-section active" id="adminTabRoles">
@@ -1113,6 +1156,11 @@ footer .contact a:hover{text-decoration:underline;}
       <p class="admin-section-title">Manage Member Badges</p>
       <div id="adminBadgesList" style="max-height:380px;overflow-y:auto;"></div>
     </div>
+    <!-- REPORTS TAB -->
+    <div class="admin-panel-section" id="adminTabReports">
+      <p class="admin-section-title"><i class="fas fa-flag" style="margin-right:5px;color:#ff9800;"></i>Member Reports — Co-Administrator+ Only</p>
+      <div id="adminReportsList" style="max-height:380px;overflow-y:auto;"></div>
+    </div>
   </div>
 </div>
 
@@ -1126,13 +1174,34 @@ footer .contact a:hover{text-decoration:underline;}
   <button id="msgToastDismiss" style="background:none;border:none;color:var(--color-text-muted);font-size:.85rem;cursor:pointer;padding:2px 4px;flex-shrink:0;line-height:1;margin-left:4px;" title="Dismiss">&#x2715;</button>
 </div>
 
+<!-- REPORT MODAL -->
+<div class="modal" id="reportModal">
+  <div class="modal-container" style="max-width:400px;">
+    <button class="close-btn" id="closeReport">&#x2715;</button>
+    <h2><i class="fas fa-flag" style="margin-right:8px;font-size:.85rem;color:#ff9800;"></i>Report Operative</h2>
+    <p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);margin:0 0 4px;line-height:1.6;">Reporting: <strong id="reportTargetName" style="color:var(--color-text-light);">—</strong></p>
+    <p style="font-family:var(--font-mono);font-size:.7rem;color:rgba(0,212,255,.3);margin:0 0 12px;">Reports are reviewed by Co-Administrator+. Misuse may result in action against your account.</p>
+    <div class="report-reason-list" id="reportReasonList">
+      <button class="report-reason-btn" data-reason="Harassment">🚨 Harassment or bullying</button>
+      <button class="report-reason-btn" data-reason="Spam">📢 Spam or advertising</button>
+      <button class="report-reason-btn" data-reason="Impersonation">👤 Impersonation</button>
+      <button class="report-reason-btn" data-reason="Inappropriate Content">⚠️ Inappropriate content</button>
+      <button class="report-reason-btn" data-reason="Other">📋 Other</button>
+    </div>
+    <textarea class="report-extra" id="reportDetails" placeholder="Additional details (optional)..." maxlength="300"></textarea>
+    <button class="btn-primary" id="submitReportBtn" style="width:100%;justify-content:center;margin-top:10px;opacity:.5;cursor:not-allowed;" disabled>
+      <i class="fas fa-flag"></i> Submit Report
+    </button>
+  </div>
+</div>
+
 <!-- NOTIFICATIONS -->
 <div class="modal" id="notifModal">
   <div class="modal-container" style="max-width:480px">
     <button class="close-btn" id="closeNotif">&#x2715;</button>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <h2 style="margin:0;display:flex;align-items:center;gap:8px;"><i class="fas fa-bell" style="font-size:.85rem;color:var(--color-primary);"></i>Notifications</h2>
-      <button id="markAllReadBtn" style="background:none;border:1px solid rgba(0,212,255,.15);color:var(--color-text-muted);font-family:var(--font-mono);font-size:.62rem;padding:4px 10px;border-radius:3px;cursor:pointer;transition:var(--transition);" onmouseover="this.style.color='var(--color-primary)';this.style.borderColor='var(--color-primary)'" onmouseout="this.style.color='var(--color-text-muted)';this.style.borderColor='rgba(0,212,255,.15)'">Mark all read</button>
+    <div class="notif-header-row">
+      <h2><i class="fas fa-bell" style="font-size:.85rem;color:var(--color-primary);"></i>Notifications</h2>
+      <button class="mark-all-read-btn" id="markAllReadBtn"><i class="fas fa-check-double"></i> Mark all read</button>
     </div>
     <div class="notif-tabs">
       <button class="notif-tab active" data-ntab="requests"><i class="fas fa-user-plus" style="margin-right:4px;"></i>Requests<span id="reqBadge" class="notif-tab-badge"></span></button>
@@ -1418,7 +1487,7 @@ function showToast(msg){const t=document.getElementById('nexusToast');t.textCont
 function openModal(id){document.getElementById(id).classList.add('active');document.body.style.overflow='hidden';}
 function closeModal(id){document.getElementById(id).classList.remove('active');if(!document.querySelector('.modal.active'))document.body.style.overflow='';}
 
-const ALL_MODALS=['loginModal','userDirectory','profileModal','myProfileModal','notifModal','msgModal','resetModal','intelDevModal','adminModal','engagementModal'];
+const ALL_MODALS=['loginModal','userDirectory','profileModal','myProfileModal','notifModal','msgModal','resetModal','intelDevModal','adminModal','engagementModal','reportModal'];
 ALL_MODALS.forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){
     if(e.target===this){
@@ -1454,7 +1523,8 @@ function startActiveMembersListener(){
     const countLabel=document.getElementById('onlineCountLabel');
     const statCount=document.getElementById('activeMemberCount');
     list.innerHTML='';
-    const members=[];snap.forEach(d=>{const u=d.data();u.id=d.id;members.push(u);});
+    const blockedList=currentUserData?.blockedUsers||[];
+    const members=[];snap.forEach(d=>{const u=d.data();u.id=d.id;if(!blockedList.includes(u.id))members.push(u);});
     countLabel.textContent=members.length;statCount.textContent=members.length;
     if(!members.length){list.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);padding:8px 0;">No operatives online right now.</p>';return;}
     members.forEach(u=>{
@@ -1484,8 +1554,9 @@ function loadAllUsers(){
   if(membersUnsubscribe){membersUnsubscribe();membersUnsubscribe=null;}
   document.getElementById('usersGrid').innerHTML='<div class="loading-spinner"></div>';
   membersUnsubscribe=db.collection('users').onSnapshot(snap=>{
+    const blocked=currentUserData?.blockedUsers||[];
     const users=[];
-    snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous)users.push(u);});
+    snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous&&!blocked.includes(u.id))users.push(u);});
     users.sort((a,b)=>{if(currentUser){if(a.id===currentUser.uid)return -1;if(b.id===currentUser.uid)return 1;}return(a.displayName||'').localeCompare(b.displayName||'');});
     displayMembers(users);
     updateDirStats(users);
@@ -1506,6 +1577,21 @@ async function openViewProfile(u){
   const content=document.getElementById('profileContent');
   const isLoggedIn=!!currentUser;
   const photo=u.photoURL||'',name=u.displayName||'Unknown';
+
+  // ── Block check — show overlay if viewer has blocked this person ──────────
+  if(isLoggedIn&&!currentUser.isAnonymous&&isBlocked(u.id)){
+    content.innerHTML=`
+      <div class="blocked-overlay">
+        <div class="blocked-overlay-icon"><i class="fas fa-ban"></i></div>
+        <div class="blocked-overlay-title">Operative Blocked</div>
+        <div class="blocked-overlay-msg">You have blocked <strong>${esc(name)}</strong>.<br>Their profile and messages are hidden from you.</div>
+        <button class="btn-unblock" id="vpUnblock" style="margin:14px auto 0;"><i class="fas fa-unlock"></i> Unblock ${esc(name)}</button>
+      </div>`;
+    openModal('profileModal');
+    document.getElementById('vpUnblock').addEventListener('click',()=>unblockUser(u.id,name));
+    return;
+  }
+
   let isFriend=false,pendingSent=false,pendingReceived=false;
   if(isLoggedIn&&currentUser.uid!==u.id){
     try{
@@ -1520,7 +1606,6 @@ async function openViewProfile(u){
   }
   const viewerIsGuest=currentUser?.isAnonymous||currentUserData?.isAnonymous;
   const statusLabel=STATUS_LABELS[u.status]||u.status||'offline';
-  const statusColor={online:'#4CAF50',idle:'#ff9800',dnd:'#f44336',offline:'#555'}[u.status]||'#555';
   let actions='';
   if(isLoggedIn&&currentUser.uid!==u.id){
     if(viewerIsGuest) actions=`<button class="btn-sm secondary" id="vpGuestPrompt" style="font-size:.65rem;"><i class="fas fa-user-plus"></i> Connect — Free Account Required</button>`;
@@ -1533,19 +1618,17 @@ async function openViewProfile(u){
   const joinStr=joinDate?joinDate.toLocaleDateString([],{month:'long',year:'numeric'}):'Unknown';
   const friendCount=(u.friends||[]).length;
   const badgeCount=(u.badges||[]).length;
+  // Report/block row — only for logged-in non-guest, not on own profile
+  const showDangerRow=isLoggedIn&&!viewerIsGuest&&currentUser.uid!==u.id;
+  const alreadyBlocked=isBlocked(u.id);
   content.innerHTML=`
     <div class="profile-modal-hero">
       <div class="profile-hero-top">
         <div class="profile-hero-av">${photo?`<img src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`${initials(name)}`}</div>
         <div class="profile-hero-info">
           <div class="profile-hero-name">${esc(name)}</div>
-          <div class="profile-hero-rank">
-            <span class="${rankClass(u.rank)}">${esc(u.rank||'Member')}</span>
-          </div>
-          <div class="profile-hero-status">
-            <span class="status-dot ${u.status||'offline'}"></span>
-            <span>${statusLabel}</span>
-          </div>
+          <div class="profile-hero-rank"><span class="${rankClass(u.rank)}">${esc(u.rank||'Member')}</span></div>
+          <div class="profile-hero-status"><span class="status-dot ${u.status||'offline'}"></span><span>${statusLabel}</span></div>
           ${u.activityStatus?`<div class="profile-activity-pill"><i class="fas fa-circle-notch" style="font-size:.55rem;opacity:.5;"></i> ${esc(u.activityStatus)}</div>`:''}
         </div>
       </div>
@@ -1560,7 +1643,13 @@ async function openViewProfile(u){
       <div class="profile-section-label"><i class="fas fa-align-left" style="margin-right:4px;"></i>About</div>
       <div class="profile-bio-text">${esc(u.bio||'No bio set yet.')}</div>
     </div>
-    ${(u.badges||[]).length?`<div class="profile-bio-section"><div class="profile-section-label"><i class="fas fa-medal" style="margin-right:4px;"></i>Badges</div>${renderBadges(u.badges)}</div>`:''}`;
+    ${(u.badges||[]).length?`<div class="profile-bio-section"><div class="profile-section-label"><i class="fas fa-medal" style="margin-right:4px;"></i>Badges</div>${renderBadges(u.badges)}</div>`:''}
+    ${showDangerRow?`<div class="profile-danger-row">
+      <button class="btn-report" id="vpReport"><i class="fas fa-flag"></i> Report</button>
+      ${alreadyBlocked
+        ?`<button class="btn-unblock" id="vpUnblock"><i class="fas fa-unlock"></i> Unblock</button>`
+        :`<button class="btn-block" id="vpBlock"><i class="fas fa-ban"></i> Block</button>`}
+    </div>`:''}`;
   openModal('profileModal');
   if(isLoggedIn&&currentUser.uid!==u.id){
     document.getElementById('vpGuestPrompt')?.addEventListener('click',()=>{closeModal('profileModal');promptGuestRegister('Create a free account to connect with operatives and send messages.');});
@@ -1568,6 +1657,9 @@ async function openViewProfile(u){
     document.getElementById('vpAccept')?.addEventListener('click',()=>acceptFriendRequest(u.id,name));
     document.getElementById('vpUnfriend')?.addEventListener('click',()=>removeFriend(u.id,name));
     document.getElementById('vpMsg')?.addEventListener('click',()=>{closeModal('profileModal');openChat(u);});
+    document.getElementById('vpReport')?.addEventListener('click',()=>{closeModal('profileModal');openReportModal(u.id,name);});
+    document.getElementById('vpBlock')?.addEventListener('click',()=>blockUser(u.id,name));
+    document.getElementById('vpUnblock')?.addEventListener('click',()=>unblockUser(u.id,name));
   }
 }
 
@@ -2540,6 +2632,7 @@ async function loadAdminTab(tab){
   else if(tab==='history')await loadAnnHistory();
   else if(tab==='missions')await loadAdminKeys();
   else if(tab==='badges')await loadAdminBadges();
+  else if(tab==='reports')await loadAdminReports();
 }
 
 async function loadAdminBadges(){
@@ -3339,6 +3432,163 @@ document.getElementById('corpHubBtn').addEventListener('click',e=>{
   dropdownMenu.classList.remove('open');
   openEngagementHub();
 });
+
+
+/* ═══════════════════════════════════════════════════════
+   REPORT & BLOCK SYSTEM
+═══════════════════════════════════════════════════════ */
+let _reportTargetUid=null, _reportTargetName='', _reportSelectedReason=null;
+
+function openReportModal(uid, name){
+  _reportTargetUid=uid;
+  _reportTargetName=name;
+  _reportSelectedReason=null;
+  document.getElementById('reportTargetName').textContent=name;
+  document.getElementById('reportDetails').value='';
+  document.getElementById('submitReportBtn').disabled=true;
+  document.getElementById('submitReportBtn').style.opacity='.5';
+  document.getElementById('submitReportBtn').style.cursor='not-allowed';
+  // Reset reason buttons
+  document.querySelectorAll('.report-reason-btn').forEach(b=>b.classList.remove('selected'));
+  openModal('reportModal');
+}
+
+// Wire reason buttons
+document.querySelectorAll('.report-reason-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.report-reason-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    _reportSelectedReason=btn.dataset.reason;
+    const submitBtn=document.getElementById('submitReportBtn');
+    submitBtn.disabled=false;
+    submitBtn.style.opacity='1';
+    submitBtn.style.cursor='pointer';
+  });
+});
+
+document.getElementById('closeReport').addEventListener('click',()=>closeModal('reportModal'));
+document.getElementById('reportModal').addEventListener('click',function(e){if(e.target===this)closeModal('reportModal');});
+
+document.getElementById('submitReportBtn').addEventListener('click',async()=>{
+  if(!currentUser||!_reportTargetUid||!_reportSelectedReason)return;
+  const details=document.getElementById('reportDetails').value.trim();
+  const btn=document.getElementById('submitReportBtn');
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Submitting...';
+  try{
+    await db.collection('reports').add({
+      reportedUid:_reportTargetUid,
+      reportedName:_reportTargetName,
+      reporterUid:currentUser.uid,
+      reporterName:currentUserData?.displayName||'Unknown',
+      reason:_reportSelectedReason,
+      details,
+      status:'pending',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    closeModal('reportModal');
+    showToast('Report submitted. Our staff will review it.');
+  }catch(err){
+    showToast('Failed to submit report: '+err.message);
+    btn.disabled=false;
+    btn.innerHTML='<i class="fas fa-flag"></i> Submit Report';
+  }
+});
+
+// ── BLOCK SYSTEM ──────────────────────────────────────
+async function blockUser(uid, name){
+  if(!currentUser||!uid)return;
+  const confirmed=confirm(`Block ${name}? Their profile will be hidden from you and you won't see their messages.`);
+  if(!confirmed)return;
+  await db.collection('users').doc(currentUser.uid).update({
+    blockedUsers:firebase.firestore.FieldValue.arrayUnion(uid)
+  }).catch(e=>showToast(e.message));
+  if(currentUserData){
+    currentUserData.blockedUsers=[...(currentUserData.blockedUsers||[]),uid];
+  }
+  // Also remove friend connection if exists
+  if((currentUserData?.friends||[]).includes(uid)){
+    await removeFriend(uid,name);
+  }else{
+    closeModal('profileModal');
+  }
+  showToast(`${name} has been blocked.`);
+}
+
+async function unblockUser(uid, name){
+  if(!currentUser)return;
+  await db.collection('users').doc(currentUser.uid).update({
+    blockedUsers:firebase.firestore.FieldValue.arrayRemove(uid)
+  }).catch(e=>showToast(e.message));
+  if(currentUserData){
+    currentUserData.blockedUsers=(currentUserData.blockedUsers||[]).filter(id=>id!==uid);
+  }
+  closeModal('profileModal');
+  showToast(`${name} has been unblocked.`);
+}
+
+function isBlocked(uid){
+  return (currentUserData?.blockedUsers||[]).includes(uid);
+}
+
+// ── ADMIN: LOAD REPORTS ───────────────────────────────
+const CO_ADMIN_RANKS=['Founder','Administrator','Co-Administrator'];
+function isCoAdmin(data){return(currentUser&&currentUser.uid===OWNER_UID)||data&&CO_ADMIN_RANKS.includes(data.rank);}
+
+async function loadAdminReports(){
+  const list=document.getElementById('adminReportsList');
+  if(!isCoAdmin(currentUserData)){
+    list.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;text-align:center;padding:20px 0;"><i class="fas fa-lock" style="margin-right:6px;"></i>Co-Administrator+ access required.</p>';
+    return;
+  }
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  try{
+    const snap=await db.collection('reports').orderBy('createdAt','desc').get().catch(async()=>{
+      // fallback without orderBy
+      return await db.collection('reports').get();
+    });
+    const docs=snap.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()??0)-(a.data().createdAt?.toMillis?.()??0));
+    list.innerHTML='';
+    if(!docs.length){list.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);text-align:center;padding:20px 0;">No reports submitted yet.</p>';return;}
+    docs.forEach(d=>{
+      const r=d.data(),rid=d.id;
+      const isPending=r.status==='pending';
+      const card=document.createElement('div');card.className='report-card';
+      if(!isPending)card.style.opacity='.5';
+      const time=r.createdAt?fmtDate(r.createdAt)+' '+fmtTime(r.createdAt):'';
+      card.innerHTML=`
+        <div class="report-card-header">
+          <span class="report-card-reason"><i class="fas fa-flag" style="margin-right:5px;"></i>${esc(r.reason||'Unknown')}</span>
+          <span style="margin-left:auto;font-family:var(--font-mono);font-size:.62rem;padding:2px 8px;border-radius:2px;background:${isPending?'rgba(255,152,0,.1)':'rgba(76,175,80,.08)'};color:${isPending?'#ff9800':'#4CAF50'};border:1px solid ${isPending?'rgba(255,152,0,.2)':'rgba(76,175,80,.2)'};">${isPending?'Pending':'Resolved'}</span>
+        </div>
+        <div class="report-card-meta">
+          Reported: <strong style="color:var(--color-text-light);">${esc(r.reportedName||'?')}</strong>
+          &nbsp;·&nbsp; By: ${esc(r.reporterName||'?')}
+          &nbsp;·&nbsp; ${time}
+        </div>
+        ${r.details?`<div class="report-card-detail">"${esc(r.details)}"</div>`:''}
+        ${isPending?`<div class="report-card-actions">
+          <button class="report-dismiss-btn" data-rid="${rid}" data-action="resolve" style="border-color:rgba(76,175,80,.3);color:#4CAF50;">
+            <i class="fas fa-check"></i> Mark Resolved
+          </button>
+          <button class="report-dismiss-btn" data-rid="${rid}" data-action="dismiss">
+            <i class="fas fa-times"></i> Dismiss
+          </button>
+        </div>`:''}`;
+      card.querySelectorAll('[data-action]').forEach(btn=>{
+        btn.addEventListener('click',async function(){
+          this.disabled=true;this.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+          await db.collection('reports').doc(this.dataset.rid).update({
+            status:this.dataset.action==='resolve'?'resolved':'dismissed',
+            resolvedAt:firebase.firestore.FieldValue.serverTimestamp(),
+            resolvedBy:currentUserData?.displayName||'Admin'
+          }).catch(e=>showToast(e.message));
+          loadAdminReports();
+        });
+      });
+      list.appendChild(card);
+    });
+  }catch(err){list.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;padding:10px 0;">Error: ${err.message}</p>`;}
+}
 
 /* ── SEARCH & DIRECTORY ── */
 let _st=null, _dirFilter='all';
