@@ -595,10 +595,11 @@ footer .contact a:hover{text-decoration:underline;}
 .log-filter-btn.active,.log-filter-btn:hover{border-color:var(--color-primary);color:var(--color-primary);background:rgba(0,212,255,.05);}
 
 /* ─── GROUP CHAT ─────────────────────────────────────── */
-.corp-chat-btn{position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--color-primary);color:#000;border:none;font-size:1.1rem;cursor:pointer;z-index:500;box-shadow:0 0 20px rgba(0,212,255,.5);transition:var(--transition);display:none;align-items:center;justify-content:center;}
+.corp-chat-btn{position:fixed;bottom:24px;right:24px;height:44px;padding:0 18px;border-radius:22px;background:rgba(0,14,28,.95);color:var(--color-primary);border:1px solid rgba(0,212,255,.35);font-size:.75rem;font-family:var(--font-main);font-weight:700;letter-spacing:.08em;cursor:pointer;z-index:500;box-shadow:0 4px 24px rgba(0,0,0,.5),0 0 14px rgba(0,212,255,.2);transition:var(--transition);display:none;align-items:center;justify-content:center;gap:8px;backdrop-filter:blur(10px);}
 .corp-chat-btn.show{display:flex;}
-.corp-chat-btn:hover{transform:scale(1.1);box-shadow:0 0 30px rgba(0,212,255,.7);}
-.corp-chat-btn .chat-unread{position:absolute;top:-3px;right:-3px;background:#f55;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.6rem;font-family:var(--font-mono);display:none;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--color-dark);}
+.corp-chat-btn:hover{border-color:var(--color-primary);box-shadow:0 4px 28px rgba(0,0,0,.6),var(--glow-sm);transform:translateY(-2px);}
+.corp-chat-btn .chat-icon-dot{width:8px;height:8px;border-radius:50%;background:#4CAF50;box-shadow:0 0 5px #4CAF50;flex-shrink:0;}
+.corp-chat-btn .chat-unread{background:#f55;color:#fff;border-radius:10px;min-width:18px;height:18px;font-size:.58rem;font-family:var(--font-mono);display:none;align-items:center;justify-content:center;font-weight:700;padding:0 4px;}
 .corp-chat-btn .chat-unread.show{display:flex;}
 #corpChatPanel{position:fixed;bottom:88px;right:24px;width:320px;height:420px;background:rgba(0,14,28,.98);border:var(--border);border-radius:12px;box-shadow:var(--glow-lg);z-index:500;display:none;flex-direction:column;overflow:hidden;transform:scale(.95) translateY(10px);opacity:0;transition:transform .25s ease,opacity .25s ease;}
 #corpChatPanel.open{display:flex;transform:scale(1) translateY(0);opacity:1;}
@@ -714,6 +715,80 @@ footer .contact a:hover{text-decoration:underline;}
 .hub-scroll::-webkit-scrollbar{width:3px;}
 .hub-scroll::-webkit-scrollbar-thumb{background:rgba(0,212,255,.15);border-radius:2px;}
 
+
+/* ── ENHANCED PROFILE MODAL ──────────────────────────── */
+.profile-modal-hero{
+  position:relative;
+  background:linear-gradient(135deg,rgba(0,212,255,.06) 0%,rgba(0,20,40,.8) 100%);
+  border-radius:6px;border:var(--border);
+  padding:20px;margin-bottom:16px;
+  overflow:hidden;
+}
+.profile-modal-hero::before{
+  content:'';position:absolute;top:0;right:0;width:120px;height:120px;
+  background:radial-gradient(circle at top right,rgba(0,212,255,.12),transparent 70%);
+  pointer-events:none;
+}
+.profile-hero-top{display:flex;align-items:flex-start;gap:16px;margin-bottom:12px;}
+.profile-hero-av{
+  width:72px;height:72px;border-radius:50%;
+  border:2px solid rgba(0,212,255,.4);
+  background:rgba(0,212,255,.08);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;font-weight:700;color:var(--color-primary);
+  overflow:hidden;flex-shrink:0;
+  box-shadow:0 0 14px rgba(0,212,255,.2);
+}
+.profile-hero-av img{width:100%;height:100%;object-fit:cover;}
+.profile-hero-info{flex:1;min-width:0;}
+.profile-hero-name{font-size:1rem;font-weight:900;color:var(--color-primary);letter-spacing:.07em;margin-bottom:3px;display:flex;align-items:center;gap:8px;}
+.profile-hero-rank{font-size:.72rem;margin-bottom:5px;display:flex;align-items:center;gap:6px;}
+.profile-hero-status{display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);}
+.profile-activity-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.12);
+  border-radius:12px;padding:3px 10px;
+  font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);
+  margin-top:5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.profile-bio-section{
+  background:rgba(0,0,0,.2);border-radius:4px;border:1px solid rgba(0,212,255,.06);
+  padding:10px 12px;margin-bottom:12px;
+}
+.profile-section-label{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.15em;color:rgba(0,212,255,.35);text-transform:uppercase;margin-bottom:5px;}
+.profile-bio-text{font-family:var(--font-mono);font-size:.78rem;color:var(--color-text-muted);line-height:1.7;}
+.profile-stats-row{display:flex;gap:0;border-top:1px solid rgba(0,212,255,.08);padding-top:10px;margin-top:2px;}
+.profile-stat{flex:1;text-align:center;padding:6px 4px;}
+.profile-stat-num{font-size:.9rem;font-weight:900;color:var(--color-primary);line-height:1;}
+.profile-stat-lbl{font-family:var(--font-mono);font-size:.58rem;color:rgba(0,212,255,.3);letter-spacing:.08em;margin-top:2px;}
+
+/* My Profile enhanced tabs */
+.profile-edit-tabs{display:flex;gap:0;border-bottom:var(--border);margin-bottom:16px;}
+.profile-edit-tab{flex:1;padding:8px 0;text-align:center;font-family:var(--font-mono);font-size:.65rem;letter-spacing:.1em;color:var(--color-text-muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:var(--transition);}
+.profile-edit-tab.active{color:var(--color-primary);border-bottom-color:var(--color-primary);}
+.profile-tab-section{display:none;}
+.profile-tab-section.active{display:block;}
+
+/* Enhanced connections list */
+.connection-card{display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(0,212,255,.02);border:1px solid rgba(0,212,255,.07);border-radius:6px;transition:var(--transition);cursor:pointer;}
+.connection-card:hover{background:rgba(0,212,255,.06);border-color:rgba(0,212,255,.2);transform:translateX(3px);}
+.connection-av{width:36px;height:36px;border-radius:50%;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--color-primary);overflow:hidden;flex-shrink:0;position:relative;}
+.connection-av img{width:100%;height:100%;object-fit:cover;}
+.connection-av-dot{position:absolute;bottom:0;right:0;width:9px;height:9px;border-radius:50%;border:1.5px solid var(--color-card);}
+.connection-info{flex:1;min-width:0;}
+.connection-name{font-size:.78rem;font-weight:700;color:var(--color-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.connection-rank{font-family:var(--font-mono);font-size:.62rem;}
+.connection-activity{font-family:var(--font-mono);font-size:.6rem;color:rgba(0,212,255,.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.connection-actions{display:flex;gap:4px;flex-shrink:0;}
+
+/* Member directory enhanced */
+.directory-stats{display:flex;gap:12px;margin-bottom:12px;padding:10px 12px;background:rgba(0,212,255,.02);border:var(--border);border-radius:4px;}
+.dir-stat{font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);}
+.dir-stat strong{color:var(--color-primary);}
+.dir-filter-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+.dir-filter{padding:4px 10px;font-family:var(--font-mono);font-size:.65rem;border:1px solid rgba(0,212,255,.15);background:transparent;color:var(--color-text-muted);border-radius:3px;cursor:pointer;transition:var(--transition);}
+.dir-filter.active,.dir-filter:hover{border-color:var(--color-primary);color:var(--color-primary);}
+
 /* FORGOT PASSWORD LINK */
 .forgot-link{text-align:right;margin-top:-6px;}
 #forgotLink{font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);cursor:pointer;letter-spacing:.06em;text-decoration:underline;transition:var(--transition);}
@@ -802,7 +877,17 @@ footer .contact a:hover{text-decoration:underline;}
   <div class="modal-container" style="max-width:860px">
     <button class="close-btn" id="closeDirectory">&#x2715;</button>
     <h2><i class="fas fa-users" style="margin-right:8px;font-size:.85rem;"></i>Corporation Members</h2>
-    <input type="text" id="searchUsers" placeholder="Search operatives...">
+    <div class="directory-stats" id="dirStats">
+      <span class="dir-stat">Total: <strong id="dirTotalCount">—</strong></span>
+      <span class="dir-stat" style="color:#4CAF50;">Online: <strong id="dirOnlineCount">—</strong></span>
+      <span class="dir-stat">Friends: <strong id="dirFriendCount">—</strong></span>
+    </div>
+    <div class="dir-filter-row">
+      <button class="dir-filter active" data-dfilter="all">All</button>
+      <button class="dir-filter" data-dfilter="online">Online</button>
+      <button class="dir-filter" data-dfilter="friends">Connections</button>
+    </div>
+    <input type="text" id="searchUsers" placeholder="Search operatives by name or bio...">
     <div id="usersGrid" class="friends-grid"></div>
   </div>
 </div>
@@ -817,44 +902,66 @@ footer .contact a:hover{text-decoration:underline;}
 
 <!-- MY PROFILE / EDIT -->
 <div class="modal" id="myProfileModal">
-  <div class="modal-container" style="max-width:480px">
+  <div class="modal-container" style="max-width:520px">
     <button class="close-btn" id="closeMyProfile">&#x2715;</button>
-    <h2>My Profile</h2>
-    <div class="edit-profile-header">
-      <div class="edit-avatar-wrap" id="editAvatarBtn" title="Click to change photo" role="button" tabindex="0">
-        <img id="editAvatarImg" src="" alt="" style="display:none;">
-        <div class="edit-avatar-placeholder" id="editAvatarPlaceholder"></div>
-        <div class="edit-avatar-overlay">CHANGE<br>PHOTO</div>
+    <h2 id="myProfileTitle">My Profile</h2>
+    <!-- Profile tabs -->
+    <div class="profile-edit-tabs">
+      <button class="profile-edit-tab active" data-ptab="edit"><i class="fas fa-edit"></i> Edit</button>
+      <button class="profile-edit-tab" data-ptab="preview"><i class="fas fa-eye"></i> Preview</button>
+      <button class="profile-edit-tab" data-ptab="connections"><i class="fas fa-user-friends"></i> Connections (<span id="friendCount">0</span>)</button>
+    </div>
+    <!-- EDIT TAB -->
+    <div class="profile-tab-section active" id="profileTabEdit">
+      <div class="edit-profile-header">
+        <div class="edit-avatar-wrap" id="editAvatarBtn" title="Click to change photo" role="button" tabindex="0">
+          <img id="editAvatarImg" src="" alt="" style="display:none;">
+          <div class="edit-avatar-placeholder" id="editAvatarPlaceholder"></div>
+          <div class="edit-avatar-overlay">CHANGE<br>PHOTO</div>
+        </div>
+        <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
+        <div class="edit-profile-name-wrap">
+          <p>Display Name</p><strong id="myProfileDisplayName"></strong>
+          <p style="margin-top:4px;">Rank</p><strong id="myProfileRank" style="font-size:.8rem;"></strong>
+        </div>
       </div>
-      <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
-      <div class="edit-profile-name-wrap">
-        <p>Display Name</p><strong id="myProfileDisplayName"></strong>
-        <p style="margin-top:6px;">Rank</p><strong id="myProfileRank" style="color:var(--color-text-muted);font-size:.8rem;"></strong>
+      <div class="field-group">
+        <label class="field-label" for="editDisplayName">Display Name</label>
+        <input type="text" id="editDisplayName" class="input-field" maxlength="30" placeholder="Your display name" autocomplete="off">
       </div>
+      <div class="field-group">
+        <label class="field-label" for="editBio">Bio</label>
+        <textarea id="editBio" class="input-field" maxlength="160" placeholder="Tell the corp about yourself..."></textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="editActivityStatus">Activity Status <span style="font-size:.6rem;color:rgba(0,212,255,.4);">(What are you up to?)</span></label>
+        <input type="text" id="editActivityStatus" class="input-field" maxlength="60" placeholder="e.g. Grinding missions, On patrol..." autocomplete="off">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Presence Status</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="rsvp-btn yes" id="profileStatusOnline" data-pstatus="online" style="font-family:var(--font-mono);font-size:.65rem;"><span class="status-dot online" style="width:7px;height:7px;margin-right:4px;vertical-align:middle;"></span>Online</button>
+          <button class="rsvp-btn" id="profileStatusIdle" data-pstatus="idle" style="font-family:var(--font-mono);font-size:.65rem;border-color:rgba(255,152,0,.3);color:#ff9800;background:rgba(255,152,0,.06);"><span class="status-dot idle" style="width:7px;height:7px;margin-right:4px;vertical-align:middle;"></span>Idle</button>
+          <button class="rsvp-btn" id="profileStatusDnd" data-pstatus="dnd" style="font-family:var(--font-mono);font-size:.65rem;border-color:rgba(244,67,54,.3);color:#f44336;background:rgba(244,67,54,.06);"><span class="status-dot dnd" style="width:7px;height:7px;margin-right:4px;vertical-align:middle;"></span>Do Not Disturb</button>
+          <button class="rsvp-btn" id="profileStatusOffline" data-pstatus="offline" style="font-family:var(--font-mono);font-size:.65rem;border-color:rgba(100,100,100,.3);color:#888;background:rgba(100,100,100,.06);"><span class="status-dot offline" style="width:7px;height:7px;margin-right:4px;vertical-align:middle;"></span>Appear Offline</button>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="editPhotoURL">Photo URL</label>
+        <input type="url" id="editPhotoURL" class="input-field" placeholder="https://...">
+        <p class="photo-hint"><i class="fas fa-image" style="margin-right:4px;font-size:.7rem;"></i>Upload free at <a href="https://postimages.org/" target="_blank" rel="noopener noreferrer">Postimages.org</a> — paste the Direct link above.</p>
+      </div>
+      <button class="btn-primary" id="saveProfileBtn" style="width:100%;justify-content:center;margin-top:4px;"><i class="fas fa-save"></i> Save Changes</button>
+      <div class="success-msg" id="profileSaveSuccess">Profile updated!</div>
     </div>
-    <div class="field-group">
-      <label class="field-label" for="editDisplayName">Display Name</label>
-      <input type="text" id="editDisplayName" class="input-field" maxlength="30" placeholder="Your display name" autocomplete="off">
+    <!-- PREVIEW TAB -->
+    <div class="profile-tab-section" id="profileTabPreview">
+      <div id="profilePreviewContent"></div>
     </div>
-    <div class="field-group">
-      <label class="field-label" for="editBio">Bio</label>
-      <textarea id="editBio" class="input-field" maxlength="160" placeholder="Tell the corp about yourself..."></textarea>
-    </div>
-    <div class="field-group">
-      <label class="field-label" for="editPhotoURL">Photo URL</label>
-      <input type="url" id="editPhotoURL" class="input-field" placeholder="https://...">
-      <p class="photo-hint">
-        <i class="fas fa-image" style="margin-right:4px;font-size:.7rem;"></i>
-        Need to host a photo? Upload it free at
-        <a href="https://postimages.org/" target="_blank" rel="noopener noreferrer">Postimages.org</a>
-        — then copy the <em>Direct link</em> and paste it above.
-      </p>
-    </div>
-    <button class="btn-primary" id="saveProfileBtn" style="width:100%;justify-content:center;margin-top:4px;"><i class="fas fa-save"></i> Save Changes</button>
-    <div class="success-msg" id="profileSaveSuccess">Profile updated successfully!</div>
-    <div class="friends-list-section">
-      <p class="friends-list-title">My Connections (<span id="friendCount">0</span>)</p>
-      <div id="friendsListInner"></div>
+    <!-- CONNECTIONS TAB -->
+    <div class="profile-tab-section" id="profileTabConnections">
+      <input type="text" id="connectionsSearch" class="input-field" placeholder="Search connections..." style="margin-bottom:10px;font-size:.78rem;" autocomplete="off">
+      <div id="friendsListInner" style="display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto;"></div>
     </div>
   </div>
 </div>
@@ -865,7 +972,7 @@ footer .contact a:hover{text-decoration:underline;}
 <div class="modal" id="engagementModal">
   <div class="modal-container">
     <button class="close-btn" id="closeEngagement">&#x2715;</button>
-    <h2><i class="fas fa-fire" style="margin-right:8px;font-size:.85rem;color:#ff6b35;"></i>Corp Hub</h2>
+    <h2><i class="fas fa-satellite-dish" style="margin-right:8px;font-size:.85rem;color:#00d4ff;filter:drop-shadow(0 0 5px rgba(0,212,255,.6));"></i>Corporation Hub</h2>
     <div class="hub-tabs">
       <button class="hub-tab active" data-hub="log"><i class="fas fa-scroll"></i> Corp Log</button>
       <button class="hub-tab" data-hub="missions"><i class="fas fa-crosshairs"></i> Missions</button>
@@ -924,7 +1031,9 @@ footer .contact a:hover{text-decoration:underline;}
 </div>
 <!-- CORP CHAT BUTTON -->
 <button class="corp-chat-btn" id="corpChatBtn" aria-label="Corp Chat">
-  <i class="fas fa-comments"></i>
+  <span class="chat-icon-dot"></span>
+  <i class="fas fa-comments" style="font-size:.85rem;"></i>
+  <span style="font-size:.72rem;">Corp Chat</span>
   <span class="chat-unread" id="chatUnreadBadge">0</span>
 </button>
 
@@ -938,6 +1047,7 @@ footer .contact a:hover{text-decoration:underline;}
       <button class="admin-tab" data-tab="announce"><i class="fas fa-bullhorn"></i> Announce</button>
       <button class="admin-tab" data-tab="history"><i class="fas fa-history"></i> History</button>
       <button class="admin-tab" data-tab="missions"><i class="fas fa-key"></i> Keys</button>
+      <button class="admin-tab" data-tab="badges"><i class="fas fa-medal"></i> Badges</button>
     </div>
     <!-- ROLES TAB -->
     <div class="admin-panel-section active" id="adminTabRoles">
@@ -963,6 +1073,11 @@ footer .contact a:hover{text-decoration:underline;}
     <div class="admin-panel-section" id="adminTabMissions">
       <p class="admin-section-title">Pending Mission KEY Submissions</p>
       <div id="adminKeysList" style="max-height:380px;overflow-y:auto;"></div>
+    </div>
+    <!-- BADGES TAB -->
+    <div class="admin-panel-section" id="adminTabBadges">
+      <p class="admin-section-title">Manage Member Badges</p>
+      <div id="adminBadgesList" style="max-height:380px;overflow-y:auto;"></div>
     </div>
   </div>
 </div>
@@ -1039,9 +1154,8 @@ footer .contact a:hover{text-decoration:underline;}
           <div class="status-pick-item" data-status="online"><span class="status-dot online"></span> Online</div>
           <div class="status-pick-item" data-status="idle"><span class="status-dot idle"></span> Idle</div>
           <div class="status-pick-item" data-status="dnd"><span class="status-dot dnd"></span> Do Not Disturb</div>
-          <div class="status-pick-item" data-status="invisible"><span class="status-dot invisible"></span> Invisible</div>
           <div class="status-pick-item" data-status="offline"><span class="status-dot offline"></span> Offline</div>
-          <input type="text" class="custom-status-input" id="customStatusInput" placeholder="Set a custom status..." maxlength="60">
+          <input type="text" class="custom-status-input" id="customStatusInput" placeholder="What are you up to? (press Enter)" maxlength="60">
         </div>
       </div>
       <div class="profile-container">
@@ -1052,7 +1166,7 @@ footer .contact a:hover{text-decoration:underline;}
         <div class="dropdown-menu" id="dropdownMenu">
           <a href="#" id="myProfileBtn" style="display:none"><i class="fas fa-id-card" style="font-size:12px;width:14px"></i> My Profile</a>
           <a href="#" id="adminPanelBtn" style="display:none"><i class="fas fa-shield-alt" style="font-size:12px;width:14px;color:#00d4ff;filter:drop-shadow(0 0 4px rgba(0,212,255,.7));"></i> Admin Panel</a>
-          <a href="#" id="corpHubBtn" style="display:none"><i class="fas fa-fire" style="font-size:12px;width:14px;color:#ff6b35;"></i> Corp Hub</a>
+          <a href="#" id="corpHubBtn" style="display:none"><i class="fas fa-satellite-dish" style="font-size:12px;width:14px;color:#00d4ff;"></i> Corporation Hub</a>
           <a href="#" id="viewMembersBtn"><i class="fas fa-users" style="font-size:12px;width:14px"></i> View Members</a>
           <a href="#" id="logoutBtn" style="display:none"><i class="fas fa-sign-out-alt" style="font-size:12px;width:14px"></i> Log Out</a>
           <a href="#" id="loginBtn"><i class="fas fa-sign-in-alt" style="font-size:12px;width:14px"></i> Log In</a>
@@ -1346,6 +1460,10 @@ function searchMembers(){
 
 /* ── VIEW PROFILE ── */
 async function openViewProfile(u){
+  // Fetch fresh user data if not complete
+  if(!u.createdAt){
+    try{const snap=await db.collection('users').doc(u.id).get();if(snap.exists)Object.assign(u,snap.data());}catch(_){}
+  }
   const content=document.getElementById('profileContent');
   const isLoggedIn=!!currentUser;
   const photo=u.photoURL||'',name=u.displayName||'Unknown';
@@ -1355,7 +1473,6 @@ async function openViewProfile(u){
       const meSnap=await db.collection('users').doc(currentUser.uid).get();
       currentUserData=meSnap.data();
       isFriend=(currentUserData?.friends||[]).includes(u.id);
-      // Only 2-field queries (no 3-field compound) — no index required, filter status client-side
       const sentSnap=await db.collection('friendRequests').where('from','==',currentUser.uid).where('to','==',u.id).get();
       pendingSent=sentSnap.docs.some(d=>d.data().status==='pending');
       const recvSnap=await db.collection('friendRequests').where('from','==',u.id).where('to','==',currentUser.uid).get();
@@ -1363,33 +1480,48 @@ async function openViewProfile(u){
     }catch(e){console.error('openViewProfile lookup:',e);}
   }
   const viewerIsGuest=currentUser?.isAnonymous||currentUserData?.isAnonymous;
+  const statusLabel=STATUS_LABELS[u.status]||u.status||'offline';
+  const statusColor={online:'#4CAF50',idle:'#ff9800',dnd:'#f44336',offline:'#555'}[u.status]||'#555';
   let actions='';
   if(isLoggedIn&&currentUser.uid!==u.id){
-    if(viewerIsGuest){
-      // Guests see a prompt to register instead of friend/message buttons
-      actions=`<button class="btn-sm secondary" id="vpGuestPrompt" style="font-size:.65rem;"><i class="fas fa-user-plus"></i> Connect — Free Account Required</button>`;
-    }else if(isFriend){
-      actions=`<button class="btn-sm danger" id="vpUnfriend"><i class="fas fa-user-minus"></i> Remove</button><button class="btn-sm" id="vpMsg"><i class="fas fa-comment"></i> Message</button>`;
-    }else if(pendingSent){
-      actions=`<button class="btn-sm secondary" disabled><i class="fas fa-clock"></i> Request Sent</button>`;
-    }else if(pendingReceived){
-      actions=`<button class="btn-sm" id="vpAccept"><i class="fas fa-check"></i> Accept Request</button>`;
-    }else{
-      actions=`<button class="btn-sm" id="vpSendReq"><i class="fas fa-user-plus"></i> Send Request</button>`;
-    }
+    if(viewerIsGuest) actions=`<button class="btn-sm secondary" id="vpGuestPrompt" style="font-size:.65rem;"><i class="fas fa-user-plus"></i> Connect — Free Account Required</button>`;
+    else if(isFriend) actions=`<button class="btn-sm danger" id="vpUnfriend"><i class="fas fa-user-minus"></i> Remove</button><button class="btn-sm" id="vpMsg"><i class="fas fa-comment"></i> Message</button>`;
+    else if(pendingSent) actions=`<button class="btn-sm secondary" disabled><i class="fas fa-clock"></i> Request Sent</button>`;
+    else if(pendingReceived) actions=`<button class="btn-sm" id="vpAccept"><i class="fas fa-check"></i> Accept Request</button>`;
+    else actions=`<button class="btn-sm" id="vpSendReq"><i class="fas fa-user-plus"></i> Send Request</button>`;
   }
-  // Always render profile — even if relationship check failed above
+  const joinDate=u.createdAt?.toDate?.();
+  const joinStr=joinDate?joinDate.toLocaleDateString([],{month:'long',year:'numeric'}):'Unknown';
+  const friendCount=(u.friends||[]).length;
+  const badgeCount=(u.badges||[]).length;
   content.innerHTML=`
-    <div class="view-profile-header">
-      <div class="view-profile-avatar-wrap">${photo?`<img src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`<div class="view-profile-avatar-placeholder">${initials(name)}</div>`}</div>
-      <div class="view-profile-info">
-        <p class="view-profile-name">${esc(name)}</p>
-        <p class="view-profile-rank"><span class="${rankClass(u.rank)}">${esc(u.rank||'Member')}</span> &middot; <span class="friend-status status-${u.status||'offline'}" style="font-size:.65rem;">${u.status||'offline'}</span></p>
-        ${actions?`<div class="profile-action-row">${actions}</div>`:''}
+    <div class="profile-modal-hero">
+      <div class="profile-hero-top">
+        <div class="profile-hero-av">${photo?`<img src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`${initials(name)}`}</div>
+        <div class="profile-hero-info">
+          <div class="profile-hero-name">${esc(name)}</div>
+          <div class="profile-hero-rank">
+            <span class="${rankClass(u.rank)}">${esc(u.rank||'Member')}</span>
+          </div>
+          <div class="profile-hero-status">
+            <span class="status-dot ${u.status||'offline'}"></span>
+            <span>${statusLabel}</span>
+          </div>
+          ${u.activityStatus?`<div class="profile-activity-pill"><i class="fas fa-circle-notch" style="font-size:.55rem;opacity:.5;"></i> ${esc(u.activityStatus)}</div>`:''}
+        </div>
+      </div>
+      ${actions?`<div class="profile-action-row" style="margin-top:4px;">${actions}</div>`:''}
+      <div class="profile-stats-row">
+        <div class="profile-stat"><div class="profile-stat-num">${friendCount}</div><div class="profile-stat-lbl">Connections</div></div>
+        <div class="profile-stat"><div class="profile-stat-num">${badgeCount}</div><div class="profile-stat-lbl">Badges</div></div>
+        <div class="profile-stat"><div class="profile-stat-num" style="font-size:.75rem;">${joinStr}</div><div class="profile-stat-lbl">Joined</div></div>
       </div>
     </div>
-    <div class="view-profile-bio">${esc(u.bio||'This operative has not set a bio yet.')}</div>
-    ${renderBadges(u.badges||'')}`;
+    <div class="profile-bio-section">
+      <div class="profile-section-label"><i class="fas fa-align-left" style="margin-right:4px;"></i>About</div>
+      <div class="profile-bio-text">${esc(u.bio||'No bio set yet.')}</div>
+    </div>
+    ${(u.badges||[]).length?`<div class="profile-bio-section"><div class="profile-section-label"><i class="fas fa-medal" style="margin-right:4px;"></i>Badges</div>${renderBadges(u.badges)}</div>`:''}`;
   openModal('profileModal');
   if(isLoggedIn&&currentUser.uid!==u.id){
     document.getElementById('vpGuestPrompt')?.addEventListener('click',()=>{closeModal('profileModal');promptGuestRegister('Create a free account to connect with operatives and send messages.');});
@@ -1791,6 +1923,7 @@ async function sendMessage(){
 document.getElementById('msgSendBtn').addEventListener('click',sendMessage);
 document.getElementById('msgInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
 
+
 /* ── MY PROFILE ── */
 async function openMyProfile(){
   if(!currentUser)return;
@@ -1798,33 +1931,35 @@ async function openMyProfile(){
     currentUserData=(await db.collection('users').doc(currentUser.uid).get()).data()||{};
     const d=currentUserData;
     const isGuest=currentUser.isAnonymous||d.isAnonymous;
-    document.getElementById('myProfileDisplayName').textContent=(d.displayName||'Guest')+' '+(isGuest?'':'');
-    document.getElementById('myProfileRank').textContent=isGuest?(d.rank||'Unaffiliated'):d.rank||'Member';
+    document.getElementById('myProfileDisplayName').textContent=d.displayName||'Guest';
+    const rankEl=document.getElementById('myProfileRank');
+    rankEl.textContent=isGuest?(d.rank||'Unaffiliated'):d.rank||'Member';
+    rankEl.className=rankClass(d.rank);
     document.getElementById('editDisplayName').value=d.displayName||'';
     document.getElementById('editBio').value=d.bio||'';
     document.getElementById('editPhotoURL').value=d.photoURL||'';
+    const actEl=document.getElementById('editActivityStatus');
+    if(actEl)actEl.value=d.activityStatus||'';
     document.getElementById('profileSaveSuccess').style.display='none';
     const imgEl=document.getElementById('editAvatarImg'),phEl=document.getElementById('editAvatarPlaceholder');
     if(d.photoURL){imgEl.src=d.photoURL;imgEl.style.display='block';phEl.style.display='none';}
     else{imgEl.style.display='none';phEl.style.display='flex';phEl.textContent=initials(d.displayName||'G');}
     document.getElementById('editPhotoURL').oninput=function(){if(this.value){imgEl.src=this.value;imgEl.style.display='block';phEl.style.display='none';}else{imgEl.style.display='none';phEl.style.display='flex';}};
-    // Guest — lock ALL editing fields and show register prompt
+    // Status buttons
+    document.querySelectorAll('[data-pstatus]').forEach(btn=>{
+      const isActive=btn.dataset.pstatus===(d.status||'online');
+      btn.style.fontWeight=isActive?'700':'400';btn.style.opacity=isActive?'1':'.55';
+      btn.onclick=()=>{setUserStatus(btn.dataset.pstatus);document.querySelectorAll('[data-pstatus]').forEach(b=>{b.style.fontWeight='400';b.style.opacity='.55';});btn.style.fontWeight='700';btn.style.opacity='1';};
+    });
+    // Guest lock
     const saveBtn=document.getElementById('saveProfileBtn');
-    const editFields=['editDisplayName','editBio','editPhotoURL'];
+    const editFields=['editDisplayName','editBio','editPhotoURL','editActivityStatus'];
     if(isGuest){
-      saveBtn.disabled=true;
-      saveBtn.title='Guest accounts cannot edit their profile.';
-      // Lock all input fields
+      saveBtn.disabled=true;saveBtn.title='Guest accounts cannot edit their profile.';
       editFields.forEach(id=>{const el=document.getElementById(id);if(el){el.disabled=true;el.classList.add('input-locked');}});
       document.getElementById('editAvatarBtn').classList.add('locked');
-      // Show notice
       let gn=document.getElementById('guestProfileNotice');
-      if(!gn){
-        gn=document.createElement('p');gn.id='guestProfileNotice';
-        gn.style.cssText='font-family:var(--font-mono);font-size:.72rem;color:#ff6b35;background:rgba(255,107,53,.07);border:1px solid rgba(255,107,53,.2);border-radius:3px;padding:8px 10px;margin-top:8px;line-height:1.6;';
-        gn.innerHTML='<i class="fas fa-lock" style="margin-right:5px;"></i>You\'re browsing as a <strong>Guest</strong>. Profile editing is disabled. <a href="#" id="guestRegisterLink" style="color:var(--color-primary);text-decoration:underline;">Create a free account</a> to customise your profile and access all features.';
-        saveBtn.parentNode.insertBefore(gn,saveBtn.nextSibling);
-      }
+      if(!gn){gn=document.createElement('p');gn.id='guestProfileNotice';gn.style.cssText='font-family:var(--font-mono);font-size:.72rem;color:#ff6b35;background:rgba(255,107,53,.07);border:1px solid rgba(255,107,53,.2);border-radius:3px;padding:8px 10px;margin-top:8px;line-height:1.6;';gn.innerHTML='<i class="fas fa-lock" style="margin-right:5px;"></i>You\'re browsing as a <strong>Guest</strong>. <a href="#" id="guestRegisterLink" style="color:var(--color-primary);text-decoration:underline;">Create a free account</a> to customise your profile.';saveBtn.parentNode.insertBefore(gn,saveBtn.nextSibling);}
       document.getElementById('guestRegisterLink')?.addEventListener('click',e=>{e.preventDefault();closeModal('myProfileModal');promptGuestRegister('Create a free account to set up your profile and access all features.');});
     }else{
       saveBtn.disabled=false;saveBtn.title='';
@@ -1832,26 +1967,97 @@ async function openMyProfile(){
       document.getElementById('editAvatarBtn').classList.remove('locked');
       document.getElementById('guestProfileNotice')?.remove();
     }
+    // Wire profile tabs
+    document.querySelectorAll('.profile-edit-tab').forEach(tab=>{
+      tab.onclick=async()=>{
+        document.querySelectorAll('.profile-edit-tab').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('.profile-tab-section').forEach(s=>s.classList.remove('active'));
+        tab.classList.add('active');
+        const secId='profileTab'+tab.dataset.ptab.charAt(0).toUpperCase()+tab.dataset.ptab.slice(1);
+        document.getElementById(secId)?.classList.add('active');
+        if(tab.dataset.ptab==='preview')renderProfilePreview(d);
+        if(tab.dataset.ptab==='connections')await renderMyFriendsList(d.friends||[]);
+      };
+    });
+    // Reset to edit tab
+    document.querySelectorAll('.profile-edit-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.profile-tab-section').forEach(s=>s.classList.remove('active'));
+    document.querySelector('.profile-edit-tab[data-ptab="edit"]')?.classList.add('active');
+    document.getElementById('profileTabEdit')?.classList.add('active');
     await renderMyFriendsList(d.friends||[]);
     openModal('myProfileModal');
   }catch(err){console.error(err);}
 }
 
+function renderProfilePreview(d){
+  const el=document.getElementById('profilePreviewContent');if(!el)return;
+  const statusLabel=STATUS_LABELS[d.status]||d.status||'offline';
+  const joinDate=d.createdAt?.toDate?.();
+  const joinStr=joinDate?joinDate.toLocaleDateString([],{month:'long',year:'numeric'}):'Unknown';
+  el.innerHTML=`<p style="font-family:var(--font-mono);font-size:.65rem;color:rgba(0,212,255,.3);margin-bottom:10px;letter-spacing:.1em;">// HOW OTHERS SEE YOUR PROFILE</p>
+    <div class="profile-modal-hero">
+      <div class="profile-hero-top">
+        <div class="profile-hero-av">${d.photoURL?`<img src="${esc(d.photoURL)}" alt="">`:`${initials(d.displayName||'?')}`}</div>
+        <div class="profile-hero-info">
+          <div class="profile-hero-name">${esc(d.displayName||'Unknown')}</div>
+          <div class="profile-hero-rank"><span class="${rankClass(d.rank)}">${esc(d.rank||'Member')}</span></div>
+          <div class="profile-hero-status"><span class="status-dot ${d.status||'offline'}"></span><span>${statusLabel}</span></div>
+          ${d.activityStatus?`<div class="profile-activity-pill"><i class="fas fa-circle-notch" style="font-size:.55rem;opacity:.5;"></i> ${esc(d.activityStatus)}</div>`:''}
+        </div>
+      </div>
+      <div class="profile-stats-row">
+        <div class="profile-stat"><div class="profile-stat-num">${(d.friends||[]).length}</div><div class="profile-stat-lbl">Connections</div></div>
+        <div class="profile-stat"><div class="profile-stat-num">${(d.badges||[]).length}</div><div class="profile-stat-lbl">Badges</div></div>
+        <div class="profile-stat"><div class="profile-stat-num" style="font-size:.75rem;">${joinStr}</div><div class="profile-stat-lbl">Joined</div></div>
+      </div>
+    </div>
+    <div class="profile-bio-section"><div class="profile-section-label">About</div><div class="profile-bio-text">${esc(d.bio||'No bio set.')}</div></div>
+    ${(d.badges||[]).length?`<div class="profile-bio-section"><div class="profile-section-label">Badges</div>${renderBadges(d.badges)}</div>`:''}`;
+}
+
+
 async function renderMyFriendsList(friendIds){
   const inner=document.getElementById('friendsListInner');
   document.getElementById('friendCount').textContent=friendIds.length;
   inner.innerHTML='';
-  if(!friendIds.length){inner.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);">No connections yet. Find operatives in Corp Members.</p>';return;}
+  if(!friendIds.length){
+    inner.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);text-align:center;padding:20px 0;">No connections yet.<br>Find operatives in the member directory.</p>';
+    return;
+  }
+  // Search filter
+  const searchEl=document.getElementById('connectionsSearch');
+  const q=searchEl?searchEl.value.trim().toLowerCase():'';
+  if(searchEl&&!searchEl._wired){
+    searchEl._wired=true;
+    searchEl.addEventListener('input',()=>renderMyFriendsList(friendIds));
+  }
   for(const fid of friendIds){
     try{
       const snap=await db.collection('users').doc(fid).get();if(!snap.exists)continue;
       const fd=snap.data();
-      const row=document.createElement('div');row.className='mini-friend-row';
-      row.innerHTML=`<div class="mini-avatar">${fd.photoURL?`<img src="${esc(fd.photoURL)}" alt="" loading="lazy">`:initials(fd.displayName)}</div><span class="mini-friend-name">${esc(fd.displayName||'Unknown')}</span><button class="mini-action mini-msg-btn" title="Message"><i class="fas fa-comment"></i></button><button class="mini-action mini-unfriend" data-uid="${fid}" data-name="${esc(fd.displayName||'this user')}">Remove</button>`;
-      row.querySelector('.mini-friend-name').addEventListener('click',()=>{closeModal('myProfileModal');openViewProfile({...fd,id:fid});});
-      row.querySelector('.mini-msg-btn').addEventListener('click',e=>{e.stopPropagation();closeModal('myProfileModal');openChat({...fd,id:fid});});
-      row.querySelector('.mini-unfriend').addEventListener('click',async e=>{e.stopPropagation();const btn=e.currentTarget;await removeFriend(btn.dataset.uid,btn.dataset.name);await openMyProfile();});
-      inner.appendChild(row);
+      if(q&&!(fd.displayName||'').toLowerCase().includes(q))continue;
+      const card=document.createElement('div');card.className='connection-card';
+      const statusColor={online:'#4CAF50',idle:'#ff9800',dnd:'#f44336',offline:'#555'}[fd.status]||'#555';
+      card.innerHTML=`
+        <div class="connection-av">
+          ${fd.photoURL?`<img src="${esc(fd.photoURL)}" alt="" loading="lazy">`:`${initials(fd.displayName)}`}
+          <span class="connection-av-dot status-dot ${fd.status||'offline'}"></span>
+        </div>
+        <div class="connection-info">
+          <div class="connection-name">${esc(fd.displayName||'Unknown')}</div>
+          <div class="connection-rank ${rankClass(fd.rank)}">${esc(fd.rank||'Member')}</div>
+          ${fd.activityStatus?`<div class="connection-activity">"${esc(fd.activityStatus)}"</div>`:''}
+        </div>
+        <div class="connection-actions">
+          <button class="btn-sm" style="padding:5px 9px;font-size:.65rem;" title="Message"><i class="fas fa-comment"></i></button>
+          <button class="btn-sm danger" style="padding:5px 9px;font-size:.65rem;" data-uid="${fid}" data-name="${esc(fd.displayName||'this user')}" title="Remove"><i class="fas fa-user-minus"></i></button>
+        </div>`;
+      // Click on name/av opens profile
+      card.querySelector('.connection-av').addEventListener('click',()=>{closeModal('myProfileModal');openViewProfile({...fd,id:fid});});
+      card.querySelector('.connection-name').addEventListener('click',()=>{closeModal('myProfileModal');openViewProfile({...fd,id:fid});});
+      card.querySelectorAll('.btn-sm:not(.danger)').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();closeModal('myProfileModal');openChat({...fd,id:fid});}));
+      card.querySelector('.btn-sm.danger').addEventListener('click',async e=>{e.stopPropagation();const btn=e.currentTarget;await removeFriend(btn.dataset.uid,btn.dataset.name);await openMyProfile();});
+      inner.appendChild(card);
     }catch(err){console.error(err);}
   }
 }
@@ -1865,12 +2071,14 @@ document.getElementById('saveProfileBtn').addEventListener('click',async()=>{
     const newName=document.getElementById('editDisplayName').value.trim();
     const newBio=document.getElementById('editBio').value.trim();
     const newPhoto=document.getElementById('editPhotoURL').value.trim();
-    const updates={bio:newBio,photoURL:newPhoto};if(newName)updates.displayName=newName;
+    const newActivity=document.getElementById('editActivityStatus')?.value.trim()||'';
+    const updates={bio:newBio,photoURL:newPhoto,activityStatus:newActivity};if(newName)updates.displayName=newName;
     await db.collection('users').doc(currentUser.uid).update(updates);
     currentUserData=(await db.collection('users').doc(currentUser.uid).get()).data();
     setNavAvatar(currentUser,currentUserData);
     document.getElementById('myProfileDisplayName').textContent=currentUserData.displayName||currentUser.email;
     const s=document.getElementById('profileSaveSuccess');s.style.display='block';setTimeout(()=>s.style.display='none',3000);
+    writeCorpLog('profile','updated their profile',{changed:Object.keys(updates).filter(k=>k!=='photoURL').join(', ')});
   }catch(err){console.error(err);showToast('Failed to save profile.');}
   finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Save Changes';}
 });
@@ -2237,8 +2445,7 @@ async function loadAdminKeys(){
   }catch(err){pendingList.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;">Error: ${err.message}</p>`;}
 }
 
-// Extend loadAdminTab to handle missions tab
-const _origLoadAdminTab=loadAdminTab;
+// Extend loadAdminTab to handle all tabs
 async function loadAdminTab(tab){
   document.querySelectorAll('.admin-panel-section').forEach(s=>s.classList.remove('active'));
   const tabId='adminTab'+tab.charAt(0).toUpperCase()+tab.slice(1);
@@ -2246,6 +2453,56 @@ async function loadAdminTab(tab){
   if(tab==='roles')await loadAdminRoles();
   else if(tab==='history')await loadAnnHistory();
   else if(tab==='missions')await loadAdminKeys();
+  else if(tab==='badges')await loadAdminBadges();
+}
+
+async function loadAdminBadges(){
+  const list=document.getElementById('adminBadgesList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  const canAssignAll=currentUser.uid===OWNER_UID; // only Founder assigns any badge
+  const canAssignDev=isDev(currentUserData); // Dev+ can assign premade badges
+  try{
+    const snap=await db.collection('users').get();
+    const users=[];snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous)users.push(u);});
+    users.sort((a,b)=>(a.displayName||'').localeCompare(b.displayName||''));
+    list.innerHTML='';
+    // Badge list — premade always available, custom only for Founder
+    const availableBadges=Object.entries(BADGE_DEFS).map(([k,v])=>({key:k,label:v.label}));
+    users.forEach(u=>{
+      const row=document.createElement('div');row.className='admin-user-row';row.style.flexWrap='wrap';row.style.gap='6px';
+      const currentBadges=(u.badges||[]);
+      row.innerHTML=`<div style="display:flex;align-items:center;gap:8px;width:100%;margin-bottom:4px;">
+        <div class="admin-user-av">${avHtml(u.photoURL,u.displayName)}</div>
+        <span class="admin-user-name ${rankClass(u.rank)}">${esc(u.displayName||'Unknown')}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;width:100%;margin-bottom:6px;">${currentBadges.length?renderBadges(currentBadges):'<span style="font-family:var(--font-mono);font-size:.65rem;color:var(--color-text-muted);">No badges</span>'}</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;width:100%;">
+        <select class="admin-rank-select badge-select" id="badgeSel_${u.id}">
+          ${availableBadges.map(b=>`<option value="${b.key}">${b.label}</option>`).join('')}
+        </select>
+        <button class="admin-save-rank" data-uid="${u.id}" data-action="add" style="font-size:.62rem;"><i class="fas fa-plus"></i> Add</button>
+        <button class="admin-save-rank" data-uid="${u.id}" data-action="remove" style="border-color:rgba(255,68,68,.4);color:#f55;font-size:.62rem;"><i class="fas fa-minus"></i> Remove</button>
+      </div>`;
+      row.querySelectorAll('[data-action]').forEach(btn=>{
+        btn.addEventListener('click',async function(){
+          if(this.dataset.action==='add'&&!canAssignDev){showToast('Developer+ required to assign badges.');return;}
+          if(this.dataset.action==='add'&&!canAssignAll&&!canAssignDev){showToast('Access denied.');return;}
+          const badge=document.getElementById('badgeSel_'+this.dataset.uid).value;
+          const uid=this.dataset.uid;
+          this.disabled=true;
+          if(this.dataset.action==='add'){
+            await awardBadge(uid,badge);
+            writeCorpLog('rank',`awarded the ${BADGE_DEFS[badge]?.label||badge} badge to a member`);
+          }else{
+            await db.collection('users').doc(uid).update({badges:firebase.firestore.FieldValue.arrayRemove(badge)}).catch(e=>showToast(e.message));
+          }
+          showToast(this.dataset.action==='add'?'Badge awarded!':'Badge removed.');
+          loadAdminBadges();
+        });
+      });
+      list.appendChild(row);
+    });
+  }catch(err){list.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;">Error: ${err.message}</p>`;}
 }
 
 // Also extend admin modal to add calendar+intel+poll creation
@@ -2401,23 +2658,23 @@ function applyGuestRestrictions(isGuest){
 /* ═══════════════════════════════════════════════════════
    STATUS SYSTEM
 ═══════════════════════════════════════════════════════ */
-const STATUS_LABELS={online:'Online',idle:'Idle',dnd:'Do Not Disturb',invisible:'Invisible',offline:'Offline'};
+const STATUS_LABELS={online:'Online',idle:'Idle',dnd:'Do Not Disturb',offline:'Offline'};
 let idleTimer=null, currentPresenceStatus='online';
 
 function updateNavStatusDot(status){
   const dot=document.getElementById('navStatusDot');
   if(!dot)return;
-  dot.className='status-dot '+(status==='invisible'?'invisible':status);
+  dot.className='status-dot '+status;
 }
 
 async function setUserStatus(status,customText){
   if(!currentUser||currentUser.isAnonymous)return;
   currentPresenceStatus=status;
   updateNavStatusDot(status);
-  const updates={status:status==='invisible'?'offline':status};
-  if(customText!==undefined)updates.customStatus=customText;
+  const updates={status};
+  if(customText!==undefined)updates.activityStatus=customText;
   await db.collection('users').doc(currentUser.uid).update(updates).catch(()=>{});
-  if(currentUserData)currentUserData.status=updates.status;
+  if(currentUserData){currentUserData.status=updates.status;if(customText!==undefined)currentUserData.activityStatus=customText;}
 }
 
 function startIdleDetection(){
@@ -2432,8 +2689,9 @@ function startIdleDetection(){
   setInterval(()=>{
     if(!currentUser||currentUser.isAnonymous)return;
     const idle=Date.now()-lastActivity>180000; // 3 min
-    if(idle&&currentPresenceStatus==='online'){
+    if(idle&&(currentPresenceStatus==='online')){
       setUserStatus('idle');
+      writeCorpLog('status','went idle');
     }
   },30000);
   document.addEventListener('visibilitychange',()=>{
@@ -2442,6 +2700,7 @@ function startIdleDetection(){
       setUserStatus('idle');
     }else if(document.visibilityState==='visible'&&currentPresenceStatus==='idle'){
       setUserStatus('online');
+      writeCorpLog('status','is back online');
     }
   });
 }
@@ -2465,9 +2724,14 @@ const customStatusInput=document.getElementById('customStatusInput');
 customStatusInput.addEventListener('keydown',async e=>{
   if(e.key==='Enter'){
     const txt=e.target.value.trim();
-    await setUserStatus(currentPresenceStatus,txt);
+    // activityStatus is separate from presence — just save it
+    await db.collection('users').doc(currentUser.uid).update({activityStatus:txt}).catch(()=>{});
+    if(currentUserData)currentUserData.activityStatus=txt;
     document.getElementById('statusPicker').classList.remove('open');
-    showToast(txt?`Status set: "${txt}"`:'Custom status cleared.');
+    // Update activity display on the profile header if visible
+    const actEl=document.getElementById('profileActivityStatus');
+    if(actEl)actEl.textContent=txt?`"${txt}"`:'';
+    showToast(txt?`Activity set: "${txt}"`:'Activity status cleared.');
   }
 });
 customStatusInput.addEventListener('click',e=>e.stopPropagation());
@@ -2519,6 +2783,9 @@ async function checkAndAwardBadges(uid,userData){
 /* ═══════════════════════════════════════════════════════
    CORPORATION LOG
 ═══════════════════════════════════════════════════════ */
+const PRIVATE_LOG_TYPES=['status','profile'];
+const DEV_RANKS=['Founder','Administrator','Co-Administrator','Developer'];
+function isDev(data){return data&&DEV_RANKS.includes(data.rank);}
 const MOD_RANKS=['Founder','Administrator','Co-Administrator','Moderator'];
 function isMod(data){return data&&MOD_RANKS.includes(data.rank);}
 
@@ -2546,14 +2813,25 @@ async function loadCorpLog(filter='all'){
     let docs=snap.docs;
     if(filter!=='all')docs=docs.filter(d=>d.data().type===filter);
     if(!docs.length){feed.innerHTML='<div class="hub-empty">No activity yet.</div>';return;}
-    docs.forEach(d=>{
+    // Filter private log entries — only Developer+ can see status/profile changes
+    const isDevViewer=isDev(currentUserData);
+    const isMViewer=isMod(currentUserData);
+    const visibleDocs=docs.filter(d=>{
+      const t=d.data().type;
+      if(PRIVATE_LOG_TYPES.includes(t)&&!isDevViewer)return false;
+      return true;
+    });
+    if(!visibleDocs.length){feed.innerHTML='<div class="hub-empty">No activity to display.</div>';return;}
+    visibleDocs.forEach(d=>{
       const log=d.data();
-      const isModViewer=isMod(currentUserData);
       const item=document.createElement('div');item.className='log-item';
       const time=log.createdAt?fmtDate(log.createdAt)+' '+fmtTime(log.createdAt):'';
-      item.innerHTML=`<div class="log-item-main"><strong>${esc(log.displayName||'Unknown')}</strong> ${esc(log.message)}</div>
-        <div class="log-item-meta">${esc(log.rank||'Member')} &middot; ${time}</div>
-        ${isModViewer&&log.extra&&Object.keys(log.extra).length?`<div class="log-item-detail">Details: ${esc(JSON.stringify(log.extra))}</div>`:''}`;
+      // Icon per type
+      const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn'};
+      const icon=typeIcon[log.type]||'fa-circle';
+      item.innerHTML=`<div class="log-item-main"><i class="fas ${icon}" style="margin-right:6px;font-size:.65rem;opacity:.6;"></i><strong>${esc(log.displayName||'Unknown')}</strong> ${esc(log.message)}</div>
+        <div class="log-item-meta"><span class="${rankClass(log.rank)}">${esc(log.rank||'Member')}</span> &middot; ${time}</div>
+        ${isMViewer&&log.extra&&Object.keys(log.extra).length?`<div class="log-item-detail"><i class="fas fa-info-circle" style="margin-right:4px;opacity:.5;font-size:.6rem;"></i>${esc(JSON.stringify(log.extra))}</div>`:''}`;
       feed.appendChild(item);
     });
   },err=>{feed.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;});
@@ -2957,10 +3235,51 @@ document.getElementById('corpHubBtn').addEventListener('click',e=>{
   openEngagementHub();
 });
 
-/* ── SEARCH ── */
-let _st=null;
+/* ── SEARCH & DIRECTORY ── */
+let _st=null, _dirFilter='all';
 document.getElementById('searchUsers').addEventListener('input',()=>{clearTimeout(_st);_st=setTimeout(searchMembers,300);});
 document.getElementById('searchUsers').addEventListener('keydown',e=>{if(e.key==='Escape'){e.target.value='';loadAllUsers();}});
+
+document.querySelectorAll('.dir-filter').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.dir-filter').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    _dirFilter=btn.dataset.dfilter;
+    applyDirFilter();
+  });
+});
+
+function applyDirFilter(){
+  const cards=document.querySelectorAll('#usersGrid .friend-card');
+  const myFriends=currentUserData?.friends||[];
+  cards.forEach(card=>{
+    const uid=card.dataset.uid;
+    let show=true;
+    if(_dirFilter==='online'){
+      // Check status from the card's status element
+      const statusEl=card.querySelector('.friend-status');
+      show=statusEl&&statusEl.classList.contains('status-online');
+    }else if(_dirFilter==='friends'){
+      show=myFriends.includes(uid);
+    }
+    card.style.display=show?'':'none';
+  });
+}
+
+// Override displayMembers to update stats and apply filter
+const _origDisplayMembers=displayMembers;
+function displayMembers(users){
+  _origDisplayMembers(users);
+  // Update directory stats
+  const totalEl=document.getElementById('dirTotalCount');
+  const onlineEl=document.getElementById('dirOnlineCount');
+  const friendsEl=document.getElementById('dirFriendCount');
+  if(totalEl)totalEl.textContent=users.length;
+  if(onlineEl)onlineEl.textContent=users.filter(u=>u.status==='online').length;
+  if(friendsEl&&currentUserData)friendsEl.textContent=users.filter(u=>(currentUserData.friends||[]).includes(u.id)).length;
+  // Re-apply filter after render
+  setTimeout(applyDirFilter,50);
+}
 </script>
 </body>
 <!-- © 2023–2026 $iz. All designs, layouts, and content are property of $iz. Do not duplicate or redistribute without permission. -->
