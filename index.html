@@ -551,6 +551,169 @@ footer .contact a:hover{text-decoration:underline;}
 .ann-history-meta{font-family:var(--font-mono);font-size:.6rem;color:rgba(0,212,255,.25);margin-top:4px;}
 .admin-section-title{font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);letter-spacing:.15em;text-transform:uppercase;margin:0 0 10px;}
 
+
+/* ─── STATUS INDICATOR ──────────────────────────────── */
+.status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;display:inline-block;border:1px solid rgba(0,0,0,.3);}
+.status-dot.online{background:#4CAF50;box-shadow:0 0 5px #4CAF50;}
+.status-dot.idle{background:#ff9800;box-shadow:0 0 5px #ff9800;}
+.status-dot.dnd{background:#f44336;box-shadow:0 0 5px #f44336;}
+.status-dot.invisible{background:#666;}
+.status-dot.offline{background:#555;}
+.status-picker{position:absolute;top:44px;right:0;background:rgba(0,14,28,.98);border:var(--border);border-radius:8px;box-shadow:var(--glow-md);z-index:1001;min-width:200px;overflow:hidden;display:none;}
+.status-picker.open{display:block;}
+.status-pick-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:var(--transition);font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);}
+.status-pick-item:hover{background:rgba(0,212,255,.05);color:var(--color-primary);}
+.status-pick-item .status-dot{width:10px;height:10px;}
+.custom-status-input{width:100%;padding:8px 12px;border:none;border-top:var(--border);background:rgba(0,0,0,.4);color:var(--color-text);font-family:var(--font-mono);font-size:.72rem;}
+.custom-status-input:focus{outline:none;}
+.custom-status-input::placeholder{color:rgba(74,143,168,.4);}
+.nav-status-wrap{position:relative;}
+
+/* ─── BADGES ────────────────────────────────────────── */
+.badge-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:3px;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.06em;border:1px solid;font-weight:700;}
+.badge-founding{background:rgba(255,215,0,.08);color:#ffd700;border-color:rgba(255,215,0,.3);}
+.badge-beta{background:rgba(0,212,255,.08);color:#00d4ff;border-color:rgba(0,212,255,.3);}
+.badge-veteran{background:rgba(74,158,202,.08);color:#4a9eca;border-color:rgba(74,158,202,.3);}
+.badge-social{background:rgba(76,175,80,.08);color:#4CAF50;border-color:rgba(76,175,80,.3);}
+.badge-top{background:rgba(255,107,53,.08);color:#ff6b35;border-color:rgba(255,107,53,.3);}
+.badge-firstlogin{background:rgba(58,127,160,.08);color:#3a7fa0;border-color:rgba(58,127,160,.3);}
+.badge-mission{background:rgba(0,180,160,.08);color:#00b4a0;border-color:rgba(0,180,160,.3);}
+
+/* ─── CORP LOG ───────────────────────────────────────── */
+.corp-log-feed{display:flex;flex-direction:column;gap:6px;max-height:440px;overflow-y:auto;padding-right:4px;}
+.corp-log-feed::-webkit-scrollbar{width:3px;}
+.corp-log-feed::-webkit-scrollbar-thumb{background:rgba(0,212,255,.15);border-radius:2px;}
+.log-item{padding:10px 12px;background:rgba(0,212,255,.02);border:1px solid rgba(0,212,255,.06);border-left:2px solid rgba(0,212,255,.2);border-radius:3px;transition:var(--transition);}
+.log-item:hover{background:rgba(0,212,255,.05);}
+.log-item-main{font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);line-height:1.5;}
+.log-item-main strong{color:var(--color-text-light);}
+.log-item-meta{font-family:var(--font-mono);font-size:.6rem;color:rgba(0,212,255,.25);margin-top:3px;}
+.log-item-detail{font-family:var(--font-mono);font-size:.68rem;color:rgba(0,212,255,.3);margin-top:3px;border-top:1px solid rgba(0,212,255,.05);padding-top:3px;}
+.log-filter-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.log-filter-btn{padding:4px 10px;font-family:var(--font-mono);font-size:.65rem;border:1px solid rgba(0,212,255,.15);background:transparent;color:var(--color-text-muted);border-radius:3px;cursor:pointer;transition:var(--transition);}
+.log-filter-btn.active,.log-filter-btn:hover{border-color:var(--color-primary);color:var(--color-primary);background:rgba(0,212,255,.05);}
+
+/* ─── GROUP CHAT ─────────────────────────────────────── */
+.corp-chat-btn{position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--color-primary);color:#000;border:none;font-size:1.1rem;cursor:pointer;z-index:500;box-shadow:0 0 20px rgba(0,212,255,.5);transition:var(--transition);display:none;align-items:center;justify-content:center;}
+.corp-chat-btn.show{display:flex;}
+.corp-chat-btn:hover{transform:scale(1.1);box-shadow:0 0 30px rgba(0,212,255,.7);}
+.corp-chat-btn .chat-unread{position:absolute;top:-3px;right:-3px;background:#f55;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.6rem;font-family:var(--font-mono);display:none;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--color-dark);}
+.corp-chat-btn .chat-unread.show{display:flex;}
+#corpChatPanel{position:fixed;bottom:88px;right:24px;width:320px;height:420px;background:rgba(0,14,28,.98);border:var(--border);border-radius:12px;box-shadow:var(--glow-lg);z-index:500;display:none;flex-direction:column;overflow:hidden;transform:scale(.95) translateY(10px);opacity:0;transition:transform .25s ease,opacity .25s ease;}
+#corpChatPanel.open{display:flex;transform:scale(1) translateY(0);opacity:1;}
+.corp-chat-header{padding:12px 16px;border-bottom:var(--border);display:flex;align-items:center;gap:8px;background:rgba(0,10,22,.9);}
+.corp-chat-title{font-size:.8rem;font-weight:700;color:var(--color-primary);letter-spacing:.08em;flex:1;}
+.corp-chat-online{font-family:var(--font-mono);font-size:.62rem;color:#4CAF50;}
+.corp-chat-close{background:none;border:none;color:var(--color-text-muted);cursor:pointer;font-size:.85rem;padding:2px 4px;transition:var(--transition);}
+.corp-chat-close:hover{color:var(--color-primary);}
+.corp-chat-body{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:5px;}
+.corp-chat-body::-webkit-scrollbar{width:2px;}
+.corp-chat-body::-webkit-scrollbar-thumb{background:rgba(0,212,255,.1);}
+.corp-msg{display:flex;flex-direction:column;max-width:88%;}
+.corp-msg.mine{align-self:flex-end;}
+.corp-msg.theirs{align-self:flex-start;}
+.corp-msg-name{font-family:var(--font-mono);font-size:.58rem;color:rgba(0,212,255,.4);margin-bottom:2px;padding-left:2px;}
+.corp-msg.mine .corp-msg-name{text-align:right;padding-right:2px;}
+.corp-msg-bubble{padding:6px 10px;border-radius:10px;font-family:var(--font-mono);font-size:.75rem;line-height:1.5;word-break:break-word;}
+.corp-msg.mine .corp-msg-bubble{background:rgba(0,180,220,.14);border:1px solid rgba(0,212,255,.18);color:var(--color-text);border-bottom-right-radius:2px;}
+.corp-msg.theirs .corp-msg-bubble{background:rgba(0,20,40,.8);border:1px solid rgba(0,212,255,.06);color:var(--color-text-muted);border-bottom-left-radius:2px;}
+.corp-msg-time{font-family:var(--font-mono);font-size:.55rem;color:rgba(0,212,255,.2);margin-top:2px;padding:0 2px;}
+.corp-msg.mine .corp-msg-time{text-align:right;}
+.corp-chat-footer{padding:8px 10px;border-top:var(--border);display:flex;gap:6px;}
+.corp-chat-input{flex:1;padding:7px 12px;border-radius:16px;border:1px solid rgba(0,212,255,.18);background:rgba(0,0,0,.5);color:var(--color-text);font-family:var(--font-mono);font-size:.75rem;transition:var(--transition);}
+.corp-chat-input:focus{outline:none;border-color:rgba(0,212,255,.4);}
+.corp-chat-input::placeholder{color:rgba(74,143,168,.3);}
+.corp-chat-send{width:32px;height:32px;border-radius:50%;border:none;background:var(--color-primary);color:#000;font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:var(--transition);}
+.corp-chat-send:hover{transform:scale(1.08);}
+.corp-date-sep{text-align:center;font-family:var(--font-mono);font-size:.58rem;color:rgba(0,212,255,.15);padding:4px 0;}
+@media(max-width:480px){#corpChatPanel{width:calc(100vw - 32px);right:16px;bottom:80px;}}
+
+/* ─── MISSIONS ───────────────────────────────────────── */
+.mission-card{background:rgba(0,212,255,.02);border:1px solid rgba(0,212,255,.1);border-radius:6px;padding:14px 16px;margin-bottom:8px;transition:var(--transition);}
+.mission-card:hover{border-color:rgba(0,212,255,.2);background:rgba(0,212,255,.04);}
+.mission-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.mission-icon{width:32px;height:32px;border-radius:6px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.15);display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--color-primary);flex-shrink:0;}
+.mission-info{flex:1;}
+.mission-title{font-size:.82rem;font-weight:700;color:var(--color-primary);letter-spacing:.05em;margin-bottom:3px;}
+.mission-desc{font-family:var(--font-mono);font-size:.72rem;color:var(--color-text-muted);line-height:1.5;}
+.mission-footer{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.mission-pts{font-family:var(--font-mono);font-size:.65rem;color:#ffd700;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);padding:2px 8px;border-radius:2px;}
+.mission-status{font-family:var(--font-mono);font-size:.65rem;padding:2px 8px;border-radius:2px;}
+.mission-status.pending{background:rgba(255,152,0,.1);color:#ff9800;border:1px solid rgba(255,152,0,.2);}
+.mission-status.completed{background:rgba(76,175,80,.1);color:#4CAF50;border:1px solid rgba(76,175,80,.2);}
+.mission-status.rejected{background:rgba(244,67,54,.08);color:#f44336;border:1px solid rgba(244,67,54,.2);}
+.mission-status.open{background:rgba(0,212,255,.06);color:var(--color-primary);border:1px solid rgba(0,212,255,.15);}
+.key-input-row{display:flex;gap:6px;margin-top:8px;}
+.key-input{flex:1;padding:7px 10px;border-radius:3px;border:1px solid rgba(0,212,255,.2);background:rgba(0,0,0,.4);color:var(--color-text);font-family:var(--font-mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;}
+.key-input:focus{outline:none;border-color:var(--color-primary);}
+.key-input::placeholder{color:rgba(74,143,168,.3);text-transform:none;}
+.key-submit{padding:7px 12px;border-radius:3px;border:1px solid var(--color-primary);background:transparent;color:var(--color-primary);font-family:var(--font-mono);font-size:.7rem;cursor:pointer;transition:var(--transition);white-space:nowrap;}
+.key-submit:hover{background:var(--color-primary);color:#000;}
+
+/* ─── LEADERBOARD ────────────────────────────────────── */
+.lb-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(0,212,255,.02);border:1px solid rgba(0,212,255,.06);border-radius:4px;margin-bottom:5px;transition:var(--transition);}
+.lb-row:hover{background:rgba(0,212,255,.05);border-color:rgba(0,212,255,.15);}
+.lb-rank{width:24px;text-align:center;font-family:var(--font-mono);font-size:.72rem;font-weight:700;flex-shrink:0;}
+.lb-rank.gold{color:#ffd700;text-shadow:0 0 6px rgba(255,215,0,.5);}
+.lb-rank.silver{color:#c0c0c0;}
+.lb-rank.bronze{color:#cd7f32;}
+.lb-rank.other{color:var(--color-text-muted);}
+.lb-av{width:28px;height:28px;border-radius:50%;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:var(--color-primary);overflow:hidden;flex-shrink:0;}
+.lb-av img{width:100%;height:100%;object-fit:cover;}
+.lb-name{font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-light);flex:1;}
+.lb-pts{font-family:var(--font-mono);font-size:.7rem;color:#ffd700;font-weight:700;}
+.lb-you{font-family:var(--font-mono);font-size:.6rem;color:rgba(0,212,255,.4);margin-left:4px;}
+
+/* ─── CALENDAR ───────────────────────────────────────── */
+.event-card{padding:12px 14px;background:rgba(0,212,255,.02);border:1px solid rgba(0,212,255,.08);border-left:3px solid var(--color-primary);border-radius:4px;margin-bottom:8px;cursor:default;transition:var(--transition);}
+.event-card:hover{background:rgba(0,212,255,.05);}
+.event-title{font-size:.8rem;font-weight:700;color:var(--color-primary);letter-spacing:.05em;margin-bottom:4px;}
+.event-desc{font-family:var(--font-mono);font-size:.72rem;color:var(--color-text-muted);line-height:1.5;margin-bottom:6px;}
+.event-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.event-date{font-family:var(--font-mono);font-size:.65rem;color:rgba(0,212,255,.5);display:flex;align-items:center;gap:4px;}
+.event-rsvp-row{display:flex;gap:6px;margin-top:8px;}
+.rsvp-btn{padding:4px 12px;font-family:var(--font-mono);font-size:.65rem;border-radius:3px;cursor:pointer;transition:var(--transition);border:1px solid;}
+.rsvp-btn.yes{border-color:rgba(76,175,80,.3);color:#4CAF50;background:rgba(76,175,80,.06);}
+.rsvp-btn.yes.active,.rsvp-btn.yes:hover{background:rgba(76,175,80,.15);border-color:#4CAF50;}
+.rsvp-btn.no{border-color:rgba(244,67,54,.2);color:#f44336;background:rgba(244,67,54,.04);}
+.rsvp-btn.no.active,.rsvp-btn.no:hover{background:rgba(244,67,54,.1);border-color:#f44336;}
+.rsvp-count{font-family:var(--font-mono);font-size:.62rem;color:rgba(0,212,255,.3);}
+
+/* ─── INTEL BOARD ────────────────────────────────────── */
+.intel-post{padding:12px 14px;background:rgba(0,212,255,.02);border:1px solid rgba(0,212,255,.07);border-radius:4px;margin-bottom:8px;transition:var(--transition);}
+.intel-post:hover{background:rgba(0,212,255,.04);}
+.intel-post-title{font-size:.78rem;font-weight:700;color:var(--color-primary);letter-spacing:.05em;margin-bottom:4px;}
+.intel-post-body{font-family:var(--font-mono);font-size:.73rem;color:var(--color-text-muted);line-height:1.6;}
+.intel-post-meta{font-family:var(--font-mono);font-size:.62rem;color:rgba(0,212,255,.25);margin-top:5px;display:flex;justify-content:space-between;}
+.intel-tag{display:inline-block;padding:1px 7px;border-radius:2px;font-family:var(--font-mono);font-size:.6rem;border:1px solid rgba(0,212,255,.15);color:var(--color-text-muted);margin-right:4px;background:rgba(0,212,255,.04);}
+
+/* ─── POLLS ──────────────────────────────────────────── */
+.poll-card{padding:14px 16px;background:rgba(0,212,255,.02);border:1px solid rgba(0,212,255,.1);border-radius:6px;margin-bottom:8px;}
+.poll-question{font-size:.82rem;font-weight:700;color:var(--color-primary);letter-spacing:.04em;margin-bottom:12px;}
+.poll-option{margin-bottom:8px;}
+.poll-option-btn{width:100%;text-align:left;padding:8px 12px;border-radius:4px;border:1px solid rgba(0,212,255,.15);background:rgba(0,0,0,.3);color:var(--color-text-muted);font-family:var(--font-mono);font-size:.75rem;cursor:pointer;transition:var(--transition);position:relative;overflow:hidden;}
+.poll-option-btn:hover:not(:disabled){border-color:var(--color-primary);color:var(--color-primary);background:rgba(0,212,255,.05);}
+.poll-option-btn.voted{border-color:var(--color-primary);color:var(--color-primary);}
+.poll-option-btn:disabled{cursor:default;}
+.poll-bar{position:absolute;top:0;left:0;height:100%;background:rgba(0,212,255,.08);transition:width .5s ease;z-index:0;}
+.poll-opt-text{position:relative;z-index:1;display:flex;justify-content:space-between;}
+.poll-meta{font-family:var(--font-mono);font-size:.62rem;color:rgba(0,212,255,.3);margin-top:8px;}
+
+/* ─── ENGAGEMENT HUB TABS ────────────────────────────── */
+.hub-tabs{display:flex;gap:0;border-bottom:var(--border);margin-bottom:16px;overflow-x:auto;flex-shrink:0;}
+.hub-tabs::-webkit-scrollbar{display:none;}
+.hub-tab{flex-shrink:0;padding:9px 14px;font-family:var(--font-mono);font-size:.65rem;letter-spacing:.1em;color:var(--color-text-muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:var(--transition);white-space:nowrap;}
+.hub-tab.active{color:var(--color-primary);border-bottom-color:var(--color-primary);}
+.hub-tab:hover{color:var(--color-primary);}
+.hub-section{display:none;}
+.hub-section.active{display:block;}
+#engagementModal .modal-container{max-width:680px;min-height:500px;}
+.hub-empty{font-family:var(--font-mono);font-size:.78rem;color:var(--color-text-muted);text-align:center;padding:30px 0;}
+.hub-scroll{max-height:420px;overflow-y:auto;padding-right:4px;}
+.hub-scroll::-webkit-scrollbar{width:3px;}
+.hub-scroll::-webkit-scrollbar-thumb{background:rgba(0,212,255,.15);border-radius:2px;}
+
 /* FORGOT PASSWORD LINK */
 .forgot-link{text-align:right;margin-top:-6px;}
 #forgotLink{font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);cursor:pointer;letter-spacing:.06em;text-decoration:underline;transition:var(--transition);}
@@ -697,6 +860,74 @@ footer .contact a:hover{text-decoration:underline;}
 </div>
 
 
+
+<!-- ENGAGEMENT HUB MODAL -->
+<div class="modal" id="engagementModal">
+  <div class="modal-container">
+    <button class="close-btn" id="closeEngagement">&#x2715;</button>
+    <h2><i class="fas fa-fire" style="margin-right:8px;font-size:.85rem;color:#ff6b35;"></i>Corp Hub</h2>
+    <div class="hub-tabs">
+      <button class="hub-tab active" data-hub="log"><i class="fas fa-scroll"></i> Corp Log</button>
+      <button class="hub-tab" data-hub="missions"><i class="fas fa-crosshairs"></i> Missions</button>
+      <button class="hub-tab" data-hub="leaderboard"><i class="fas fa-trophy"></i> Leaderboard</button>
+      <button class="hub-tab" data-hub="calendar"><i class="fas fa-calendar-alt"></i> Calendar</button>
+      <button class="hub-tab" data-hub="intel"><i class="fas fa-satellite-dish"></i> Intel Board</button>
+      <button class="hub-tab" data-hub="polls"><i class="fas fa-poll"></i> Polls</button>
+    </div>
+    <!-- CORP LOG -->
+    <div class="hub-section active" id="hubLog">
+      <div class="log-filter-row" id="logFilterRow">
+        <button class="log-filter-btn active" data-filter="all">All</button>
+        <button class="log-filter-btn" data-filter="join">Joins</button>
+        <button class="log-filter-btn" data-filter="rank">Rank</button>
+        <button class="log-filter-btn" data-filter="mission">Missions</button>
+        <button class="log-filter-btn" data-filter="connection">Connections</button>
+      </div>
+      <div class="corp-log-feed hub-scroll" id="corpLogFeed"></div>
+    </div>
+    <!-- MISSIONS -->
+    <div class="hub-section" id="hubMissions">
+      <div class="hub-scroll" id="missionsList"></div>
+    </div>
+    <!-- LEADERBOARD -->
+    <div class="hub-section" id="hubLeaderboard">
+      <div id="leaderboardList" class="hub-scroll"></div>
+    </div>
+    <!-- CALENDAR -->
+    <div class="hub-section" id="hubCalendar">
+      <div class="hub-scroll" id="calendarList"></div>
+    </div>
+    <!-- INTEL BOARD -->
+    <div class="hub-section" id="hubIntel">
+      <div class="hub-scroll" id="intelList"></div>
+    </div>
+    <!-- POLLS -->
+    <div class="hub-section" id="hubPolls">
+      <div class="hub-scroll" id="pollsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CORP CHAT PANEL (not a modal, fixed element) -->
+<div id="corpChatPanel">
+  <div class="corp-chat-header">
+    <i class="fas fa-comments" style="color:var(--color-primary);font-size:.85rem;"></i>
+    <span class="corp-chat-title">Corp Chat</span>
+    <span class="corp-chat-online" id="corpChatOnline"></span>
+    <button class="corp-chat-close" id="corpChatClose"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="corp-chat-body" id="corpChatBody"></div>
+  <div class="corp-chat-footer">
+    <input type="text" class="corp-chat-input" id="corpChatInput" placeholder="Message the corp..." maxlength="300" autocomplete="off">
+    <button class="corp-chat-send" id="corpChatSend"><i class="fas fa-paper-plane"></i></button>
+  </div>
+</div>
+<!-- CORP CHAT BUTTON -->
+<button class="corp-chat-btn" id="corpChatBtn" aria-label="Corp Chat">
+  <i class="fas fa-comments"></i>
+  <span class="chat-unread" id="chatUnreadBadge">0</span>
+</button>
+
 <!-- ADMIN PANEL -->
 <div class="modal" id="adminModal">
   <div class="modal-container">
@@ -706,6 +937,7 @@ footer .contact a:hover{text-decoration:underline;}
       <button class="admin-tab active" data-tab="roles"><i class="fas fa-id-badge"></i> Roles</button>
       <button class="admin-tab" data-tab="announce"><i class="fas fa-bullhorn"></i> Announce</button>
       <button class="admin-tab" data-tab="history"><i class="fas fa-history"></i> History</button>
+      <button class="admin-tab" data-tab="missions"><i class="fas fa-key"></i> Keys</button>
     </div>
     <!-- ROLES TAB -->
     <div class="admin-panel-section active" id="adminTabRoles">
@@ -726,6 +958,11 @@ footer .contact a:hover{text-decoration:underline;}
     <div class="admin-panel-section" id="adminTabHistory">
       <p class="admin-section-title">Past Announcements</p>
       <div id="annHistoryList" style="max-height:380px;overflow-y:auto;"></div>
+    </div>
+    <!-- KEYS TAB -->
+    <div class="admin-panel-section" id="adminTabMissions">
+      <p class="admin-section-title">Pending Mission KEY Submissions</p>
+      <div id="adminKeysList" style="max-height:380px;overflow-y:auto;"></div>
     </div>
   </div>
 </div>
@@ -794,6 +1031,19 @@ footer .contact a:hover{text-decoration:underline;}
         <i class="fas fa-bell"></i>
         <span class="notif-badge" id="notifBadge">0</span>
       </button>
+      <div class="nav-status-wrap" id="navStatusWrap" style="display:none;">
+        <button id="statusDotBtn" style="background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;" title="Set status">
+          <span class="status-dot offline" id="navStatusDot"></span>
+        </button>
+        <div class="status-picker" id="statusPicker">
+          <div class="status-pick-item" data-status="online"><span class="status-dot online"></span> Online</div>
+          <div class="status-pick-item" data-status="idle"><span class="status-dot idle"></span> Idle</div>
+          <div class="status-pick-item" data-status="dnd"><span class="status-dot dnd"></span> Do Not Disturb</div>
+          <div class="status-pick-item" data-status="invisible"><span class="status-dot invisible"></span> Invisible</div>
+          <div class="status-pick-item" data-status="offline"><span class="status-dot offline"></span> Offline</div>
+          <input type="text" class="custom-status-input" id="customStatusInput" placeholder="Set a custom status..." maxlength="60">
+        </div>
+      </div>
       <div class="profile-container">
         <button class="profile-button" id="profileButton" aria-label="Profile menu">
           <img id="userAvatar" src="" alt="Profile">
@@ -802,6 +1052,7 @@ footer .contact a:hover{text-decoration:underline;}
         <div class="dropdown-menu" id="dropdownMenu">
           <a href="#" id="myProfileBtn" style="display:none"><i class="fas fa-id-card" style="font-size:12px;width:14px"></i> My Profile</a>
           <a href="#" id="adminPanelBtn" style="display:none"><i class="fas fa-shield-alt" style="font-size:12px;width:14px;color:#00d4ff;filter:drop-shadow(0 0 4px rgba(0,212,255,.7));"></i> Admin Panel</a>
+          <a href="#" id="corpHubBtn" style="display:none"><i class="fas fa-fire" style="font-size:12px;width:14px;color:#ff6b35;"></i> Corp Hub</a>
           <a href="#" id="viewMembersBtn"><i class="fas fa-users" style="font-size:12px;width:14px"></i> View Members</a>
           <a href="#" id="logoutBtn" style="display:none"><i class="fas fa-sign-out-alt" style="font-size:12px;width:14px"></i> Log Out</a>
           <a href="#" id="loginBtn"><i class="fas fa-sign-in-alt" style="font-size:12px;width:14px"></i> Log In</a>
@@ -1016,7 +1267,7 @@ function showToast(msg){const t=document.getElementById('nexusToast');t.textCont
 function openModal(id){document.getElementById(id).classList.add('active');document.body.style.overflow='hidden';}
 function closeModal(id){document.getElementById(id).classList.remove('active');if(!document.querySelector('.modal.active'))document.body.style.overflow='';}
 
-const ALL_MODALS=['loginModal','userDirectory','profileModal','myProfileModal','notifModal','msgModal','resetModal','intelDevModal','adminModal'];
+const ALL_MODALS=['loginModal','userDirectory','profileModal','myProfileModal','notifModal','msgModal','resetModal','intelDevModal','adminModal','engagementModal'];
 ALL_MODALS.forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){
     if(e.target===this){
@@ -1137,7 +1388,8 @@ async function openViewProfile(u){
         ${actions?`<div class="profile-action-row">${actions}</div>`:''}
       </div>
     </div>
-    <div class="view-profile-bio">${esc(u.bio||'This operative has not set a bio yet.')}</div>`;
+    <div class="view-profile-bio">${esc(u.bio||'This operative has not set a bio yet.')}</div>
+    ${renderBadges(u.badges||'')}`;
   openModal('profileModal');
   if(isLoggedIn&&currentUser.uid!==u.id){
     document.getElementById('vpGuestPrompt')?.addEventListener('click',()=>{closeModal('profileModal');promptGuestRegister('Create a free account to connect with operatives and send messages.');});
@@ -1218,6 +1470,9 @@ async function acceptFriendRequest(fromUid,fromName){
     closeModal('notifModal');
     showToast(`You are now connected with ${fromName}!`);
     updateNotifBadge();
+    writeCorpLog('connection',`connected with ${fromName}`);
+    // Award points for connection
+    db.collection('users').doc(currentUser.uid).update({points:firebase.firestore.FieldValue.increment(10)}).catch(()=>{});
   }catch(err){
     console.error('acceptFriendRequest error:',err);
     showToast(err.code==='permission-denied'
@@ -1669,6 +1924,38 @@ auth.onAuthStateChanged(async user=>{
     document.getElementById('adminPanelBtn').style.display=(user.uid===OWNER_UID||isAdmin(currentUserData))?'flex':'none';
     // Apply guest content restrictions
     applyGuestRestrictions(currentUserData?.isAnonymous||user.isAnonymous);
+    // Start idle detection for real accounts
+    if(!user.isAnonymous){startIdleDetection();}
+    // Check and award badges
+    checkAndAwardBadges(user.uid,currentUserData);
+    // Show corp hub + chat buttons for real accounts
+    const isRealUser=!user.isAnonymous;
+    document.getElementById('corpHubBtn').style.display=isRealUser?'flex':'none';
+    document.getElementById('corpChatBtn').classList.toggle('show',isRealUser);
+    document.getElementById('navStatusWrap').style.display=isRealUser?'flex':'none';
+    if(isRealUser){
+      // Set initial nav status dot
+      updateNavStatusDot(currentUserData?.status||'online');
+      // Start corp chat listener
+      if(!corpChatUnsub)startCorpChatListener();
+      // Write join log on first ever login
+      if(!currentUserData?.hasLoggedBefore){
+        writeCorpLog('join','joined the corporation');
+        db.collection('users').doc(user.uid).update({hasLoggedBefore:true}).catch(()=>{});
+        // Award founding member badge if corp is young (<100 members)
+        db.collection('users').get().then(s=>{
+          if(s.size<=100)awardBadge(user.uid,'founding');
+        }).catch(()=>{});
+      }
+      // Award points for daily login
+      const today=new Date().toDateString();
+      if(currentUserData?.lastLoginDate!==today){
+        db.collection('users').doc(user.uid).update({
+          lastLoginDate:today,
+          points:firebase.firestore.FieldValue.increment(5)
+        }).catch(()=>{});
+      }
+    }
     // Single listener for all unread notifications (friend requests + messages + announcements)
     if(notifUnsubscribe)notifUnsubscribe();
     notifUnsubscribe=db.collection('notifications').where('to','==',user.uid).where('read','==',false).onSnapshot(snap=>{
@@ -1789,6 +2076,9 @@ document.getElementById('logoutBtn').addEventListener('click',async e=>{
   e.preventDefault();const u=auth.currentUser;
   if(msgUnsubscribe){msgUnsubscribe();msgUnsubscribe=null;}
   if(notifUnsubscribe){notifUnsubscribe();notifUnsubscribe=null;}
+  if(corpChatUnsub){corpChatUnsub();corpChatUnsub=null;}
+  if(corpLogUnsub){corpLogUnsub();corpLogUnsub=null;}
+  closeCorpChat();
   if(u){
     const isGuest=u.isAnonymous;
     try{await db.collection('users').doc(u.uid).update({status:'offline'});}catch(_){}
@@ -1870,6 +2160,95 @@ async function loadAdminTab(tab){
   // announce tab is static form, nothing to load
 }
 
+/* ── ADMIN: MISSION CREATOR + KEY REVIEW ── */
+async function loadAdminKeys(){
+  const list=document.getElementById('adminKeysList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  // Show create mission form + pending submissions
+  list.innerHTML=`<div style="margin-bottom:14px;border-bottom:var(--border);padding-bottom:12px;">
+    <p class="admin-section-title">Create New Mission</p>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <input type="text" id="missionTitleInput" class="input-field" placeholder="Mission title..." maxlength="80" style="font-size:.78rem;">
+      <textarea id="missionDescInput" class="input-field" placeholder="Mission description..." maxlength="300" style="min-height:56px;font-size:.75rem;resize:vertical;"></textarea>
+      <div style="display:flex;gap:6px;">
+        <input type="text" id="missionKeyInput" class="input-field" placeholder="SECRET KEY (share in Discord)" maxlength="30" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;flex:1;">
+        <input type="number" id="missionPtsInput" class="input-field" placeholder="Pts" min="5" max="500" value="50" style="font-size:.75rem;width:70px;">
+      </div>
+      <button class="btn-primary" id="createMissionBtn" style="justify-content:center;font-size:.75rem;padding:8px;"><i class="fas fa-plus"></i> Create Mission</button>
+      <div class="success-msg" id="missionCreateMsg">Mission created!</div>
+    </div>
+  </div>
+  <p class="admin-section-title">Pending KEY Submissions</p>
+  <div id="pendingKeysList"></div>`;
+
+  document.getElementById('createMissionBtn').addEventListener('click',async()=>{
+    const title=document.getElementById('missionTitleInput').value.trim();
+    const desc=document.getElementById('missionDescInput').value.trim();
+    const key=document.getElementById('missionKeyInput').value.trim().toUpperCase();
+    const pts=parseInt(document.getElementById('missionPtsInput').value)||50;
+    if(!title||!desc||!key){showToast('Fill in all fields.');return;}
+    const btn=document.getElementById('createMissionBtn');
+    btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+    await db.collection('missions').add({title,description:desc,secretKey:key,points:pts,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(e=>showToast(e.message));
+    const s=document.getElementById('missionCreateMsg');s.style.display='block';
+    setTimeout(()=>s.style.display='none',2500);
+    btn.disabled=false;btn.innerHTML='<i class="fas fa-plus"></i> Create Mission';
+  });
+
+  // Load pending submissions
+  const pendingList=document.getElementById('pendingKeysList');
+  try{
+    const snap=await db.collection('missionSubmissions').where('status','==','pending').get();
+    if(snap.empty){pendingList.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);">No pending submissions.</p>';return;}
+    for(const d of snap.docs){
+      const sub=d.data(),sid=d.id;
+      // Get correct key
+      const missionDoc=await db.collection('missions').doc(sub.missionId).get();
+      const correctKey=missionDoc.exists?missionDoc.data().secretKey:'???';
+      const keyMatch=sub.keySubmitted===correctKey;
+      const row=document.createElement('div');row.className='admin-user-row';row.style.flexDirection='column';row.style.alignItems='flex-start';row.style.gap='6px';
+      row.innerHTML=`<div style="display:flex;align-items:center;gap:8px;width:100%;">
+        <span class="admin-user-name" style="flex:1;">${esc(sub.displayName||'?')} — ${esc(sub.missionTitle||'?')}</span>
+        <span class="mission-status ${keyMatch?'completed':'rejected'}">${keyMatch?'Key Correct':'Wrong Key'}</span>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);">Submitted: <strong>${esc(sub.keySubmitted||'')}</strong> &nbsp;|&nbsp; Expected: <strong style="color:${keyMatch?'#4CAF50':'#f44336'};">${esc(correctKey)}</strong></div>
+      <div style="display:flex;gap:6px;">
+        <button class="admin-save-rank" style="border-color:rgba(76,175,80,.4);color:#4CAF50;" data-sid="${sid}" data-uid="${sub.uid}" data-pts="${sub.points||50}" data-action="approve"><i class="fas fa-check"></i> Approve +${sub.points||50}pts</button>
+        <button class="admin-save-rank" style="border-color:rgba(255,68,68,.4);color:#f55;" data-sid="${sid}" data-action="reject"><i class="fas fa-times"></i> Reject</button>
+      </div>`;
+      row.querySelector('[data-action="approve"]').addEventListener('click',async function(){
+        this.disabled=true;this.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+        const batch=db.batch();
+        batch.update(db.collection('missionSubmissions').doc(this.dataset.sid),{status:'approved'});
+        batch.update(db.collection('users').doc(this.dataset.uid),{points:firebase.firestore.FieldValue.increment(parseInt(this.dataset.pts)||50)});
+        await batch.commit().catch(e=>showToast(e.message));
+        awardBadge(this.dataset.uid,'mission');
+        showToast('Approved! Points awarded.');
+        loadAdminKeys();
+      });
+      row.querySelector('[data-action="reject"]').addEventListener('click',async function(){
+        const reason=prompt('Rejection reason (optional):');
+        await db.collection('missionSubmissions').doc(this.dataset.sid).update({status:'rejected',rejectReason:reason||''}).catch(e=>showToast(e.message));
+        showToast('Submission rejected.');
+        loadAdminKeys();
+      });
+      pendingList.appendChild(row);
+    }
+  }catch(err){pendingList.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;">Error: ${err.message}</p>`;}
+}
+
+// Extend loadAdminTab to handle missions tab
+const _origLoadAdminTab=loadAdminTab;
+async function loadAdminTab(tab){
+  document.querySelectorAll('.admin-panel-section').forEach(s=>s.classList.remove('active'));
+  const tabId='adminTab'+tab.charAt(0).toUpperCase()+tab.slice(1);
+  const el=document.getElementById(tabId);if(el)el.classList.add('active');
+  if(tab==='roles')await loadAdminRoles();
+  else if(tab==='history')await loadAnnHistory();
+  else if(tab==='missions')await loadAdminKeys();
+}
+
+// Also extend admin modal to add calendar+intel+poll creation
 async function loadAdminRoles(){
   const list=document.getElementById('adminUserList');
   list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
@@ -2012,7 +2391,571 @@ function applyGuestRestrictions(isGuest){
   if(viewMembersBtn){
     viewMembersBtn.style.display=isGuest?'none':'flex';
   }
+  // Hide corp hub + chat for guests/logged-out
+  document.getElementById('corpHubBtn').style.display='none';
+  document.getElementById('corpChatBtn').classList.remove('show');
+  document.getElementById('navStatusWrap').style.display='none';
 }
+
+
+/* ═══════════════════════════════════════════════════════
+   STATUS SYSTEM
+═══════════════════════════════════════════════════════ */
+const STATUS_LABELS={online:'Online',idle:'Idle',dnd:'Do Not Disturb',invisible:'Invisible',offline:'Offline'};
+let idleTimer=null, currentPresenceStatus='online';
+
+function updateNavStatusDot(status){
+  const dot=document.getElementById('navStatusDot');
+  if(!dot)return;
+  dot.className='status-dot '+(status==='invisible'?'invisible':status);
+}
+
+async function setUserStatus(status,customText){
+  if(!currentUser||currentUser.isAnonymous)return;
+  currentPresenceStatus=status;
+  updateNavStatusDot(status);
+  const updates={status:status==='invisible'?'offline':status};
+  if(customText!==undefined)updates.customStatus=customText;
+  await db.collection('users').doc(currentUser.uid).update(updates).catch(()=>{});
+  if(currentUserData)currentUserData.status=updates.status;
+}
+
+function startIdleDetection(){
+  let lastActivity=Date.now();
+  const resetIdle=()=>{
+    lastActivity=Date.now();
+    if(currentPresenceStatus==='idle'&&document.visibilityState==='visible'){
+      setUserStatus('online');
+    }
+  };
+  ['mousemove','keydown','click','scroll','touchstart'].forEach(e=>document.addEventListener(e,resetIdle,{passive:true}));
+  setInterval(()=>{
+    if(!currentUser||currentUser.isAnonymous)return;
+    const idle=Date.now()-lastActivity>180000; // 3 min
+    if(idle&&currentPresenceStatus==='online'){
+      setUserStatus('idle');
+    }
+  },30000);
+  document.addEventListener('visibilitychange',()=>{
+    if(!currentUser||currentUser.isAnonymous)return;
+    if(document.visibilityState==='hidden'&&currentPresenceStatus==='online'){
+      setUserStatus('idle');
+    }else if(document.visibilityState==='visible'&&currentPresenceStatus==='idle'){
+      setUserStatus('online');
+    }
+  });
+}
+
+// Wire status picker
+document.getElementById('statusDotBtn').addEventListener('click',e=>{
+  e.stopPropagation();
+  document.getElementById('statusPicker').classList.toggle('open');
+});
+document.addEventListener('click',()=>document.getElementById('statusPicker').classList.remove('open'));
+document.querySelectorAll('.status-pick-item').forEach(item=>{
+  item.addEventListener('click',e=>{
+    e.stopPropagation();
+    const s=item.dataset.status;
+    setUserStatus(s);
+    document.getElementById('statusPicker').classList.remove('open');
+    writeCorpLog('status',`set their status to ${STATUS_LABELS[s]||s}`,{status:s});
+  });
+});
+const customStatusInput=document.getElementById('customStatusInput');
+customStatusInput.addEventListener('keydown',async e=>{
+  if(e.key==='Enter'){
+    const txt=e.target.value.trim();
+    await setUserStatus(currentPresenceStatus,txt);
+    document.getElementById('statusPicker').classList.remove('open');
+    showToast(txt?`Status set: "${txt}"`:'Custom status cleared.');
+  }
+});
+customStatusInput.addEventListener('click',e=>e.stopPropagation());
+
+/* ═══════════════════════════════════════════════════════
+   BADGES
+═══════════════════════════════════════════════════════ */
+const BADGE_DEFS={
+  founding:{icon:'fa-star',label:'Founding Member',cls:'badge-founding',desc:'One of the first to join TheSizNexus'},
+  beta:{icon:'fa-flask',label:'Beta Tester',cls:'badge-beta',desc:'Helped test the Nexus platform'},
+  veteran:{icon:'fa-shield-alt',label:'Veteran',cls:'badge-veteran',desc:'Member for 30+ days'},
+  social:{icon:'fa-user-friends',label:'Social',cls:'badge-social',desc:'10+ connections'},
+  top:{icon:'fa-trophy',label:'Top Operative',cls:'badge-top',desc:'Ranked in the top 3'},
+  firstlogin:{icon:'fa-door-open',label:'First Access',cls:'badge-firstlogin',desc:'Completed first login'},
+  mission:{icon:'fa-check-circle',label:'Operative',cls:'badge-mission',desc:'Completed a mission'}
+};
+
+function renderBadges(badges){
+  if(!badges||!badges.length)return'';
+  return'<div class="badge-row">'+badges.map(b=>{
+    const def=BADGE_DEFS[b];
+    if(!def)return'';
+    return`<span class="badge ${def.cls}" title="${def.desc}"><i class="fas ${def.icon}"></i> ${def.label}</span>`;
+  }).join('')+'</div>';
+}
+
+async function awardBadge(uid,badgeKey){
+  await db.collection('users').doc(uid).update({
+    badges:firebase.firestore.FieldValue.arrayUnion(badgeKey)
+  }).catch(()=>{});
+}
+
+async function checkAndAwardBadges(uid,userData){
+  if(!uid||!userData||userData.isAnonymous)return;
+  const badges=userData.badges||[];
+  const toAward=[];
+  if(!badges.includes('firstlogin'))toAward.push('firstlogin');
+  const createdAt=userData.createdAt?.toDate?.();
+  if(createdAt&&(Date.now()-createdAt.getTime())>30*24*60*60*1000&&!badges.includes('veteran'))toAward.push('veteran');
+  if((userData.friends||[]).length>=10&&!badges.includes('social'))toAward.push('social');
+  const missionsSnap=await db.collection('missionSubmissions').where('uid','==',uid).where('status','==','approved').get().catch(()=>({empty:true}));
+  if(!missionsSnap.empty&&!badges.includes('mission'))toAward.push('mission');
+  if(toAward.length){
+    await db.collection('users').doc(uid).update({badges:firebase.firestore.FieldValue.arrayUnion(...toAward)}).catch(()=>{});
+    if(currentUserData)currentUserData.badges=[...badges,...toAward];
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   CORPORATION LOG
+═══════════════════════════════════════════════════════ */
+const MOD_RANKS=['Founder','Administrator','Co-Administrator','Moderator'];
+function isMod(data){return data&&MOD_RANKS.includes(data.rank);}
+
+async function writeCorpLog(type,message,extra={}){
+  if(!currentUser||currentUser.isAnonymous)return;
+  await db.collection('corpLog').add({
+    type,
+    uid:currentUser.uid,
+    displayName:currentUserData?.displayName||'Unknown',
+    rank:currentUserData?.rank||'Member',
+    message,
+    extra,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(()=>{});
+}
+
+let corpLogUnsub=null;
+async function loadCorpLog(filter='all'){
+  const feed=document.getElementById('corpLogFeed');
+  feed.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  if(corpLogUnsub){corpLogUnsub();corpLogUnsub=null;}
+  let q=db.collection('corpLog').orderBy('createdAt','desc').limit(50);
+  corpLogUnsub=q.onSnapshot(snap=>{
+    feed.innerHTML='';
+    let docs=snap.docs;
+    if(filter!=='all')docs=docs.filter(d=>d.data().type===filter);
+    if(!docs.length){feed.innerHTML='<div class="hub-empty">No activity yet.</div>';return;}
+    docs.forEach(d=>{
+      const log=d.data();
+      const isModViewer=isMod(currentUserData);
+      const item=document.createElement('div');item.className='log-item';
+      const time=log.createdAt?fmtDate(log.createdAt)+' '+fmtTime(log.createdAt):'';
+      item.innerHTML=`<div class="log-item-main"><strong>${esc(log.displayName||'Unknown')}</strong> ${esc(log.message)}</div>
+        <div class="log-item-meta">${esc(log.rank||'Member')} &middot; ${time}</div>
+        ${isModViewer&&log.extra&&Object.keys(log.extra).length?`<div class="log-item-detail">Details: ${esc(JSON.stringify(log.extra))}</div>`:''}`;
+      feed.appendChild(item);
+    });
+  },err=>{feed.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;});
+}
+
+// Filter buttons
+document.querySelectorAll('.log-filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.log-filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    loadCorpLog(btn.dataset.filter);
+  });
+});
+
+/* ═══════════════════════════════════════════════════════
+   MISSIONS
+═══════════════════════════════════════════════════════ */
+async function loadMissions(){
+  const list=document.getElementById('missionsList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  try{
+    const [missionsSnap,mySubsSnap]=await Promise.all([
+      db.collection('missions').where('active','==',true).get(),
+      db.collection('missionSubmissions').where('uid','==',currentUser.uid).get()
+    ]);
+    const mySubsMap={};
+    mySubsSnap.forEach(d=>{mySubsMap[d.data().missionId]=d.data();});
+    list.innerHTML='';
+    if(missionsSnap.empty){list.innerHTML='<div class="hub-empty">No active missions. Check back soon.</div>';return;}
+    missionsSnap.forEach(d=>{
+      const m=d.data(),mid=d.id;
+      const mySub=mySubsMap[mid];
+      const card=document.createElement('div');card.className='mission-card';
+      let statusHtml='<span class="mission-status open">Open</span>';
+      let actionHtml='';
+      if(mySub){
+        if(mySub.status==='pending'){
+          statusHtml='<span class="mission-status pending">Pending Review</span>';
+          actionHtml='<p style="font-family:var(--font-mono);font-size:.7rem;color:var(--color-text-muted);margin-top:8px;"><i class="fas fa-clock"></i> Your KEY has been submitted and is awaiting admin review.</p>';
+        }else if(mySub.status==='approved'){
+          statusHtml='<span class="mission-status completed">Completed</span>';
+          actionHtml='<p style="font-family:var(--font-mono);font-size:.7rem;color:#4CAF50;margin-top:8px;"><i class="fas fa-check-circle"></i> Mission complete! +${m.points||50} pts awarded.</p>';
+        }else if(mySub.status==='rejected'){
+          statusHtml='<span class="mission-status rejected">Rejected</span>';
+          actionHtml=`<p style="font-family:var(--font-mono);font-size:.7rem;color:#f44336;margin-top:8px;"><i class="fas fa-times-circle"></i> Key rejected. ${esc(mySub.rejectReason||'Try again or contact an admin.')}</p>`;
+        }
+      }else{
+        actionHtml=`<div class="key-input-row">
+          <input type="text" class="key-input" id="keyInput_${mid}" placeholder="Enter mission KEY..." maxlength="30">
+          <button class="key-submit" data-mid="${mid}" data-pts="${m.points||50}"><i class="fas fa-key"></i> Submit</button>
+        </div>
+        <p style="font-family:var(--font-mono);font-size:.62rem;color:rgba(0,212,255,.3);margin-top:5px;">Use the <strong style="color:rgba(0,212,255,.5);">/key</strong> bot command in Discord to get the KEY for this mission.</p>`;
+      }
+      card.innerHTML=`
+        <div class="mission-header">
+          <div class="mission-icon"><i class="fas fa-crosshairs"></i></div>
+          <div class="mission-info">
+            <div class="mission-title">${esc(m.title||'Mission')}</div>
+            <div class="mission-desc">${esc(m.description||'')}</div>
+          </div>
+        </div>
+        <div class="mission-footer"><span class="mission-pts"><i class="fas fa-star"></i> ${m.points||50} pts</span>${statusHtml}</div>
+        ${actionHtml}`;
+      // Wire submit button
+      const submitBtn=card.querySelector('.key-submit');
+      if(submitBtn){
+        submitBtn.addEventListener('click',async function(){
+          const keyVal=document.getElementById('keyInput_'+this.dataset.mid)?.value.trim().toUpperCase();
+          if(!keyVal){showToast('Enter a KEY first.');return;}
+          this.disabled=true;this.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+          try{
+            await db.collection('missionSubmissions').add({
+              uid:currentUser.uid,
+              displayName:currentUserData?.displayName||'Unknown',
+              missionId:this.dataset.mid,
+              missionTitle:m.title||'Mission',
+              keySubmitted:keyVal,
+              points:parseInt(this.dataset.pts)||50,
+              status:'pending',
+              createdAt:firebase.firestore.FieldValue.serverTimestamp()
+            });
+            showToast('KEY submitted! Awaiting admin review.');
+            writeCorpLog('mission',`submitted a KEY for mission: ${m.title}`);
+            loadMissions();
+          }catch(err){showToast('Error: '+err.message);this.disabled=false;this.innerHTML='<i class="fas fa-key"></i> Submit';}
+        });
+      }
+      list.appendChild(card);
+    });
+  }catch(err){list.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;}
+}
+
+/* ═══════════════════════════════════════════════════════
+   LEADERBOARD
+═══════════════════════════════════════════════════════ */
+async function loadLeaderboard(){
+  const list=document.getElementById('leaderboardList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  try{
+    const snap=await db.collection('users').get();
+    const users=[];
+    snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous)users.push(u);});
+    // Score = points field OR compute from friends + badges + loginCount
+    users.sort((a,b)=>(b.points||0)-(a.points||0));
+    list.innerHTML='';
+    if(!users.length){list.innerHTML='<div class="hub-empty">No operatives ranked yet.</div>';return;}
+    users.slice(0,20).forEach((u,i)=>{
+      const rankNum=i+1;
+      const rankCls=rankNum===1?'gold':rankNum===2?'silver':rankNum===3?'bronze':'other';
+      const rankIcon=rankNum===1?'🥇':rankNum===2?'🥈':rankNum===3?'🥉':rankNum;
+      const isMe=u.id===currentUser.uid;
+      const row=document.createElement('div');row.className='lb-row'+(isMe?' ':"");
+      if(isMe)row.style.borderColor='rgba(0,212,255,.3)';
+      row.innerHTML=`<span class="lb-rank ${rankCls}">${rankIcon}</span>
+        <div class="lb-av">${avHtml(u.photoURL,u.displayName)}</div>
+        <span class="lb-name">${esc(u.displayName||'Unknown')}${isMe?'<span class="lb-you">[YOU]</span>':''}</span>
+        <span class="lb-pts"><i class="fas fa-star" style="font-size:.6rem;margin-right:3px;"></i>${u.points||0}</span>`;
+      list.appendChild(row);
+    });
+  }catch(err){list.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;}
+}
+
+/* ═══════════════════════════════════════════════════════
+   CALENDAR
+═══════════════════════════════════════════════════════ */
+async function loadCalendar(){
+  const list=document.getElementById('calendarList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  try{
+    const snap=await db.collection('events').get();
+    const events=snap.docs.sort((a,b)=>(a.data().eventDate?.toMillis?.()??0)-(b.data().eventDate?.toMillis?.()??0));
+    list.innerHTML='';
+    if(!events.length){list.innerHTML='<div class="hub-empty">No events scheduled yet.</div>';return;}
+    for(const d of events){
+      const ev=d.data(),eid=d.id;
+      const evDate=ev.eventDate?.toDate?.();
+      const dateStr=evDate?evDate.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'TBD';
+      const isPast=evDate&&evDate<new Date();
+      const myRsvp=(ev.rsvpYes||[]).includes(currentUser.uid)?'yes':(ev.rsvpNo||[]).includes(currentUser.uid)?'no':null;
+      const card=document.createElement('div');card.className='event-card';
+      if(isPast)card.style.opacity='.55';
+      card.innerHTML=`<div class="event-title">${esc(ev.title||'Event')}</div>
+        <div class="event-desc">${esc(ev.description||'')}</div>
+        <div class="event-meta">
+          <span class="event-date"><i class="fas fa-clock"></i> ${dateStr}</span>
+          <span class="rsvp-count" id="rsvpCount_${eid}">✅ ${(ev.rsvpYes||[]).length} going</span>
+        </div>
+        ${!isPast?`<div class="event-rsvp-row">
+          <button class="rsvp-btn yes${myRsvp==='yes'?' active':''}" data-eid="${eid}" data-action="yes">✅ Going</button>
+          <button class="rsvp-btn no${myRsvp==='no'?' active':''}" data-eid="${eid}" data-action="no">❌ Can't go</button>
+        </div>`:'<p style="font-family:var(--font-mono);font-size:.65rem;color:rgba(0,212,255,.3);margin-top:6px;">This event has passed.</p>'}`;
+      // Wire RSVP buttons
+      card.querySelectorAll('.rsvp-btn').forEach(btn=>{
+        btn.addEventListener('click',async function(){
+          const action=this.dataset.action,eid=this.dataset.eid;
+          const ref=db.collection('events').doc(eid);
+          const updateData={};
+          if(action==='yes'){
+            updateData.rsvpYes=firebase.firestore.FieldValue.arrayUnion(currentUser.uid);
+            updateData.rsvpNo=firebase.firestore.FieldValue.arrayRemove(currentUser.uid);
+          }else{
+            updateData.rsvpNo=firebase.firestore.FieldValue.arrayUnion(currentUser.uid);
+            updateData.rsvpYes=firebase.firestore.FieldValue.arrayRemove(currentUser.uid);
+          }
+          await ref.update(updateData).catch(e=>showToast(e.message));
+          loadCalendar();
+        });
+      });
+      list.appendChild(card);
+    }
+  }catch(err){list.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;}
+}
+
+/* ═══════════════════════════════════════════════════════
+   INTEL BOARD
+═══════════════════════════════════════════════════════ */
+async function loadIntelBoard(){
+  const list=document.getElementById('intelList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  const canPost=isMod(currentUserData);
+  try{
+    const snap=await db.collection('intelPosts').get();
+    const posts=snap.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()??0)-(a.data().createdAt?.toMillis?.()??0));
+    list.innerHTML='';
+    if(canPost){
+      list.innerHTML=`<div style="margin-bottom:12px;display:flex;flex-direction:column;gap:6px;">
+        <input type="text" id="intelTitle" class="input-field" placeholder="Intel title..." maxlength="80" style="font-size:.78rem;">
+        <textarea id="intelBody" class="input-field" placeholder="Write intel post..." maxlength="600" style="min-height:60px;font-size:.75rem;resize:vertical;"></textarea>
+        <input type="text" id="intelTag" class="input-field" placeholder="Tag (e.g. Recon, Alert, Update)" maxlength="20" style="font-size:.75rem;">
+        <button class="btn-primary" id="postIntelBtn" style="justify-content:center;font-size:.75rem;padding:8px;"><i class="fas fa-satellite-dish"></i> Post Intel</button>
+      </div>`;
+      document.getElementById('postIntelBtn').addEventListener('click',async()=>{
+        const title=document.getElementById('intelTitle').value.trim();
+        const body=document.getElementById('intelBody').value.trim();
+        const tag=document.getElementById('intelTag').value.trim();
+        if(!title||!body){showToast('Title and body required.');return;}
+        const btn=document.getElementById('postIntelBtn');
+        btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Posting...';
+        await db.collection('intelPosts').add({title,body,tag,authorName:currentUserData?.displayName||'Admin',authorRank:currentUserData?.rank||'Member',createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(e=>showToast(e.message));
+        writeCorpLog('intel',`posted new intel: "${title}"`);
+        loadIntelBoard();
+      });
+    }
+    if(!posts.length){list.innerHTML+='<div class="hub-empty">No intel posts yet.</div>';return;}
+    posts.forEach(d=>{
+      const p=d.data();
+      const item=document.createElement('div');item.className='intel-post';
+      item.innerHTML=`<div class="intel-post-title">${p.tag?`<span class="intel-tag">${esc(p.tag)}</span>`:''}${esc(p.title||'Intel')}</div>
+        <div class="intel-post-body">${esc(p.body||'')}</div>
+        <div class="intel-post-meta"><span>${esc(p.authorName||'Admin')} &middot; ${esc(p.authorRank||'')}</span><span>${p.createdAt?fmtDate(p.createdAt):''}</span></div>`;
+      list.appendChild(item);
+    });
+  }catch(err){list.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;}
+}
+
+/* ═══════════════════════════════════════════════════════
+   POLLS
+═══════════════════════════════════════════════════════ */
+async function loadPolls(){
+  const list=document.getElementById('pollsList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  const canCreate=isAdmin(currentUserData);
+  try{
+    const snap=await db.collection('polls').get();
+    const polls=snap.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()??0)-(a.data().createdAt?.toMillis?.()??0));
+    list.innerHTML='';
+    if(canCreate){
+      list.innerHTML=`<div style="margin-bottom:14px;display:flex;flex-direction:column;gap:6px;">
+        <input type="text" id="pollQuestion" class="input-field" placeholder="Poll question..." maxlength="120" style="font-size:.78rem;">
+        <div id="pollOptionsWrap" style="display:flex;flex-direction:column;gap:4px;">
+          <input type="text" class="poll-opt-inp input-field" placeholder="Option 1" maxlength="80" style="font-size:.75rem;">
+          <input type="text" class="poll-opt-inp input-field" placeholder="Option 2" maxlength="80" style="font-size:.75rem;">
+        </div>
+        <button id="addPollOptBtn" style="background:none;border:1px solid rgba(0,212,255,.2);color:var(--color-text-muted);font-family:var(--font-mono);font-size:.65rem;padding:4px;border-radius:3px;cursor:pointer;">+ Add option</button>
+        <button class="btn-primary" id="createPollBtn" style="justify-content:center;font-size:.75rem;padding:8px;"><i class="fas fa-poll"></i> Create Poll</button>
+      </div>`;
+      document.getElementById('addPollOptBtn').addEventListener('click',()=>{
+        const inp=document.createElement('input');inp.type='text';inp.className='poll-opt-inp input-field';inp.placeholder='Option';inp.maxLength=80;inp.style.fontSize='.75rem';
+        document.getElementById('pollOptionsWrap').appendChild(inp);
+      });
+      document.getElementById('createPollBtn').addEventListener('click',async()=>{
+        const q=document.getElementById('pollQuestion').value.trim();
+        const opts=[...document.querySelectorAll('.poll-opt-inp')].map(i=>i.value.trim()).filter(Boolean);
+        if(!q||opts.length<2){showToast('Question and at least 2 options required.');return;}
+        const btn=document.getElementById('createPollBtn');
+        btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+        const votesObj={};opts.forEach(o=>{votesObj[o]=[];});
+        await db.collection('polls').add({question:q,options:opts,votes:votesObj,createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(e=>showToast(e.message));
+        writeCorpLog('poll',`created a new poll: "${q}"`);
+        loadPolls();
+      });
+    }
+    if(!polls.length){list.innerHTML+='<div class="hub-empty">No polls yet.</div>';return;}
+    for(const d of polls){
+      const p=d.data(),pid=d.id;
+      const votes=p.votes||{};
+      const totalVotes=Object.values(votes).reduce((s,arr)=>s+(arr.length||0),0);
+      const myVote=Object.entries(votes).find(([opt,arr])=>arr.includes(currentUser.uid))?.[0];
+      const card=document.createElement('div');card.className='poll-card';
+      let optsHtml=(p.options||[]).map(opt=>{
+        const count=(votes[opt]||[]).length;
+        const pct=totalVotes?Math.round(count/totalVotes*100):0;
+        const isVoted=myVote===opt;
+        return`<div class="poll-option">
+          <button class="poll-option-btn${isVoted?' voted':''}" data-pid="${pid}" data-opt="${esc(opt)}" ${myVote?'disabled':''}>
+            ${myVote?`<div class="poll-bar" style="width:${pct}%"></div>`:''}
+            <div class="poll-opt-text"><span>${esc(opt)}</span>${myVote?`<span>${pct}% (${count})</span>`:''}</div>
+          </button></div>`;
+      }).join('');
+      card.innerHTML=`<div class="poll-question">${esc(p.question||'')}</div>${optsHtml}<div class="poll-meta">${totalVotes} vote${totalVotes!==1?'s':''} &middot; ${p.createdAt?fmtDate(p.createdAt):''}</div>`;
+      card.querySelectorAll('.poll-option-btn:not([disabled])').forEach(btn=>{
+        btn.addEventListener('click',async function(){
+          const opt=this.dataset.opt,pid=this.dataset.pid;
+          const ref=db.collection('polls').doc(pid);
+          const snap2=await ref.get();if(!snap2.exists)return;
+          const data=snap2.data();const vs=data.votes||{};
+          // Remove from any existing choice first
+          Object.keys(vs).forEach(k=>{vs[k]=(vs[k]||[]).filter(id=>id!==currentUser.uid);});
+          if(!vs[opt])vs[opt]=[];
+          vs[opt].push(currentUser.uid);
+          await ref.update({votes:vs}).catch(e=>showToast(e.message));
+          loadPolls();
+        });
+      });
+      list.appendChild(card);
+    }
+  }catch(err){list.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;}
+}
+
+/* ═══════════════════════════════════════════════════════
+   GROUP CHAT
+═══════════════════════════════════════════════════════ */
+let corpChatUnsub=null, corpChatOpen=false, corpChatLastSeen=0;
+
+function openCorpChat(){
+  corpChatOpen=true;
+  corpChatLastSeen=Date.now();
+  document.getElementById('corpChatPanel').classList.add('open');
+  document.getElementById('chatUnreadBadge').classList.remove('show');
+  if(!corpChatUnsub)startCorpChatListener();
+}
+function closeCorpChat(){
+  corpChatOpen=false;
+  document.getElementById('corpChatPanel').classList.remove('open');
+}
+function startCorpChatListener(){
+  if(corpChatUnsub){corpChatUnsub();corpChatUnsub=null;}
+  corpChatUnsub=db.collection('corpChat').orderBy('createdAt','asc').limitToLast(60).onSnapshot(snap=>{
+    const body=document.getElementById('corpChatBody');
+    body.innerHTML='';
+    let lastDate='',lastUid='';
+    snap.forEach(d=>{
+      const m=d.data(),isMine=m.uid===currentUser.uid;
+      const ds=m.createdAt?fmtDate(m.createdAt):'';
+      if(ds&&ds!==lastDate){
+        lastDate=ds;
+        const sep=document.createElement('div');sep.className='corp-date-sep';sep.textContent=ds;body.appendChild(sep);
+      }
+      const wrap=document.createElement('div');wrap.className='corp-msg '+(isMine?'mine':'theirs');
+      const showName=m.uid!==lastUid;
+      lastUid=m.uid;
+      wrap.innerHTML=`${showName&&!isMine?`<div class="corp-msg-name">${esc(m.displayName||'?')}</div>`:''}
+        <div class="corp-msg-bubble">${esc(m.text||'')}</div>
+        <div class="corp-msg-time">${fmtTime(m.createdAt)}</div>`;
+      body.appendChild(wrap);
+    });
+    body.scrollTop=body.scrollHeight;
+    // Show unread badge if panel is closed
+    if(!corpChatOpen){
+      const badge=document.getElementById('chatUnreadBadge');
+      badge.classList.add('show');
+    }
+    // Update online count
+    document.getElementById('corpChatOnline').textContent='';
+  },err=>console.error('Corp chat error:',err));
+}
+
+async function sendCorpChatMsg(){
+  const input=document.getElementById('corpChatInput');
+  const text=input.value.trim();if(!text)return;
+  input.value='';
+  await db.collection('corpChat').add({
+    uid:currentUser.uid,
+    displayName:currentUserData?.displayName||'Unknown',
+    rank:currentUserData?.rank||'Member',
+    text,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(e=>{input.value=text;showToast('Failed to send: '+e.message);});
+}
+
+document.getElementById('corpChatBtn').addEventListener('click',()=>{
+  corpChatOpen?closeCorpChat():openCorpChat();
+});
+document.getElementById('corpChatClose').addEventListener('click',closeCorpChat);
+document.getElementById('corpChatSend').addEventListener('click',sendCorpChatMsg);
+document.getElementById('corpChatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendCorpChatMsg();}});
+
+/* ═══════════════════════════════════════════════════════
+   ENGAGEMENT HUB MODAL
+═══════════════════════════════════════════════════════ */
+async function openEngagementHub(tab='log'){
+  if(!currentUser||currentUser.isAnonymous){
+    promptGuestRegister('Create a free account to access the Corp Hub.');
+    return;
+  }
+  openModal('engagementModal');
+  // Activate correct tab
+  document.querySelectorAll('.hub-tab').forEach(b=>{b.classList.toggle('active',b.dataset.hub===tab);});
+  document.querySelectorAll('.hub-section').forEach(s=>{s.classList.toggle('active',s.id==='hub'+tab.charAt(0).toUpperCase()+tab.slice(1));});
+  await loadHubTab(tab);
+  // Tab switching
+  document.querySelectorAll('.hub-tab').forEach(btn=>{
+    btn.onclick=async()=>{
+      document.querySelectorAll('.hub-tab').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.hub-section').forEach(s=>s.classList.remove('active'));
+      btn.classList.add('active');
+      const section=document.getElementById('hub'+btn.dataset.hub.charAt(0).toUpperCase()+btn.dataset.hub.slice(1));
+      if(section)section.classList.add('active');
+      await loadHubTab(btn.dataset.hub);
+    };
+  });
+}
+
+async function loadHubTab(tab){
+  if(tab==='log')loadCorpLog(document.querySelector('.log-filter-btn.active')?.dataset.filter||'all');
+  else if(tab==='missions')loadMissions();
+  else if(tab==='leaderboard')loadLeaderboard();
+  else if(tab==='calendar')loadCalendar();
+  else if(tab==='intel')loadIntelBoard();
+  else if(tab==='polls')loadPolls();
+}
+
+document.getElementById('closeEngagement').addEventListener('click',()=>{
+  closeModal('engagementModal');
+  if(corpLogUnsub){corpLogUnsub();corpLogUnsub=null;}
+});
+
+document.getElementById('corpHubBtn').addEventListener('click',e=>{
+  e.preventDefault();
+  dropdownMenu.classList.remove('open');
+  openEngagementHub();
+});
 
 /* ── SEARCH ── */
 let _st=null;
