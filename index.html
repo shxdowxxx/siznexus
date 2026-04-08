@@ -30,6 +30,95 @@
   };
   firebase.initializeApp(firebaseConfig);
   firebase.analytics();
+
+  /* ── DOMAIN LOCK & DEVELOPER KEY SYSTEM ── */
+  const ALLOWED_DOMAIN='siznexus.org';
+  let isDeveloperMode=sessionStorage.getItem('devMode')==='true';
+  
+  function getCurrentDomain(){
+    const host=window.location.hostname;
+    return host.replace('www.','');
+  }
+  
+  function isAllowedDomain(){
+    const domain=getCurrentDomain();
+    return domain===ALLOWED_DOMAIN||domain==='localhost'||domain.startsWith('127.');
+  }
+  
+  function showDomainLock(){
+    const overlay=document.createElement('div');
+    overlay.id='domain-lock-overlay';
+    overlay.style.cssText=`
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background:linear-gradient(135deg,#060d14,#0a1628);
+      display:flex;align-items:center;justify-content:center;
+      z-index:10000;backdrop-filter:blur(5px);
+      font-family:var(--font-mono);
+    `;
+    overlay.innerHTML=`
+      <div style="text-align:center;max-width:500px;padding:30px;background:rgba(0,20,40,0.9);border:1px solid rgba(0,212,255,0.3);border-radius:8px;box-shadow:0 0 30px rgba(0,212,255,0.2);">
+        <div style="font-size:2rem;margin-bottom:20px;"><i class="fas fa-lock" style="color:#00d4ff;"></i></div>
+        <h1 style="color:#00d4ff;margin:0 0 10px 0;font-size:1.5rem;letter-spacing:0.1em;">Access Restricted</h1>
+        <p style="color:#66f0ff;margin:0 0 20px 0;font-size:0.9rem;line-height:1.6;">This application is restricted to <strong>siznexus.org</strong>. Access from this domain is blocked.</p>
+        <p style="color:#4a8fa8;margin:0 0 15px 0;font-size:0.75rem;opacity:0.7;">Current domain: <code style="color:#00d4ff;">${getCurrentDomain()}</code></p>
+        <button id="dev-unlock-btn" style="margin-top:20px;padding:8px 16px;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);color:#00d4ff;cursor:pointer;font-family:var(--font-mono);font-size:0.7rem;border-radius:4px;transition:all 0.3s;opacity:0.5;pointer-events:all;">👤 Developer</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    document.getElementById('dev-unlock-btn').addEventListener('click',promptDeveloperKey);
+  }
+  
+  async function promptDeveloperKey(){
+    const key=prompt('Enter developer key:');
+    if(!key)return;
+    
+    try{
+      const btn=document.getElementById('dev-unlock-btn');
+      btn.disabled=true;
+      btn.innerHTML='Validating...';
+      
+      db.collection('_config').doc('devKey').get().then(doc=>{
+        if(!doc.exists){
+          alert('Key validation not configured. Contact owner.');
+          btn.disabled=false;
+          btn.innerHTML='👤 Developer';
+          return;
+        }
+        const storedKey=doc.data().key;
+        if(key===storedKey){
+          sessionStorage.setItem('devMode','true');
+          isDeveloperMode=true;
+          document.getElementById('domain-lock-overlay')?.remove();
+          window.location.reload();
+        }else{
+          alert('Invalid key.');
+          btn.disabled=false;
+          btn.innerHTML='👤 Developer';
+        }
+      }).catch(err=>{
+        console.error('Key validation error:',err);
+        alert('Error validating key. Check console.');
+        btn.disabled=false;
+        btn.innerHTML='👤 Developer';
+      });
+    }catch(err){
+      console.error('Validation error:',err);
+      alert('Error: '+err.message);
+    }
+  }
+  
+  if(!isAllowedDomain()&&!isDeveloperMode){
+    document.addEventListener('DOMContentLoaded',showDomainLock);
+    window.addEventListener('load',()=>{
+      const lock=document.getElementById('domain-lock-overlay');
+      if(lock){
+        document.body.style.overflow='hidden';
+        document.querySelectorAll('*').forEach(el=>{
+          if(el.id!=='domain-lock-overlay')el.style.pointerEvents='none';
+        });
+      }
+    });
+  }
 </script>
 <style>
 :root{
@@ -1490,6 +1579,20 @@ const auth=firebase.auth(),db=firebase.firestore();
 const googleProvider=new firebase.auth.GoogleAuthProvider();
 let currentUser=null,currentUserData=null;
 let msgUnsubscribe=null,notifUnsubscribe=null,activeMembersUnsub=null,membersUnsubscribe=null;
+
+// Ensure config documents exist (dev key kept hidden - only in Firestore, never in client code)
+db.collection('_config').doc('app').set({
+  domainLock:{
+    allowedDomain:'siznexus.org',
+    enabled:true
+  }
+},{merge:true}).catch(()=>{});
+
+// Note: Developer key is NOT stored in client code. Owner must set it manually in Firestore:
+// 1. Go to Firebase Console → _config → devKey
+// 2. Create document with field "key" containing the secret
+// 3. Firestore rules will protect it (owner-only read/write)
+// Client will validate attempts against the server-stored key
 
 /* ── HELPERS ── */
 function initials(n){if(!n)return'?';return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
