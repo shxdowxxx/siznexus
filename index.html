@@ -32,7 +32,9 @@
   firebase.analytics();
 
   /* ── DOMAIN LOCK & DEVELOPER KEY SYSTEM ── */
-  const ALLOWED_DOMAIN='siznexus.org';
+  const ALLOWED_DOMAIN_FALLBACK='siznexus.org';
+  let allowedDomain=ALLOWED_DOMAIN_FALLBACK;
+  let domainLockEnabled=true;
   let isDeveloperMode=sessionStorage.getItem('devMode')==='true';
   
   function getCurrentDomain(){
@@ -41,8 +43,9 @@
   }
   
   function isAllowedDomain(){
+    if(!domainLockEnabled) return true;
     const domain=getCurrentDomain();
-    return domain===ALLOWED_DOMAIN||domain==='localhost'||domain.startsWith('127.');
+    return domain===allowedDomain||domain==='localhost'||domain.startsWith('127.');
   }
   
   function showDomainLock(){
@@ -68,42 +71,46 @@
     document.getElementById('dev-unlock-btn').addEventListener('click',promptDeveloperKey);
   }
   
+  async function sha256(str){
+    const msgUint8=new TextEncoder().encode(str);
+    const hashBuffer=await crypto.subtle.digest('SHA-256',msgUint8);
+    const hashArray=Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+
   async function promptDeveloperKey(){
     const key=prompt('Enter developer key:');
     if(!key)return;
-    
+
+    const btn=document.getElementById('dev-unlock-btn');
+    btn.disabled=true;
+    btn.innerHTML='Validating...';
+
     try{
-      const btn=document.getElementById('dev-unlock-btn');
-      btn.disabled=true;
-      btn.innerHTML='Validating...';
-      
-      db.collection('_config').doc('devKey').get().then(doc=>{
-        if(!doc.exists){
-          alert('Key validation not configured. Contact owner.');
-          btn.disabled=false;
-          btn.innerHTML='👤 Developer';
-          return;
-        }
-        const storedKey=doc.data().key;
-        if(key===storedKey){
-          sessionStorage.setItem('devMode','true');
-          isDeveloperMode=true;
-          document.getElementById('domain-lock-overlay')?.remove();
-          window.location.reload();
-        }else{
-          alert('Invalid key.');
-          btn.disabled=false;
-          btn.innerHTML='👤 Developer';
-        }
-      }).catch(err=>{
-        console.error('Key validation error:',err);
-        alert('Error validating key. Check console.');
+      const storedDoc=await db.collection('_configKEY').doc('devKeyHash').get();
+      if(!storedDoc.exists){
+        alert('Developer key not configured. Contact owner.');
         btn.disabled=false;
         btn.innerHTML='👤 Developer';
-      });
-    }catch(err){
-      console.error('Validation error:',err);
-      alert('Error: '+err.message);
+        return;
+      }
+      const storedHash=storedDoc.data().hash;
+      const inputHash=await sha256(key.trim());
+      if(inputHash===storedHash){
+        sessionStorage.setItem('devMode','true');
+        isDeveloperMode=true;
+        document.getElementById('domain-lock-overlay')?.remove();
+        window.location.reload();
+      } else {
+        alert('Invalid key.');
+        btn.disabled=false;
+        btn.innerHTML='👤 Developer';
+      }
+    } catch(err){
+      console.error('Key validation error:',err);
+      alert('Error validating key. Check console.');
+      btn.disabled=false;
+      btn.innerHTML='👤 Developer';
     }
   }
   
@@ -1581,18 +1588,32 @@ let currentUser=null,currentUserData=null;
 let msgUnsubscribe=null,notifUnsubscribe=null,activeMembersUnsub=null,membersUnsubscribe=null;
 
 // Ensure config documents exist (dev key kept hidden - only in Firestore, never in client code)
-db.collection('_config').doc('app').set({
+const appConfigRef=db.collection('_configKEY').doc('app');
+appConfigRef.set({
   domainLock:{
     allowedDomain:'siznexus.org',
     enabled:true
   }
 },{merge:true}).catch(()=>{});
 
+async function loadAppConfig(){
+  try{
+    const configSnapshot=await appConfigRef.get();
+    if(configSnapshot.exists){
+      const config=configSnapshot.data();
+      if(config?.domainLock?.allowedDomain) allowedDomain=config.domainLock.allowedDomain;
+      if(typeof config?.domainLock?.enabled === 'boolean') domainLockEnabled=config.domainLock.enabled;
+    }
+  }catch(err){
+    console.warn('Unable to load app config:',err);
+  }
+}
+loadAppConfig();
+
 // Note: Developer key is NOT stored in client code. Owner must set it manually in Firestore:
-// 1. Go to Firebase Console → _config → devKey
-// 2. Create document with field "key" containing the secret
-// 3. Firestore rules will protect it (owner-only read/write)
-// Client will validate attempts against the server-stored key
+// 1. Go to Firebase Console → Firestore → _configKEY → devKeyHash
+// 2. Create document with field "hash" containing the SHA-256 hash of the secret
+// 3. The app validates entered keys by hashing and comparing to the stored hash
 
 /* ── HELPERS ── */
 function initials(n){if(!n)return'?';return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
