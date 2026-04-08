@@ -1616,7 +1616,7 @@ function searchMembers(){
 async function openViewProfile(u){
   // Fetch user data
   if(!u.createdAt){
-    try{const snap=await db.collection('users').doc(u.id).get();if(snap.exists)Object.assign(u,snap.data());}catch(_){}}
+    try{const snap=await db.collection('users').doc(u.id).get();if(snap.exists)Object.assign(u,snap.data());}catch(_){}
   }
   const content=document.getElementById('profileContent');
   const isLoggedIn=!!currentUser;
