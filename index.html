@@ -410,6 +410,7 @@ input.input-field::placeholder,textarea.input-field::placeholder{color:rgba(74,1
   color:var(--color-text);
   font-family:var(--font-mono);font-size:.8rem;
   transition:var(--transition);
+  appearance:none;
   -webkit-appearance:none;
 }
 .msg-input:focus{outline:none;border-color:rgba(0,212,255,.5);background:rgba(0,0,0,.7);}
@@ -1457,9 +1458,7 @@ footer .contact a:hover{text-decoration:underline;}
 
 <script>
 /* ── SECURITY ── */
-document.addEventListener('keydown',e=>{if(e.keyCode===123||(e.ctrlKey&&e.shiftKey&&[73,74,67].includes(e.keyCode))||(e.ctrlKey&&e.keyCode===85))e.preventDefault();});
-document.addEventListener('contextmenu',e=>e.preventDefault());
-document.addEventListener('dragstart',e=>{if(e.target.tagName==='IMG')e.preventDefault();});
+document.addEventListener('dragstart', e => { if (e.target && e.target.tagName === 'IMG') e.preventDefault(); });
 
 /* ── SPLASH ── */
 (function(){
@@ -1500,12 +1499,18 @@ function chatId(a,b){return[a,b].sort().join('_');}
 function fmtTime(ts){if(!ts)return'';const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
 function fmtDate(ts){if(!ts)return'';const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'});}
 
+function safeExec(promise, successMsg){
+  return (async ()=>{
+    try{const res=await promise; if(successMsg)showToast(successMsg); return res;}catch(err){console.error(err); showToast(err&&err.code==='permission-denied'?'Permission denied — check Firestore rules or your role.':(err&&err.message||String(err))); throw err;}
+  })();
+}
+
 function setNavAvatar(user,data){
   const av=document.getElementById('userAvatar'),ic=document.getElementById('defaultIcon');
   const url=data?.photoURL||user?.photoURL||'';
   if(user&&url){av.src=url;av.style.cssText='display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;position:absolute;top:0;left:0;';ic.style.display='none';}
   else{av.style.display='none';ic.style.display='block';}
-  // Show ghost icon for anonymous users
+  // Ghost icon
   if(user?.isAnonymous){ic.className='fas fa-user-secret';ic.style.display='block';av.style.display='none';}
   else{ic.className='fas fa-user';}
 }
@@ -1609,15 +1614,15 @@ function searchMembers(){
 
 /* ── VIEW PROFILE ── */
 async function openViewProfile(u){
-  // Fetch fresh user data if not complete
+  // Fetch user data
   if(!u.createdAt){
-    try{const snap=await db.collection('users').doc(u.id).get();if(snap.exists)Object.assign(u,snap.data());}catch(_){}
+    try{const snap=await db.collection('users').doc(u.id).get();if(snap.exists)Object.assign(u,snap.data());}catch(_){}}
   }
   const content=document.getElementById('profileContent');
   const isLoggedIn=!!currentUser;
   const photo=u.photoURL||'',name=u.displayName||'Unknown';
 
-  // ── Block check — show overlay if viewer has blocked this person ──────────
+  // Block check
   if(isLoggedIn&&!currentUser.isAnonymous&&isBlocked(u.id)){
     content.innerHTML=`
       <div class="blocked-overlay">
@@ -1657,7 +1662,7 @@ async function openViewProfile(u){
   const joinStr=joinDate?joinDate.toLocaleDateString([],{month:'long',year:'numeric'}):'Unknown';
   const friendCount=(u.friends||[]).length;
   const badgeCount=(u.badges||[]).length;
-  // Report/block row — only for logged-in non-guest, not on own profile
+  // Report/block row
   const showDangerRow=isLoggedIn&&!viewerIsGuest&&currentUser.uid!==u.id;
   const alreadyBlocked=isBlocked(u.id);
   content.innerHTML=`
@@ -1705,14 +1710,14 @@ async function openViewProfile(u){
 /* ── FRIEND REQUEST SYSTEM ── */
 /* ── GUEST REGISTER PROMPT ── */
 function promptGuestRegister(reason){
-  // Reuse the login modal but switch straight to register view with a banner
+  // Reuse login modal
   clearError();
   const lf=document.getElementById('loginForm'),rf=document.getElementById('registerForm');
   lf.style.display='none';rf.style.display='flex';
   document.getElementById('modalTitle').textContent='Create Account';
   document.getElementById('toggleForm').textContent='Already have an account? Login here';
   document.getElementById('forgotLinkWrap').style.display='none';
-  // Show reason as info message (reuse error el with different style)
+  // Show reason
   const el=document.getElementById('errorMessage');
   el.textContent=reason||'Create a free account to access all features.';
   el.style.display='block';
@@ -1724,7 +1729,7 @@ function promptGuestRegister(reason){
 
 async function sendFriendRequest(toUid,toName){
   if(!currentUser)return;
-  // Guests cannot send friend requests
+  // Check guest
   if(currentUser.isAnonymous||currentUserData?.isAnonymous){
     closeModal('profileModal');
     promptGuestRegister('Create a free account to connect with other operatives and send friend requests.');
@@ -1753,17 +1758,17 @@ async function sendFriendRequest(toUid,toName){
 async function acceptFriendRequest(fromUid,fromName){
   if(!currentUser)return;
   try{
-    // 1. Mark the request as accepted (user owns the 'to' field so this is allowed)
+    // Mark request accepted
     const reqSnap=await db.collection('friendRequests').where('from','==',fromUid).where('to','==',currentUser.uid).get();
     const pendingDocs=reqSnap.docs.filter(d=>d.data().status==='pending');
     for(const d of pendingDocs){
       await db.collection('friendRequests').doc(d.id).update({status:'accepted'});
     }
-    // 2. Add to current user's friends (own doc — always allowed)
+    // Add to current user's friends
     await db.collection('users').doc(currentUser.uid).update({
       friends:firebase.firestore.FieldValue.arrayUnion(fromUid)
     });
-    // 3. Add to the other user's friends (allowed by the new rule: only 'friends' field changes)
+    // Add to other user's friends
     await db.collection('users').doc(fromUid).update({
       friends:firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
     });
@@ -1773,7 +1778,7 @@ async function acceptFriendRequest(fromUid,fromName){
     showToast(`You are now connected with ${fromName}!`);
     updateNotifBadge();
     writeCorpLog('connection',`connected with ${fromName}`);
-    // Award points for connection
+    // Award points
     db.collection('users').doc(currentUser.uid).update({points:firebase.firestore.FieldValue.increment(10)}).catch(()=>{});
   }catch(err){
     console.error('acceptFriendRequest error:',err);
@@ -1795,13 +1800,13 @@ async function declineFriendRequest(reqId){
 async function removeFriend(uid,name){
   if(!currentUser)return;
   try{
-    // Each write only touches 'friends' on each respective doc
+    // Update friends field
     await db.collection('users').doc(currentUser.uid).update({
       friends:firebase.firestore.FieldValue.arrayRemove(uid)
     });
     await db.collection('users').doc(uid).update({
       friends:firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
-    }).catch(()=>{}); // non-critical if this one fails
+    }).catch(()=>{}); // non-critical
     currentUserData=(await db.collection('users').doc(currentUser.uid).get()).data();
     closeModal('profileModal');closeModal('myProfileModal');
     showToast(`Removed ${name} from connections.`);
@@ -1812,7 +1817,7 @@ async function removeFriend(uid,name){
 const ADMIN_RANKS=['Founder','Administrator','Co-Administrator'];
 const OWNER_UID='QZ62mytbllhPt7wWkv6gKtmz31l1';
 function isAdmin(data){return (currentUser&&currentUser.uid===OWNER_UID)||data&&ADMIN_RANKS.includes(data.rank);}
-// Panel access: Moderator+ can open panel (with limited tabs)
+// Panel access
 function canOpenPanel(data){return (currentUser&&currentUser.uid===OWNER_UID)||data&&[...ADMIN_RANKS,'Developer','Moderator'].includes(data.rank);}
 function rankClass(rank){
   const r=(rank||'').toLowerCase();
@@ -1827,9 +1832,9 @@ function rankClass(rank){
   return'rank-badge-member';
 }
 
-// Unread message notifications — track last-seen message per chat
+// Unread message tracking
 let unreadMsgUnsub=null;
-const readMsgTimestamps={}; // chatId -> last read millis (in-memory per session)
+const readMsgTimestamps={}; // per-session tracking
 
 async function updateNotifBadge(){
   if(!currentUser)return;
@@ -1851,9 +1856,9 @@ async function updateNotifBadge(){
 
 async function openNotifications(){
   openModal('notifModal');
-  // Load all three tabs, start on requests
+  // Load notif tabs
   loadNotifTab('requests');
-  // Set up tab switching
+  // Setup tabs
   document.querySelectorAll('.notif-tab').forEach(btn=>{
     btn.onclick=()=>{
       document.querySelectorAll('.notif-tab').forEach(b=>b.classList.remove('active'));
@@ -1958,14 +1963,14 @@ async function loadAnnNotifTab(){
     const dismissed=currentUserData?.dismissedAnnouncements||[];
     let shownCount=0;
     snap.forEach(d=>{
-      if(dismissed.includes(d.id))return; // skip dismissed
+      if(dismissed.includes(d.id))return;
       shownCount++;
       const a=d.data();
       const item=document.createElement('div');item.className='ann-item';
       item.style.position='relative';
       item.innerHTML=`<button class="notif-dismiss" title="Dismiss" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--color-text-muted);font-size:.8rem;cursor:pointer;padding:2px 4px;line-height:1;transition:var(--transition);" onmouseover="this.style.color='#f55'" onmouseout="this.style.color='var(--color-text-muted)'">&#x2715;</button><div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${esc(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>`;
       item.querySelector('.notif-dismiss').addEventListener('click',async()=>{
-        // Persist dismissal so it stays gone after reload
+        // Update dismissed
         await db.collection('users').doc(currentUser.uid).update({
           dismissedAnnouncements:firebase.firestore.FieldValue.arrayUnion(d.id)
         }).catch(()=>{});
@@ -1981,7 +1986,7 @@ async function loadAnnNotifTab(){
     if(!shownCount){list.innerHTML='<div class="notif-empty">No announcements. All caught up!</div>';}
     updateNotifBadge();
   }catch(err){
-    // orderBy may need index — fall back to unsorted
+    // Unsorted fallback
     try{
       const snap2=await db.collection('announcements').get();
       list.innerHTML='';
@@ -2010,7 +2015,7 @@ document.getElementById('markAllReadBtn').addEventListener('click',async()=>{
     const batch=db.batch();
     snap.forEach(d=>batch.update(d.ref,{read:true}));
     await batch.commit();
-    // Also mark friend requests — just update badge
+    // Update badge
     updateNotifBadge();
     showToast('All notifications marked as read.');
     // Reload current tab
@@ -2047,7 +2052,7 @@ async function openChat(otherUser){
     promptGuestRegister('Create a free account to message other operatives.');
     return;
   }
-  // Verify friendship using cached data first, fall back to fresh fetch
+  // Verify friendship
   const friends=(currentUserData?.friends)||[];
   if(!friends.includes(otherUser.id)){
     // Re-fetch in case cache is stale
@@ -2093,7 +2098,7 @@ function renderMessages(docs){
     const wrap=document.createElement('div');wrap.style.cssText='position:relative;display:flex;align-items:flex-end;gap:4px;'+(isMine?'justify-content:flex-end;':'');
     const bub=document.createElement('div');bub.className='msg-bubble '+(isMine?'mine':'theirs');
     bub.innerHTML=`${esc(m.text||'')}<span class="msg-time">${fmtTime(m.createdAt)}</span>`;
-    // Delete button for Co-Admin+ or own messages
+    // Delete check
     if(canDelete||isMine){
       const delBtn=document.createElement('button');
       delBtn.style.cssText='background:none;border:none;color:rgba(244,67,54,.4);font-size:.6rem;cursor:pointer;padding:2px;opacity:0;transition:opacity .2s;flex-shrink:0;';
@@ -2127,13 +2132,13 @@ async function sendMessage(){
       text,
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
-    // Update last message preview (non-blocking)
+    // Update last message
     db.collection('chats').doc(cid).set({
       participants:[currentUser.uid,currentChatUid],
       lastMessage:text,
       lastAt:firebase.firestore.FieldValue.serverTimestamp()
     },{merge:true}).catch(()=>{});
-    // Write a notification for the recipient (non-blocking)
+    // Write notification
     db.collection('notifications').add({
       to:currentChatUid,
       type:'message',
@@ -2401,19 +2406,17 @@ auth.onAuthStateChanged(async user=>{
       currentUserData=snap.exists?snap.data():await createUserDoc(user);
       setNavAvatar(user,currentUserData);
       db.collection('users').doc(user.uid).update({lastActive:firebase.firestore.FieldValue.serverTimestamp(),status:'online'}).catch(()=>{});
-      // Check if user is banned before anything else
       if(!user.isAnonymous)checkBanStatus();
-      // Auto-ensure owner always has Founder rank
+      // Owner rank check
       if(user.uid===OWNER_UID&&currentUserData?.rank!=='Founder'){
         db.collection('users').doc(user.uid).update({rank:'Founder'}).catch(()=>{});
         currentUserData={...currentUserData,rank:'Founder'};
       }
       updateNotifBadge();
       if(notifUnsubscribe)notifUnsubscribe();
-      // notifications listener set above
     }catch(e){console.error(e);}
     logoutBtn.style.display='flex';loginBtn.style.display='none';myProfileBtn.style.display='flex';
-    // Guests get a dimmed bell that prompts register instead of opening notifications
+    // Dim bell for guests
     notifBtn.classList.add('show');
     if(currentUserData?.isAnonymous){
       notifBtn.style.opacity='.4';
@@ -2422,34 +2425,24 @@ auth.onAuthStateChanged(async user=>{
       notifBtn.style.opacity='';
       notifBtn.title='Notifications';
     }
-    // Show/hide admin button
     document.getElementById('adminPanelBtn').style.display=(user.uid===OWNER_UID||canOpenPanel(currentUserData))?'flex':'none';
-    // Apply guest content restrictions
     applyGuestRestrictions(currentUserData?.isAnonymous||user.isAnonymous);
-    // Start idle detection for real accounts
     if(!user.isAnonymous){startIdleDetection();}
-    // Check and award badges
     checkAndAwardBadges(user.uid,currentUserData);
-    // Show corp hub + chat buttons for real accounts
     const isRealUser=!user.isAnonymous;
     document.getElementById('corpHubBtn').style.display=isRealUser?'flex':'none';
     document.getElementById('corpChatBtn').classList.toggle('show',isRealUser);
     document.getElementById('navStatusWrap').style.display=isRealUser?'flex':'none';
     if(isRealUser){
-      // Set initial nav status dot
       updateNavStatusDot(currentUserData?.status||'online');
-      // Start corp chat listener
       if(!corpChatUnsub)startCorpChatListener();
-      // Write join log on first ever login
       if(!currentUserData?.hasLoggedBefore){
         writeCorpLog('join','joined the corporation');
         db.collection('users').doc(user.uid).update({hasLoggedBefore:true}).catch(()=>{});
-        // Award founding member badge if corp is young (<100 members)
         db.collection('users').get().then(s=>{
           if(s.size<=100)awardBadge(user.uid,'founding');
         }).catch(()=>{});
       }
-      // Award points for daily login
       const today=new Date().toDateString();
       if(currentUserData?.lastLoginDate!==today){
         db.collection('users').doc(user.uid).update({
@@ -2458,28 +2451,25 @@ auth.onAuthStateChanged(async user=>{
         }).catch(()=>{});
       }
     }
-    // Single listener for all unread notifications (friend requests + messages + announcements)
     if(notifUnsubscribe)notifUnsubscribe();
     notifUnsubscribe=db.collection('notifications').where('to','==',user.uid).where('read','==',false).onSnapshot(snap=>{
       updateNotifBadge();
       snap.docChanges().forEach(change=>{
         if(change.type==='added'){
           const n=change.doc.data();
-          // Pop-up toast for incoming messages when chat isn't open
           if(n.type==='message'&&n.fromUid!==currentUser.uid&&currentChatUid!==n.fromUid){
             showMsgToast(n.fromName,n.fromPhoto,n.preview,n.fromUid);
           }
         }
       });
     });
-    // Keep friend request listener for badge count too
     db.collection('friendRequests').where('to','==',user.uid).onSnapshot(()=>updateNotifBadge());
   }else{
     currentUserData=null;
     document.getElementById('userAvatar').style.display='none';document.getElementById('defaultIcon').style.display='block';
     logoutBtn.style.display='none';loginBtn.style.display='flex';myProfileBtn.style.display='none';notifBtn.classList.remove('show');
     document.getElementById('adminPanelBtn').style.display='none';
-    applyGuestRestrictions(true); // logged-out = same restrictions as guest
+    applyGuestRestrictions(true); // logged-out = guest
     if(notifUnsubscribe){notifUnsubscribe();notifUnsubscribe=null;}
   }
 });
@@ -2527,7 +2517,7 @@ document.getElementById('anonLogin').addEventListener('click',async()=>{
   btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
   try{
     const r=await auth.signInAnonymously();
-    // Create a guest doc with a random guest number
+    // Create guest doc
     const guestNum=Math.floor(Math.random()*9000)+1000;
     await db.collection('users').doc(r.user.uid).set({
       displayName:`Guest#${guestNum}`,email:'',photoURL:'',
@@ -2541,65 +2531,9 @@ document.getElementById('anonLogin').addEventListener('click',async()=>{
 
 /* ── PASSWORD RESET ── */
 document.getElementById('forgotLink').addEventListener('click',()=>{
-  document.getElementById('resetEmail').value=document.getElementById('loginEmail').value||'';
-  document.getElementById('resetError').style.display='none';
-  document.getElementById('resetSuccess').style.display='none';
-  openModal('resetModal');
-});
-
-document.getElementById('closeReset').addEventListener('click',()=>closeModal('resetModal'));
-document.getElementById('resetModal').addEventListener('click',function(e){if(e.target===this)closeModal('resetModal');});
-
-document.getElementById('sendResetBtn').addEventListener('click',async()=>{
-  const email=document.getElementById('resetEmail').value.trim();
-  const errEl=document.getElementById('resetError'),succEl=document.getElementById('resetSuccess');
-  errEl.style.display='none';succEl.style.display='none';
-  if(!email){errEl.textContent='Please enter your email address.';errEl.style.display='block';return;}
-  const btn=document.getElementById('sendResetBtn');
-  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sending...';
-  try{
-    // Firebase compat SDK — same as sendPasswordResetEmail(getAuth(), email) in modular SDK
-    await firebase.auth().sendPasswordResetEmail(email);
-    succEl.style.display='block';
-    succEl.textContent='Reset email sent to '+email+'! Check your inbox (and spam folder).';
-    setTimeout(()=>{closeModal('resetModal');succEl.style.display='none';},4000);
-  }catch(err){
-    console.error('Password reset error:',err);
-    const msg={
-      'auth/user-not-found':'No account found with that email.',
-      'auth/invalid-email':'Please enter a valid email address.',
-      'auth/too-many-requests':'Too many attempts. Try again later.'
-    }[err.code]||err.message;
-    errEl.textContent=msg;errEl.style.display='block';
-  }finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> Send Reset Email';}
-});
-
-// Hide forgot link on register form view
-document.getElementById('toggleForm').addEventListener('click',function(){
-  const lf=document.getElementById('loginForm');
-  const isLogin=lf.style.display!=='none'; // after toggle, login is being hidden
-  document.getElementById('forgotLinkWrap').style.display=isLogin?'none':'block';
-},true); // capture phase so it runs before the existing listener reorders forms
-
-
-document.getElementById('logoutBtn').addEventListener('click',async e=>{
-  e.preventDefault();const u=auth.currentUser;
-  if(msgUnsubscribe){msgUnsubscribe();msgUnsubscribe=null;}
-  if(notifUnsubscribe){notifUnsubscribe();notifUnsubscribe=null;}
-  if(corpChatUnsub){corpChatUnsub();corpChatUnsub=null;}
-  if(corpLogUnsub){corpLogUnsub();corpLogUnsub=null;}
-  closeCorpChat();
-  if(u){
-    const isGuest=u.isAnonymous;
-    try{await db.collection('users').doc(u.uid).update({status:'offline'});}catch(_){}
-    if(isGuest){
-      try{await db.collection('users').doc(u.uid).delete();}catch(_){}
-      try{await u.delete();}catch(_){}
-      showToast('Guest session ended.');
-      return;
-    }
-  }
-  await auth.signOut();showToast('Signed out successfully.');
+  auth.sendPasswordResetEmail(document.getElementById('emailInput').value.trim())
+    .then(()=>showToast('Password reset email sent!'))
+    .catch(err=>showToast('Error: '+err.message));
 });
 
 /* ── TOGGLE AUTH FORM ── */
@@ -2626,7 +2560,7 @@ document.getElementById('myProfileBtn').addEventListener('click',e=>{e.preventDe
 document.getElementById('viewMembersBtn').addEventListener('click',e=>{
   e.preventDefault();
   dropdownMenu.classList.remove('open');
-  // Must have a real account to view members
+  // Members need account
   if(!currentUser||currentUser.isAnonymous||currentUserData?.isAnonymous){
     promptGuestRegister('Create a free account to view and connect with other operatives.');
     return;
@@ -2648,17 +2582,17 @@ document.getElementById('intelFeedMobile').addEventListener('click',e=>{
 
 /* ── ADMIN PANEL ── */
 const RANKS_LIST=['Unaffiliated','Member','Beta Tester','Moderator','Developer','Co-Administrator','Administrator','Founder'];
-// Rank authority — index in RANKS_LIST = power level (higher = more authority)
+// Rank power level
 const RANK_POWER={};
 RANKS_LIST.forEach((r,i)=>RANK_POWER[r]=i);
 function myPower(){return currentUser?.uid===OWNER_UID?99:(RANK_POWER[currentUserData?.rank]??0);}
 function rankPower(rank){return RANK_POWER[rank]??0;}
-// Can viewer manage target? Viewer must outrank target AND not promote above themselves
+// Can manage check
 function canManage(targetRank){
   if(currentUser?.uid===OWNER_UID)return true;
   return myPower()>rankPower(targetRank);
 }
-// Ranks a given user can assign (only ranks below themselves, never equal or above)
+// Ranks user can assign
 function assignableRanks(){
   const power=myPower();
   return RANKS_LIST.filter(r=>RANK_POWER[r]<power);
@@ -2670,19 +2604,19 @@ async function openAdminPanel(){
   // Show viewer's rank in header
   const rBadge=document.getElementById('adminViewerRank');
   if(rBadge){rBadge.textContent=currentUserData?.rank||'';rBadge.className='';rBadge.style.cssText='font-family:var(--font-mono);font-size:.62rem;padding:3px 10px;border-radius:3px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.12);';rBadge.classList.add(rankClass(currentUserData?.rank));}
-  // Determine which tabs this rank can access
+  // Tab access
   const rank=currentUserData?.rank||'';
   const isModerator=['Moderator'].includes(rank);
   const isDeveloper=['Developer'].includes(rank);
   const isCoAdminPlus=['Co-Administrator','Administrator','Founder'].includes(rank)||currentUser.uid===OWNER_UID;
-  // Tab visibility rules:
-  // Moderator:       reports, announce(polls only, handled inside)
-  // Developer:       roles, announce, history, keys
-  // Co-Admin+:       all tabs including badges, bans
+  // Tab visibility
+  // Moderator: reports, announce
+  // Developer: roles, announce, history, keys
+  // Co-Admin+: all tabs including badges, bans
   const tabAccess={
     roles: !isModerator,         // Dev+
     badges: isCoAdminPlus,       // Co-Admin+
-    announce: true,              // All panel users (content restricted inside)
+    announce: true,              // All panel users
     history: !isModerator,       // Dev+
     missions: !isModerator,      // Dev+
     reports: isCoAdminPlus,      // Co-Admin+
@@ -2693,7 +2627,7 @@ async function openAdminPanel(){
     const tab=btn.dataset.tab;
     btn.style.display=(tabAccess[tab]===false)?'none':'';
   });
-  // Default to first visible tab
+  // Default tab
   const firstVisible=document.querySelector('.admin-tab:not([style*="display: none"]):not([style*="display:none"])');
   const defaultTab=firstVisible?.dataset.tab||'announce';
   document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('active'));
@@ -2708,19 +2642,11 @@ async function openAdminPanel(){
   });
 }
 
-async function loadAdminTab(tab){
-  document.querySelectorAll('.admin-panel-section').forEach(s=>s.classList.remove('active'));
-  document.getElementById('adminTab'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
-  if(tab==='roles') await loadAdminRoles();
-  else if(tab==='history') await loadAnnHistory();
-  // announce tab is static form, nothing to load
-}
-
 /* ── ADMIN: MISSION CREATOR + KEY REVIEW ── */
 async function loadAdminKeys(){
   const list=document.getElementById('adminKeysList');
   list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
-  // Show create mission form + pending submissions
+  // Show missions
   list.innerHTML=`<div style="margin-bottom:14px;border-bottom:var(--border);padding-bottom:12px;">
     <p class="admin-section-title">Create New Mission</p>
     <div style="display:flex;flex-direction:column;gap:6px;">
@@ -2743,11 +2669,12 @@ async function loadAdminKeys(){
     const key=document.getElementById('missionKeyInput').value.trim().toUpperCase();
     const pts=parseInt(document.getElementById('missionPtsInput').value)||50;
     if(!title||!desc||!key){showToast('Fill in all fields.');return;}
+    if(!currentUser||!(isDev(currentUserData)||currentUser.uid===OWNER_UID)){showToast('Developer+ required to create missions.');return;}
     const btn=document.getElementById('createMissionBtn');
     btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
-    await db.collection('missions').add({title,description:desc,secretKey:key,points:pts,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(e=>showToast(e.message));
-    const s=document.getElementById('missionCreateMsg');s.style.display='block';
-    setTimeout(()=>s.style.display='none',2500);
+    try{await safeExec(db.collection('missions').add({title,description:desc,secretKey:key,points:pts,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}),'Mission created');
+      const s=document.getElementById('missionCreateMsg');s.style.display='block';setTimeout(()=>s.style.display='none',2500);
+    }catch(e){}
     btn.disabled=false;btn.innerHTML='<i class="fas fa-plus"></i> Create Mission';
   });
 
@@ -2777,15 +2704,12 @@ async function loadAdminKeys(){
         const batch=db.batch();
         batch.update(db.collection('missionSubmissions').doc(this.dataset.sid),{status:'approved'});
         batch.update(db.collection('users').doc(this.dataset.uid),{points:firebase.firestore.FieldValue.increment(parseInt(this.dataset.pts)||50)});
-        await batch.commit().catch(e=>showToast(e.message));
-        awardBadge(this.dataset.uid,'mission');
-        showToast('Approved! Points awarded.');
+        try{await safeExec(batch.commit()); await safeExec(awardBadge(this.dataset.uid,'mission'),'Approved! Points awarded.');}catch(_){ }
         loadAdminKeys();
       });
       row.querySelector('[data-action="reject"]').addEventListener('click',async function(){
         const reason=prompt('Rejection reason (optional):');
-        await db.collection('missionSubmissions').doc(this.dataset.sid).update({status:'rejected',rejectReason:reason||''}).catch(e=>showToast(e.message));
-        showToast('Submission rejected.');
+        try{await safeExec(db.collection('missionSubmissions').doc(this.dataset.sid).update({status:'rejected',rejectReason:reason||''}),'Submission rejected.');}catch(_){}
         loadAdminKeys();
       });
       pendingList.appendChild(row);
@@ -2793,7 +2717,7 @@ async function loadAdminKeys(){
   }catch(err){pendingList.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;">Error: ${err.message}</p>`;}
 }
 
-// Extend loadAdminTab to handle all tabs
+// Load admin tabs
 async function loadAdminTab(tab){
   document.querySelectorAll('.admin-panel-section').forEach(s=>s.classList.remove('active'));
   const tabId='adminTab'+tab.charAt(0).toUpperCase()+tab.slice(1);
@@ -2816,7 +2740,7 @@ async function loadAdminBadges(){
     const users=[];snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous)users.push(u);});
     users.sort((a,b)=>(a.displayName||'').localeCompare(b.displayName||''));
     list.innerHTML='';
-    // Badge list — premade always available, custom only for Founder
+    // Badge list
     const availableBadges=Object.entries(BADGE_DEFS).map(([k,v])=>({key:k,label:v.label}));
     users.forEach(u=>{
       const row=document.createElement('div');row.className='admin-user-row';row.style.flexWrap='wrap';row.style.gap='6px';
@@ -2841,12 +2765,11 @@ async function loadAdminBadges(){
           const uid=this.dataset.uid;
           this.disabled=true;
           if(this.dataset.action==='add'){
-            await awardBadge(uid,badge);
-            // Badge award — not logged publicly
+            try{await safeExec(awardBadge(uid,badge),'Badge awarded!');}catch(_){ }
           }else{
-            await db.collection('users').doc(uid).update({badges:firebase.firestore.FieldValue.arrayRemove(badge)}).catch(e=>showToast(e.message));
+            try{await safeExec(db.collection('users').doc(uid).update({badges:firebase.firestore.FieldValue.arrayRemove(badge)}),'Badge removed!');}catch(_){ }
           }
-          showToast(this.dataset.action==='add'?'Badge awarded!':'Badge removed.');
+          loadAdminBadges();
           loadAdminBadges();
         });
       });
@@ -2855,7 +2778,7 @@ async function loadAdminBadges(){
   }catch(err){list.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;">Error: ${err.message}</p>`;}
 }
 
-// Also extend admin modal to add calendar+intel+poll creation
+// Extend admin modal
 async function loadAdminRoles(){
   const list=document.getElementById('adminUserList');
   list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
@@ -2887,7 +2810,7 @@ async function loadAdminRoles(){
     users.forEach(u=>{
       const row=document.createElement('div');row.className='admin-user-row';
       const selectId='rankSel_'+u.id;
-      // Owner row — locked, cannot be edited by anyone
+      // Owner row
       const isOwnerRow=u.id===OWNER_UID;
       row.innerHTML=`
         <div class="admin-user-av">${avHtml(u.photoURL,u.displayName)}</div>
@@ -2903,26 +2826,24 @@ async function loadAdminRoles(){
       const targetCurrentRank=u.rank||'Member';
       row.querySelector('.admin-save-rank').addEventListener('click',async function(){
         const newRank=document.getElementById(this.dataset.sel).value;
-        // Security: can only assign ranks strictly below viewer's own rank
+        // Check rank power
         if(rankPower(newRank)>=myPower()){
           showToast('You cannot assign a rank equal to or above your own.');
           return;
         }
-        // Security: cannot promote someone to equal/above viewer's rank
+        // Check promotion authority
         if(rankPower(newRank)>rankPower(targetCurrentRank)&&rankPower(newRank)>=myPower()){
           showToast('Cannot promote above your own rank.');
           return;
         }
         this.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
         try{
-          await db.collection('users').doc(this.dataset.uid).update({rank:newRank});
+          await safeExec(db.collection('users').doc(this.dataset.uid).update({rank:newRank}),'Rank updated');
           this.innerHTML='<i class="fas fa-check"></i> Saved!';
           row.querySelector('.admin-user-name').className='admin-user-name '+rankClass(newRank);
           setTimeout(()=>{this.innerHTML='<i class="fas fa-check"></i> Save';},1500);
-          showToast(`Rank updated to ${newRank}`);
         }catch(err){
           this.innerHTML='<i class="fas fa-times"></i> Error';
-          showToast('Failed: '+err.message);
         }
       });
       list.appendChild(row);
@@ -2955,14 +2876,12 @@ document.getElementById('sendAnnBtn').addEventListener('click',async()=>{
   const btn=document.getElementById('sendAnnBtn');
   btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sending...';
   try{
-    // Write announcement doc
     await db.collection('announcements').add({
       title,body,
       authorUid:currentUser.uid,
       authorName:currentUserData?.displayName||'Admin',
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
-    // Write notification for every non-anonymous user
     const usersSnap=await db.collection('users').get();
     const batch=db.batch();
     let batchCount=0;
@@ -2977,7 +2896,6 @@ document.getElementById('sendAnnBtn').addEventListener('click',async()=>{
           createdAt:firebase.firestore.FieldValue.serverTimestamp()
         });
         batchCount++;
-        // Firestore batch limit is 500 — flush and restart if needed
       }
     });
     await batch.commit();
@@ -2997,15 +2915,26 @@ document.getElementById('sendAnnBtn').addEventListener('click',async()=>{
 document.getElementById('closeAdmin').addEventListener('click',()=>closeModal('adminModal'));
 document.getElementById('adminPanelBtn').addEventListener('click',e=>{e.preventDefault();dropdownMenu.classList.remove('open');openAdminPanel();});
 
+document.getElementById('logoutBtn').addEventListener('click',async(e)=>{
+  e.preventDefault();
+  try{
+    if(currentUser?.isAnonymous){
+      try{await db.collection('users').doc(currentUser.uid).delete();}catch(_){}
+      try{await currentUser.delete();}catch(_){}
+    }
+    await auth.signOut();
+    showToast('Signed out successfully.');
+  }catch(err){showToast('Error signing out: '+err.message);}
+});
 
 /* ── GUEST CONTENT RESTRICTIONS ── */
 function applyGuestRestrictions(isGuest){
-  // Hide/show member-only bubbles (projects, featured member)
+  // Hide member-only
   document.querySelectorAll('[data-member-only="true"]').forEach(el=>{
     el.classList.toggle('guest-hidden', isGuest);
   });
 
-  // Active members panel — show count label but hide the list + count line, show prompt instead
+  // Active members panel
   const countRow=document.getElementById('activeMembersCount');
   const membersList=document.getElementById('activeMembersList');
   const guestMsg=document.getElementById('activeMembersGuestMsg');
@@ -3013,7 +2942,7 @@ function applyGuestRestrictions(isGuest){
   if(membersList) membersList.style.display=isGuest?'none':'';
   if(guestMsg) guestMsg.style.display=isGuest?'block':'none';
 
-  // Wire up the "Create a free account" link inside the active members panel
+  // Wire register link
   const regLink=document.getElementById('activeMembersRegisterLink');
   if(regLink&&isGuest){
     regLink.onclick=e=>{
@@ -3022,12 +2951,12 @@ function applyGuestRestrictions(isGuest){
     };
   }
 
-  // Hide View Members button for guests/logged-out; show for real accounts
+  // Hide members button for guests
   const viewMembersBtn=document.getElementById('viewMembersBtn');
   if(viewMembersBtn){
     viewMembersBtn.style.display=isGuest?'none':'flex';
   }
-  // Hide corp hub + chat for guests/logged-out
+  // Hide corp hub for guests
   document.getElementById('corpHubBtn').style.display='none';
   document.getElementById('corpChatBtn').classList.remove('show');
   document.getElementById('navStatusWrap').style.display='none';
@@ -3103,11 +3032,11 @@ const customStatusInput=document.getElementById('customStatusInput');
 customStatusInput.addEventListener('keydown',async e=>{
   if(e.key==='Enter'){
     const txt=e.target.value.trim();
-    // activityStatus is separate from presence — just save it
+    // Save activity
     await db.collection('users').doc(currentUser.uid).update({activityStatus:txt}).catch(()=>{});
     if(currentUserData)currentUserData.activityStatus=txt;
     document.getElementById('statusPicker').classList.remove('open');
-    // Update activity display on the profile header if visible
+    // Update display
     const actEl=document.getElementById('profileActivityStatus');
     if(actEl)actEl.textContent=txt?`"${txt}"`:'';
     showToast(txt?`Activity set: "${txt}"`:'Activity status cleared.');
@@ -3137,10 +3066,8 @@ function renderBadges(badges){
   }).join('')+'</div>';
 }
 
-async function awardBadge(uid,badgeKey){
-  await db.collection('users').doc(uid).update({
-    badges:firebase.firestore.FieldValue.arrayUnion(badgeKey)
-  }).catch(()=>{});
+function awardBadge(uid,badgeKey){
+  return db.collection('users').doc(uid).update({badges:firebase.firestore.FieldValue.arrayUnion(badgeKey)});
 }
 
 async function checkAndAwardBadges(uid,userData){
@@ -3192,7 +3119,7 @@ async function loadCorpLog(filter='all'){
     let docs=snap.docs;
     if(filter!=='all')docs=docs.filter(d=>d.data().type===filter);
     if(!docs.length){feed.innerHTML='<div class="hub-empty">No activity yet.</div>';return;}
-    // Filter private log entries — only Developer+ can see status/profile changes
+    // Filter log entries
     const isDevViewer=isDev(currentUserData);
     const isMViewer=isMod(currentUserData);
     const visibleDocs=docs.filter(d=>{
@@ -3313,7 +3240,7 @@ async function loadLeaderboard(){
     const snap=await db.collection('users').get();
     const users=[];
     snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous)users.push(u);});
-    // Score = points field OR compute from friends + badges + loginCount
+    // Compute score
     users.sort((a,b)=>(b.points||0)-(a.points||0));
     list.innerHTML='';
     if(!users.length){list.innerHTML='<div class="hub-empty">No operatives ranked yet.</div>';return;}
@@ -3699,7 +3626,7 @@ async function blockUser(uid, name){
   if(currentUserData){
     currentUserData.blockedUsers=[...(currentUserData.blockedUsers||[]),uid];
   }
-  // Also remove friend connection if exists
+  // Remove friend if connected
   if((currentUserData?.friends||[]).includes(uid)){
     await removeFriend(uid,name);
   }else{
@@ -3821,17 +3748,8 @@ async function banUser(uid, name){
   const reason=prompt(`Ban reason for ${name}:`);
   if(reason===null)return; // cancelled
   try{
-    await db.collection('bans').doc(uid).set({
-      uid,name,
-      reason:reason||'Banned by staff.',
-      bannedBy:currentUserData?.displayName||'Admin',
-      bannedByUid:currentUser.uid,
-      active:true,
-      createdAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
-    // Also mark user doc as banned
-    await db.collection('users').doc(uid).update({isBanned:true}).catch(()=>{});
-    showToast(`${name} has been banned.`);
+    await safeExec(db.collection('bans').doc(uid).set({uid,name,reason:reason||'Banned by staff.',bannedBy:currentUserData?.displayName||'Admin',bannedByUid:currentUser.uid,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}),'User banned');
+    await safeExec(db.collection('users').doc(uid).update({isBanned:true}));
     loadAdminBans();
   }catch(err){showToast('Failed: '+err.message);}
 }
@@ -3839,9 +3757,8 @@ async function banUser(uid, name){
 async function unbanUser(uid, name){
   if(!isCoAdmin(currentUserData)){showToast('Co-Administrator+ required.');return;}
   try{
-    await db.collection('bans').doc(uid).update({active:false});
-    await db.collection('users').doc(uid).update({isBanned:false}).catch(()=>{});
-    showToast(`${name} has been unbanned.`);
+    await safeExec(db.collection('bans').doc(uid).update({active:false}),'User unbanned');
+    await safeExec(db.collection('users').doc(uid).update({isBanned:false}));
     loadAdminBans();
   }catch(err){showToast('Failed: '+err.message);}
 }
@@ -3929,7 +3846,7 @@ function applyDirFilter(){
     const uid=card.dataset.uid;
     let show=true;
     if(_dirFilter==='online'){
-      // Check status from the card's status element
+      // Check online status
       const statusEl=card.querySelector('.friend-status');
       show=statusEl&&statusEl.classList.contains('status-online');
     }else if(_dirFilter==='friends'){
@@ -3939,7 +3856,7 @@ function applyDirFilter(){
   });
 }
 
-// Update directory stats (called from loadAllUsers after displayMembers)
+// Update directory stats
 function updateDirStats(users){
   const totalEl=document.getElementById('dirTotalCount');
   const onlineEl=document.getElementById('dirOnlineCount');
