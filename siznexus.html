@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>TheSizNexus</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="apple-touch-icon" sizes="192x192" href="/web-app-manifest-192x192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="/web-app-manifest-512x512.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+<link rel="manifest" href="/site.webmanifest">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
+<link rel="stylesheet" href="siznexus.css">
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo">The$izNexus</div>
+  <div class="splash-bar-track"><div class="splash-bar-fill" id="splashBar"></div></div>
+  <div class="splash-text" id="splashText">INITIALIZING NEXUS...</div>
+  <div class="splash-version">v2.1 // NEXUS ONLINE</div>
+</div>
+<div id="particles-js"></div>
+<div id="nexusToast"></div>
+
+<!-- AUTH MODAL -->
+<div class="modal" id="loginModal">
+  <div class="modal-container" style="max-width:400px;">
+    <button class="close-btn" id="closeModal">&#x2715;</button>
+    <!-- Auth header with logo -->
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:1.4rem;font-weight:900;background:var(--silver-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:.12em;filter:drop-shadow(0 0 6px rgba(192,192,192,.2));margin-bottom:4px;">TheSizNexus</div>
+      <h2 id="modalTitle" style="margin:0;font-size:.85rem;letter-spacing:.2em;color:var(--color-text-muted);font-weight:400;">ACCESS NEXUS</h2>
+    </div>
+    <div class="error-message" id="errorMessage"></div>
+    <!-- LOGIN FORM -->
+    <form class="login-form" id="loginForm" novalidate>
+      <div class="input-group">
+        <label for="loginEmail"><i class="fas fa-envelope" style="margin-right:5px;opacity:.5;font-size:.7rem;"></i>Email</label>
+        <input type="email" id="loginEmail" autocomplete="email" required placeholder="operative@nexus.corp">
+      </div>
+      <div class="input-group">
+        <label for="loginPassword"><i class="fas fa-lock" style="margin-right:5px;opacity:.5;font-size:.7rem;"></i>Password</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn-primary" style="justify-content:center;width:100%;margin-top:4px;"><i class="fas fa-sign-in-alt"></i> Login</button>
+    </form>
+    <!-- REGISTER FORM -->
+    <form class="login-form" id="registerForm" style="display:none" novalidate>
+      <div class="input-group">
+        <label for="registerEmail"><i class="fas fa-envelope" style="margin-right:5px;opacity:.5;font-size:.7rem;"></i>Email</label>
+        <input type="email" id="registerEmail" autocomplete="email" required placeholder="operative@nexus.corp">
+      </div>
+      <div class="input-group">
+        <label for="registerPassword"><i class="fas fa-lock" style="margin-right:5px;opacity:.5;font-size:.7rem;"></i>Password <span style="opacity:.5;font-weight:400;">(min 6 chars)</span></label>
+        <input type="password" id="registerPassword" autocomplete="new-password" minlength="6" required placeholder="Create a password">
+      </div>
+      <div class="input-group">
+        <label for="confirmPassword"><i class="fas fa-lock" style="margin-right:5px;opacity:.5;font-size:.7rem;"></i>Confirm Password</label>
+        <input type="password" id="confirmPassword" autocomplete="new-password" minlength="6" required placeholder="Repeat password">
+      </div>
+      <button type="submit" class="btn-primary" style="justify-content:center;width:100%;margin-top:4px;"><i class="fas fa-user-plus"></i> Create Account</button>
+    </form>
+    <div class="toggle-form" style="margin-top:14px;"><span id="toggleForm">Don't have an account? <strong style="color:var(--color-primary);cursor:pointer;">Register here</strong></span></div>
+    <div class="forgot-link" id="forgotLinkWrap" style="text-align:center;margin-top:6px;"><span id="forgotLink" style="font-size:.68rem;">Forgot your password?</span></div>
+    <div class="auth-divider">OR CONTINUE WITH</div>
+    <div class="social-login" style="flex-direction:column;gap:8px;">
+      <button type="button" class="social-btn" id="googleLogin" style="flex:unset;justify-content:center;"><i class="fab fa-google" style="color:#DB4437;"></i> Continue with Google</button>
+      <button type="button" class="social-btn" id="anonLogin" style="flex:unset;justify-content:center;"><i class="fas fa-user-secret" style="opacity:.6;"></i> Browse as Guest</button>
+    </div>
+    <p style="font-family:var(--font-mono);font-size:.6rem;color:rgba(192,192,192,.2);text-align:center;margin-top:14px;line-height:1.5;">By joining you agree to follow corp rules.<br>Guests have limited access.</p>
+  </div>
+</div>
+
+<!-- PASSWORD RESET MODAL -->
+<div class="modal" id="resetModal">
+  <div class="modal-container" style="max-width:380px">
+    <button class="close-btn" id="closeReset">&#x2715;</button>
+    <h2><i class="fas fa-key" style="margin-right:8px;font-size:.85rem;"></i>Reset Password</h2>
+    <p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);margin:0 0 16px;line-height:1.6;">Enter your email and we'll send you a reset link via Firebase.</p>
+    <div class="error-message" id="resetError"></div>
+    <div class="success-msg" id="resetSuccess" style="display:none;">Reset email sent! Check your inbox.</div>
+    <div class="input-group" style="margin-bottom:14px;">
+      <label for="resetEmail">Email</label>
+      <input type="email" id="resetEmail" autocomplete="email" placeholder="your@email.com">
+    </div>
+    <button class="btn-primary" id="sendResetBtn" style="width:100%;justify-content:center;"><i class="fas fa-paper-plane"></i> Send Reset Email</button>
+  </div>
+</div>
+
+<!-- INTEL FEED UNDER DEVELOPMENT MODAL -->
+<div class="modal" id="intelDevModal">
+  <div class="modal-container" style="max-width:420px;text-align:center;">
+    <button class="close-btn" id="closeIntelDev">&#x2715;</button>
+    <div style="margin-bottom:18px;">
+      <div style="width:56px;height:56px;background:rgba(192,192,192,.07);border:1px solid rgba(192,192,192,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.4rem;color:var(--color-primary);"><i class="fas fa-hard-hat"></i></div>
+      <h2 style="margin:0 0 8px;letter-spacing:.15em;">Intel Feed</h2>
+      <div style="display:inline-block;background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.3);color:#ff6b35;font-family:var(--font-mono);font-size:.65rem;letter-spacing:.18em;padding:3px 12px;border-radius:2px;margin-bottom:16px;">UNDER DEVELOPMENT</div>
+      <p style="font-family:var(--font-mono);font-size:.78rem;color:var(--color-text-muted);line-height:1.8;margin:0 0 8px;">This section is currently being built.</p>
+      <p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);line-height:1.7;margin:0;">Stay tuned — follow our <a href="https://discord.gg/73Mb3syadB" target="_blank" rel="noopener noreferrer" style="color:var(--color-primary);text-decoration:underline;">Discord</a> for updates.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MEMBER DIRECTORY -->
+<div class="modal" id="userDirectory">
+  <div class="modal-container" style="max-width:860px">
+    <button class="close-btn" id="closeDirectory">&#x2715;</button>
+    <h2><i class="fas fa-users" style="margin-right:8px;font-size:.85rem;"></i>Corporation Members</h2>
+    <div class="directory-stats" id="dirStats">
+      <span class="dir-stat">Total: <strong id="dirTotalCount">—</strong></span>
+      <span class="dir-stat" style="color:#4CAF50;">Online: <strong id="dirOnlineCount">—</strong></span>
+      <span class="dir-stat">Friends: <strong id="dirFriendCount">—</strong></span>
+    </div>
+    <div class="dir-filter-row">
+      <button class="dir-filter active" data-dfilter="all">All</button>
+      <button class="dir-filter" data-dfilter="online">Online</button>
+      <button class="dir-filter" data-dfilter="friends">Connections</button>
+    </div>
+    <input type="text" id="searchUsers" placeholder="Search operatives by name or bio...">
+    <div id="usersGrid" class="friends-grid"></div>
+  </div>
+</div>
+
+<!-- VIEW OTHER PROFILE -->
+<div class="modal" id="profileModal">
+  <div class="modal-container" style="max-width:480px">
+    <button class="close-btn" id="closeProfile">&#x2715;</button>
+    <div id="profileContent"></div>
+  </div>
+</div>
+
+<!-- MY PROFILE / EDIT -->
+<div class="modal" id="myProfileModal">
+  <div class="modal-container" style="max-width:520px">
+    <button class="close-btn" id="closeMyProfile">&#x2715;</button>
+    <h2 id="myProfileTitle">My Profile</h2>
+    <!-- Profile tabs -->
+    <div class="profile-edit-tabs">
+      <button class="profile-edit-tab active" data-ptab="edit"><i class="fas fa-edit"></i> Edit</button>
+      <button class="profile-edit-tab" data-ptab="preview"><i class="fas fa-eye"></i> Preview</button>
+      <button class="profile-edit-tab" data-ptab="connections"><i class="fas fa-user-friends"></i> Connections (<span id="friendCount">0</span>)</button>
+    </div>
+    <!-- EDIT TAB -->
+    <div class="profile-tab-section active" id="profileTabEdit">
+      <div class="edit-profile-header">
+        <div class="edit-avatar-wrap" id="editAvatarBtn" title="Click to change photo" role="button" tabindex="0">
+          <img id="editAvatarImg" src="" alt="" style="display:none;">
+          <div class="edit-avatar-placeholder" id="editAvatarPlaceholder"></div>
+          <div class="edit-avatar-overlay">CHANGE<br>PHOTO</div>
+        </div>
+        <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
+        <div class="edit-profile-name-wrap">
+          <p>Display Name</p><strong id="myProfileDisplayName"></strong>
+          <p style="margin-top:4px;">Rank</p><strong id="myProfileRank" style="font-size:.8rem;"></strong>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="editDisplayName">Display Name</label>
+        <input type="text" id="editDisplayName" class="input-field" maxlength="30" placeholder="Your display name" autocomplete="off">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="editBio">Bio</label>
+        <textarea id="editBio" class="input-field" maxlength="160" placeholder="Tell the corp about yourself..."></textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="editActivityStatus">Activity Status <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(What are you up to?)</span></label>
+        <input type="text" id="editActivityStatus" class="input-field" maxlength="60" placeholder="e.g. Grinding missions, On patrol..." autocomplete="off">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Presence Status</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="rsvp-btn yes" id="profileStatusOnline" data-pstatus="online" style="font-family:var(--font-mono);font-size:.65rem;"><span class="status-dot online" style="width:7px;height:7px;margin-right:4px;vertical-align:middle;"></span>Online</button>
+          <button class="rsvp-btn" id="profileStatusIdle" data-pstatus="idle" style="font-family:var(--font-mono);font-size:.65rem;border-color:rgba(255,152,0,.3);color:#ff9800;background:rgba(255,152,0,.06);"><span class="status-dot idle" style="width:7px;height:7px;margin-right:4px;vertical-align:middle;"></span>Idle</button>
+          <button class="rsvp-btn" id="profileStatusDnd" data-pstatus="dnd" style="font-family:var(--font-mono);font-size:.65rem;border-color:rgba(244,67,54,.3);color:#f44336;background:rgba(244,67,54,.06);"><span class="status-dot dnd" style="width:7px;height:7px;margin-right:4px;vertical-align:middle;"></span>Do Not Disturb</button>
+          <button class="rsvp-btn" id="profileStatusOffline" data-pstatus="offline" style="font-family:var(--font-mono);font-size:.65rem;border-color:rgba(100,100,100,.3);color:#888;background:rgba(100,100,100,.06);"><span class="status-dot offline" style="width:7px;height:7px;margin-right:4px;vertical-align:middle;"></span>Appear Offline</button>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="editPhotoURL">Photo URL</label>
+        <input type="url" id="editPhotoURL" class="input-field" placeholder="https://...">
+        <p class="photo-hint"><i class="fas fa-image" style="margin-right:4px;font-size:.7rem;"></i>Upload free at <a href="https://postimages.org/" target="_blank" rel="noopener noreferrer">Postimages.org</a> — paste the Direct link above.</p>
+      </div>
+      <button class="btn-primary" id="saveProfileBtn" style="width:100%;justify-content:center;margin-top:4px;"><i class="fas fa-save"></i> Save Changes</button>
+      <div class="success-msg" id="profileSaveSuccess">Profile updated!</div>
+    </div>
+    <!-- PREVIEW TAB -->
+    <div class="profile-tab-section" id="profileTabPreview">
+      <div id="profilePreviewContent"></div>
+    </div>
+    <!-- CONNECTIONS TAB -->
+    <div class="profile-tab-section" id="profileTabConnections">
+      <div style="display:flex;gap:0;border-bottom:var(--border);margin-bottom:10px;">
+        <button class="conn-sub-tab active" data-ctab="friends" style="flex:1;padding:6px 0;text-align:center;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.08em;color:var(--color-text-muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:var(--transition);">Connections</button>
+        <button class="conn-sub-tab" data-ctab="blocked" style="flex:1;padding:6px 0;text-align:center;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.08em;color:var(--color-text-muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:var(--transition);">Blocked / Hidden</button>
+      </div>
+      <div id="connSubFriends">
+        <input type="text" id="connectionsSearch" class="input-field" placeholder="Search connections..." style="margin-bottom:10px;font-size:.78rem;" autocomplete="off">
+        <div id="friendsListInner" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;"></div>
+      </div>
+      <div id="connSubBlocked" style="display:none;">
+        <div id="blockedListInner" style="display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ENGAGEMENT HUB MODAL -->
+<div class="modal" id="engagementModal">
+  <div class="modal-container">
+    <button class="close-btn" id="closeEngagement">&#x2715;</button>
+    <h2><i class="fas fa-satellite-dish" style="margin-right:8px;font-size:.85rem;color:#C0C0C0;filter:drop-shadow(0 0 5px rgba(192,192,192,.35));"></i>Corporation Hub</h2>
+    <div class="hub-tabs">
+      <button class="hub-tab active" data-hub="log"><i class="fas fa-scroll"></i> Corp Log</button>
+      <button class="hub-tab" data-hub="missions"><i class="fas fa-crosshairs"></i> Missions</button>
+      <button class="hub-tab" data-hub="leaderboard"><i class="fas fa-trophy"></i> Leaderboard</button>
+      <button class="hub-tab" data-hub="calendar"><i class="fas fa-calendar-alt"></i> Calendar</button>
+      <button class="hub-tab" data-hub="intel"><i class="fas fa-satellite-dish"></i> Intel Board</button>
+      <button class="hub-tab" data-hub="polls"><i class="fas fa-poll"></i> Polls</button>
+    </div>
+    <!-- CORP LOG -->
+    <div class="hub-section active" id="hubLog">
+      <div class="log-filter-row" id="logFilterRow">
+        <button class="log-filter-btn active" data-filter="all">All</button>
+        <button class="log-filter-btn" data-filter="join">Joins</button>
+        <button class="log-filter-btn" data-filter="rank">Rank</button>
+        <button class="log-filter-btn" data-filter="mission">Missions</button>
+        <button class="log-filter-btn" data-filter="connection">Connections</button>
+      </div>
+      <div class="corp-log-feed hub-scroll" id="corpLogFeed"></div>
+    </div>
+    <!-- MISSIONS -->
+    <div class="hub-section" id="hubMissions">
+      <div class="hub-scroll" id="missionsList"></div>
+    </div>
+    <!-- LEADERBOARD -->
+    <div class="hub-section" id="hubLeaderboard">
+      <div id="leaderboardList" class="hub-scroll"></div>
+    </div>
+    <!-- CALENDAR -->
+    <div class="hub-section" id="hubCalendar">
+      <div class="hub-scroll" id="calendarList"></div>
+    </div>
+    <!-- INTEL BOARD -->
+    <div class="hub-section" id="hubIntel">
+      <div class="hub-scroll" id="intelList"></div>
+    </div>
+    <!-- POLLS -->
+    <div class="hub-section" id="hubPolls">
+      <div class="hub-scroll" id="pollsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CORP CHAT PANEL (not a modal, fixed element) -->
+<div id="corpChatPanel">
+  <div class="corp-chat-header">
+    <i class="fas fa-comments" style="color:var(--color-primary);font-size:.85rem;"></i>
+    <span class="corp-chat-title">Corp Chat</span>
+    <span class="corp-chat-online" id="corpChatOnline"></span>
+    <button class="corp-chat-close" id="corpChatClose"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="corp-chat-body" id="corpChatBody"></div>
+  <div class="corp-chat-footer">
+    <input type="text" class="corp-chat-input" id="corpChatInput" placeholder="Message the corp..." maxlength="300" autocomplete="off">
+    <button class="corp-chat-send" id="corpChatSend"><i class="fas fa-paper-plane"></i></button>
+  </div>
+</div>
+<!-- CORP CHAT BUTTON -->
+<button class="corp-chat-btn" id="corpChatBtn" aria-label="Corp Chat">
+  <span class="chat-icon-dot"></span>
+  <i class="fas fa-comments" style="font-size:.85rem;"></i>
+  <span style="font-size:.72rem;">Corp Chat</span>
+  <span class="chat-unread" id="chatUnreadBadge">0</span>
+</button>
+
+<!-- ADMIN PANEL -->
+<div class="modal" id="adminModal">
+  <div class="modal-container">
+    <button class="close-btn" id="closeAdmin">&#x2715;</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <h2 style="margin:0;"><i class="fas fa-shield-alt" style="margin-right:8px;font-size:.85rem;color:#C0C0C0;filter:drop-shadow(0 0 6px rgba(192,192,192,.4));"></i>Admin Panel</h2>
+      <span id="adminViewerRank" style="font-family:var(--font-mono);font-size:.62rem;padding:3px 10px;border-radius:3px;background:rgba(192,192,192,.05);border:1px solid rgba(192,192,192,.15);"></span>
+    </div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="roles"><i class="fas fa-id-badge"></i> Roles</button>
+      <button class="admin-tab" data-tab="badges"><i class="fas fa-medal"></i> Badges</button>
+      <button class="admin-tab" data-tab="announce"><i class="fas fa-bullhorn"></i> Announce</button>
+      <button class="admin-tab" data-tab="history"><i class="fas fa-history"></i> History</button>
+      <button class="admin-tab" data-tab="missions"><i class="fas fa-key"></i> Keys</button>
+      <button class="admin-tab" data-tab="reports"><i class="fas fa-flag" style="color:#ff9800;"></i> Reports</button>
+      <button class="admin-tab" data-tab="bans"><i class="fas fa-gavel" style="color:#f44336;"></i> Bans</button>
+    </div>
+    <!-- ROLES TAB -->
+    <div class="admin-panel-section active" id="adminTabRoles">
+      <div class="admin-stat-row" id="adminStats"></div>
+      <input type="text" class="admin-search" id="adminUserSearch" placeholder="Search members...">
+      <div id="adminUserList" style="max-height:340px;overflow-y:auto;"></div>
+    </div>
+    <!-- ANNOUNCE TAB -->
+    <div class="admin-panel-section" id="adminTabAnnounce">
+      <p class="admin-section-title">Send Announcement to All Members</p>
+      <div class="ann-compose">
+        <input type="text" id="annTitle" placeholder="Announcement title..." maxlength="80">
+        <textarea id="annBody" placeholder="Write your announcement..." maxlength="500"></textarea>
+        <button class="btn-primary" id="sendAnnBtn" style="justify-content:center;"><i class="fas fa-bullhorn"></i> Send Announcement</button>
+        <div class="success-msg" id="annSentMsg">Announcement sent!</div>
+      </div>
+    </div>
+    <!-- HISTORY TAB -->
+    <div class="admin-panel-section" id="adminTabHistory">
+      <p class="admin-section-title">Past Announcements</p>
+      <div id="annHistoryList" style="max-height:380px;overflow-y:auto;"></div>
+    </div>
+    <!-- KEYS TAB -->
+    <div class="admin-panel-section" id="adminTabMissions">
+      <p class="admin-section-title">Pending Mission KEY Submissions</p>
+      <div id="adminKeysList" style="max-height:380px;overflow-y:auto;"></div>
+    </div>
+    <!-- BADGES TAB -->
+    <div class="admin-panel-section" id="adminTabBadges">
+      <p class="admin-section-title">Manage Member Badges</p>
+      <div id="adminBadgesList" style="max-height:380px;overflow-y:auto;"></div>
+    </div>
+    <!-- REPORTS TAB -->
+    <div class="admin-panel-section" id="adminTabReports">
+      <p class="admin-section-title"><i class="fas fa-flag" style="margin-right:5px;color:#ff9800;"></i>Member Reports — Co-Administrator+ Only</p>
+      <div id="adminReportsList" style="max-height:360px;overflow-y:auto;"></div>
+    </div>
+    <!-- BANS TAB -->
+    <div class="admin-panel-section" id="adminTabBans">
+      <p class="admin-section-title"><i class="fas fa-gavel" style="margin-right:5px;color:#f44336;"></i>Ban Management — Co-Administrator+ Only</p>
+      <div style="margin-bottom:12px;">
+        <input type="text" class="admin-search" id="banSearchInput" placeholder="Search member to ban...">
+        <div id="banUserList" style="max-height:200px;overflow-y:auto;margin-bottom:8px;"></div>
+      </div>
+      <p class="admin-section-title" style="margin-top:8px;border-top:var(--border);padding-top:10px;">Currently Banned</p>
+      <div id="bannedUserList" style="max-height:160px;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGE NOTIFICATION TOAST -->
+<div class="msg-notif-toast" id="msgNotifToast">
+  <div class="msg-notif-av" id="msgNotifAv"></div>
+  <div class="msg-notif-info">
+    <div class="msg-notif-name" id="msgNotifName"></div>
+    <div class="msg-notif-preview" id="msgNotifPreview"></div>
+  </div>
+  <button id="msgToastDismiss" style="background:none;border:none;color:var(--color-text-muted);font-size:.85rem;cursor:pointer;padding:2px 4px;flex-shrink:0;line-height:1;margin-left:4px;" title="Dismiss">&#x2715;</button>
+</div>
+
+<!-- REPORT MODAL -->
+<div class="modal" id="reportModal">
+  <div class="modal-container" style="max-width:400px;">
+    <button class="close-btn" id="closeReport">&#x2715;</button>
+    <h2><i class="fas fa-flag" style="margin-right:8px;font-size:.85rem;color:#ff9800;"></i>Report Operative</h2>
+    <p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);margin:0 0 4px;line-height:1.6;">Reporting: <strong id="reportTargetName" style="color:var(--color-text-light);">—</strong></p>
+    <p style="font-family:var(--font-mono);font-size:.7rem;color:rgba(192,192,192,.35);margin:0 0 12px;">Reports are reviewed by Co-Administrator+. Misuse may result in action against your account.</p>
+    <div class="report-reason-list" id="reportReasonList">
+      <button class="report-reason-btn" data-reason="Harassment">🚨 Harassment or bullying</button>
+      <button class="report-reason-btn" data-reason="Spam">📢 Spam or advertising</button>
+      <button class="report-reason-btn" data-reason="Impersonation">👤 Impersonation</button>
+      <button class="report-reason-btn" data-reason="Inappropriate Content">⚠️ Inappropriate content</button>
+      <button class="report-reason-btn" data-reason="Other">📋 Other</button>
+    </div>
+    <textarea class="report-extra" id="reportDetails" placeholder="Additional details (optional)..." maxlength="300"></textarea>
+    <button class="btn-primary" id="submitReportBtn" style="width:100%;justify-content:center;margin-top:10px;opacity:.5;cursor:not-allowed;" disabled>
+      <i class="fas fa-flag"></i> Submit Report
+    </button>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div class="modal" id="notifModal">
+  <div class="modal-container" style="max-width:480px">
+    <button class="close-btn" id="closeNotif">&#x2715;</button>
+    <div class="notif-header-row">
+      <h2><i class="fas fa-bell" style="font-size:.85rem;color:var(--color-primary);"></i>Notifications</h2>
+      <button class="mark-all-read-btn" id="markAllReadBtn"><i class="fas fa-check-double"></i> Mark all read</button>
+    </div>
+    <div class="notif-tabs">
+      <button class="notif-tab active" data-ntab="requests"><i class="fas fa-user-plus" style="margin-right:4px;"></i>Requests<span id="reqBadge" class="notif-tab-badge"></span></button>
+      <button class="notif-tab" data-ntab="messages"><i class="fas fa-comment" style="margin-right:4px;"></i>Messages<span id="msgNotifBadge" class="notif-tab-badge"></span></button>
+      <button class="notif-tab" data-ntab="announcements"><i class="fas fa-bullhorn" style="margin-right:4px;"></i>Updates</button>
+    </div>
+    <div id="notifTabRequests"><div id="notifList" class="notif-list"></div></div>
+    <div id="notifTabMessages" style="display:none;"><div id="notifMsgList" class="notif-list"></div></div>
+    <div id="notifTabAnnouncements" style="display:none;"><div id="notifAnnList" class="notif-list"></div></div>
+  </div>
+</div>
+
+<!-- MESSAGING -->
+<div class="modal" id="msgModal">
+  <div class="modal-container">
+    <button class="close-btn" id="closeMsgModal" style="z-index:2;">&#x2715;</button>
+    <div class="msg-header">
+      <button class="msg-header-back" id="msgBackBtn" aria-label="Close chat"><i class="fas fa-chevron-down"></i></button>
+      <div class="msg-header-av" id="msgHeaderAv"></div>
+      <div class="msg-header-info">
+        <div class="msg-header-name" id="msgHeaderName">—</div>
+        <div class="msg-header-status" id="msgHeaderStatus"></div>
+      </div>
+    </div>
+    <div class="msg-body" id="msgBody"></div>
+    <div class="msg-footer">
+      <input type="text" class="msg-input" id="msgInput" placeholder="Type a message..." maxlength="500" autocomplete="off">
+      <button class="msg-send" id="msgSendBtn" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-content">
+    <div class="nav-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">TheSizNexus</div>
+    <div class="nav-links">
+      <a href="#home">Home</a>
+      <a href="#" id="intelFeedNav">Intel Feed</a>
+      <a href="#projects">Projects</a>
+      <a href="#join">Join</a>
+    </div>
+    <div class="nav-right">
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <button class="notif-btn" id="notifBtn" aria-label="Notifications">
+        <i class="fas fa-bell"></i>
+        <span class="notif-badge" id="notifBadge">0</span>
+      </button>
+      <div class="nav-status-wrap" id="navStatusWrap" style="display:none;">
+        <button id="statusDotBtn" style="background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;" title="Set status">
+          <span class="status-dot offline" id="navStatusDot"></span>
+        </button>
+        <div class="status-picker" id="statusPicker">
+          <div class="status-pick-item" data-status="online"><span class="status-dot online"></span> Online</div>
+          <div class="status-pick-item" data-status="idle"><span class="status-dot idle"></span> Idle</div>
+          <div class="status-pick-item" data-status="dnd"><span class="status-dot dnd"></span> Do Not Disturb</div>
+          <div class="status-pick-item" data-status="offline"><span class="status-dot offline"></span> Offline</div>
+          <input type="text" class="custom-status-input" id="customStatusInput" placeholder="What are you up to? (press Enter)" maxlength="60">
+        </div>
+      </div>
+      <div class="profile-container">
+        <button class="profile-button" id="profileButton" aria-label="Profile menu">
+          <img id="userAvatar" src="" alt="Profile">
+          <i class="fas fa-user" id="defaultIcon"></i>
+        </button>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <a href="#" id="myProfileBtn" style="display:none"><i class="fas fa-id-card" style="font-size:12px;width:14px"></i> My Profile</a>
+          <a href="#" id="adminPanelBtn" style="display:none"><i class="fas fa-shield-alt" style="font-size:12px;width:14px;color:#C0C0C0;filter:drop-shadow(0 0 4px rgba(192,192,192,.35));"></i> Admin Panel</a>
+          <a href="#" id="corpHubBtn" style="display:none"><i class="fas fa-satellite-dish" style="font-size:12px;width:14px;color:#C0C0C0;"></i> Corporation Hub</a>
+          <a href="#" id="viewMembersBtn"><i class="fas fa-users" style="font-size:12px;width:14px"></i> View Members</a>
+          <a href="#" id="logoutBtn" style="display:none"><i class="fas fa-sign-out-alt" style="font-size:12px;width:14px"></i> Log Out</a>
+          <a href="#" id="loginBtn"><i class="fas fa-sign-in-alt" style="font-size:12px;width:14px"></i> Log In</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#home">Home</a><a href="#" id="intelFeedMobile">Intel Feed</a><a href="#projects">Projects</a><a href="#join">Join</a>
+</div>
+
+<!-- HERO -->
+<div class="hero" id="home">
+  <div class="hero-title-glow"></div>
+  <div class="hero-eyebrow">// INTELLIGENCE CORPORATION — RESTRUCTURING</div>
+  <h1>TheSizNexus<span class="cursor-blink">_</span></h1>
+  <p class="hero-sub">An elite intelligence corporation. Currently restructuring and migrating to a new platform — follow our Discord for updates and clearance assignments.</p>
+  <div class="hero-cta">
+    <a href="https://discord.gg/73Mb3syadB" class="btn-primary" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord"></i> Join Discord</a>
+    <a href="#join" class="btn-secondary"><i class="fas fa-chevron-down"></i> How to Join</a>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-wrapper">
+  <div class="ticker-content">
+    <span class="ticker-label">NEXUS FEED</span>
+    🔊 Welcome to TheSizNexus
+    <span class="ticker-dot">◆</span> Corporation currently restructuring — migrating to a new platform
+    <span class="ticker-dot">◆</span> Put ˢᶦᶻ in your name to identify as a member
+    <span class="ticker-dot">◆</span> Intelligence operations in progress — join Discord for clearance
+    <span class="ticker-dot">◆</span> Reworking on the corporation — stay tuned <span class="ticker-dot">◆</span>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-number" id="activeMemberCount">—</div>
+    <div class="stat-label">Active Members</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number" data-target="1">0</div>
+    <div class="stat-label">Active Projects</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number" style="font-size:clamp(1rem,3vw,1.6rem);letter-spacing:.15em;">ACTIVE</div>
+    <div class="stat-label">Corporation Status</div>
+  </div>
+</div>
+
+<!-- CONTENT GRID -->
+<main class="info-section">
+
+  <div class="bubble" id="about">
+    <h2><span class="section-icon"><i class="fas fa-info"></i></span> About Us</h2>
+    <ul>
+      <li><strong>Who are we?</strong> — TheSizNexus is an intelligence corporation currently restructuring and migrating to a new platform.</li>
+      <li><strong>What will you get?</strong> — Join a network of operatives, gain rank clearance, and access exclusive intel operations.</li>
+      <li><strong>What can you do?</strong> — Participate in corporation events and rank up to unlock higher clearance levels.</li>
+    </ul>
+    <a href="https://discord.gg/73Mb3syadB" class="discord-button" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord"></i> Join Discord</a>
+  </div>
+
+  <div class="bubble" id="projects" data-member-only="true">
+    <h2><span class="section-icon"><i class="fas fa-flask"></i></span> Projects</h2>
+    <ul>
+      <li><strong>Corporation Developments</strong> — Reworking on the corporation.</li>
+      <li><strong>Corp Events</strong> — Reworking on the corporation.</li>
+      <li><strong>Intel Gathering</strong> — Reworking on the corporation.</li>
+    </ul>
+  </div>
+
+  <div class="bubble" id="information">
+    <h2><span class="section-icon"><i class="fas fa-crosshairs"></i></span> What We Do</h2>
+    <ul>
+      <li><strong>Main:</strong> TheSizNexus is an intelligence corporation — currently restructuring and moving to a new platform.</li>
+      <li>We focus on intelligence operations, corp infrastructure, and community-driven initiatives.</li>
+      <li><strong>We develop:</strong> Internal systems, operative tools, and organizational frameworks.</li>
+    </ul>
+  </div>
+
+  <div class="bubble" id="socials">
+    <h2><span class="section-icon"><i class="fas fa-satellite-dish"></i></span> Socials</h2>
+    <div class="social-links">
+      <a href="https://discord.gg/73Mb3syadB" class="social-link" target="_blank" rel="noopener noreferrer">
+        <div class="social-icon"><i class="fab fa-discord"></i></div>Discord — Active
+      </a>
+      <a class="social-link disabled"><div class="social-icon"><i class="fab fa-youtube"></i></div>YouTube <span class="social-soon">SOON</span></a>
+      <a class="social-link disabled"><div class="social-icon"><i class="fab fa-tiktok"></i></div>TikTok <span class="social-soon">SOON</span></a>
+    </div>
+  </div>
+
+  <!-- ACTIVE MEMBERS PANEL (replaces Ranks) -->
+  <div class="bubble" id="active-members-panel">
+    <h2><span class="section-icon"><i class="fas fa-signal"></i></span> Active Members</h2>
+    <div class="active-count" id="activeMembersCount">Online now: <span id="onlineCountLabel">0</span> operative(s)</div>
+    <div class="active-members-list" id="activeMembersList">
+      <div class="loading-spinner" style="grid-column:unset;padding:16px 0;"></div>
+    </div>
+    <div id="activeMembersGuestMsg" style="display:none;font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);padding:8px 0;line-height:1.6;">
+      <i class="fas fa-lock" style="margin-right:6px;opacity:.5;"></i>
+      <a href="#" id="activeMembersRegisterLink" style="color:var(--color-primary);text-decoration:underline;">Create a free account</a> to see who's online.
+    </div>
+  </div>
+
+  <div class="bubble" id="featured-member" data-member-only="true">
+    <h2><span class="section-icon"><i class="fas fa-star"></i></span> Featured Member</h2>
+    <div class="featured-card">
+      <p class="featured-name" id="featured-name">No Operative Selected</p>
+      <p class="featured-desc" id="featured-desc">No operative has been featured yet.</p>
+      <div class="achievements" id="member-achievements"></div>
+    </div>
+  </div>
+
+  <div class="bubble bubble-full" id="join">
+    <h2><span class="section-icon"><i class="fas fa-door-open"></i></span> How to Join</h2>
+    <div class="join-steps">
+      <div class="join-step">
+        <div class="step-num">01</div>
+        <div class="step-text">Add the tag <strong style="color:var(--color-primary)">ˢᶦᶻ</strong> to your username to identify as a TheSizNexus operative.</div>
+      </div>
+      <div class="join-step">
+        <div class="step-num">02</div>
+        <div class="step-text">Join our <a href="https://discord.gg/73Mb3syadB" target="_blank" rel="noopener noreferrer">Discord server</a> and head to the introductions channel.</div>
+      </div>
+      <div class="join-step">
+        <div class="step-num">03</div>
+        <div class="step-text">Introduce yourself and request a clearance rank assignment from an Administrator.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="contact">Discord: <a href="https://discord.gg/73Mb3syadB" target="_blank" rel="noopener noreferrer">discord.gg/73Mb3syadB</a></div>
+  <div class="footer-divider"></div>
+  <div>© 2023–2026 $iz — All rights reserved</div>
+</footer>
+
+<script src="siznexus.js"></script>
+</body>
+<!-- © 2023–2026 $iz. All designs, layouts, and content are property of $iz. Do not duplicate or redistribute without permission. -->
+</html>
