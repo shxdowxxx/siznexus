@@ -1,3 +1,4 @@
+  // SizNexus v2.1 — Firebase config
   const firebaseConfig={
     apiKey:"AIzaSyBcfVGWx4PFU__CeYkpSlmac3SasqODBx4",
     authDomain:"thesiznexus.firebaseapp.com",
