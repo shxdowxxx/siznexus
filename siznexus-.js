@@ -1,0 +1,2414 @@
+  const firebaseConfig={
+    apiKey:"AIzaSyBcfVGWx4PFU__CeYkpSlmac3SasqODBx4",
+    authDomain:"thesiznexus.firebaseapp.com",
+    projectId:"thesiznexus",
+    storageBucket:"thesiznexus.firebasestorage.app",
+    messagingSenderId:"654294052068",
+    appId:"1:654294052068:web:0cc5a7d3fd79f533a710f1",
+    measurementId:"G-R8EJ0QB1XT"
+  };
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+  /* ── DOMAIN LOCK & DEVELOPER KEY SYSTEM ── */
+  const ALLOWED_DOMAIN_FALLBACK='siznexus.org';
+  let allowedDomain=ALLOWED_DOMAIN_FALLBACK;
+  let domainLockEnabled=true;
+  let isDeveloperMode=sessionStorage.getItem('devMode')==='true';
+  
+  function getCurrentDomain(){
+    const host=window.location.hostname;
+    return host.replace('www.','');
+  }
+  
+  function isAllowedDomain(){
+    if(!domainLockEnabled) return true;
+    const domain=getCurrentDomain();
+    return domain===allowedDomain||domain==='localhost'||domain.startsWith('127.');
+  }
+  
+  function showDomainLock(){
+    const overlay=document.createElement('div');
+    overlay.id='domain-lock-overlay';
+    overlay.style.cssText=`
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background:linear-gradient(135deg,#060a12,#0a0e1a);
+      display:flex;align-items:center;justify-content:center;
+      z-index:10000;backdrop-filter:blur(5px);
+      font-family:var(--font-mono);
+    `;
+    overlay.innerHTML=`
+      <div style="text-align:center;max-width:500px;padding:30px;background:rgba(10,14,26,0.97);border:1px solid rgba(192,192,192,0.25);border-top:1px solid rgba(212,216,226,0.35);border-radius:8px;box-shadow:0 0 30px rgba(192,192,192,0.12);">
+        <div style="font-size:2rem;margin-bottom:20px;"><i class="fas fa-lock" style="color:#C0C0C0;"></i></div>
+        <h1 style="color:#D4D8E2;margin:0 0 10px 0;font-size:1.5rem;letter-spacing:0.1em;">Access Restricted</h1>
+        <p style="color:#B0BAC9;margin:0 0 20px 0;font-size:0.9rem;line-height:1.6;">This application is restricted to <strong>siznexus.org</strong>. Access from this domain is blocked.</p>
+        <p style="color:#7A8499;margin:0 0 15px 0;font-size:0.75rem;opacity:0.7;">Current domain: <code style="color:#C0C0C0;">${getCurrentDomain()}</code></p>
+        <button id="dev-unlock-btn" style="margin-top:20px;padding:8px 16px;background:rgba(192,192,192,0.07);border:1px solid rgba(192,192,192,0.25);color:#C0C0C0;cursor:pointer;font-family:var(--font-mono);font-size:0.7rem;border-radius:4px;transition:all 0.3s;opacity:0.5;pointer-events:all;">Developer</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    document.getElementById('dev-unlock-btn').addEventListener('click',promptDeveloperKey);
+  }
+  
+  async function sha256(str){
+    const msgUint8=new TextEncoder().encode(str);
+    const hashBuffer=await crypto.subtle.digest('SHA-256',msgUint8);
+    const hashArray=Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  async function promptDeveloperKey(){
+    const key=prompt('Enter developer key:');
+    if(!key)return;
+    const btn=document.getElementById('dev-unlock-btn');
+    btn.disabled=true;
+    btn.innerHTML='Validating...';
+    try{
+      const storedDoc=await db.collection('_configKEY').doc('devKeyHash').get();
+      if(!storedDoc.exists){
+        alert('Developer key not configured. Contact owner.');
+        btn.disabled=false;
+        btn.innerHTML='👤 Developer';
+        return;
+      }
+      const storedHash=storedDoc.data().hash;
+      const inputHash=await sha256(key.trim());
+      if(inputHash===storedHash){
+        sessionStorage.setItem('devMode','true');
+        isDeveloperMode=true;
+        document.getElementById('domain-lock-overlay')?.remove();
+        window.location.reload();
+      } else {
+        alert('Invalid key.');
+        btn.disabled=false;
+        btn.innerHTML='👤 Developer';
+      }
+    } catch(err){
+      console.error('Key validation error:',err);
+      alert('Error validating key. Check console.');
+      btn.disabled=false;
+      btn.innerHTML='👤 Developer';
+    }
+  }
+  
+  if(!isAllowedDomain()&&!isDeveloperMode){
+    document.addEventListener('DOMContentLoaded',showDomainLock);
+    window.addEventListener('load',()=>{
+      const lock=document.getElementById('domain-lock-overlay');
+      if(lock){
+        document.body.style.overflow='hidden';
+        document.querySelectorAll('*').forEach(el=>{
+          if(el.id!=='domain-lock-overlay')el.style.pointerEvents='none';
+        });
+      }
+    });
+  }
+/* ── SECURITY ── */
+document.addEventListener('dragstart', e => { if (e.target && e.target.tagName === 'IMG') e.preventDefault(); });
+/* ── SPLASH ── */
+(function(){
+  const bar=document.getElementById('splashBar'),txt=document.getElementById('splashText');
+  const msgs=['INITIALIZING NEXUS...','LOADING CORPORATION DATA...','ESTABLISHING CONNECTION...','ACCESS GRANTED'];
+  let pct=0,mi=0;
+  const iv=setInterval(()=>{
+    pct+=Math.random()*8+2;if(pct>100)pct=100;bar.style.width=pct+'%';
+    const ni=Math.floor(pct/25);if(ni!==mi&&ni<msgs.length){mi=ni;txt.textContent=msgs[ni];}
+    if(pct>=100){clearInterval(iv);txt.textContent='ACCESS GRANTED';setTimeout(()=>document.getElementById('splash').classList.add('hidden'),600);}
+  },60);
+})();
+/* ── PARTICLES ── */
+particlesJS('particles-js',{particles:{number:{value:window.innerWidth<768?30:60,density:{enable:true,value_area:window.innerWidth<768?400:800}},color:{value:'#A8B2C1'},shape:{type:'circle'},opacity:{value:.15,random:true},size:{value:window.innerWidth<768?.8:1.2,random:true},line_linked:{enable:true,distance:150,color:'#A8B2C1',opacity:.05,width:1},move:{enable:true,speed:window.innerWidth<768?.3:.5,direction:'none',random:true}},interactivity:{events:{onhover:{enable:window.innerWidth>=768,mode:'repulse'}}}});
+/* ── STATS COUNTER ── */
+function animateCounters(){document.querySelectorAll('.stat-number[data-target]').forEach(el=>{const t=+el.dataset.target;let c=0;const s=Math.max(1,Math.ceil(t/30));const iv=setInterval(()=>{c+=s;if(c>=t){c=t;clearInterval(iv);}el.textContent=c;},40);});}
+const so=new IntersectionObserver(en=>{en.forEach(e=>{if(e.isIntersecting){animateCounters();so.disconnect();}});},{threshold:.5});
+const sbe=document.querySelector('.stats-bar');if(sbe)so.observe(sbe);
+/* ── FEATURED MEMBER ── */
+const featuredData=[{name:'No Operative Selected',desc:'No operative has been featured yet.',achievements:['???','???','???']}];
+function updateFeatured(){const e=featuredData[Math.floor(Math.random()*featuredData.length)];document.getElementById('featured-name').textContent=e.name;document.getElementById('featured-desc').textContent=e.desc;document.getElementById('member-achievements').innerHTML=e.achievements.map(a=>`<span class="achievement-badge">${a}</span>`).join('');}
+setInterval(updateFeatured,8000);updateFeatured();
+/* ── FIREBASE ── */
+const auth=firebase.auth(),db=firebase.firestore();
+const googleProvider=new firebase.auth.GoogleAuthProvider();
+let currentUser=null,currentUserData=null;
+let msgUnsubscribe=null,notifUnsubscribe=null,activeMembersUnsub=null,membersUnsubscribe=null;
+// Ensure config documents exist (dev key kept hidden - only in Firestore, never in client code)
+const appConfigRef=db.collection('_configKEY').doc('app');
+appConfigRef.set({
+  domainLock:{
+    allowedDomain:'siznexus.org',
+    enabled:true
+  }
+},{merge:true}).catch(()=>{});
+async function loadAppConfig(){
+  try{
+    const configSnapshot=await appConfigRef.get();
+    if(configSnapshot.exists){
+      const config=configSnapshot.data();
+      if(config?.domainLock?.allowedDomain) allowedDomain=config.domainLock.allowedDomain;
+      if(typeof config?.domainLock?.enabled === 'boolean') domainLockEnabled=config.domainLock.enabled;
+    }
+  }catch(err){
+    console.warn('Unable to load app config:',err);
+  }
+}
+loadAppConfig();
+// Note: Developer key is NOT stored in client code. Owner must set it manually in Firestore:
+// 1. Go to Firebase Console → Firestore → _configKEY → devKeyHash
+// 2. Create document with field "hash" containing the SHA-256 hash of the secret
+// 3. The app validates entered keys by hashing and comparing to the stored hash
+/* ── HELPERS ── */
+function initials(n){if(!n)return'?';return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function avHtml(photo,name){if(photo)return`<img src="${esc(photo)}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;">`;return`<span>${initials(name)}</span>`;}
+function chatId(a,b){return[a,b].sort().join('_');}
+function fmtTime(ts){if(!ts)return'';const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+function fmtDate(ts){if(!ts)return'';const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'});}
+function safeExec(promise, successMsg){
+  return (async ()=>{
+    try{const res=await promise; if(successMsg)showToast(successMsg); return res;}catch(err){console.error(err); showToast(err&&err.code==='permission-denied'?'Permission denied — check Firestore rules or your role.':(err&&err.message||String(err))); throw err;}
+  })();
+}
+function setNavAvatar(user,data){
+  const av=document.getElementById('userAvatar'),ic=document.getElementById('defaultIcon');
+  const url=data?.photoURL||user?.photoURL||'';
+  if(user&&url){av.src=url;av.style.cssText='display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;position:absolute;top:0;left:0;';ic.style.display='none';}
+  else{av.style.display='none';ic.style.display='block';}
+  // Ghost icon
+  if(user?.isAnonymous){ic.className='fas fa-user-secret';ic.style.display='block';av.style.display='none';}
+  else{ic.className='fas fa-user';}
+}
+async function createUserDoc(user){
+  await db.collection('users').doc(user.uid).set({
+    displayName:user.displayName||user.email.split('@')[0],email:user.email,photoURL:user.photoURL||'',
+    rank:'Member',bio:'',status:'online',friends:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
+  return(await db.collection('users').doc(user.uid).get()).data();
+}
+/* ── TOAST ── */
+let _tt=null;
+function showToast(msg){const t=document.getElementById('nexusToast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),3200);}
+/* ── MODAL UTILITIES ── */
+function openModal(id){document.getElementById(id).classList.add('active');document.body.style.overflow='hidden';}
+function closeModal(id){document.getElementById(id).classList.remove('active');if(!document.querySelector('.modal.active'))document.body.style.overflow='';}
+const ALL_MODALS=['loginModal','userDirectory','profileModal','myProfileModal','notifModal','msgModal','resetModal','intelDevModal','adminModal','engagementModal','reportModal'];
+ALL_MODALS.forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){
+    if(e.target===this){
+      closeModal(id);
+      if(id==='userDirectory'&&membersUnsubscribe){membersUnsubscribe();membersUnsubscribe=null;}
+      if(id==='msgModal'){if(msgUnsubscribe){msgUnsubscribe();msgUnsubscribe=null;}currentChatUid=null;}
+    }
+  });
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')ALL_MODALS.forEach(id=>{
+    if(document.getElementById(id).classList.contains('active')){
+      closeModal(id);
+      if(id==='userDirectory'&&membersUnsubscribe){membersUnsubscribe();membersUnsubscribe=null;}
+      if(id==='msgModal'){if(msgUnsubscribe){msgUnsubscribe();msgUnsubscribe=null;}currentChatUid=null;}
+    }
+  });
+});
+document.getElementById('closeModal').addEventListener('click',()=>closeModal('loginModal'));
+document.getElementById('closeDirectory').addEventListener('click',()=>{closeModal('userDirectory');if(membersUnsubscribe){membersUnsubscribe();membersUnsubscribe=null;}});
+document.getElementById('closeProfile').addEventListener('click',()=>closeModal('profileModal'));
+document.getElementById('closeMyProfile').addEventListener('click',()=>closeModal('myProfileModal'));
+document.getElementById('closeNotif').addEventListener('click',()=>closeModal('notifModal'));
+function closeMsgChat(){closeModal('msgModal');if(msgUnsubscribe){msgUnsubscribe();msgUnsubscribe=null;}currentChatUid=null;}
+document.getElementById('closeMsgModal').addEventListener('click',closeMsgChat);
+document.getElementById('msgBackBtn').addEventListener('click',closeMsgChat);
+/* ── ACTIVE MEMBERS PANEL ── */
+function startActiveMembersListener(){
+  if(activeMembersUnsub)activeMembersUnsub();
+  activeMembersUnsub=db.collection('users').where('status','==','online').onSnapshot(snap=>{
+    const list=document.getElementById('activeMembersList');
+    const countLabel=document.getElementById('onlineCountLabel');
+    const statCount=document.getElementById('activeMemberCount');
+    list.innerHTML='';
+    const blockedList=currentUserData?.blockedUsers||[];
+    const members=[];snap.forEach(d=>{const u=d.data();u.id=d.id;if(!blockedList.includes(u.id))members.push(u);});
+    countLabel.textContent=members.length;statCount.textContent=members.length;
+    if(!members.length){list.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);padding:8px 0;">No operatives online right now.</p>';return;}
+    members.forEach(u=>{
+      const row=document.createElement('div');row.className='active-member-row';
+      row.innerHTML=`<div class="active-dot"></div><div class="active-member-av">${avHtml(u.photoURL,u.displayName)}</div><span class="active-member-name">${esc(u.displayName||'Unknown')}</span><span class="active-member-rank ${rankClass(u.rank)}">${esc(u.rank||'Member')}</span>`;
+      row.addEventListener('click',()=>{if(currentUser&&u.id===currentUser.uid)openMyProfile();else openViewProfile(u);});
+      list.appendChild(row);
+    });
+  },()=>{document.getElementById('activeMembersList').innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;padding:8px 0;">Failed to load active members.</p>';});
+}
+startActiveMembersListener();
+/* ── MEMBER CARDS / DIRECTORY ── */
+function buildMemberCard(u,isSelf){
+  const div=document.createElement('div');div.className='friend-card';div.dataset.uid=u.id;
+  const photo=u.photoURL||'',name=u.displayName||'Unknown',bio=u.bio||'No bio set',status=u.status||'offline',rank=u.rank||'Member';
+  div.innerHTML=`<div class="friend-avatar-wrap">${photo?`<img class="friend-avatar" src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`<div class="friend-avatar-placeholder">${initials(name)}</div>`}</div><div class="friend-info"><h3 class="friend-name">${esc(name)}${isSelf?' <span style="font-size:.6rem;color:var(--color-text-muted);font-family:var(--font-mono);">[YOU]</span>':''}</h3><p class="friend-bio">${esc(bio)}</p><div class="friend-footer"><span class="friend-status status-${status}">${status}</span><span class="friend-rank ${rankClass(rank)}">${esc(rank)}</span></div></div>`;
+  div.addEventListener('click',()=>{if(isSelf)openMyProfile();else openViewProfile(u);});
+  return div;
+}
+function displayMembers(users){
+  const g=document.getElementById('usersGrid');g.innerHTML='';
+  if(!users.length){g.innerHTML='<p style="font-family:var(--font-mono);font-size:.8rem;color:var(--color-text-muted);grid-column:1/-1;text-align:center;padding:20px 0;">No members found.</p>';return;}
+  users.forEach(u=>g.appendChild(buildMemberCard(u,currentUser&&u.id===currentUser.uid)));
+}
+function loadAllUsers(){
+  if(membersUnsubscribe){membersUnsubscribe();membersUnsubscribe=null;}
+  document.getElementById('usersGrid').innerHTML='<div class="loading-spinner"></div>';
+  membersUnsubscribe=db.collection('users').onSnapshot(snap=>{
+    const blocked=currentUserData?.blockedUsers||[];
+    const users=[];
+    snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous&&!blocked.includes(u.id))users.push(u);});
+    users.sort((a,b)=>{if(currentUser){if(a.id===currentUser.uid)return -1;if(b.id===currentUser.uid)return 1;}return(a.displayName||'').localeCompare(b.displayName||'');});
+    displayMembers(users);
+    updateDirStats(users);
+  },err=>{console.error(err);document.getElementById('usersGrid').innerHTML='<p style="font-family:var(--font-mono);font-size:.8rem;color:#f55;grid-column:1/-1;text-align:center;padding:20px 0;">Failed to load members.</p>';});
+}
+function searchMembers(){
+  const q=document.getElementById('searchUsers').value.trim().toLowerCase();
+  if(!q){loadAllUsers();return;}
+  db.collection('users').get().then(snap=>{const users=[];snap.forEach(d=>{const u=d.data();u.id=d.id;if((u.displayName||'').toLowerCase().includes(q)||(u.bio||'').toLowerCase().includes(q))users.push(u);});displayMembers(users);}).catch(console.error);
+}
+/* ── VIEW PROFILE ── */
+async function openViewProfile(u){
+  // Fetch user data
+  if(!u.createdAt){
+    try{const snap=await db.collection('users').doc(u.id).get();if(snap.exists)Object.assign(u,snap.data());}catch(_){}
+  }
+  const content=document.getElementById('profileContent');
+  const isLoggedIn=!!currentUser;
+  const photo=u.photoURL||'',name=u.displayName||'Unknown';
+  // Block check
+  if(isLoggedIn&&!currentUser.isAnonymous&&isBlocked(u.id)){
+    content.innerHTML=`
+      <div class="blocked-overlay">
+        <div class="blocked-overlay-icon"><i class="fas fa-ban"></i></div>
+        <div class="blocked-overlay-title">Operative Blocked</div>
+        <div class="blocked-overlay-msg">You have blocked <strong>${esc(name)}</strong>.<br>Their profile and messages are hidden from you.</div>
+        <button class="btn-unblock" id="vpUnblock" style="margin:14px auto 0;"><i class="fas fa-unlock"></i> Unblock ${esc(name)}</button>
+      </div>`;
+    openModal('profileModal');
+    document.getElementById('vpUnblock').addEventListener('click',()=>unblockUser(u.id,name));
+    return;
+  }
+  let isFriend=false,pendingSent=false,pendingReceived=false;
+  if(isLoggedIn&&currentUser.uid!==u.id){
+    try{
+      const meSnap=await db.collection('users').doc(currentUser.uid).get();
+      currentUserData=meSnap.data();
+      isFriend=(currentUserData?.friends||[]).includes(u.id);
+      const sentSnap=await db.collection('friendRequests').where('from','==',currentUser.uid).where('to','==',u.id).get();
+      pendingSent=sentSnap.docs.some(d=>d.data().status==='pending');
+      const recvSnap=await db.collection('friendRequests').where('from','==',u.id).where('to','==',currentUser.uid).get();
+      pendingReceived=recvSnap.docs.some(d=>d.data().status==='pending');
+    }catch(e){console.error('openViewProfile lookup:',e);}
+  }
+  const viewerIsGuest=currentUser?.isAnonymous||currentUserData?.isAnonymous;
+  const statusLabel=STATUS_LABELS[u.status]||u.status||'offline';
+  let actions='';
+  if(isLoggedIn&&currentUser.uid!==u.id){
+    if(viewerIsGuest) actions=`<button class="btn-sm secondary" id="vpGuestPrompt" style="font-size:.65rem;"><i class="fas fa-user-plus"></i> Connect — Free Account Required</button>`;
+    else if(isFriend) actions=`<button class="btn-sm danger" id="vpUnfriend"><i class="fas fa-user-minus"></i> Remove</button><button class="btn-sm" id="vpMsg"><i class="fas fa-comment"></i> Message</button>`;
+    else if(pendingSent) actions=`<button class="btn-sm secondary" disabled><i class="fas fa-clock"></i> Request Sent</button>`;
+    else if(pendingReceived) actions=`<button class="btn-sm" id="vpAccept"><i class="fas fa-check"></i> Accept Request</button>`;
+    else actions=`<button class="btn-sm" id="vpSendReq"><i class="fas fa-user-plus"></i> Send Request</button>`;
+  }
+  const joinDate=u.createdAt?.toDate?.();
+  const joinStr=joinDate?joinDate.toLocaleDateString([],{month:'long',year:'numeric'}):'Unknown';
+  const friendCount=(u.friends||[]).length;
+  const badgeCount=(u.badges||[]).length;
+  // Report/block row
+  const showDangerRow=isLoggedIn&&!viewerIsGuest&&currentUser.uid!==u.id;
+  const alreadyBlocked=isBlocked(u.id);
+  content.innerHTML=`
+    <div class="profile-modal-hero">
+      <div class="profile-hero-top">
+        <div class="profile-hero-av">${photo?`<img src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`${initials(name)}`}</div>
+        <div class="profile-hero-info">
+          <div class="profile-hero-name">${esc(name)}</div>
+          <div class="profile-hero-rank"><span class="${rankClass(u.rank)}">${esc(u.rank||'Member')}</span></div>
+          <div class="profile-hero-status"><span class="status-dot ${u.status||'offline'}"></span><span>${statusLabel}</span></div>
+          ${u.activityStatus?`<div class="profile-activity-pill"><i class="fas fa-circle-notch" style="font-size:.55rem;opacity:.5;"></i> ${esc(u.activityStatus)}</div>`:''}
+        </div>
+      </div>
+      ${actions?`<div class="profile-action-row" style="margin-top:4px;">${actions}</div>`:''}
+      <div class="profile-stats-row">
+        <div class="profile-stat"><div class="profile-stat-num">${friendCount}</div><div class="profile-stat-lbl">Connections</div></div>
+        <div class="profile-stat"><div class="profile-stat-num">${badgeCount}</div><div class="profile-stat-lbl">Badges</div></div>
+        <div class="profile-stat"><div class="profile-stat-num" style="font-size:.75rem;">${joinStr}</div><div class="profile-stat-lbl">Joined</div></div>
+      </div>
+    </div>
+    <div class="profile-bio-section">
+      <div class="profile-section-label"><i class="fas fa-align-left" style="margin-right:4px;"></i>About</div>
+      <div class="profile-bio-text">${esc(u.bio||'No bio set yet.')}</div>
+    </div>
+    ${(u.badges||[]).length?`<div class="profile-bio-section"><div class="profile-section-label"><i class="fas fa-medal" style="margin-right:4px;"></i>Badges</div>${renderBadges(u.badges)}</div>`:''}
+    ${showDangerRow?`<div class="profile-danger-row">
+      <button class="btn-report" id="vpReport"><i class="fas fa-flag"></i> Report</button>
+      ${alreadyBlocked
+        ?`<button class="btn-unblock" id="vpUnblock"><i class="fas fa-unlock"></i> Unblock</button>`
+        :`<button class="btn-block" id="vpBlock"><i class="fas fa-ban"></i> Block</button>`}
+    </div>`:''}`;
+  openModal('profileModal');
+  if(isLoggedIn&&currentUser.uid!==u.id){
+    document.getElementById('vpGuestPrompt')?.addEventListener('click',()=>{closeModal('profileModal');promptGuestRegister('Create a free account to connect with operatives and send messages.');});
+    document.getElementById('vpSendReq')?.addEventListener('click',()=>sendFriendRequest(u.id,name));
+    document.getElementById('vpAccept')?.addEventListener('click',()=>acceptFriendRequest(u.id,name));
+    document.getElementById('vpUnfriend')?.addEventListener('click',()=>removeFriend(u.id,name));
+    document.getElementById('vpMsg')?.addEventListener('click',()=>{closeModal('profileModal');openChat(u);});
+    document.getElementById('vpReport')?.addEventListener('click',()=>{closeModal('profileModal');openReportModal(u.id,name);});
+    document.getElementById('vpBlock')?.addEventListener('click',()=>blockUser(u.id,name));
+    document.getElementById('vpUnblock')?.addEventListener('click',()=>unblockUser(u.id,name));
+  }
+}
+/* ── FRIEND REQUEST SYSTEM ── */
+/* ── GUEST REGISTER PROMPT ── */
+function promptGuestRegister(reason){
+  // Reuse login modal
+  clearError();
+  const lf=document.getElementById('loginForm'),rf=document.getElementById('registerForm');
+  lf.style.display='none';rf.style.display='flex';
+  document.getElementById('modalTitle').textContent='Create Account';
+  document.getElementById('toggleForm').textContent='Already have an account? Login here';
+  document.getElementById('forgotLinkWrap').style.display='none';
+  // Show reason
+  const el=document.getElementById('errorMessage');
+  el.textContent=reason||'Create a free account to access all features.';
+  el.style.display='block';
+  el.style.color='var(--color-primary)';
+  el.style.borderColor='rgba(192,192,192,.25)';
+  el.style.background='rgba(192,192,192,.05)';
+  openModal('loginModal');
+}
+async function sendFriendRequest(toUid,toName){
+  if(!currentUser)return;
+  // Check guest
+  if(currentUser.isAnonymous||currentUserData?.isAnonymous){
+    closeModal('profileModal');
+    promptGuestRegister('Create a free account to connect with other operatives and send friend requests.');
+    return;
+  }
+  const btn=document.getElementById('vpSendReq');
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';}
+  try{
+    await db.collection('friendRequests').add({
+      from:currentUser.uid,
+      fromName:currentUserData?.displayName||'Unknown',
+      fromPhoto:currentUserData?.photoURL||'',
+      to:toUid,
+      status:'pending',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    closeModal('profileModal');
+    showToast(`Friend request sent to ${toName}!`);
+  }catch(err){
+    console.error('sendFriendRequest error:',err);
+    showToast(`Error: ${err.code==='permission-denied'?'Permission denied — check Firestore rules.':err.message}`);
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-user-plus"></i> Send Request';}
+  }
+}
+async function acceptFriendRequest(fromUid,fromName){
+  if(!currentUser)return;
+  try{
+    // Mark request accepted
+    const reqSnap=await db.collection('friendRequests').where('from','==',fromUid).where('to','==',currentUser.uid).get();
+    const pendingDocs=reqSnap.docs.filter(d=>d.data().status==='pending');
+    for(const d of pendingDocs){
+      await db.collection('friendRequests').doc(d.id).update({status:'accepted'});
+    }
+    // Add to current user's friends
+    await db.collection('users').doc(currentUser.uid).update({
+      friends:firebase.firestore.FieldValue.arrayUnion(fromUid)
+    });
+    // Add to other user's friends
+    await db.collection('users').doc(fromUid).update({
+      friends:firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+    });
+    currentUserData=(await db.collection('users').doc(currentUser.uid).get()).data();
+    closeModal('profileModal');
+    closeModal('notifModal');
+    showToast(`You are now connected with ${fromName}!`);
+    updateNotifBadge();
+    writeCorpLog('connection',`connected with ${fromName}`);
+    // Award points
+    db.collection('users').doc(currentUser.uid).update({points:firebase.firestore.FieldValue.increment(10)}).catch(()=>{});
+  }catch(err){
+    console.error('acceptFriendRequest error:',err);
+    showToast(err.code==='permission-denied'
+      ?'Permission denied — make sure you published the updated Firestore rules.'
+      :`Error: ${err.message}`);
+  }
+}
+async function declineFriendRequest(reqId){
+  try{
+    await db.collection('friendRequests').doc(reqId).update({status:'declined'});
+    showToast('Request declined.');
+    updateNotifBadge();
+    openNotifications();
+  }catch(err){console.error('declineFriendRequest error:',err);}
+}
+async function removeFriend(uid,name){
+  if(!currentUser)return;
+  try{
+    // Update friends field
+    await db.collection('users').doc(currentUser.uid).update({
+      friends:firebase.firestore.FieldValue.arrayRemove(uid)
+    });
+    await db.collection('users').doc(uid).update({
+      friends:firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+    }).catch(()=>{}); // non-critical
+    currentUserData=(await db.collection('users').doc(currentUser.uid).get()).data();
+    closeModal('profileModal');closeModal('myProfileModal');
+    showToast(`Removed ${name} from connections.`);
+  }catch(err){console.error('removeFriend error:',err);showToast('Failed to remove.');}
+}
+/* ── NOTIFICATIONS ── */
+const ADMIN_RANKS=['Founder','Administrator','Co-Administrator'];
+const OWNER_UID='QZ62mytbllhPt7wWkv6gKtmz31l1';
+function isAdmin(data){return (currentUser&&currentUser.uid===OWNER_UID)||data&&ADMIN_RANKS.includes(data.rank);}
+// Panel access
+function canOpenPanel(data){return (currentUser&&currentUser.uid===OWNER_UID)||data&&[...ADMIN_RANKS,'Developer','Moderator'].includes(data.rank);}
+function rankClass(rank){
+  const r=(rank||'').toLowerCase();
+  if(r==='founder')return'rank-badge-founder';
+  if(r==='administrator')return'rank-badge-admin';
+  if(r==='co-administrator')return'rank-badge-coadmin';
+  if(r==='developer')return'rank-badge-dev';
+  if(r==='moderator')return'rank-badge-mod';
+  if(r==='beta tester')return'rank-badge-beta';
+  if(r==='unaffiliated')return'rank-badge-unaffiliated';
+  if(r==='guest')return'rank-badge-guest';
+  return'rank-badge-member';
+}
+// Unread message tracking
+let unreadMsgUnsub=null;
+const readMsgTimestamps={}; // per-session tracking
+async function updateNotifBadge(){
+  if(!currentUser)return;
+  try{
+    const [reqSnap,msgSnap,annSnap]=await Promise.all([
+      db.collection('friendRequests').where('to','==',currentUser.uid).get(),
+      db.collection('notifications').where('to','==',currentUser.uid).where('type','==','message').where('read','==',false).get(),
+      db.collection('notifications').where('to','==',currentUser.uid).where('type','==','announcement').where('read','==',false).get()
+    ]);
+    const reqCount=reqSnap.docs.filter(d=>d.data().status==='pending').length;
+    const msgCount=msgSnap.size;
+    const annCount=annSnap.size;
+    const total=reqCount+msgCount+annCount;
+    const badge=document.getElementById('notifBadge');
+    if(total>0){badge.textContent=total>9?'9+':total;badge.classList.add('show');}
+    else{badge.classList.remove('show');}
+  }catch(e){console.error('Badge error:',e);}
+}
+async function openNotifications(){
+  openModal('notifModal');
+  // Load notif tabs
+  loadNotifTab('requests');
+  // Setup tabs
+  document.querySelectorAll('.notif-tab').forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll('.notif-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      loadNotifTab(btn.dataset.ntab);
+    };
+  });
+}
+async function loadNotifTab(tab){
+  if(tab==='requests') await loadRequestsTab();
+  else if(tab==='messages') await loadMsgNotifTab();
+  else if(tab==='announcements') await loadAnnNotifTab();
+  // Update tab badges
+  try{
+    const [reqSnap,msgSnap]=await Promise.all([
+      db.collection('friendRequests').where('to','==',currentUser.uid).get(),
+      db.collection('notifications').where('to','==',currentUser.uid).where('type','==','message').where('read','==',false).get()
+    ]);
+    const reqCount=reqSnap.docs.filter(d=>d.data().status==='pending').length;
+    const reqBadge=document.getElementById('reqBadge');
+    if(reqBadge)reqBadge.textContent=reqCount>0?reqCount:'';
+    const msgBadge=document.getElementById('msgNotifBadge');
+    if(msgBadge)msgBadge.textContent=msgSnap.size>0?msgSnap.size:'';
+  }catch(_){}
+}
+async function loadRequestsTab(){
+  const list=document.getElementById('notifList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  document.getElementById('notifTabRequests').style.display='';
+  document.getElementById('notifTabMessages').style.display='none';
+  document.getElementById('notifTabAnnouncements').style.display='none';
+  try{
+    const snap=await db.collection('friendRequests').where('to','==',currentUser.uid).get();
+    const pending=snap.docs.filter(d=>d.data().status==='pending').sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));
+    list.innerHTML='';
+    if(!pending.length){list.innerHTML='<div class="notif-empty">No pending requests.</div>';return;}
+    pending.forEach(d=>{
+      const req=d.data(),reqId=d.id;
+      const item=document.createElement('div');item.className='notif-item';
+      item.innerHTML=`<div class="notif-av">${avHtml(req.fromPhoto,req.fromName)}</div><div class="notif-info"><div class="notif-text"><strong>${esc(req.fromName||'Someone')}</strong> sent you a connection request.</div><div class="notif-actions"><button class="btn-sm" style="padding:5px 10px;font-size:.65rem;" data-uid="${req.from}" data-name="${esc(req.fromName||'them')}"><i class="fas fa-check"></i> Accept</button><button class="btn-sm danger" style="padding:5px 10px;font-size:.65rem;" data-rid="${reqId}"><i class="fas fa-times"></i> Decline</button></div></div>`;
+      item.querySelector('[data-uid]').addEventListener('click',async function(){await acceptFriendRequest(this.dataset.uid,this.dataset.name);loadRequestsTab();});
+      item.querySelector('[data-rid]').addEventListener('click',async function(){await declineFriendRequest(this.dataset.rid);loadRequestsTab();});
+      list.appendChild(item);
+    });
+  }catch(err){console.error(err);document.getElementById('notifList').innerHTML=`<div class="notif-empty" style="color:#f55;">Error: ${err.code||err.message}</div>`;}
+}
+async function loadMsgNotifTab(){
+  const list=document.getElementById('notifMsgList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  document.getElementById('notifTabRequests').style.display='none';
+  document.getElementById('notifTabMessages').style.display='';
+  document.getElementById('notifTabAnnouncements').style.display='none';
+  try{
+    const snap=await db.collection('notifications').where('to','==',currentUser.uid).where('type','==','message').get();
+    const items=snap.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));
+    list.innerHTML='';
+    if(!items.length){list.innerHTML='<div class="notif-empty">No message notifications.</div>';return;}
+    for(const d of items){
+      const n=d.data();
+      const item=document.createElement('div');
+      item.className='notif-item'+(n.read?'':' unread');
+      item.style.cursor='pointer';
+      item.innerHTML=`<div class="notif-av">${avHtml(n.fromPhoto,n.fromName)}</div><div class="notif-info"><div class="notif-text"><strong>${esc(n.fromName||'Someone')}</strong> sent you a message.</div><div class="notif-text" style="margin-top:3px;font-size:.7rem;color:var(--color-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(n.preview||'')}</div><div class="notif-actions" style="margin-top:5px;"><span style="font-family:var(--font-mono);font-size:.62rem;color:rgba(192,192,192,.35);">${n.createdAt?fmtDate(n.createdAt):''}</span></div></div>${!n.read?'<div class="ann-unread-dot"></div>':''}<button class="notif-dismiss" data-id="${d.id}" title="Dismiss" style="background:none;border:none;color:var(--color-text-muted);font-size:.8rem;cursor:pointer;padding:2px 4px;flex-shrink:0;line-height:1;transition:var(--transition);" onmouseover="this.style.color='#f55'" onmouseout="this.style.color='var(--color-text-muted)'">&#x2715;</button>`;
+      item.querySelector('.notif-dismiss').addEventListener('click',async e=>{
+        e.stopPropagation();
+        await db.collection('notifications').doc(e.currentTarget.dataset.id).delete().catch(()=>{});
+        item.style.transition='opacity .2s';item.style.opacity='0';
+        setTimeout(()=>item.remove(),200);
+        updateNotifBadge();
+      });
+      item.addEventListener('click',async e=>{
+        if(e.target.classList.contains('notif-dismiss'))return;
+        await db.collection('notifications').doc(d.id).update({read:true}).catch(()=>{});
+        const senderSnap=await db.collection('users').doc(n.fromUid).get();
+        if(senderSnap.exists){closeModal('notifModal');openChat({...senderSnap.data(),id:n.fromUid});}
+      });
+      list.appendChild(item);
+    }
+    // Mark all as read
+    snap.docs.filter(d=>!d.data().read).forEach(d=>db.collection('notifications').doc(d.id).update({read:true}).catch(()=>{}));
+    updateNotifBadge();
+  }catch(err){console.error(err);list.innerHTML=`<div class="notif-empty" style="color:#f55;">Error: ${err.code||err.message}</div>`;}
+}
+async function loadAnnNotifTab(){
+  const list=document.getElementById('notifAnnList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  document.getElementById('notifTabRequests').style.display='none';
+  document.getElementById('notifTabMessages').style.display='none';
+  document.getElementById('notifTabAnnouncements').style.display='';
+  try{
+    const snap=await db.collection('announcements').orderBy('createdAt','desc').limit(20).get();
+    // Mark announcement notifs as read
+    db.collection('notifications').where('to','==',currentUser.uid).where('type','==','announcement').where('read','==',false).get()
+      .then(s=>s.docs.forEach(d=>db.collection('notifications').doc(d.id).update({read:true}).catch(()=>{}))).catch(()=>{});
+    list.innerHTML='';
+    if(snap.empty){list.innerHTML='<div class="notif-empty">No announcements yet.</div>';return;}
+    // Get user's dismissed list
+    const dismissed=currentUserData?.dismissedAnnouncements||[];
+    let shownCount=0;
+    snap.forEach(d=>{
+      if(dismissed.includes(d.id))return;
+      shownCount++;
+      const a=d.data();
+      const item=document.createElement('div');item.className='ann-item';
+      item.style.position='relative';
+      item.innerHTML=`<button class="notif-dismiss" title="Dismiss" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--color-text-muted);font-size:.8rem;cursor:pointer;padding:2px 4px;line-height:1;transition:var(--transition);" onmouseover="this.style.color='#f55'" onmouseout="this.style.color='var(--color-text-muted)'">&#x2715;</button><div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${esc(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>`;
+      item.querySelector('.notif-dismiss').addEventListener('click',async()=>{
+        // Update dismissed
+        await db.collection('users').doc(currentUser.uid).update({
+          dismissedAnnouncements:firebase.firestore.FieldValue.arrayUnion(d.id)
+        }).catch(()=>{});
+        if(currentUserData)currentUserData.dismissedAnnouncements=[...(currentUserData.dismissedAnnouncements||[]),d.id];
+        db.collection('notifications').where('to','==',currentUser.uid).where('type','==','announcement').get()
+          .then(s=>s.docs.forEach(nd=>db.collection('notifications').doc(nd.id).update({read:true}).catch(()=>{}))).catch(()=>{});
+        item.style.transition='opacity .2s';item.style.opacity='0';
+        setTimeout(()=>item.remove(),200);
+        updateNotifBadge();
+      });
+      list.appendChild(item);
+    });
+    if(!shownCount){list.innerHTML='<div class="notif-empty">No announcements. All caught up!</div>';}
+    updateNotifBadge();
+  }catch(err){
+    // Unsorted fallback
+    try{
+      const snap2=await db.collection('announcements').get();
+      list.innerHTML='';
+      const docs=snap2.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));
+      if(!docs.length){list.innerHTML='<div class="notif-empty">No announcements yet.</div>';return;}
+      docs.forEach(d=>{const a=d.data();const item=document.createElement('div');item.className='ann-item';item.style.position='relative';item.innerHTML=`<button class="notif-dismiss" title="Dismiss" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--color-text-muted);font-size:.8rem;cursor:pointer;padding:2px 4px;line-height:1;">&#x2715;</button><div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${esc(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>`;item.querySelector('.notif-dismiss').addEventListener('click',()=>{item.style.transition='opacity .2s';item.style.opacity='0';setTimeout(()=>item.remove(),200);updateNotifBadge();});list.appendChild(item);});
+    }catch(e2){list.innerHTML=`<div class="notif-empty" style="color:#f55;">Error: ${e2.code||e2.message}</div>`;}
+  }
+}
+document.getElementById('notifBtn').addEventListener('click',e=>{
+  e.stopPropagation();
+  if(!currentUser){showToast('Log in to view notifications.');return;}
+  if(currentUser.isAnonymous||currentUserData?.isAnonymous){
+    promptGuestRegister('Create a free account to get notifications, add friends, and message people.');
+    return;
+  }
+  openNotifications();
+});
+// Mark all read button
+document.getElementById('markAllReadBtn').addEventListener('click',async()=>{
+  if(!currentUser)return;
+  try{
+    const snap=await db.collection('notifications').where('to','==',currentUser.uid).where('read','==',false).get();
+    const batch=db.batch();
+    snap.forEach(d=>batch.update(d.ref,{read:true}));
+    await batch.commit();
+    // Update badge
+    updateNotifBadge();
+    showToast('All notifications marked as read.');
+    // Reload current tab
+    const activeTab=document.querySelector('.notif-tab.active');
+    if(activeTab)loadNotifTab(activeTab.dataset.ntab);
+  }catch(err){console.error(err);}
+});
+/* ── MESSAGE POPUP TOAST ── */
+let msgToastTimer=null;
+function showMsgToast(senderName,senderPhoto,preview,senderUid){
+  const toast=document.getElementById('msgNotifToast');
+  document.getElementById('msgNotifAv').innerHTML=avHtml(senderPhoto,senderName);
+  document.getElementById('msgNotifName').textContent=senderName||'New message';
+  document.getElementById('msgNotifPreview').textContent=preview||'';
+  toast.classList.add('show');
+  clearTimeout(msgToastTimer);
+  msgToastTimer=setTimeout(()=>toast.classList.remove('show'),5000);
+  toast.onclick=async e=>{
+    if(e.target.id==='msgToastDismiss'){toast.classList.remove('show');return;}
+    toast.classList.remove('show');
+    const snap=await db.collection('users').doc(senderUid).get();
+    if(snap.exists)openChat({...snap.data(),id:senderUid});
+  };
+}
+/* ── MESSAGING ── */
+let currentChatUid=null;
+async function openChat(otherUser){
+  if(!currentUser)return;
+  // Guests cannot message
+  if(currentUser.isAnonymous||currentUserData?.isAnonymous){
+    promptGuestRegister('Create a free account to message other operatives.');
+    return;
+  }
+  // Verify friendship
+  const friends=(currentUserData?.friends)||[];
+  if(!friends.includes(otherUser.id)){
+    // Re-fetch in case cache is stale
+    const meSnap=await db.collection('users').doc(currentUser.uid).get();
+    currentUserData=meSnap.data();
+    if(!(currentUserData?.friends||[]).includes(otherUser.id)){
+      showToast('You can only message connections.');return;
+    }
+  }
+  currentChatUid=otherUser.id;
+  if(msgUnsubscribe){msgUnsubscribe();msgUnsubscribe=null;}
+  const hav=document.getElementById('msgHeaderAv');
+  hav.innerHTML=avHtml(otherUser.photoURL,otherUser.displayName);
+  document.getElementById('msgHeaderName').textContent=otherUser.displayName||'Unknown';
+  const statusEl=document.getElementById('msgHeaderStatus');
+  statusEl.textContent=(otherUser.status||'offline');
+  statusEl.className='msg-header-status'+(otherUser.status==='online'?' online':'');
+  document.getElementById('msgBody').innerHTML='<div class="loading-spinner" style="grid-column:unset;align-self:center;margin:auto;"></div>';
+  document.getElementById('msgInput').value='';
+  openModal('msgModal');
+  const cid=chatId(currentUser.uid,otherUser.id);
+  msgUnsubscribe=db.collection('chats').doc(cid).collection('messages').orderBy('createdAt','asc').onSnapshot(snap=>{
+    renderMessages(snap.docs);
+  },err=>{
+    console.error('Chat listener error:',err);
+    document.getElementById('msgBody').innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;text-align:center;margin:auto;">Could not load messages (${err.code||err.message}). Make sure Firestore rules are published.</p>`;
+  });
+}
+function renderMessages(docs){
+  const body=document.getElementById('msgBody');
+  body.innerHTML='';
+  if(!docs.length){
+    const p=document.createElement('p');p.style.cssText='font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);text-align:center;margin:auto;';p.textContent='No messages yet. Say hello!';body.appendChild(p);return;
+  }
+  const canDelete=isCoAdmin(currentUserData);
+  const cid=chatId(currentUser.uid,currentChatUid);
+  let lastDate='';
+  docs.forEach(d=>{
+    const m=d.data(),isMine=m.senderUid===currentUser.uid;
+    const ds=m.createdAt?fmtDate(m.createdAt):'';
+    if(ds&&ds!==lastDate){lastDate=ds;const div=document.createElement('div');div.className='msg-date-div';div.textContent=ds;body.appendChild(div);}
+    const wrap=document.createElement('div');wrap.style.cssText='position:relative;display:flex;align-items:flex-end;gap:4px;'+(isMine?'justify-content:flex-end;':'');
+    const bub=document.createElement('div');bub.className='msg-bubble '+(isMine?'mine':'theirs');
+    bub.innerHTML=`${esc(m.text||'')}<span class="msg-time">${fmtTime(m.createdAt)}</span>`;
+    // Delete check
+    if(canDelete||isMine){
+      const delBtn=document.createElement('button');
+      delBtn.style.cssText='background:none;border:none;color:rgba(244,67,54,.4);font-size:.6rem;cursor:pointer;padding:2px;opacity:0;transition:opacity .2s;flex-shrink:0;';
+      delBtn.title='Delete message';delBtn.innerHTML='<i class="fas fa-trash"></i>';
+      wrap.addEventListener('mouseenter',()=>{delBtn.style.opacity='1';});
+      wrap.addEventListener('mouseleave',()=>{delBtn.style.opacity='0';});
+      delBtn.addEventListener('click',async()=>{
+        if(!confirm('Delete this message?'))return;
+        await db.collection('chats').doc(cid).collection('messages').doc(d.id).delete().catch(e=>showToast(e.message));
+      });
+      if(isMine)wrap.appendChild(bub),wrap.appendChild(delBtn);
+      else wrap.appendChild(delBtn),wrap.appendChild(bub);
+    }else{
+      wrap.appendChild(bub);
+    }
+    body.appendChild(wrap);
+  });
+  body.scrollTop=body.scrollHeight;
+}
+async function sendMessage(){
+  if(!currentUser||!currentChatUid)return;
+  const input=document.getElementById('msgInput');
+  const text=input.value.trim();if(!text)return;
+  input.value='';
+  const cid=chatId(currentUser.uid,currentChatUid);
+  try{
+    await db.collection('chats').doc(cid).collection('messages').add({
+      senderUid:currentUser.uid,
+      senderName:currentUserData?.displayName||'Unknown',
+      text,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Update last message
+    db.collection('chats').doc(cid).set({
+      participants:[currentUser.uid,currentChatUid],
+      lastMessage:text,
+      lastAt:firebase.firestore.FieldValue.serverTimestamp()
+    },{merge:true}).catch(()=>{});
+    // Write notification
+    db.collection('notifications').add({
+      to:currentChatUid,
+      type:'message',
+      fromUid:currentUser.uid,
+      fromName:currentUserData?.displayName||'Unknown',
+      fromPhoto:currentUserData?.photoURL||'',
+      preview:text.length>60?text.slice(0,60)+'…':text,
+      read:false,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(()=>{});
+  }catch(err){
+    console.error('sendMessage error:',err);
+    input.value=text;
+    showToast(`Could not send message (${err.code==='permission-denied'?'Permission denied — check Firestore rules':err.message})`);
+  }
+}
+document.getElementById('msgSendBtn').addEventListener('click',sendMessage);
+document.getElementById('msgInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
+/* ── MY PROFILE ── */
+async function openMyProfile(){
+  if(!currentUser)return;
+  try{
+    currentUserData=(await db.collection('users').doc(currentUser.uid).get()).data()||{};
+    const d=currentUserData;
+    const isGuest=currentUser.isAnonymous||d.isAnonymous;
+    document.getElementById('myProfileDisplayName').textContent=d.displayName||'Guest';
+    const rankEl=document.getElementById('myProfileRank');
+    rankEl.textContent=isGuest?(d.rank||'Unaffiliated'):d.rank||'Member';
+    rankEl.className=rankClass(d.rank);
+    document.getElementById('editDisplayName').value=d.displayName||'';
+    document.getElementById('editBio').value=d.bio||'';
+    document.getElementById('editPhotoURL').value=d.photoURL||'';
+    const actEl=document.getElementById('editActivityStatus');
+    if(actEl)actEl.value=d.activityStatus||'';
+    document.getElementById('profileSaveSuccess').style.display='none';
+    const imgEl=document.getElementById('editAvatarImg'),phEl=document.getElementById('editAvatarPlaceholder');
+    if(d.photoURL){imgEl.src=d.photoURL;imgEl.style.display='block';phEl.style.display='none';}
+    else{imgEl.style.display='none';phEl.style.display='flex';phEl.textContent=initials(d.displayName||'G');}
+    document.getElementById('editPhotoURL').oninput=function(){if(this.value){imgEl.src=this.value;imgEl.style.display='block';phEl.style.display='none';}else{imgEl.style.display='none';phEl.style.display='flex';}};
+    // Status buttons
+    document.querySelectorAll('[data-pstatus]').forEach(btn=>{
+      const isActive=btn.dataset.pstatus===(d.status||'online');
+      btn.style.fontWeight=isActive?'700':'400';btn.style.opacity=isActive?'1':'.55';
+      btn.onclick=()=>{setUserStatus(btn.dataset.pstatus);document.querySelectorAll('[data-pstatus]').forEach(b=>{b.style.fontWeight='400';b.style.opacity='.55';});btn.style.fontWeight='700';btn.style.opacity='1';};
+    });
+    // Guest lock
+    const saveBtn=document.getElementById('saveProfileBtn');
+    const editFields=['editDisplayName','editBio','editPhotoURL','editActivityStatus'];
+    if(isGuest){
+      saveBtn.disabled=true;saveBtn.title='Guest accounts cannot edit their profile.';
+      editFields.forEach(id=>{const el=document.getElementById(id);if(el){el.disabled=true;el.classList.add('input-locked');}});
+      document.getElementById('editAvatarBtn').classList.add('locked');
+      let gn=document.getElementById('guestProfileNotice');
+      if(!gn){gn=document.createElement('p');gn.id='guestProfileNotice';gn.style.cssText='font-family:var(--font-mono);font-size:.72rem;color:#ff6b35;background:rgba(255,107,53,.07);border:1px solid rgba(255,107,53,.2);border-radius:3px;padding:8px 10px;margin-top:8px;line-height:1.6;';gn.innerHTML='<i class="fas fa-lock" style="margin-right:5px;"></i>You\'re browsing as a <strong>Guest</strong>. <a href="#" id="guestRegisterLink" style="color:var(--color-primary);text-decoration:underline;">Create a free account</a> to customise your profile.';saveBtn.parentNode.insertBefore(gn,saveBtn.nextSibling);}
+      document.getElementById('guestRegisterLink')?.addEventListener('click',e=>{e.preventDefault();closeModal('myProfileModal');promptGuestRegister('Create a free account to set up your profile and access all features.');});
+    }else{
+      saveBtn.disabled=false;saveBtn.title='';
+      editFields.forEach(id=>{const el=document.getElementById(id);if(el){el.disabled=false;el.classList.remove('input-locked');}});
+      document.getElementById('editAvatarBtn').classList.remove('locked');
+      document.getElementById('guestProfileNotice')?.remove();
+    }
+    // Wire profile tabs
+    document.querySelectorAll('.profile-edit-tab').forEach(tab=>{
+      tab.onclick=async()=>{
+        document.querySelectorAll('.profile-edit-tab').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('.profile-tab-section').forEach(s=>s.classList.remove('active'));
+        tab.classList.add('active');
+        const secId='profileTab'+tab.dataset.ptab.charAt(0).toUpperCase()+tab.dataset.ptab.slice(1);
+        document.getElementById(secId)?.classList.add('active');
+        if(tab.dataset.ptab==='preview')renderProfilePreview(d);
+        if(tab.dataset.ptab==='connections'){
+          await renderMyFriendsList(d.friends||[]);
+          wireConnSubTabs(d);
+        }
+      };
+    });
+    // Reset to edit tab
+    document.querySelectorAll('.profile-edit-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.profile-tab-section').forEach(s=>s.classList.remove('active'));
+    document.querySelector('.profile-edit-tab[data-ptab="edit"]')?.classList.add('active');
+    document.getElementById('profileTabEdit')?.classList.add('active');
+    await renderMyFriendsList(d.friends||[]);
+    openModal('myProfileModal');
+  }catch(err){console.error(err);}
+}
+function wireConnSubTabs(d){
+  document.querySelectorAll('.conn-sub-tab').forEach(btn=>{
+    // Set active style
+    const isActive=btn.classList.contains('active');
+    btn.style.color=isActive?'var(--color-primary)':'var(--color-text-muted)';
+    btn.style.borderBottomColor=isActive?'var(--color-primary)':'transparent';
+    btn.onclick=async()=>{
+      document.querySelectorAll('.conn-sub-tab').forEach(b=>{
+        b.classList.remove('active');b.style.color='var(--color-text-muted)';b.style.borderBottomColor='transparent';
+      });
+      btn.classList.add('active');btn.style.color='var(--color-primary)';btn.style.borderBottomColor='var(--color-primary)';
+      const tab=btn.dataset.ctab;
+      document.getElementById('connSubFriends').style.display=tab==='friends'?'':'none';
+      document.getElementById('connSubBlocked').style.display=tab==='blocked'?'':'none';
+      if(tab==='blocked')await renderBlockedList();
+    };
+  });
+}
+async function renderBlockedList(){
+  const inner=document.getElementById('blockedListInner');
+  if(!inner)return;
+  const blocked=currentUserData?.blockedUsers||[];
+  inner.innerHTML='';
+  if(!blocked.length){
+    inner.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);text-align:center;padding:20px 0;">No blocked or hidden operatives.</p>';
+    return;
+  }
+  for(const uid of blocked){
+    try{
+      const snap=await db.collection('users').doc(uid).get();
+      const ud=snap.exists?snap.data():{displayName:'Unknown User',rank:'',photoURL:''};
+      const card=document.createElement('div');card.className='connection-card';
+      card.style.borderColor='rgba(244,67,54,.15)';
+      card.innerHTML=`
+        <div class="connection-av" style="border-color:rgba(244,67,54,.3);">
+          ${ud.photoURL?`<img src="${esc(ud.photoURL)}" alt="" loading="lazy">`:`${initials(ud.displayName||'?')}`}
+        </div>
+        <div class="connection-info">
+          <div class="connection-name" style="color:rgba(244,67,54,.7);">${esc(ud.displayName||'Unknown')}</div>
+          <div class="connection-rank ${rankClass(ud.rank)}">${esc(ud.rank||'')}</div>
+          <div class="connection-activity" style="color:rgba(244,67,54,.4);">Blocked</div>
+        </div>
+        <div class="connection-actions">
+          <button class="btn-unblock" style="padding:4px 9px;font-size:.62rem;" data-uid="${uid}" data-name="${esc(ud.displayName||'?')}">
+            <i class="fas fa-unlock"></i> Unblock
+          </button>
+        </div>`;
+      card.querySelector('.btn-unblock').addEventListener('click',async function(){
+        await unblockUser(this.dataset.uid,this.dataset.name);
+        await renderBlockedList();
+        // Refresh currentUserData
+        currentUserData=(await db.collection('users').doc(currentUser.uid).get()).data();
+      });
+      inner.appendChild(card);
+    }catch(_){}
+  }
+}
+function renderProfilePreview(d){
+  const el=document.getElementById('profilePreviewContent');if(!el)return;
+  const statusLabel=STATUS_LABELS[d.status]||d.status||'offline';
+  const joinDate=d.createdAt?.toDate?.();
+  const joinStr=joinDate?joinDate.toLocaleDateString([],{month:'long',year:'numeric'}):'Unknown';
+  el.innerHTML=`<p style="font-family:var(--font-mono);font-size:.65rem;color:rgba(192,192,192,.3);margin-bottom:10px;letter-spacing:.1em;">// HOW OTHERS SEE YOUR PROFILE</p>
+    <div class="profile-modal-hero">
+      <div class="profile-hero-top">
+        <div class="profile-hero-av">${d.photoURL?`<img src="${esc(d.photoURL)}" alt="">`:`${initials(d.displayName||'?')}`}</div>
+        <div class="profile-hero-info">
+          <div class="profile-hero-name">${esc(d.displayName||'Unknown')}</div>
+          <div class="profile-hero-rank"><span class="${rankClass(d.rank)}">${esc(d.rank||'Member')}</span></div>
+          <div class="profile-hero-status"><span class="status-dot ${d.status||'offline'}"></span><span>${statusLabel}</span></div>
+          ${d.activityStatus?`<div class="profile-activity-pill"><i class="fas fa-circle-notch" style="font-size:.55rem;opacity:.5;"></i> ${esc(d.activityStatus)}</div>`:''}
+        </div>
+      </div>
+      <div class="profile-stats-row">
+        <div class="profile-stat"><div class="profile-stat-num">${(d.friends||[]).length}</div><div class="profile-stat-lbl">Connections</div></div>
+        <div class="profile-stat"><div class="profile-stat-num">${(d.badges||[]).length}</div><div class="profile-stat-lbl">Badges</div></div>
+        <div class="profile-stat"><div class="profile-stat-num" style="font-size:.75rem;">${joinStr}</div><div class="profile-stat-lbl">Joined</div></div>
+      </div>
+    </div>
+    <div class="profile-bio-section"><div class="profile-section-label">About</div><div class="profile-bio-text">${esc(d.bio||'No bio set.')}</div></div>
+    ${(d.badges||[]).length?`<div class="profile-bio-section"><div class="profile-section-label">Badges</div>${renderBadges(d.badges)}</div>`:''}`;
+}
+async function renderMyFriendsList(friendIds){
+  const inner=document.getElementById('friendsListInner');
+  document.getElementById('friendCount').textContent=friendIds.length;
+  inner.innerHTML='';
+  if(!friendIds.length){
+    inner.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);text-align:center;padding:20px 0;">No connections yet.<br>Find operatives in the member directory.</p>';
+    return;
+  }
+  // Search filter
+  const searchEl=document.getElementById('connectionsSearch');
+  const q=searchEl?searchEl.value.trim().toLowerCase():'';
+  if(searchEl&&!searchEl._wired){
+    searchEl._wired=true;
+    searchEl.addEventListener('input',()=>renderMyFriendsList(friendIds));
+  }
+  for(const fid of friendIds){
+    try{
+      const snap=await db.collection('users').doc(fid).get();if(!snap.exists)continue;
+      const fd=snap.data();
+      if(q&&!(fd.displayName||'').toLowerCase().includes(q))continue;
+      const card=document.createElement('div');card.className='connection-card';
+      const statusColor={online:'#4CAF50',idle:'#ff9800',dnd:'#f44336',offline:'#555'}[fd.status]||'#555';
+      card.innerHTML=`
+        <div class="connection-av">
+          ${fd.photoURL?`<img src="${esc(fd.photoURL)}" alt="" loading="lazy">`:`${initials(fd.displayName)}`}
+          <span class="connection-av-dot status-dot ${fd.status||'offline'}"></span>
+        </div>
+        <div class="connection-info">
+          <div class="connection-name">${esc(fd.displayName||'Unknown')}</div>
+          <div class="connection-rank ${rankClass(fd.rank)}">${esc(fd.rank||'Member')}</div>
+          ${fd.activityStatus?`<div class="connection-activity">"${esc(fd.activityStatus)}"</div>`:''}
+        </div>
+        <div class="connection-actions">
+          <button class="btn-sm" style="padding:5px 9px;font-size:.65rem;" title="Message"><i class="fas fa-comment"></i></button>
+          <button class="btn-sm danger" style="padding:5px 9px;font-size:.65rem;" data-uid="${fid}" data-name="${esc(fd.displayName||'this user')}" title="Remove"><i class="fas fa-user-minus"></i></button>
+        </div>`;
+      // Click on name/av opens profile
+      card.querySelector('.connection-av').addEventListener('click',()=>{closeModal('myProfileModal');openViewProfile({...fd,id:fid});});
+      card.querySelector('.connection-name').addEventListener('click',()=>{closeModal('myProfileModal');openViewProfile({...fd,id:fid});});
+      card.querySelectorAll('.btn-sm:not(.danger)').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();closeModal('myProfileModal');openChat({...fd,id:fid});}));
+      card.querySelector('.btn-sm.danger').addEventListener('click',async e=>{e.stopPropagation();const btn=e.currentTarget;await removeFriend(btn.dataset.uid,btn.dataset.name);await openMyProfile();});
+      inner.appendChild(card);
+    }catch(err){console.error(err);}
+  }
+}
+/* ── SAVE PROFILE ── */
+document.getElementById('saveProfileBtn').addEventListener('click',async()=>{
+  if(!currentUser)return;
+  const btn=document.getElementById('saveProfileBtn');
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving...';
+  try{
+    const newName=document.getElementById('editDisplayName').value.trim();
+    const newBio=document.getElementById('editBio').value.trim();
+    const newPhoto=document.getElementById('editPhotoURL').value.trim();
+    const newActivity=document.getElementById('editActivityStatus')?.value.trim()||'';
+    const updates={bio:newBio,photoURL:newPhoto,activityStatus:newActivity};if(newName)updates.displayName=newName;
+    await db.collection('users').doc(currentUser.uid).update(updates);
+    currentUserData=(await db.collection('users').doc(currentUser.uid).get()).data();
+    setNavAvatar(currentUser,currentUserData);
+    document.getElementById('myProfileDisplayName').textContent=currentUserData.displayName||currentUser.email;
+    const s=document.getElementById('profileSaveSuccess');s.style.display='block';setTimeout(()=>s.style.display='none',3000);
+    writeCorpLog('profile','updated their profile',{changed:Object.keys(updates).filter(k=>k!=='photoURL').join(', ')});
+  }catch(err){console.error(err);showToast('Failed to save profile.');}
+  finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Save Changes';}
+});
+document.getElementById('editAvatarBtn').addEventListener('click',()=>document.getElementById('avatarFileInput').click());
+document.getElementById('editAvatarBtn').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();document.getElementById('avatarFileInput').click();}});
+document.getElementById('avatarFileInput').addEventListener('change',function(){
+  const file=this.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    document.getElementById('editPhotoURL').value='';
+    document.getElementById('editAvatarImg').src=e.target.result;
+    document.getElementById('editAvatarImg').style.display='block';
+    document.getElementById('editAvatarPlaceholder').style.display='none';
+    showToast('Preview set! Upload to Postimages.org then paste the Direct link above.');
+  };
+  reader.readAsDataURL(file);
+});
+/* ── AUTH STATE ── */
+auth.onAuthStateChanged(async user=>{
+  currentUser=user;
+  const logoutBtn=document.getElementById('logoutBtn'),loginBtn=document.getElementById('loginBtn');
+  const myProfileBtn=document.getElementById('myProfileBtn'),notifBtn=document.getElementById('notifBtn');
+  if(user){
+    try{
+      const snap=await db.collection('users').doc(user.uid).get();
+      currentUserData=snap.exists?snap.data():await createUserDoc(user);
+      setNavAvatar(user,currentUserData);
+      db.collection('users').doc(user.uid).update({lastActive:firebase.firestore.FieldValue.serverTimestamp(),status:'online'}).catch(()=>{});
+      if(!user.isAnonymous)checkBanStatus();
+      // Owner rank check
+      if(user.uid===OWNER_UID&&currentUserData?.rank!=='Founder'){
+        db.collection('users').doc(user.uid).update({rank:'Founder'}).catch(()=>{});
+        currentUserData={...currentUserData,rank:'Founder'};
+      }
+      updateNotifBadge();
+      if(notifUnsubscribe)notifUnsubscribe();
+    }catch(e){console.error(e);}
+    logoutBtn.style.display='flex';loginBtn.style.display='none';myProfileBtn.style.display='flex';
+    // Dim bell for guests
+    notifBtn.classList.add('show');
+    if(currentUserData?.isAnonymous){
+      notifBtn.style.opacity='.4';
+      notifBtn.title='Create an account to get notifications';
+    }else{
+      notifBtn.style.opacity='';
+      notifBtn.title='Notifications';
+    }
+    document.getElementById('adminPanelBtn').style.display=(user.uid===OWNER_UID||canOpenPanel(currentUserData))?'flex':'none';
+    applyGuestRestrictions(currentUserData?.isAnonymous||user.isAnonymous);
+    if(!user.isAnonymous){startIdleDetection();}
+    checkAndAwardBadges(user.uid,currentUserData);
+    const isRealUser=!user.isAnonymous;
+    document.getElementById('corpHubBtn').style.display=isRealUser?'flex':'none';
+    document.getElementById('corpChatBtn').classList.toggle('show',isRealUser);
+    document.getElementById('navStatusWrap').style.display=isRealUser?'flex':'none';
+    if(isRealUser){
+      updateNavStatusDot(currentUserData?.status||'online');
+      if(!corpChatUnsub)startCorpChatListener();
+      if(!currentUserData?.hasLoggedBefore){
+        writeCorpLog('join','joined the corporation');
+        db.collection('users').doc(user.uid).update({hasLoggedBefore:true}).catch(()=>{});
+        db.collection('users').get().then(s=>{
+          if(s.size<=100)awardBadge(user.uid,'founding');
+        }).catch(()=>{});
+      }
+      const today=new Date().toDateString();
+      if(currentUserData?.lastLoginDate!==today){
+        db.collection('users').doc(user.uid).update({
+          lastLoginDate:today,
+          points:firebase.firestore.FieldValue.increment(5)
+        }).catch(()=>{});
+      }
+    }
+    if(notifUnsubscribe)notifUnsubscribe();
+    notifUnsubscribe=db.collection('notifications').where('to','==',user.uid).where('read','==',false).onSnapshot(snap=>{
+      updateNotifBadge();
+      snap.docChanges().forEach(change=>{
+        if(change.type==='added'){
+          const n=change.doc.data();
+          if(n.type==='message'&&n.fromUid!==currentUser.uid&&currentChatUid!==n.fromUid){
+            showMsgToast(n.fromName,n.fromPhoto,n.preview,n.fromUid);
+          }
+        }
+      });
+    });
+    db.collection('friendRequests').where('to','==',user.uid).onSnapshot(()=>updateNotifBadge());
+  }else{
+    currentUserData=null;
+    document.getElementById('userAvatar').style.display='none';document.getElementById('defaultIcon').style.display='block';
+    logoutBtn.style.display='none';loginBtn.style.display='flex';myProfileBtn.style.display='none';notifBtn.classList.remove('show');
+    document.getElementById('adminPanelBtn').style.display='none';
+    applyGuestRestrictions(true); // logged-out = guest
+    if(notifUnsubscribe){notifUnsubscribe();notifUnsubscribe=null;}
+  }
+});
+window.addEventListener('beforeunload',()=>{if(currentUser)db.collection('users').doc(currentUser.uid).update({status:'offline'}).catch(()=>{});});
+/* ── AUTH FORMS ── */
+function showError(msg){const el=document.getElementById('errorMessage');el.textContent=msg;el.style.display='block';}
+function clearError(){
+  const el=document.getElementById('errorMessage');
+  el.style.display='none';
+  el.style.color='#ff4444';
+  el.style.borderColor='rgba(255,68,68,.2)';
+  el.style.background='rgba(255,68,68,.05)';
+}
+document.getElementById('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();clearError();const btn=e.target.querySelector('button[type=submit]');
+  btn.disabled=true;btn.textContent='LOGGING IN...';
+  try{await auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value,document.getElementById('loginPassword').value);closeModal('loginModal');}
+  catch(err){showError(err.message);}
+  finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-sign-in-alt"></i> LOGIN';}
+});
+document.getElementById('registerForm').addEventListener('submit',async e=>{
+  e.preventDefault();clearError();
+  const pw=document.getElementById('registerPassword').value,cpw=document.getElementById('confirmPassword').value;
+  if(pw!==cpw){showError("Passwords don't match");return;}
+  const btn=e.target.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='CREATING ACCOUNT...';
+  try{const uc=await auth.createUserWithEmailAndPassword(document.getElementById('registerEmail').value,pw);await createUserDoc(uc.user);closeModal('loginModal');}
+  catch(err){showError(err.message);}
+  finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-user-plus"></i> REGISTER';}
+});
+document.getElementById('googleLogin').addEventListener('click',async()=>{
+  clearError();
+  try{const r=await auth.signInWithPopup(googleProvider);if(r.additionalUserInfo.isNewUser)await createUserDoc(r.user);closeModal('loginModal');}
+  catch(err){showError(err.message);}
+});
+/* ── ANONYMOUS / GUEST LOGIN ── */
+document.getElementById('anonLogin').addEventListener('click',async()=>{
+  clearError();
+  const btn=document.getElementById('anonLogin');
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+  try{
+    const r=await auth.signInAnonymously();
+    // Create guest doc
+    const guestNum=Math.floor(Math.random()*9000)+1000;
+    await db.collection('users').doc(r.user.uid).set({
+      displayName:`Guest#${guestNum}`,email:'',photoURL:'',
+      rank:'Unaffiliated',bio:'Browsing as guest.',status:'online',friends:[],isAnonymous:true,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    },{merge:true});
+    closeModal('loginModal');
+  }catch(err){showError(err.message);}
+  finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-user-secret"></i> Guest';}
+});
+/* ── PASSWORD RESET ── */
+document.getElementById('forgotLink').addEventListener('click',()=>{
+  auth.sendPasswordResetEmail(document.getElementById('emailInput').value.trim())
+    .then(()=>showToast('Password reset email sent!'))
+    .catch(err=>showToast('Error: '+err.message));
+});
+/* ── TOGGLE AUTH FORM ── */
+document.getElementById('toggleForm').addEventListener('click',function(){
+  const lf=document.getElementById('loginForm'),rf=document.getElementById('registerForm');
+  const isLogin=lf.style.display!=='none';
+  lf.style.display=isLogin?'none':'flex';rf.style.display=isLogin?'flex':'none';
+  document.getElementById('modalTitle').textContent=isLogin?'Create Account':'Access Nexus';
+  this.textContent=isLogin?'Already have an account? Login here':"Don't have an account? Register here";
+  clearError();
+});
+/* ── HAMBURGER ── */
+const hamburger=document.getElementById('hamburger'),mobileMenu=document.getElementById('mobileMenu');
+hamburger.addEventListener('click',function(){const o=this.classList.toggle('open');this.setAttribute('aria-expanded',o);mobileMenu.classList.toggle('open',o);});
+mobileMenu.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{hamburger.classList.remove('open');hamburger.setAttribute('aria-expanded','false');mobileMenu.classList.remove('open');}));
+/* ── DROPDOWN ── */
+const profileButton=document.getElementById('profileButton'),dropdownMenu=document.getElementById('dropdownMenu');
+profileButton.addEventListener('click',function(e){e.stopPropagation();const o=dropdownMenu.classList.toggle('open');this.setAttribute('aria-expanded',o);});
+document.addEventListener('click',()=>{dropdownMenu.classList.remove('open');profileButton.setAttribute('aria-expanded','false');});
+document.getElementById('loginBtn').addEventListener('click',e=>{e.preventDefault();clearError();openModal('loginModal');});
+document.getElementById('myProfileBtn').addEventListener('click',e=>{e.preventDefault();dropdownMenu.classList.remove('open');openMyProfile();});
+document.getElementById('viewMembersBtn').addEventListener('click',e=>{
+  e.preventDefault();
+  dropdownMenu.classList.remove('open');
+  // Members need account
+  if(!currentUser||currentUser.isAnonymous||currentUserData?.isAnonymous){
+    promptGuestRegister('Create a free account to view and connect with other operatives.');
+    return;
+  }
+  openModal('userDirectory');
+  loadAllUsers();
+});
+/* ── INTEL FEED — UNDER DEVELOPMENT ── */
+document.getElementById('closeIntelDev').addEventListener('click',()=>closeModal('intelDevModal'));
+document.getElementById('intelDevModal').addEventListener('click',function(e){if(e.target===this)closeModal('intelDevModal');});
+document.getElementById('intelFeedNav').addEventListener('click',e=>{e.preventDefault();openModal('intelDevModal');});
+document.getElementById('intelFeedMobile').addEventListener('click',e=>{
+  e.preventDefault();
+  hamburger.classList.remove('open');hamburger.setAttribute('aria-expanded','false');mobileMenu.classList.remove('open');
+  openModal('intelDevModal');
+});
+/* ── ADMIN PANEL ── */
+const RANKS_LIST=['Unaffiliated','Member','Beta Tester','Moderator','Developer','Co-Administrator','Administrator','Founder'];
+// Rank power level
+const RANK_POWER={};
+RANKS_LIST.forEach((r,i)=>RANK_POWER[r]=i);
+function myPower(){return currentUser?.uid===OWNER_UID?99:(RANK_POWER[currentUserData?.rank]??0);}
+function rankPower(rank){return RANK_POWER[rank]??0;}
+// Can manage check
+function canManage(targetRank){
+  if(currentUser?.uid===OWNER_UID)return true;
+  return myPower()>rankPower(targetRank);
+}
+// Ranks user can assign
+function assignableRanks(){
+  const power=myPower();
+  return RANKS_LIST.filter(r=>RANK_POWER[r]<power);
+}
+async function openAdminPanel(){
+  if(!currentUser||!canOpenPanel(currentUserData)){showToast('Access denied.');return;}
+  openModal('adminModal');
+  // Show viewer's rank in header
+  const rBadge=document.getElementById('adminViewerRank');
+  if(rBadge){rBadge.textContent=currentUserData?.rank||'';rBadge.className='';rBadge.style.cssText='font-family:var(--font-mono);font-size:.62rem;padding:3px 10px;border-radius:3px;background:rgba(192,192,192,.05);border:1px solid rgba(192,192,192,.15);';rBadge.classList.add(rankClass(currentUserData?.rank));}
+  // Tab access
+  const rank=currentUserData?.rank||'';
+  const isModerator=['Moderator'].includes(rank);
+  const isDeveloper=['Developer'].includes(rank);
+  const isCoAdminPlus=['Co-Administrator','Administrator','Founder'].includes(rank)||currentUser.uid===OWNER_UID;
+  // Tab visibility
+  // Moderator: reports, announce
+  // Developer: roles, announce, history, keys
+  // Co-Admin+: all tabs including badges, bans
+  const tabAccess={
+    roles: !isModerator,         // Dev+
+    badges: isCoAdminPlus,       // Co-Admin+
+    announce: true,              // All panel users
+    history: !isModerator,       // Dev+
+    missions: !isModerator,      // Dev+
+    reports: isCoAdminPlus,      // Co-Admin+
+    bans: isCoAdminPlus,         // Co-Admin+
+  };
+  // Show/hide tabs
+  document.querySelectorAll('.admin-tab').forEach(btn=>{
+    const tab=btn.dataset.tab;
+    btn.style.display=(tabAccess[tab]===false)?'none':'';
+  });
+  // Default tab
+  const firstVisible=document.querySelector('.admin-tab:not([style*="display: none"]):not([style*="display:none"])');
+  const defaultTab=firstVisible?.dataset.tab||'announce';
+  document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('active'));
+  firstVisible?.classList.add('active');
+  loadAdminTab(defaultTab);
+  document.querySelectorAll('.admin-tab').forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      loadAdminTab(btn.dataset.tab);
+    };
+  });
+}
+/* ── ADMIN: MISSION CREATOR + KEY REVIEW ── */
+async function loadAdminKeys(){
+  const list=document.getElementById('adminKeysList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  // Show missions
+  list.innerHTML=`<div style="margin-bottom:14px;border-bottom:var(--border);padding-bottom:12px;">
+    <p class="admin-section-title">Create New Mission</p>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <input type="text" id="missionTitleInput" class="input-field" placeholder="Mission title..." maxlength="80" style="font-size:.78rem;">
+      <textarea id="missionDescInput" class="input-field" placeholder="Mission description..." maxlength="300" style="min-height:56px;font-size:.75rem;resize:vertical;"></textarea>
+      <div style="display:flex;gap:6px;">
+        <input type="text" id="missionKeyInput" class="input-field" placeholder="SECRET KEY (share in Discord)" maxlength="30" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;flex:1;">
+        <input type="number" id="missionPtsInput" class="input-field" placeholder="Pts" min="5" max="500" value="50" style="font-size:.75rem;width:70px;">
+      </div>
+      <button class="btn-primary" id="createMissionBtn" style="justify-content:center;font-size:.75rem;padding:8px;"><i class="fas fa-plus"></i> Create Mission</button>
+      <div class="success-msg" id="missionCreateMsg">Mission created!</div>
+    </div>
+  </div>
+  <p class="admin-section-title">Pending KEY Submissions</p>
+  <div id="pendingKeysList"></div>`;
+  document.getElementById('createMissionBtn').addEventListener('click',async()=>{
+    const title=document.getElementById('missionTitleInput').value.trim();
+    const desc=document.getElementById('missionDescInput').value.trim();
+    const key=document.getElementById('missionKeyInput').value.trim().toUpperCase();
+    const pts=parseInt(document.getElementById('missionPtsInput').value)||50;
+    if(!title||!desc||!key){showToast('Fill in all fields.');return;}
+    if(!currentUser||!(isDev(currentUserData)||currentUser.uid===OWNER_UID)){showToast('Developer+ required to create missions.');return;}
+    const btn=document.getElementById('createMissionBtn');
+    btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+    try{await safeExec(db.collection('missions').add({title,description:desc,secretKey:key,points:pts,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}),'Mission created');
+      const s=document.getElementById('missionCreateMsg');s.style.display='block';setTimeout(()=>s.style.display='none',2500);
+    }catch(e){}
+    btn.disabled=false;btn.innerHTML='<i class="fas fa-plus"></i> Create Mission';
+  });
+  // Load pending submissions
+  const pendingList=document.getElementById('pendingKeysList');
+  try{
+    const snap=await db.collection('missionSubmissions').where('status','==','pending').get();
+    if(snap.empty){pendingList.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);">No pending submissions.</p>';return;}
+    for(const d of snap.docs){
+      const sub=d.data(),sid=d.id;
+      // Get correct key
+      const missionDoc=await db.collection('missions').doc(sub.missionId).get();
+      const correctKey=missionDoc.exists?missionDoc.data().secretKey:'???';
+      const keyMatch=sub.keySubmitted===correctKey;
+      const row=document.createElement('div');row.className='admin-user-row';row.style.flexDirection='column';row.style.alignItems='flex-start';row.style.gap='6px';
+      row.innerHTML=`<div style="display:flex;align-items:center;gap:8px;width:100%;">
+        <span class="admin-user-name" style="flex:1;">${esc(sub.displayName||'?')} — ${esc(sub.missionTitle||'?')}</span>
+        <span class="mission-status ${keyMatch?'completed':'rejected'}">${keyMatch?'Key Correct':'Wrong Key'}</span>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);">Submitted: <strong>${esc(sub.keySubmitted||'')}</strong> &nbsp;|&nbsp; Expected: <strong style="color:${keyMatch?'#4CAF50':'#f44336'};">${esc(correctKey)}</strong></div>
+      <div style="display:flex;gap:6px;">
+        <button class="admin-save-rank" style="border-color:rgba(76,175,80,.4);color:#4CAF50;" data-sid="${sid}" data-uid="${sub.uid}" data-pts="${sub.points||50}" data-action="approve"><i class="fas fa-check"></i> Approve +${sub.points||50}pts</button>
+        <button class="admin-save-rank" style="border-color:rgba(255,68,68,.4);color:#f55;" data-sid="${sid}" data-action="reject"><i class="fas fa-times"></i> Reject</button>
+      </div>`;
+      row.querySelector('[data-action="approve"]').addEventListener('click',async function(){
+        this.disabled=true;this.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+        const batch=db.batch();
+        batch.update(db.collection('missionSubmissions').doc(this.dataset.sid),{status:'approved'});
+        batch.update(db.collection('users').doc(this.dataset.uid),{points:firebase.firestore.FieldValue.increment(parseInt(this.dataset.pts)||50)});
+        try{await safeExec(batch.commit()); await safeExec(awardBadge(this.dataset.uid,'mission'),'Approved! Points awarded.');}catch(_){ }
+        loadAdminKeys();
+      });
+      row.querySelector('[data-action="reject"]').addEventListener('click',async function(){
+        const reason=prompt('Rejection reason (optional):');
+        try{await safeExec(db.collection('missionSubmissions').doc(this.dataset.sid).update({status:'rejected',rejectReason:reason||''}),'Submission rejected.');}catch(_){}
+        loadAdminKeys();
+      });
+      pendingList.appendChild(row);
+    }
+  }catch(err){pendingList.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;">Error: ${err.message}</p>`;}
+}
+// Load admin tabs
+async function loadAdminTab(tab){
+  document.querySelectorAll('.admin-panel-section').forEach(s=>s.classList.remove('active'));
+  const tabId='adminTab'+tab.charAt(0).toUpperCase()+tab.slice(1);
+  const el=document.getElementById(tabId);if(el)el.classList.add('active');
+  if(tab==='roles')await loadAdminRoles();
+  else if(tab==='history')await loadAnnHistory();
+  else if(tab==='missions')await loadAdminKeys();
+  else if(tab==='badges')await loadAdminBadges();
+  else if(tab==='reports')await loadAdminReports();
+  else if(tab==='bans')await loadAdminBans();
+}
+async function loadAdminBadges(){
+  const list=document.getElementById('adminBadgesList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  const canAssignAll=currentUser.uid===OWNER_UID; // only Founder assigns any badge
+  const canAssignDev=isDev(currentUserData); // Dev+ can assign premade badges
+  try{
+    const snap=await db.collection('users').get();
+    const users=[];snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous)users.push(u);});
+    users.sort((a,b)=>(a.displayName||'').localeCompare(b.displayName||''));
+    list.innerHTML='';
+    // Badge list
+    const availableBadges=Object.entries(BADGE_DEFS).map(([k,v])=>({key:k,label:v.label}));
+    users.forEach(u=>{
+      const row=document.createElement('div');row.className='admin-user-row';row.style.flexWrap='wrap';row.style.gap='6px';
+      const currentBadges=(u.badges||[]);
+      row.innerHTML=`<div style="display:flex;align-items:center;gap:8px;width:100%;margin-bottom:4px;">
+        <div class="admin-user-av">${avHtml(u.photoURL,u.displayName)}</div>
+        <span class="admin-user-name ${rankClass(u.rank)}">${esc(u.displayName||'Unknown')}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;width:100%;margin-bottom:6px;">${currentBadges.length?renderBadges(currentBadges):'<span style="font-family:var(--font-mono);font-size:.65rem;color:var(--color-text-muted);">No badges</span>'}</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;width:100%;">
+        <select class="admin-rank-select badge-select" id="badgeSel_${u.id}">
+          ${availableBadges.map(b=>`<option value="${b.key}">${b.label}</option>`).join('')}
+        </select>
+        <button class="admin-save-rank" data-uid="${u.id}" data-action="add" style="font-size:.62rem;"><i class="fas fa-plus"></i> Add</button>
+        <button class="admin-save-rank" data-uid="${u.id}" data-action="remove" style="border-color:rgba(255,68,68,.4);color:#f55;font-size:.62rem;"><i class="fas fa-minus"></i> Remove</button>
+      </div>`;
+      row.querySelectorAll('[data-action]').forEach(btn=>{
+        btn.addEventListener('click',async function(){
+          if(this.dataset.action==='add'&&!canAssignDev){showToast('Developer+ required to assign badges.');return;}
+          if(this.dataset.action==='add'&&!canAssignAll&&!canAssignDev){showToast('Access denied.');return;}
+          const badge=document.getElementById('badgeSel_'+this.dataset.uid).value;
+          const uid=this.dataset.uid;
+          this.disabled=true;
+          if(this.dataset.action==='add'){
+            try{await safeExec(awardBadge(uid,badge),'Badge awarded!');}catch(_){ }
+          }else{
+            try{await safeExec(db.collection('users').doc(uid).update({badges:firebase.firestore.FieldValue.arrayRemove(badge)}),'Badge removed!');}catch(_){ }
+          }
+          loadAdminBadges();
+          loadAdminBadges();
+        });
+      });
+      list.appendChild(row);
+    });
+  }catch(err){list.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;">Error: ${err.message}</p>`;}
+}
+// Extend admin modal
+async function loadAdminRoles(){
+  const list=document.getElementById('adminUserList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  // Wire search
+  const searchEl=document.getElementById('adminUserSearch');
+  if(searchEl&&!searchEl._wired){
+    searchEl._wired=true;
+    searchEl.addEventListener('input',()=>{
+      const q=searchEl.value.trim().toLowerCase();
+      list.querySelectorAll('.admin-user-row').forEach(row=>{
+        const name=row.querySelector('.admin-user-name')?.textContent.toLowerCase()||'';
+        row.style.display=name.includes(q)?'':'none';
+      });
+    });
+  }
+  try{
+    const snap=await db.collection('users').get();
+    const users=[];
+    snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous)users.push(u);});
+    users.sort((a,b)=>(a.displayName||'').localeCompare(b.displayName||''));
+    // Update stats
+    const statsEl=document.getElementById('adminStats');
+    if(statsEl){
+      const onlineCount=users.filter(u=>u.status==='online').length;
+      const rankCounts={};users.forEach(u=>{rankCounts[u.rank||'Member']=(rankCounts[u.rank||'Member']||0)+1;});
+      statsEl.innerHTML=`<div class="admin-stat-chip">Total: <strong>${users.length}</strong></div><div class="admin-stat-chip" style="color:#4CAF50;">Online: <strong>${onlineCount}</strong></div>${Object.entries(rankCounts).slice(0,3).map(([r,n])=>`<div class="admin-stat-chip">${esc(r)}: <strong>${n}</strong></div>`).join('')}`;
+    }
+    list.innerHTML='';
+    users.forEach(u=>{
+      const row=document.createElement('div');row.className='admin-user-row';
+      const selectId='rankSel_'+u.id;
+      // Owner row
+      const isOwnerRow=u.id===OWNER_UID;
+      row.innerHTML=`
+        <div class="admin-user-av">${avHtml(u.photoURL,u.displayName)}</div>
+        <span class="admin-user-name ${rankClass(u.rank)}">${esc(u.displayName||'Unknown')}</span>
+        ${isOwnerRow
+          ? `<span style="font-family:var(--font-mono);font-size:.65rem;color:#ffd700;margin-left:auto;display:flex;align-items:center;gap:5px;"><i class="fas fa-crown"></i> Founder — Protected</span>`
+          : `<select class="admin-rank-select" id="${selectId}">
+              ${assignableRanks().map(r=>`<option value="${r}"${r===u.rank?' selected':''}>${r}</option>`).join('')}
+            </select>
+            <button class="admin-save-rank" data-uid="${u.id}" data-sel="${selectId}"${!canManage(u.rank)?'disabled title="Cannot manage this rank"':''} ><i class="fas fa-check"></i> Save</button>`
+        }`;
+      if(isOwnerRow)return; // no click handler needed
+      const targetCurrentRank=u.rank||'Member';
+      row.querySelector('.admin-save-rank').addEventListener('click',async function(){
+        const newRank=document.getElementById(this.dataset.sel).value;
+        // Check rank power
+        if(rankPower(newRank)>=myPower()){
+          showToast('You cannot assign a rank equal to or above your own.');
+          return;
+        }
+        // Check promotion authority
+        if(rankPower(newRank)>rankPower(targetCurrentRank)&&rankPower(newRank)>=myPower()){
+          showToast('Cannot promote above your own rank.');
+          return;
+        }
+        this.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+        try{
+          await safeExec(db.collection('users').doc(this.dataset.uid).update({rank:newRank}),'Rank updated');
+          this.innerHTML='<i class="fas fa-check"></i> Saved!';
+          row.querySelector('.admin-user-name').className='admin-user-name '+rankClass(newRank);
+          setTimeout(()=>{this.innerHTML='<i class="fas fa-check"></i> Save';},1500);
+        }catch(err){
+          this.innerHTML='<i class="fas fa-times"></i> Error';
+        }
+      });
+      list.appendChild(row);
+    });
+  }catch(err){list.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;">Error: ${err.message}</p>`;}
+}
+async function loadAnnHistory(){
+  const list=document.getElementById('annHistoryList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  try{
+    const snap=await db.collection('announcements').get();
+    const docs=snap.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));
+    list.innerHTML='';
+    if(!docs.length){list.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);text-align:center;padding:20px 0;">No announcements sent yet.</p>';return;}
+    docs.forEach(d=>{
+      const a=d.data();
+      const item=document.createElement('div');item.className='ann-history-item';
+      item.innerHTML=`<div class="ann-history-title">${esc(a.title||'Untitled')}</div><div class="ann-history-body">${esc(a.body||'')}</div><div class="ann-history-meta">Sent by ${esc(a.authorName||'Admin')} • ${a.createdAt?fmtDate(a.createdAt):''}</div>`;
+      list.appendChild(item);
+    });
+  }catch(err){list.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;">Error: ${err.message}</p>`;}
+}
+document.getElementById('sendAnnBtn').addEventListener('click',async()=>{
+  if(!currentUser||!isDev(currentUserData)){showToast('Developer+ required to send announcements.');return;}
+  const title=document.getElementById('annTitle').value.trim();
+  const body=document.getElementById('annBody').value.trim();
+  if(!title||!body){showToast('Please fill in both title and message.');return;}
+  const btn=document.getElementById('sendAnnBtn');
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sending...';
+  try{
+    await db.collection('announcements').add({
+      title,body,
+      authorUid:currentUser.uid,
+      authorName:currentUserData?.displayName||'Admin',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    const usersSnap=await db.collection('users').get();
+    const batch=db.batch();
+    let batchCount=0;
+    usersSnap.docs.forEach(d=>{
+      if(d.id!==currentUser.uid&&!d.data().isAnonymous){
+        const ref=db.collection('notifications').doc();
+        batch.set(ref,{
+          to:d.id,type:'announcement',
+          fromName:currentUserData?.displayName||'Admin',
+          title,preview:body.length>60?body.slice(0,60)+'…':body,
+          read:false,
+          createdAt:firebase.firestore.FieldValue.serverTimestamp()
+        });
+        batchCount++;
+      }
+    });
+    await batch.commit();
+    document.getElementById('annTitle').value='';
+    document.getElementById('annBody').value='';
+    const s=document.getElementById('annSentMsg');s.style.display='block';
+    setTimeout(()=>s.style.display='none',3000);
+    showToast(`Announcement sent to ${batchCount} member(s)!`);
+  }catch(err){
+    console.error('Announcement error:',err);
+    showToast('Error: '+err.message);
+  }finally{
+    btn.disabled=false;btn.innerHTML='<i class="fas fa-bullhorn"></i> Send Announcement';
+  }
+});
+document.getElementById('closeAdmin').addEventListener('click',()=>closeModal('adminModal'));
+document.getElementById('adminPanelBtn').addEventListener('click',e=>{e.preventDefault();dropdownMenu.classList.remove('open');openAdminPanel();});
+document.getElementById('logoutBtn').addEventListener('click',async(e)=>{
+  e.preventDefault();
+  try{
+    if(currentUser?.isAnonymous){
+      try{await db.collection('users').doc(currentUser.uid).delete();}catch(_){}
+      try{await currentUser.delete();}catch(_){}
+    }
+    await auth.signOut();
+    showToast('Signed out successfully.');
+  }catch(err){showToast('Error signing out: '+err.message);}
+});
+/* ── GUEST CONTENT RESTRICTIONS ── */
+function applyGuestRestrictions(isGuest){
+  // Hide member-only
+  document.querySelectorAll('[data-member-only="true"]').forEach(el=>{
+    el.classList.toggle('guest-hidden', isGuest);
+  });
+  // Active members panel
+  const countRow=document.getElementById('activeMembersCount');
+  const membersList=document.getElementById('activeMembersList');
+  const guestMsg=document.getElementById('activeMembersGuestMsg');
+  if(countRow) countRow.style.display=isGuest?'none':'';
+  if(membersList) membersList.style.display=isGuest?'none':'';
+  if(guestMsg) guestMsg.style.display=isGuest?'block':'none';
+  // Wire register link
+  const regLink=document.getElementById('activeMembersRegisterLink');
+  if(regLink&&isGuest){
+    regLink.onclick=e=>{
+      e.preventDefault();
+      promptGuestRegister("Create a free account to see who's online and connect with other operatives.");
+    };
+  }
+  // Hide members button for guests
+  const viewMembersBtn=document.getElementById('viewMembersBtn');
+  if(viewMembersBtn){
+    viewMembersBtn.style.display=isGuest?'none':'flex';
+  }
+  // Hide corp hub for guests
+  document.getElementById('corpHubBtn').style.display='none';
+  document.getElementById('corpChatBtn').classList.remove('show');
+  document.getElementById('navStatusWrap').style.display='none';
+}
+/* ═══════════════════════════════════════════════════════
+   STATUS SYSTEM
+═══════════════════════════════════════════════════════ */
+const STATUS_LABELS={online:'Online',idle:'Idle',dnd:'Do Not Disturb',offline:'Offline'};
+let idleTimer=null, currentPresenceStatus='online';
+function updateNavStatusDot(status){
+  const dot=document.getElementById('navStatusDot');
+  if(!dot)return;
+  dot.className='status-dot '+status;
+}
+async function setUserStatus(status,customText){
+  if(!currentUser||currentUser.isAnonymous)return;
+  currentPresenceStatus=status;
+  updateNavStatusDot(status);
+  const updates={status};
+  if(customText!==undefined)updates.activityStatus=customText;
+  await db.collection('users').doc(currentUser.uid).update(updates).catch(()=>{});
+  if(currentUserData){currentUserData.status=updates.status;if(customText!==undefined)currentUserData.activityStatus=customText;}
+}
+function startIdleDetection(){
+  let lastActivity=Date.now();
+  const resetIdle=()=>{
+    lastActivity=Date.now();
+    if(currentPresenceStatus==='idle'&&document.visibilityState==='visible'){
+      setUserStatus('online');
+    }
+  };
+  ['mousemove','keydown','click','scroll','touchstart'].forEach(e=>document.addEventListener(e,resetIdle,{passive:true}));
+  setInterval(()=>{
+    if(!currentUser||currentUser.isAnonymous)return;
+    const idle=Date.now()-lastActivity>180000; // 3 min
+    if(idle&&(currentPresenceStatus==='online')){
+      setUserStatus('idle');
+      writeCorpLog('status','went idle');
+    }
+  },30000);
+  document.addEventListener('visibilitychange',()=>{
+    if(!currentUser||currentUser.isAnonymous)return;
+    if(document.visibilityState==='hidden'&&currentPresenceStatus==='online'){
+      setUserStatus('idle');
+    }else if(document.visibilityState==='visible'&&currentPresenceStatus==='idle'){
+      setUserStatus('online');
+      writeCorpLog('status','is back online');
+    }
+  });
+}
+// Wire status picker
+document.getElementById('statusDotBtn').addEventListener('click',e=>{
+  e.stopPropagation();
+  document.getElementById('statusPicker').classList.toggle('open');
+});
+document.addEventListener('click',()=>document.getElementById('statusPicker').classList.remove('open'));
+document.querySelectorAll('.status-pick-item').forEach(item=>{
+  item.addEventListener('click',e=>{
+    e.stopPropagation();
+    const s=item.dataset.status;
+    setUserStatus(s);
+    document.getElementById('statusPicker').classList.remove('open');
+    writeCorpLog('status',`set their status to ${STATUS_LABELS[s]||s}`,{status:s});
+  });
+});
+const customStatusInput=document.getElementById('customStatusInput');
+customStatusInput.addEventListener('keydown',async e=>{
+  if(e.key==='Enter'){
+    const txt=e.target.value.trim();
+    // Save activity
+    await db.collection('users').doc(currentUser.uid).update({activityStatus:txt}).catch(()=>{});
+    if(currentUserData)currentUserData.activityStatus=txt;
+    document.getElementById('statusPicker').classList.remove('open');
+    // Update display
+    const actEl=document.getElementById('profileActivityStatus');
+    if(actEl)actEl.textContent=txt?`"${txt}"`:'';
+    showToast(txt?`Activity set: "${txt}"`:'Activity status cleared.');
+  }
+});
+customStatusInput.addEventListener('click',e=>e.stopPropagation());
+/* ═══════════════════════════════════════════════════════
+   BADGES
+═══════════════════════════════════════════════════════ */
+const BADGE_DEFS={
+  founding:{icon:'fa-star',label:'Founding Member',cls:'badge-founding',desc:'One of the first to join TheSizNexus'},
+  beta:{icon:'fa-flask',label:'Beta Tester',cls:'badge-beta',desc:'Helped test the Nexus platform'},
+  veteran:{icon:'fa-shield-alt',label:'Veteran',cls:'badge-veteran',desc:'Member for 30+ days'},
+  social:{icon:'fa-user-friends',label:'Social',cls:'badge-social',desc:'10+ connections'},
+  top:{icon:'fa-trophy',label:'Top Operative',cls:'badge-top',desc:'Ranked in the top 3'},
+  firstlogin:{icon:'fa-door-open',label:'First Access',cls:'badge-firstlogin',desc:'Completed first login'},
+  mission:{icon:'fa-check-circle',label:'Operative',cls:'badge-mission',desc:'Completed a mission'}
+};
+function renderBadges(badges){
+  if(!badges||!badges.length)return'';
+  return'<div class="badge-row">'+badges.map(b=>{
+    const def=BADGE_DEFS[b];
+    if(!def)return'';
+    return`<span class="badge ${def.cls}" title="${def.desc}"><i class="fas ${def.icon}"></i> ${def.label}</span>`;
+  }).join('')+'</div>';
+}
+function awardBadge(uid,badgeKey){
+  return db.collection('users').doc(uid).update({badges:firebase.firestore.FieldValue.arrayUnion(badgeKey)});
+}
+async function checkAndAwardBadges(uid,userData){
+  if(!uid||!userData||userData.isAnonymous)return;
+  const badges=userData.badges||[];
+  const toAward=[];
+  if(!badges.includes('firstlogin'))toAward.push('firstlogin');
+  const createdAt=userData.createdAt?.toDate?.();
+  if(createdAt&&(Date.now()-createdAt.getTime())>30*24*60*60*1000&&!badges.includes('veteran'))toAward.push('veteran');
+  if((userData.friends||[]).length>=10&&!badges.includes('social'))toAward.push('social');
+  const missionsSnap=await db.collection('missionSubmissions').where('uid','==',uid).where('status','==','approved').get().catch(()=>({empty:true}));
+  if(!missionsSnap.empty&&!badges.includes('mission'))toAward.push('mission');
+  if(toAward.length){
+    await db.collection('users').doc(uid).update({badges:firebase.firestore.FieldValue.arrayUnion(...toAward)}).catch(()=>{});
+    if(currentUserData)currentUserData.badges=[...badges,...toAward];
+  }
+}
+/* ═══════════════════════════════════════════════════════
+   CORPORATION LOG
+═══════════════════════════════════════════════════════ */
+const PRIVATE_LOG_TYPES=['status','profile'];
+const DEV_RANKS=['Founder','Administrator','Co-Administrator','Developer'];
+function isDev(data){return data&&DEV_RANKS.includes(data.rank);}
+const MOD_RANKS=['Founder','Administrator','Co-Administrator','Moderator'];
+function isMod(data){return data&&MOD_RANKS.includes(data.rank);}
+async function writeCorpLog(type,message,extra={}){
+  if(!currentUser||currentUser.isAnonymous)return;
+  await db.collection('corpLog').add({
+    type,
+    uid:currentUser.uid,
+    displayName:currentUserData?.displayName||'Unknown',
+    rank:currentUserData?.rank||'Member',
+    message,
+    extra,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(()=>{});
+}
+let corpLogUnsub=null;
+async function loadCorpLog(filter='all'){
+  const feed=document.getElementById('corpLogFeed');
+  feed.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  if(corpLogUnsub){corpLogUnsub();corpLogUnsub=null;}
+  let q=db.collection('corpLog').orderBy('createdAt','desc').limit(50);
+  corpLogUnsub=q.onSnapshot(snap=>{
+    feed.innerHTML='';
+    let docs=snap.docs;
+    if(filter!=='all')docs=docs.filter(d=>d.data().type===filter);
+    if(!docs.length){feed.innerHTML='<div class="hub-empty">No activity yet.</div>';return;}
+    // Filter log entries
+    const isDevViewer=isDev(currentUserData);
+    const isMViewer=isMod(currentUserData);
+    const visibleDocs=docs.filter(d=>{
+      const t=d.data().type;
+      if(PRIVATE_LOG_TYPES.includes(t)&&!isDevViewer)return false;
+      return true;
+    });
+    if(!visibleDocs.length){feed.innerHTML='<div class="hub-empty">No activity to display.</div>';return;}
+    visibleDocs.forEach(d=>{
+      const log=d.data();
+      const item=document.createElement('div');item.className='log-item';
+      const time=log.createdAt?fmtDate(log.createdAt)+' '+fmtTime(log.createdAt):'';
+      // Icon per type
+      const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn'};
+      const icon=typeIcon[log.type]||'fa-circle';
+      item.innerHTML=`<div class="log-item-main"><i class="fas ${icon}" style="margin-right:6px;font-size:.65rem;opacity:.6;"></i><strong>${esc(log.displayName||'Unknown')}</strong> ${esc(log.message)}</div>
+        <div class="log-item-meta"><span class="${rankClass(log.rank)}">${esc(log.rank||'Member')}</span> &middot; ${time}</div>
+        ${isMViewer&&log.extra&&Object.keys(log.extra).length?`<div class="log-item-detail"><i class="fas fa-info-circle" style="margin-right:4px;opacity:.5;font-size:.6rem;"></i>${esc(JSON.stringify(log.extra))}</div>`:''}`;
+      feed.appendChild(item);
+    });
+  },err=>{feed.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;});
+}
+// Filter buttons
+document.querySelectorAll('.log-filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.log-filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    loadCorpLog(btn.dataset.filter);
+  });
+});
+/* ═══════════════════════════════════════════════════════
+   MISSIONS
+═══════════════════════════════════════════════════════ */
+async function loadMissions(){
+  const list=document.getElementById('missionsList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  try{
+    const [missionsSnap,mySubsSnap]=await Promise.all([
+      db.collection('missions').where('active','==',true).get(),
+      db.collection('missionSubmissions').where('uid','==',currentUser.uid).get()
+    ]);
+    const mySubsMap={};
+    mySubsSnap.forEach(d=>{mySubsMap[d.data().missionId]=d.data();});
+    list.innerHTML='';
+    if(missionsSnap.empty){list.innerHTML='<div class="hub-empty">No active missions. Check back soon.</div>';return;}
+    missionsSnap.forEach(d=>{
+      const m=d.data(),mid=d.id;
+      const mySub=mySubsMap[mid];
+      const card=document.createElement('div');card.className='mission-card';
+      let statusHtml='<span class="mission-status open">Open</span>';
+      let actionHtml='';
+      if(mySub){
+        if(mySub.status==='pending'){
+          statusHtml='<span class="mission-status pending">Pending Review</span>';
+          actionHtml='<p style="font-family:var(--font-mono);font-size:.7rem;color:var(--color-text-muted);margin-top:8px;"><i class="fas fa-clock"></i> Your KEY has been submitted and is awaiting admin review.</p>';
+        }else if(mySub.status==='approved'){
+          statusHtml='<span class="mission-status completed">Completed</span>';
+          actionHtml='<p style="font-family:var(--font-mono);font-size:.7rem;color:#4CAF50;margin-top:8px;"><i class="fas fa-check-circle"></i> Mission complete! +${m.points||50} pts awarded.</p>';
+        }else if(mySub.status==='rejected'){
+          statusHtml='<span class="mission-status rejected">Rejected</span>';
+          actionHtml=`<p style="font-family:var(--font-mono);font-size:.7rem;color:#f44336;margin-top:8px;"><i class="fas fa-times-circle"></i> Key rejected. ${esc(mySub.rejectReason||'Try again or contact an admin.')}</p>`;
+        }
+      }else{
+        actionHtml=`<div class="key-input-row">
+          <input type="text" class="key-input" id="keyInput_${mid}" placeholder="Enter mission KEY..." maxlength="30">
+          <button class="key-submit" data-mid="${mid}" data-pts="${m.points||50}"><i class="fas fa-key"></i> Submit</button>
+        </div>
+        <p style="font-family:var(--font-mono);font-size:.62rem;color:rgba(192,192,192,.35);margin-top:5px;">Use the <strong style="color:rgba(192,192,192,.55);">/key</strong> bot command in Discord to get the KEY for this mission.</p>`;
+      }
+      card.innerHTML=`
+        <div class="mission-header">
+          <div class="mission-icon"><i class="fas fa-crosshairs"></i></div>
+          <div class="mission-info">
+            <div class="mission-title">${esc(m.title||'Mission')}</div>
+            <div class="mission-desc">${esc(m.description||'')}</div>
+          </div>
+        </div>
+        <div class="mission-footer"><span class="mission-pts"><i class="fas fa-star"></i> ${m.points||50} pts</span>${statusHtml}</div>
+        ${actionHtml}`;
+      // Wire submit button
+      const submitBtn=card.querySelector('.key-submit');
+      if(submitBtn){
+        submitBtn.addEventListener('click',async function(){
+          const keyVal=document.getElementById('keyInput_'+this.dataset.mid)?.value.trim().toUpperCase();
+          if(!keyVal){showToast('Enter a KEY first.');return;}
+          this.disabled=true;this.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+          try{
+            await db.collection('missionSubmissions').add({
+              uid:currentUser.uid,
+              displayName:currentUserData?.displayName||'Unknown',
+              missionId:this.dataset.mid,
+              missionTitle:m.title||'Mission',
+              keySubmitted:keyVal,
+              points:parseInt(this.dataset.pts)||50,
+              status:'pending',
+              createdAt:firebase.firestore.FieldValue.serverTimestamp()
+            });
+            showToast('KEY submitted! Awaiting admin review.');
+            writeCorpLog('mission',`submitted a KEY for mission: ${m.title}`);
+            loadMissions();
+          }catch(err){showToast('Error: '+err.message);this.disabled=false;this.innerHTML='<i class="fas fa-key"></i> Submit';}
+        });
+      }
+      list.appendChild(card);
+    });
+  }catch(err){list.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;}
+}
+/* ═══════════════════════════════════════════════════════
+   LEADERBOARD
+═══════════════════════════════════════════════════════ */
+async function loadLeaderboard(){
+  const list=document.getElementById('leaderboardList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  try{
+    const snap=await db.collection('users').get();
+    const users=[];
+    snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous)users.push(u);});
+    // Compute score
+    users.sort((a,b)=>(b.points||0)-(a.points||0));
+    list.innerHTML='';
+    if(!users.length){list.innerHTML='<div class="hub-empty">No operatives ranked yet.</div>';return;}
+    users.slice(0,20).forEach((u,i)=>{
+      const rankNum=i+1;
+      const rankCls=rankNum===1?'gold':rankNum===2?'silver':rankNum===3?'bronze':'other';
+      const rankIcon=rankNum===1?'🥇':rankNum===2?'🥈':rankNum===3?'🥉':rankNum;
+      const isMe=u.id===currentUser.uid;
+      const row=document.createElement('div');row.className='lb-row'+(isMe?' ':"");
+      if(isMe)row.style.borderColor='rgba(192,192,192,.3)';
+      row.innerHTML=`<span class="lb-rank ${rankCls}">${rankIcon}</span>
+        <div class="lb-av">${avHtml(u.photoURL,u.displayName)}</div>
+        <span class="lb-name">${esc(u.displayName||'Unknown')}${isMe?'<span class="lb-you">[YOU]</span>':''}</span>
+        <span class="lb-pts"><i class="fas fa-star" style="font-size:.6rem;margin-right:3px;"></i>${u.points||0}</span>`;
+      list.appendChild(row);
+    });
+  }catch(err){list.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;}
+}
+/* ═══════════════════════════════════════════════════════
+   CALENDAR
+═══════════════════════════════════════════════════════ */
+async function loadCalendar(){
+  const list=document.getElementById('calendarList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  try{
+    const snap=await db.collection('events').get();
+    const events=snap.docs.sort((a,b)=>(a.data().eventDate?.toMillis?.()??0)-(b.data().eventDate?.toMillis?.()??0));
+    list.innerHTML='';
+    if(!events.length){list.innerHTML='<div class="hub-empty">No events scheduled yet.</div>';return;}
+    for(const d of events){
+      const ev=d.data(),eid=d.id;
+      const evDate=ev.eventDate?.toDate?.();
+      const dateStr=evDate?evDate.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'TBD';
+      const isPast=evDate&&evDate<new Date();
+      const myRsvp=(ev.rsvpYes||[]).includes(currentUser.uid)?'yes':(ev.rsvpNo||[]).includes(currentUser.uid)?'no':null;
+      const card=document.createElement('div');card.className='event-card';
+      if(isPast)card.style.opacity='.55';
+      card.innerHTML=`<div class="event-title">${esc(ev.title||'Event')}</div>
+        <div class="event-desc">${esc(ev.description||'')}</div>
+        <div class="event-meta">
+          <span class="event-date"><i class="fas fa-clock"></i> ${dateStr}</span>
+          <span class="rsvp-count" id="rsvpCount_${eid}">✅ ${(ev.rsvpYes||[]).length} going</span>
+        </div>
+        ${!isPast?`<div class="event-rsvp-row">
+          <button class="rsvp-btn yes${myRsvp==='yes'?' active':''}" data-eid="${eid}" data-action="yes">✅ Going</button>
+          <button class="rsvp-btn no${myRsvp==='no'?' active':''}" data-eid="${eid}" data-action="no">❌ Can't go</button>
+        </div>`:'<p style="font-family:var(--font-mono);font-size:.65rem;color:rgba(192,192,192,.3);margin-top:6px;">This event has passed.</p>'}`;
+      // Wire RSVP buttons
+      card.querySelectorAll('.rsvp-btn').forEach(btn=>{
+        btn.addEventListener('click',async function(){
+          const action=this.dataset.action,eid=this.dataset.eid;
+          const ref=db.collection('events').doc(eid);
+          const updateData={};
+          if(action==='yes'){
+            updateData.rsvpYes=firebase.firestore.FieldValue.arrayUnion(currentUser.uid);
+            updateData.rsvpNo=firebase.firestore.FieldValue.arrayRemove(currentUser.uid);
+          }else{
+            updateData.rsvpNo=firebase.firestore.FieldValue.arrayUnion(currentUser.uid);
+            updateData.rsvpYes=firebase.firestore.FieldValue.arrayRemove(currentUser.uid);
+          }
+          await ref.update(updateData).catch(e=>showToast(e.message));
+          loadCalendar();
+        });
+      });
+      list.appendChild(card);
+    }
+  }catch(err){list.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;}
+}
+/* ═══════════════════════════════════════════════════════
+   INTEL BOARD
+═══════════════════════════════════════════════════════ */
+async function loadIntelBoard(){
+  const list=document.getElementById('intelList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  const canPost=isMod(currentUserData);
+  try{
+    const snap=await db.collection('intelPosts').get();
+    const posts=snap.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()??0)-(a.data().createdAt?.toMillis?.()??0));
+    list.innerHTML='';
+    if(canPost){
+      list.innerHTML=`<div style="margin-bottom:12px;display:flex;flex-direction:column;gap:6px;">
+        <input type="text" id="intelTitle" class="input-field" placeholder="Intel title..." maxlength="80" style="font-size:.78rem;">
+        <textarea id="intelBody" class="input-field" placeholder="Write intel post..." maxlength="600" style="min-height:60px;font-size:.75rem;resize:vertical;"></textarea>
+        <input type="text" id="intelTag" class="input-field" placeholder="Tag (e.g. Recon, Alert, Update)" maxlength="20" style="font-size:.75rem;">
+        <button class="btn-primary" id="postIntelBtn" style="justify-content:center;font-size:.75rem;padding:8px;"><i class="fas fa-satellite-dish"></i> Post Intel</button>
+      </div>`;
+      document.getElementById('postIntelBtn').addEventListener('click',async()=>{
+        const title=document.getElementById('intelTitle').value.trim();
+        const body=document.getElementById('intelBody').value.trim();
+        const tag=document.getElementById('intelTag').value.trim();
+        if(!title||!body){showToast('Title and body required.');return;}
+        const btn=document.getElementById('postIntelBtn');
+        btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Posting...';
+        await db.collection('intelPosts').add({title,body,tag,authorName:currentUserData?.displayName||'Admin',authorRank:currentUserData?.rank||'Member',createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(e=>showToast(e.message));
+        writeCorpLog('intel',`posted new intel: "${title}"`);
+        loadIntelBoard();
+      });
+    }
+    if(!posts.length){list.innerHTML+='<div class="hub-empty">No intel posts yet.</div>';return;}
+    posts.forEach(d=>{
+      const p=d.data();
+      const item=document.createElement('div');item.className='intel-post';
+      item.innerHTML=`<div class="intel-post-title">${p.tag?`<span class="intel-tag">${esc(p.tag)}</span>`:''}${esc(p.title||'Intel')}</div>
+        <div class="intel-post-body">${esc(p.body||'')}</div>
+        <div class="intel-post-meta"><span>${esc(p.authorName||'Admin')} &middot; ${esc(p.authorRank||'')}</span><span>${p.createdAt?fmtDate(p.createdAt):''}</span></div>`;
+      list.appendChild(item);
+    });
+  }catch(err){list.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;}
+}
+/* ═══════════════════════════════════════════════════════
+   POLLS
+═══════════════════════════════════════════════════════ */
+async function loadPolls(){
+  const list=document.getElementById('pollsList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  const canCreate=isAdmin(currentUserData);
+  try{
+    const snap=await db.collection('polls').get();
+    const polls=snap.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()??0)-(a.data().createdAt?.toMillis?.()??0));
+    list.innerHTML='';
+    if(canCreate){
+      list.innerHTML=`<div style="margin-bottom:14px;display:flex;flex-direction:column;gap:6px;">
+        <input type="text" id="pollQuestion" class="input-field" placeholder="Poll question..." maxlength="120" style="font-size:.78rem;">
+        <div id="pollOptionsWrap" style="display:flex;flex-direction:column;gap:4px;">
+          <input type="text" class="poll-opt-inp input-field" placeholder="Option 1" maxlength="80" style="font-size:.75rem;">
+          <input type="text" class="poll-opt-inp input-field" placeholder="Option 2" maxlength="80" style="font-size:.75rem;">
+        </div>
+        <button id="addPollOptBtn" style="background:none;border:1px solid rgba(192,192,192,.18);color:var(--color-text-muted);font-family:var(--font-mono);font-size:.65rem;padding:4px;border-radius:3px;cursor:pointer;">+ Add option</button>
+        <button class="btn-primary" id="createPollBtn" style="justify-content:center;font-size:.75rem;padding:8px;"><i class="fas fa-poll"></i> Create Poll</button>
+      </div>`;
+      document.getElementById('addPollOptBtn').addEventListener('click',()=>{
+        const inp=document.createElement('input');inp.type='text';inp.className='poll-opt-inp input-field';inp.placeholder='Option';inp.maxLength=80;inp.style.fontSize='.75rem';
+        document.getElementById('pollOptionsWrap').appendChild(inp);
+      });
+      document.getElementById('createPollBtn').addEventListener('click',async()=>{
+        const q=document.getElementById('pollQuestion').value.trim();
+        const opts=[...document.querySelectorAll('.poll-opt-inp')].map(i=>i.value.trim()).filter(Boolean);
+        if(!q||opts.length<2){showToast('Question and at least 2 options required.');return;}
+        const btn=document.getElementById('createPollBtn');
+        btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+        const votesObj={};opts.forEach(o=>{votesObj[o]=[];});
+        await db.collection('polls').add({question:q,options:opts,votes:votesObj,createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(e=>showToast(e.message));
+        writeCorpLog('poll',`created a new poll: "${q}"`);
+        loadPolls();
+      });
+    }
+    if(!polls.length){list.innerHTML+='<div class="hub-empty">No polls yet.</div>';return;}
+    for(const d of polls){
+      const p=d.data(),pid=d.id;
+      const votes=p.votes||{};
+      const totalVotes=Object.values(votes).reduce((s,arr)=>s+(arr.length||0),0);
+      const myVote=Object.entries(votes).find(([opt,arr])=>arr.includes(currentUser.uid))?.[0];
+      const card=document.createElement('div');card.className='poll-card';
+      let optsHtml=(p.options||[]).map(opt=>{
+        const count=(votes[opt]||[]).length;
+        const pct=totalVotes?Math.round(count/totalVotes*100):0;
+        const isVoted=myVote===opt;
+        return`<div class="poll-option">
+          <button class="poll-option-btn${isVoted?' voted':''}" data-pid="${pid}" data-opt="${esc(opt)}" ${myVote?'disabled':''}>
+            ${myVote?`<div class="poll-bar" style="width:${pct}%"></div>`:''}
+            <div class="poll-opt-text"><span>${esc(opt)}</span>${myVote?`<span>${pct}% (${count})</span>`:''}</div>
+          </button></div>`;
+      }).join('');
+      card.innerHTML=`<div class="poll-question">${esc(p.question||'')}</div>${optsHtml}<div class="poll-meta">${totalVotes} vote${totalVotes!==1?'s':''} &middot; ${p.createdAt?fmtDate(p.createdAt):''}</div>`;
+      card.querySelectorAll('.poll-option-btn:not([disabled])').forEach(btn=>{
+        btn.addEventListener('click',async function(){
+          const opt=this.dataset.opt,pid=this.dataset.pid;
+          const ref=db.collection('polls').doc(pid);
+          const snap2=await ref.get();if(!snap2.exists)return;
+          const data=snap2.data();const vs=data.votes||{};
+          // Remove from any existing choice first
+          Object.keys(vs).forEach(k=>{vs[k]=(vs[k]||[]).filter(id=>id!==currentUser.uid);});
+          if(!vs[opt])vs[opt]=[];
+          vs[opt].push(currentUser.uid);
+          await ref.update({votes:vs}).catch(e=>showToast(e.message));
+          loadPolls();
+        });
+      });
+      list.appendChild(card);
+    }
+  }catch(err){list.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;}
+}
+/* ═══════════════════════════════════════════════════════
+   GROUP CHAT
+═══════════════════════════════════════════════════════ */
+let corpChatUnsub=null, corpChatOpen=false, corpChatLastSeen=0;
+function openCorpChat(){
+  corpChatOpen=true;
+  corpChatLastSeen=Date.now();
+  document.getElementById('corpChatPanel').classList.add('open');
+  document.getElementById('chatUnreadBadge').classList.remove('show');
+  if(!corpChatUnsub)startCorpChatListener();
+}
+function closeCorpChat(){
+  corpChatOpen=false;
+  document.getElementById('corpChatPanel').classList.remove('open');
+}
+function startCorpChatListener(){
+  if(corpChatUnsub){corpChatUnsub();corpChatUnsub=null;}
+  corpChatUnsub=db.collection('corpChat').orderBy('createdAt','asc').limitToLast(60).onSnapshot(snap=>{
+    const body=document.getElementById('corpChatBody');
+    body.innerHTML='';
+    let lastDate='',lastUid='';
+    snap.forEach(d=>{
+      const m=d.data(),isMine=m.uid===currentUser.uid;
+      const ds=m.createdAt?fmtDate(m.createdAt):'';
+      if(ds&&ds!==lastDate){
+        lastDate=ds;
+        const sep=document.createElement('div');sep.className='corp-date-sep';sep.textContent=ds;body.appendChild(sep);
+      }
+      const wrap=document.createElement('div');wrap.className='corp-msg '+(isMine?'mine':'theirs');
+      const showName=m.uid!==lastUid;
+      lastUid=m.uid;
+      const canDelCorpMsg=isCoAdmin(currentUserData)||isMine;
+      let nameHtml=showName&&!isMine?`<div class="corp-msg-name">${esc(m.displayName||'?')}</div>`:'';
+      let delHtml=canDelCorpMsg?`<button class="corp-del-btn" data-id="${d.id}" title="Delete" style="background:none;border:none;color:rgba(244,67,54,.35);font-size:.58rem;cursor:pointer;padding:1px 3px;opacity:0;transition:opacity .2s;align-self:center;flex-shrink:0;"><i class="fas fa-trash"></i></button>`:'';
+      wrap.innerHTML=`${nameHtml}<div class="corp-msg-bubble">${esc(m.text||'')}</div>${delHtml}<div class="corp-msg-time" style="clear:both;">${fmtTime(m.createdAt)}</div>`;
+      if(canDelCorpMsg){
+        const db2=wrap.querySelector('.corp-del-btn');
+        if(db2){
+          wrap.addEventListener('mouseenter',()=>{db2.style.opacity='1';});
+          wrap.addEventListener('mouseleave',()=>{db2.style.opacity='0';});
+          db2.addEventListener('click',async e=>{
+            e.stopPropagation();
+            if(!confirm('Delete this message?'))return;
+            await db.collection('corpChat').doc(db2.dataset.id).delete().catch(e2=>showToast(e2.message));
+          });
+        }
+      }
+      body.appendChild(wrap);
+    });
+    body.scrollTop=body.scrollHeight;
+    // Show unread badge if panel is closed
+    if(!corpChatOpen){
+      const badge=document.getElementById('chatUnreadBadge');
+      badge.classList.add('show');
+    }
+    // Update online count
+    document.getElementById('corpChatOnline').textContent='';
+  },err=>console.error('Corp chat error:',err));
+}
+async function sendCorpChatMsg(){
+  const input=document.getElementById('corpChatInput');
+  const text=input.value.trim();if(!text)return;
+  input.value='';
+  await db.collection('corpChat').add({
+    uid:currentUser.uid,
+    displayName:currentUserData?.displayName||'Unknown',
+    rank:currentUserData?.rank||'Member',
+    text,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(e=>{input.value=text;showToast('Failed to send: '+e.message);});
+}
+document.getElementById('corpChatBtn').addEventListener('click',()=>{
+  corpChatOpen?closeCorpChat():openCorpChat();
+});
+document.getElementById('corpChatClose').addEventListener('click',closeCorpChat);
+document.getElementById('corpChatSend').addEventListener('click',sendCorpChatMsg);
+document.getElementById('corpChatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendCorpChatMsg();}});
+/* ═══════════════════════════════════════════════════════
+   ENGAGEMENT HUB MODAL
+═══════════════════════════════════════════════════════ */
+async function openEngagementHub(tab='log'){
+  if(!currentUser||currentUser.isAnonymous){
+    promptGuestRegister('Create a free account to access the Corp Hub.');
+    return;
+  }
+  openModal('engagementModal');
+  // Activate correct tab
+  document.querySelectorAll('.hub-tab').forEach(b=>{b.classList.toggle('active',b.dataset.hub===tab);});
+  document.querySelectorAll('.hub-section').forEach(s=>{s.classList.toggle('active',s.id==='hub'+tab.charAt(0).toUpperCase()+tab.slice(1));});
+  await loadHubTab(tab);
+  // Tab switching
+  document.querySelectorAll('.hub-tab').forEach(btn=>{
+    btn.onclick=async()=>{
+      document.querySelectorAll('.hub-tab').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.hub-section').forEach(s=>s.classList.remove('active'));
+      btn.classList.add('active');
+      const section=document.getElementById('hub'+btn.dataset.hub.charAt(0).toUpperCase()+btn.dataset.hub.slice(1));
+      if(section)section.classList.add('active');
+      await loadHubTab(btn.dataset.hub);
+    };
+  });
+}
+async function loadHubTab(tab){
+  if(tab==='log')loadCorpLog(document.querySelector('.log-filter-btn.active')?.dataset.filter||'all');
+  else if(tab==='missions')loadMissions();
+  else if(tab==='leaderboard')loadLeaderboard();
+  else if(tab==='calendar')loadCalendar();
+  else if(tab==='intel')loadIntelBoard();
+  else if(tab==='polls')loadPolls();
+}
+document.getElementById('closeEngagement').addEventListener('click',()=>{
+  closeModal('engagementModal');
+  if(corpLogUnsub){corpLogUnsub();corpLogUnsub=null;}
+});
+document.getElementById('corpHubBtn').addEventListener('click',e=>{
+  e.preventDefault();
+  dropdownMenu.classList.remove('open');
+  openEngagementHub();
+});
+/* ═══════════════════════════════════════════════════════
+   REPORT & BLOCK SYSTEM
+═══════════════════════════════════════════════════════ */
+let _reportTargetUid=null, _reportTargetName='', _reportSelectedReason=null;
+function openReportModal(uid, name){
+  _reportTargetUid=uid;
+  _reportTargetName=name;
+  _reportSelectedReason=null;
+  document.getElementById('reportTargetName').textContent=name;
+  document.getElementById('reportDetails').value='';
+  document.getElementById('submitReportBtn').disabled=true;
+  document.getElementById('submitReportBtn').style.opacity='.5';
+  document.getElementById('submitReportBtn').style.cursor='not-allowed';
+  // Reset reason buttons
+  document.querySelectorAll('.report-reason-btn').forEach(b=>b.classList.remove('selected'));
+  openModal('reportModal');
+}
+// Wire reason buttons
+document.querySelectorAll('.report-reason-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.report-reason-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    _reportSelectedReason=btn.dataset.reason;
+    const submitBtn=document.getElementById('submitReportBtn');
+    submitBtn.disabled=false;
+    submitBtn.style.opacity='1';
+    submitBtn.style.cursor='pointer';
+  });
+});
+document.getElementById('closeReport').addEventListener('click',()=>closeModal('reportModal'));
+document.getElementById('reportModal').addEventListener('click',function(e){if(e.target===this)closeModal('reportModal');});
+document.getElementById('submitReportBtn').addEventListener('click',async()=>{
+  if(!currentUser||!_reportTargetUid||!_reportSelectedReason)return;
+  const details=document.getElementById('reportDetails').value.trim();
+  const btn=document.getElementById('submitReportBtn');
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Submitting...';
+  try{
+    await db.collection('reports').add({
+      reportedUid:_reportTargetUid,
+      reportedName:_reportTargetName,
+      reporterUid:currentUser.uid,
+      reporterName:currentUserData?.displayName||'Unknown',
+      reason:_reportSelectedReason,
+      details,
+      status:'pending',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    closeModal('reportModal');
+    showToast('Report submitted. Our staff will review it.');
+  }catch(err){
+    showToast('Failed to submit report: '+err.message);
+    btn.disabled=false;
+    btn.innerHTML='<i class="fas fa-flag"></i> Submit Report';
+  }
+});
+// ── BLOCK SYSTEM ──────────────────────────────────────
+async function blockUser(uid, name){
+  if(!currentUser||!uid)return;
+  const confirmed=confirm(`Block ${name}? Their profile will be hidden from you and you won't see their messages.`);
+  if(!confirmed)return;
+  await db.collection('users').doc(currentUser.uid).update({
+    blockedUsers:firebase.firestore.FieldValue.arrayUnion(uid)
+  }).catch(e=>showToast(e.message));
+  if(currentUserData){
+    currentUserData.blockedUsers=[...(currentUserData.blockedUsers||[]),uid];
+  }
+  // Remove friend if connected
+  if((currentUserData?.friends||[]).includes(uid)){
+    await removeFriend(uid,name);
+  }else{
+    closeModal('profileModal');
+  }
+  showToast(`${name} has been blocked.`);
+}
+async function unblockUser(uid, name){
+  if(!currentUser)return;
+  await db.collection('users').doc(currentUser.uid).update({
+    blockedUsers:firebase.firestore.FieldValue.arrayRemove(uid)
+  }).catch(e=>showToast(e.message));
+  if(currentUserData){
+    currentUserData.blockedUsers=(currentUserData.blockedUsers||[]).filter(id=>id!==uid);
+  }
+  closeModal('profileModal');
+  showToast(`${name} has been unblocked.`);
+}
+function isBlocked(uid){
+  return (currentUserData?.blockedUsers||[]).includes(uid);
+}
+// ── ADMIN: LOAD REPORTS ───────────────────────────────
+const CO_ADMIN_RANKS=['Founder','Administrator','Co-Administrator'];
+function isCoAdmin(data){return(currentUser&&currentUser.uid===OWNER_UID)||data&&CO_ADMIN_RANKS.includes(data.rank);}
+async function loadAdminReports(){
+  const list=document.getElementById('adminReportsList');
+  if(!isCoAdmin(currentUserData)){
+    list.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;text-align:center;padding:20px 0;"><i class="fas fa-lock" style="margin-right:6px;"></i>Co-Administrator+ access required.</p>';
+    return;
+  }
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  try{
+    const snap=await db.collection('reports').orderBy('createdAt','desc').get().catch(async()=>{
+      // fallback without orderBy
+      return await db.collection('reports').get();
+    });
+    const docs=snap.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()??0)-(a.data().createdAt?.toMillis?.()??0));
+    list.innerHTML='';
+    if(!docs.length){list.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);text-align:center;padding:20px 0;">No reports submitted yet.</p>';return;}
+    docs.forEach(d=>{
+      const r=d.data(),rid=d.id;
+      const isPending=r.status==='pending';
+      const card=document.createElement('div');card.className='report-card';
+      if(!isPending)card.style.opacity='.5';
+      const time=r.createdAt?fmtDate(r.createdAt)+' '+fmtTime(r.createdAt):'';
+      card.innerHTML=`
+        <div class="report-card-header">
+          <span class="report-card-reason"><i class="fas fa-flag" style="margin-right:5px;"></i>${esc(r.reason||'Unknown')}</span>
+          <span style="margin-left:auto;font-family:var(--font-mono);font-size:.62rem;padding:2px 8px;border-radius:2px;background:${isPending?'rgba(255,152,0,.1)':'rgba(76,175,80,.08)'};color:${isPending?'#ff9800':'#4CAF50'};border:1px solid ${isPending?'rgba(255,152,0,.2)':'rgba(76,175,80,.2)'};">${isPending?'Pending':'Resolved'}</span>
+        </div>
+        <div class="report-card-meta">
+          Reported: <strong style="color:var(--color-text-light);">${esc(r.reportedName||'?')}</strong>
+          &nbsp;·&nbsp; By: ${esc(r.reporterName||'?')}
+          &nbsp;·&nbsp; ${time}
+        </div>
+        ${r.details?`<div class="report-card-detail">"${esc(r.details)}"</div>`:''}
+        ${isPending?`<div class="report-card-actions">
+          <button class="report-dismiss-btn" data-rid="${rid}" data-action="resolve" style="border-color:rgba(76,175,80,.3);color:#4CAF50;">
+            <i class="fas fa-check"></i> Mark Resolved
+          </button>
+          <button class="report-dismiss-btn" data-rid="${rid}" data-action="dismiss">
+            <i class="fas fa-times"></i> Dismiss
+          </button>
+        </div>`:''}`;
+      card.querySelectorAll('[data-action]').forEach(btn=>{
+        btn.addEventListener('click',async function(){
+          this.disabled=true;this.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+          await db.collection('reports').doc(this.dataset.rid).update({
+            status:this.dataset.action==='resolve'?'resolved':'dismissed',
+            resolvedAt:firebase.firestore.FieldValue.serverTimestamp(),
+            resolvedBy:currentUserData?.displayName||'Admin'
+          }).catch(e=>showToast(e.message));
+          loadAdminReports();
+        });
+      });
+      list.appendChild(card);
+    });
+  }catch(err){list.innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;padding:10px 0;">Error: ${err.message}</p>`;}
+}
+/* ═══════════════════════════════════════════════════════
+   BAN SYSTEM
+═══════════════════════════════════════════════════════ */
+async function checkBanStatus(){
+  if(!currentUser||currentUser.isAnonymous)return;
+  try{
+    const snap=await db.collection('bans').doc(currentUser.uid).get();
+    if(snap.exists&&snap.data().active){
+      // Show ban screen — user is banned
+      showBannedScreen(snap.data().reason||'You have been banned from TheSizNexus.');
+    }
+  }catch(_){}
+}
+function showBannedScreen(reason){
+  // Remove existing if any
+  document.getElementById('bannedScreen')?.remove();
+  const screen=document.createElement('div');
+  screen.id='bannedScreen';screen.className='banned-overlay';
+  screen.innerHTML=`
+    <div class="banned-overlay-icon"><i class="fas fa-gavel"></i></div>
+    <div class="banned-overlay-title">ACCESS DENIED</div>
+    <div class="banned-overlay-msg">Your account has been suspended from TheSizNexus by a staff member.</div>
+    <div class="banned-reason-box"><i class="fas fa-comment-alt" style="margin-right:6px;"></i>${esc(reason)}</div>
+    <p style="font-family:var(--font-mono);font-size:.65rem;color:rgba(255,255,255,.2);margin-top:8px;">If you believe this is a mistake, contact staff on Discord.</p>
+    <a href="https://discord.gg/73Mb3syadB" target="_blank" style="font-family:var(--font-mono);font-size:.75rem;color:#C0C0C0;text-decoration:none;"><i class="fab fa-discord" style="margin-right:5px;"></i>Contact on Discord</a>`;
+  document.body.appendChild(screen);
+  // Sign them out after showing screen
+  setTimeout(()=>auth.signOut().catch(()=>{}),2000);
+}
+async function banUser(uid, name){
+  if(!isCoAdmin(currentUserData)){showToast('Co-Administrator+ required.');return;}
+  const reason=prompt(`Ban reason for ${name}:`);
+  if(reason===null)return; // cancelled
+  try{
+    await safeExec(db.collection('bans').doc(uid).set({uid,name,reason:reason||'Banned by staff.',bannedBy:currentUserData?.displayName||'Admin',bannedByUid:currentUser.uid,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}),'User banned');
+    await safeExec(db.collection('users').doc(uid).update({isBanned:true}));
+    loadAdminBans();
+  }catch(err){showToast('Failed: '+err.message);}
+}
+async function unbanUser(uid, name){
+  if(!isCoAdmin(currentUserData)){showToast('Co-Administrator+ required.');return;}
+  try{
+    await safeExec(db.collection('bans').doc(uid).update({active:false}),'User unbanned');
+    await safeExec(db.collection('users').doc(uid).update({isBanned:false}));
+    loadAdminBans();
+  }catch(err){showToast('Failed: '+err.message);}
+}
+async function loadAdminBans(){
+  const banList=document.getElementById('banUserList');
+  const bannedList=document.getElementById('bannedUserList');
+  if(!isCoAdmin(currentUserData)){
+    banList.innerHTML='';
+    bannedList.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;text-align:center;padding:12px 0;"><i class="fas fa-lock" style="margin-right:5px;"></i>Co-Administrator+ access required.</p>';
+    return;
+  }
+  // Wire search
+  const searchEl=document.getElementById('banSearchInput');
+  if(searchEl&&!searchEl._wired){
+    searchEl._wired=true;
+    searchEl.addEventListener('input',async()=>{
+      const q=searchEl.value.trim().toLowerCase();
+      if(!q){banList.innerHTML='';return;}
+      const snap=await db.collection('users').get();
+      banList.innerHTML='';
+      snap.forEach(d=>{
+        const u=d.data();u.id=d.id;
+        if(u.isAnonymous||u.id===currentUser.uid||u.id===OWNER_UID)return;
+        if(!(u.displayName||'').toLowerCase().includes(q))return;
+        const row=document.createElement('div');row.className='ban-user-row';
+        row.innerHTML=`<div class="admin-user-av">${avHtml(u.photoURL,u.displayName)}</div>
+          <span class="ban-name">${esc(u.displayName||'?')}</span>
+          <span class="ban-rank-label ${rankClass(u.rank)}">${esc(u.rank||'Member')}</span>
+          ${u.isBanned?'<span style="font-family:var(--font-mono);font-size:.6rem;color:#f44336;">BANNED</span>':''}
+          <button class="${u.isBanned?'btn-unban-admin':'btn-ban'}" data-uid="${u.id}" data-name="${esc(u.displayName||'?')}" data-banned="${u.isBanned?'1':'0'}">
+            <i class="fas fa-${u.isBanned?'unlock':'gavel'}"></i> ${u.isBanned?'Unban':'Ban'}
+          </button>`;
+        row.querySelector('button').addEventListener('click',async function(){
+          if(this.dataset.banned==='1')await unbanUser(this.dataset.uid,this.dataset.name);
+          else await banUser(this.dataset.uid,this.dataset.name);
+          searchEl.dispatchEvent(new Event('input'));
+        });
+        banList.appendChild(row);
+      });
+    });
+  }
+  // Load currently banned users
+  bannedList.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:12px 0;"></div>';
+  try{
+    const snap=await db.collection('bans').where('active','==',true).get().catch(async()=>db.collection('bans').get());
+    const bans=snap.docs.filter(d=>d.data().active);
+    bannedList.innerHTML='';
+    if(!bans.length){bannedList.innerHTML='<p style="font-family:var(--font-mono);font-size:.72rem;color:var(--color-text-muted);padding:8px 0;">No banned members.</p>';return;}
+    bans.forEach(d=>{
+      const b=d.data();
+      const row=document.createElement('div');row.className='ban-user-row';
+      row.innerHTML=`<div class="admin-user-av" style="background:rgba(244,67,54,.1);border-color:rgba(244,67,54,.3);"><i class="fas fa-ban" style="color:#f44336;font-size:.7rem;"></i></div>
+        <div style="flex:1;">
+          <div class="ban-name">${esc(b.name||'?')}</div>
+          <div style="font-family:var(--font-mono);font-size:.6rem;color:rgba(192,192,192,.35);">Banned by ${esc(b.bannedBy||'?')} &middot; Reason: ${esc(b.reason||'—')}</div>
+        </div>
+        <button class="btn-unban-admin" data-uid="${d.id}" data-name="${esc(b.name||'?')}"><i class="fas fa-unlock"></i> Unban</button>`;
+      row.querySelector('button').addEventListener('click',async function(){
+        await unbanUser(this.dataset.uid,this.dataset.name);
+      });
+      bannedList.appendChild(row);
+    });
+  }catch(err){bannedList.innerHTML=`<p style="font-family:var(--font-mono);font-size:.72rem;color:#f55;">${err.message}</p>`;}
+}
+/* ── SEARCH & DIRECTORY ── */
+let _st=null, _dirFilter='all';
+document.getElementById('searchUsers').addEventListener('input',()=>{clearTimeout(_st);_st=setTimeout(searchMembers,300);});
+document.getElementById('searchUsers').addEventListener('keydown',e=>{if(e.key==='Escape'){e.target.value='';loadAllUsers();}});
+document.querySelectorAll('.dir-filter').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.dir-filter').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    _dirFilter=btn.dataset.dfilter;
+    applyDirFilter();
+  });
+});
+function applyDirFilter(){
+  const cards=document.querySelectorAll('#usersGrid .friend-card');
+  const myFriends=currentUserData?.friends||[];
+  cards.forEach(card=>{
+    const uid=card.dataset.uid;
+    let show=true;
+    if(_dirFilter==='online'){
+      // Check online status
+      const statusEl=card.querySelector('.friend-status');
+      show=statusEl&&statusEl.classList.contains('status-online');
+    }else if(_dirFilter==='friends'){
+      show=myFriends.includes(uid);
+    }
+    card.style.display=show?'':'none';
+  });
+}
+// Update directory stats
+function updateDirStats(users){
+  const totalEl=document.getElementById('dirTotalCount');
+  const onlineEl=document.getElementById('dirOnlineCount');
+  const friendsEl=document.getElementById('dirFriendCount');
+  if(totalEl)totalEl.textContent=users.filter(u=>!u.isAnonymous).length;
+  if(onlineEl)onlineEl.textContent=users.filter(u=>u.status==='online'&&!u.isAnonymous).length;
+  if(friendsEl&&currentUserData)friendsEl.textContent=users.filter(u=>(currentUserData.friends||[]).includes(u.id)).length;
+  setTimeout(applyDirFilter,50);
+}
