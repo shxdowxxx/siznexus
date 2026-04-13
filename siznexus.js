@@ -1146,9 +1146,24 @@ document.getElementById('anonLogin').addEventListener('click',async()=>{
 });
 /* ── PASSWORD RESET ── */
 document.getElementById('forgotLink').addEventListener('click',()=>{
-  auth.sendPasswordResetEmail(document.getElementById('emailInput').value.trim())
-    .then(()=>showToast('Password reset email sent!'))
-    .catch(err=>showToast('Error: '+err.message));
+  closeModal('loginModal');
+  document.getElementById('resetError').style.display='none';
+  document.getElementById('resetSuccess').style.display='none';
+  document.getElementById('resetEmail').value='';
+  openModal('resetModal');
+});
+document.getElementById('closeReset').addEventListener('click',()=>closeModal('resetModal'));
+document.getElementById('resetModal').addEventListener('click',function(e){if(e.target===this)closeModal('resetModal');});
+document.getElementById('sendResetBtn').addEventListener('click',()=>{
+  const email=document.getElementById('resetEmail').value.trim();
+  const errEl=document.getElementById('resetError');
+  const successEl=document.getElementById('resetSuccess');
+  errEl.style.display='none';
+  successEl.style.display='none';
+  if(!email){errEl.textContent='Please enter your email.';errEl.style.display='block';return;}
+  auth.sendPasswordResetEmail(email)
+    .then(()=>{successEl.style.display='block';})
+    .catch(err=>{errEl.textContent=err.message;errEl.style.display='block';});
 });
 /* ── TOGGLE AUTH FORM ── */
 document.getElementById('toggleForm').addEventListener('click',function(){
