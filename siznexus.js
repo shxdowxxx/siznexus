@@ -853,8 +853,8 @@ async function openMyProfile(){
     document.querySelectorAll('.profile-tab-section').forEach(s=>s.classList.remove('active'));
     document.querySelector('.profile-edit-tab[data-ptab="edit"]')?.classList.add('active');
     document.getElementById('profileTabEdit')?.classList.add('active');
-    await renderMyFriendsList(d.friends||[]);
     openModal('myProfileModal');
+    renderMyFriendsList(d.friends||[]);
   }catch(err){console.error(err);}
 }
 function wireConnSubTabs(d){
@@ -954,34 +954,33 @@ async function renderMyFriendsList(friendIds){
     searchEl._wired=true;
     searchEl.addEventListener('input',()=>renderMyFriendsList(friendIds));
   }
-  for(const fid of friendIds){
-    try{
-      const snap=await db.collection('users').doc(fid).get();if(!snap.exists)continue;
-      const fd=snap.data();
-      if(q&&!(fd.displayName||'').toLowerCase().includes(q))continue;
-      const card=document.createElement('div');card.className='connection-card';
-      const statusColor={online:'#4CAF50',idle:'#ff9800',dnd:'#f44336',offline:'#555'}[fd.status]||'#555';
-      card.innerHTML=`
-        <div class="connection-av">
-          ${fd.photoURL?`<img src="${esc(fd.photoURL)}" alt="" loading="lazy">`:`${initials(fd.displayName)}`}
-          <span class="connection-av-dot status-dot ${fd.status||'offline'}"></span>
-        </div>
-        <div class="connection-info">
-          <div class="connection-name">${esc(fd.displayName||'Unknown')}</div>
-          <div class="connection-rank ${rankClass(fd.rank)}">${esc(fd.rank||'Member')}</div>
-          ${fd.activityStatus?`<div class="connection-activity">"${esc(fd.activityStatus)}"</div>`:''}
-        </div>
-        <div class="connection-actions">
-          <button class="btn-sm" style="padding:5px 9px;font-size:.65rem;" title="Message"><i class="fas fa-comment"></i></button>
-          <button class="btn-sm danger" style="padding:5px 9px;font-size:.65rem;" data-uid="${fid}" data-name="${esc(fd.displayName||'this user')}" title="Remove"><i class="fas fa-user-minus"></i></button>
-        </div>`;
-      // Click on name/av opens profile
-      card.querySelector('.connection-av').addEventListener('click',()=>{closeModal('myProfileModal');openViewProfile({...fd,id:fid});});
-      card.querySelector('.connection-name').addEventListener('click',()=>{closeModal('myProfileModal');openViewProfile({...fd,id:fid});});
-      card.querySelectorAll('.btn-sm:not(.danger)').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();closeModal('myProfileModal');openChat({...fd,id:fid});}));
-      card.querySelector('.btn-sm.danger').addEventListener('click',async e=>{e.stopPropagation();const btn=e.currentTarget;await removeFriend(btn.dataset.uid,btn.dataset.name);await openMyProfile();});
-      inner.appendChild(card);
-    }catch(err){console.error(err);}
+  const snaps=await Promise.all(friendIds.map(fid=>db.collection('users').doc(fid).get().catch(()=>null)));
+  for(let i=0;i<friendIds.length;i++){
+    const fid=friendIds[i];
+    const snap=snaps[i];
+    if(!snap||!snap.exists)continue;
+    const fd=snap.data();
+    if(q&&!(fd.displayName||'').toLowerCase().includes(q))continue;
+    const card=document.createElement('div');card.className='connection-card';
+    card.innerHTML=`
+      <div class="connection-av">
+        ${fd.photoURL?`<img src="${esc(fd.photoURL)}" alt="" loading="lazy">`:`${initials(fd.displayName)}`}
+        <span class="connection-av-dot status-dot ${fd.status||'offline'}"></span>
+      </div>
+      <div class="connection-info">
+        <div class="connection-name">${esc(fd.displayName||'Unknown')}</div>
+        <div class="connection-rank ${rankClass(fd.rank)}">${esc(fd.rank||'Member')}</div>
+        ${fd.activityStatus?`<div class="connection-activity">"${esc(fd.activityStatus)}"</div>`:''}
+      </div>
+      <div class="connection-actions">
+        <button class="btn-sm" style="padding:5px 9px;font-size:.65rem;" title="Message"><i class="fas fa-comment"></i></button>
+        <button class="btn-sm danger" style="padding:5px 9px;font-size:.65rem;" data-uid="${fid}" data-name="${esc(fd.displayName||'this user')}" title="Remove"><i class="fas fa-user-minus"></i></button>
+      </div>`;
+    card.querySelector('.connection-av').addEventListener('click',()=>{closeModal('myProfileModal');openViewProfile({...fd,id:fid});});
+    card.querySelector('.connection-name').addEventListener('click',()=>{closeModal('myProfileModal');openViewProfile({...fd,id:fid});});
+    card.querySelectorAll('.btn-sm:not(.danger)').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();closeModal('myProfileModal');openChat({...fd,id:fid});}));
+    card.querySelector('.btn-sm.danger').addEventListener('click',async e=>{e.stopPropagation();const btn=e.currentTarget;await removeFriend(btn.dataset.uid,btn.dataset.name);await openMyProfile();});
+    inner.appendChild(card);
   }
 }
 /* ── SAVE PROFILE ── */
