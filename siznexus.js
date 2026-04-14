@@ -1158,12 +1158,23 @@ document.getElementById('sendResetBtn').addEventListener('click',()=>{
   const email=document.getElementById('resetEmail').value.trim();
   const errEl=document.getElementById('resetError');
   const successEl=document.getElementById('resetSuccess');
+  const btn=document.getElementById('sendResetBtn');
   errEl.style.display='none';
   successEl.style.display='none';
   if(!email){errEl.textContent='Please enter your email.';errEl.style.display='block';return;}
-  auth.sendPasswordResetEmail(email)
-    .then(()=>{successEl.style.display='block';})
-    .catch(err=>{errEl.textContent=err.message;errEl.style.display='block';});
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sending...';
+  const actionCodeSettings={url:window.location.origin,handleCodeInApp:false};
+  auth.sendPasswordResetEmail(email,actionCodeSettings)
+    .then(()=>{
+      successEl.style.display='block';
+      btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> Send Reset Email';
+    })
+    .catch(err=>{
+      const msgs={'auth/user-not-found':'No account found with that email.','auth/invalid-email':'Please enter a valid email address.','auth/too-many-requests':'Too many attempts. Please wait a moment and try again.'};
+      errEl.textContent=msgs[err.code]||err.message;
+      errEl.style.display='block';
+      btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> Send Reset Email';
+    });
 });
 /* ── TOGGLE AUTH FORM ── */
 document.getElementById('toggleForm').addEventListener('click',function(){
