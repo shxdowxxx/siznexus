@@ -1,33 +1,3 @@
-# Firestore Security Rules — TheSizNexus
-> **To paste into Firebase Console:** open `firestore.rules` — it contains the raw rules only, no markdown.
-> This `.md` file is for AI agent reference (schema docs + annotated rules). Last updated: 2026-04-18
-
-## Collections
-
-| Collection | Purpose |
-|---|---|
-| `users` | User profiles, ranks, bans |
-| `friendRequests` | Friend request state |
-| `chats` | DM chat metadata |
-| `chats/{id}/messages` | DM messages subcollection |
-| `notifications` | In-app notifications |
-| `announcements` | Public announcements |
-| `corpLog` | Corp activity log (immutable) |
-| `corpChat` | Global group chat |
-| `missions` | Mission definitions |
-| `missionSubmissions` | Member mission submissions |
-| `events` | Corp events with RSVP |
-| `intelPosts` | Intel/news posts |
-| `polls` | Polls and voting |
-| `reports` | Member abuse reports |
-| `bans` | Ban records |
-| `_configKEY` | App config (owner-only write) |
-| `commissions` | Member commission listings |
-| `inquiries` | Commission contact messages |
-
-## Rules
-
-```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -380,11 +350,9 @@ service cloud.firestore {
     //  Commissions
     // ──────────────────────────────────────────────
     match /commissions/{id} {
-      // Public can read active listings; owner can read their own regardless of status
       allow read: if resource.data.status == 'active'
                   || (isAuthenticated() && request.auth.uid == resource.data.uid);
 
-      // Registered, non-banned members can post listings
       allow create: if isRegisteredUser()
         && isNotBanned()
         && request.resource.data.uid == request.auth.uid
@@ -393,12 +361,10 @@ service cloud.firestore {
         && validString('description', 2000)
         && request.resource.data.status == 'active';
 
-      // Owner can update their own listing; uid is immutable
       allow update: if isAuthenticated()
         && request.auth.uid == resource.data.uid
         && request.resource.data.uid == resource.data.uid;
 
-      // Owner or senior staff can soft-delete (set status: 'removed') or hard delete
       allow delete: if isAuthenticated()
         && (request.auth.uid == resource.data.uid
             || isCoAdminOrAbove()
@@ -409,21 +375,18 @@ service cloud.firestore {
     //  Inquiries
     // ──────────────────────────────────────────────
     match /inquiries/{id} {
-      // Registered, non-banned members can send inquiries
       allow create: if isRegisteredUser()
         && isNotBanned()
         && request.resource.data.fromUid == request.auth.uid
         && request.resource.data.keys().hasAll(['commissionId', 'artistUid', 'fromUid', 'message'])
         && validString('message', 1000);
 
-      // Only the sender, the commission owner, or staff can read
       allow read: if isAuthenticated() && (
         request.auth.uid == resource.data.fromUid
         || request.auth.uid == resource.data.artistUid
         || isModOrAbove()
       );
 
-      // Commission owner can update status field only (mark read/replied)
       allow update: if isAuthenticated()
         && request.auth.uid == resource.data.artistUid
         && hasOnly(['status']);
@@ -439,4 +402,3 @@ service cloud.firestore {
     }
   }
 }
-```
