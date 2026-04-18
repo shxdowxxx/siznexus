@@ -15,558 +15,232 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
 <script>
+/* Same project as main site — auth state and user docs are shared */
 firebase.initializeApp({
-  apiKey:"AIzaSyAKpvFbIO_Q5fYRH06svYrqGGZTfjd9od4",
-  authDomain:"siznexus.firebaseapp.com",
-  projectId:"siznexus",
-  appId:"1:1000655186936:web:9ee1b1e241b58acd83840d"
+  apiKey:"AIzaSyBcfVGWx4PFU__CeYkpSlmac3SasqODBx4",
+  authDomain:"thesiznexus.firebaseapp.com",
+  projectId:"thesiznexus",
+  storageBucket:"thesiznexus.firebasestorage.app",
+  messagingSenderId:"654294052068",
+  appId:"1:654294052068:web:0cc5a7d3fd79f533a710f1",
+  measurementId:"G-R8EJ0QB1XT"
 });
+firebase.analytics();
 </script>
 <link rel="stylesheet" href="siznexus.css">
 <style>
-/* ── Commission page – page-specific styles only ── */
+/* ── Commission page — page-specific styles only. siznexus.css handles the rest. ── */
 
-/* ── HERO ─────────────────────────────────────────────────────────────────── */
-.page-hero {
-  text-align: center;
-  padding: 80px 20px 48px;
-  position: relative;
-  z-index: 1;
-  overflow: hidden;
-}
-/* Radial ambient glow behind the title — matches .hero-title-glow on main site */
-.page-hero-glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 50% 40%, rgba(192,192,192,.055) 0%, transparent 65%);
-  pointer-events: none;
-}
-.page-hero-eyebrow {
-  font-family: var(--font-mono);
-  font-size: .75rem;
-  letter-spacing: .32em;
-  color: var(--color-text-muted);
-  margin-bottom: 1.1rem;
-  opacity: 0;
-  animation: fadeInUp .8s ease forwards;
-  animation-delay: .15s;
-}
-.page-hero h1 {
-  font-weight: 900;
-  font-size: clamp(2.2rem, 7vw, 4.2rem);
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  margin: 0 0 1rem;
-  background: var(--silver-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 0 28px rgba(192,192,192,.18));
-  opacity: 0;
-  animation: fadeInUp .8s ease forwards;
-  animation-delay: .35s;
-}
-.page-hero-sub {
-  font-family: var(--font-mono);
-  font-size: clamp(.78rem, 2vw, .92rem);
-  color: var(--color-text-muted);
-  max-width: 520px;
-  margin: 0 auto 2rem;
-  line-height: 1.9;
-  opacity: 0;
-  animation: fadeInUp .8s ease forwards;
-  animation-delay: .55s;
-}
-.page-hero-cta {
-  opacity: 0;
-  animation: fadeInUp .8s ease forwards;
-  animation-delay: .75s;
-}
+/* Hero */
+.page-hero{text-align:center;padding:80px 20px 48px;position:relative;z-index:1;overflow:hidden;}
+.page-hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(192,192,192,.05) 0%,transparent 65%);pointer-events:none;}
+.page-hero-eyebrow{font-family:var(--font-mono);font-size:.75rem;letter-spacing:.32em;color:var(--color-text-muted);margin-bottom:1rem;opacity:0;animation:fadeInUp .8s ease forwards;animation-delay:.15s;}
+.page-hero h1{font-weight:900;font-size:clamp(2.2rem,7vw,4.2rem);text-transform:uppercase;letter-spacing:.12em;margin:0 0 1rem;background:var(--silver-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 28px rgba(192,192,192,.18));opacity:0;animation:fadeInUp .8s ease forwards;animation-delay:.35s;}
+.page-hero-sub{font-family:var(--font-mono);font-size:clamp(.78rem,2vw,.92rem);color:var(--color-text-muted);max-width:520px;margin:0 auto 2rem;line-height:1.9;opacity:0;animation:fadeInUp .8s ease forwards;animation-delay:.55s;}
+.page-hero-cta{opacity:0;animation:fadeInUp .8s ease forwards;animation-delay:.75s;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
 
-/* ── STATS STRIP ──────────────────────────────────────────────────────────── */
-/* Horizontal summary bar between ticker and main section */
-.comm-stats-strip {
-  display: flex;
-  justify-content: center;
-  max-width: 1200px;
-  margin: 0 auto;
-  border-bottom: var(--border);
-  position: relative;
-  z-index: 1;
-}
-.comm-stat-item {
-  flex: 1;
-  max-width: 200px;
-  padding: 20px 16px;
-  text-align: center;
-  border-right: 1px solid rgba(192,192,192,.08);
-  transition: var(--transition);
-  cursor: default;
-}
-.comm-stat-item:last-child { border-right: none; }
-.comm-stat-item:hover { background: rgba(192,192,192,.02); }
-.comm-stat-num {
-  font-size: clamp(1.4rem, 3vw, 2rem);
-  font-weight: 900;
-  background: var(--silver-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1;
-  filter: drop-shadow(0 0 5px rgba(192,192,192,.15));
-}
-.comm-stat-label {
-  font-family: var(--font-mono);
-  font-size: .62rem;
-  color: var(--color-text-muted);
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  margin-top: 5px;
-}
+/* Stats strip */
+.comm-stats-strip{display:flex;justify-content:center;max-width:1200px;margin:0 auto;border-bottom:var(--border);position:relative;z-index:1;}
+.comm-stat-item{flex:1;max-width:200px;padding:20px 16px;text-align:center;border-right:1px solid rgba(192,192,192,.08);transition:var(--transition);cursor:default;}
+.comm-stat-item:last-child{border-right:none;}
+.comm-stat-item:hover{background:rgba(192,192,192,.02);}
+.comm-stat-num{font-size:clamp(1.4rem,3vw,2rem);font-weight:900;background:var(--silver-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;filter:drop-shadow(0 0 5px rgba(192,192,192,.12));}
+.comm-stat-label{font-family:var(--font-mono);font-size:.62rem;color:var(--color-text-muted);letter-spacing:.14em;text-transform:uppercase;margin-top:5px;}
 
-/* ── SECTION WRAPPER ────────────────────────────────────────────────────────  */
-.comm-section {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 20px 60px;
-  position: relative;
-  z-index: 1;
-}
-.comm-section-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-.comm-section-title {
-  font-size: .85rem;
-  font-weight: 700;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  background: var(--silver-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.comm-section-sub {
-  font-family: var(--font-mono);
-  font-size: .7rem;
-  color: var(--color-text-muted);
-  letter-spacing: .06em;
-}
+/* Section */
+.comm-section{max-width:1200px;margin:0 auto;padding:32px 20px 60px;position:relative;z-index:1;}
+.comm-section-header{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.comm-section-title{font-size:.85rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;background:var(--silver-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.comm-section-sub{font-family:var(--font-mono);font-size:.7rem;color:var(--color-text-muted);letter-spacing:.06em;}
 
-/* ── FILTER BAR ─────────────────────────────────────────────────────────────  */
-.comm-filter-bar {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 1px;
-  padding-bottom: 2px;
-}
-.comm-filter-btn {
-  position: relative;
-  font-family: var(--font-mono);
-  font-size: .65rem;
-  letter-spacing: .1em;
-  padding: 6px 16px;
-  border-radius: 2px;
-  border: 1px solid rgba(192,192,192,.18);
-  background: transparent;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  transition: var(--transition);
-  text-transform: uppercase;
-  overflow: hidden;
-}
-/* Sliding underline indicator on active filter */
-.comm-filter-btn::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 1px;
-  background: var(--silver-gradient);
-  transition: width .25s ease, left .25s ease;
-  box-shadow: 0 0 5px rgba(192,192,192,.3);
-}
-.comm-filter-btn:hover { border-color: rgba(192,192,192,.38); color: var(--color-text-light); }
-.comm-filter-btn.active {
-  border-color: rgba(192,192,192,.45);
-  color: var(--color-text-light);
-  background: rgba(192,192,192,.04);
-}
-.comm-filter-btn.active::after { left: 0; width: 100%; }
+/* Filter bar */
+.comm-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1px;padding-bottom:2px;}
+.comm-filter-btn{position:relative;font-family:var(--font-mono);font-size:.65rem;letter-spacing:.1em;padding:6px 16px;border-radius:2px;border:1px solid rgba(192,192,192,.18);background:transparent;color:var(--color-text-muted);cursor:pointer;transition:var(--transition);text-transform:uppercase;overflow:hidden;}
+.comm-filter-btn::after{content:'';position:absolute;bottom:0;left:50%;width:0;height:1px;background:var(--silver-gradient);transition:width .25s ease,left .25s ease;box-shadow:0 0 5px rgba(192,192,192,.3);}
+.comm-filter-btn:hover{border-color:rgba(192,192,192,.38);color:var(--color-text-light);}
+.comm-filter-btn.active{border-color:rgba(192,192,192,.45);color:var(--color-text-light);background:rgba(192,192,192,.04);}
+.comm-filter-btn.active::after{left:0;width:100%;}
 
-/* ── COMMISSION CARD GRID ───────────────────────────────────────────────────  */
-.comm-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1px;
-}
+/* Card grid */
+.comm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
-/* Card entrance stagger animation */
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+/* Commission card */
+.comm-card{background:var(--color-card);border:var(--border);border-top:1px solid rgba(212,216,226,.22);padding:24px;transition:background .3s ease,box-shadow .3s ease;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;opacity:0;animation:cardIn .45s ease forwards;animation-delay:calc(var(--i,0)*75ms);}
+.comm-card::before{content:'';position:absolute;top:0;left:0;width:2px;height:0;background:var(--silver-gradient);transition:height .4s ease;box-shadow:0 0 8px rgba(192,192,192,.2);z-index:1;}
+.comm-card:hover::before{height:100%;}
+.comm-card:hover{background:rgba(13,19,39,.98);box-shadow:0 8px 40px rgba(0,0,0,.35),inset 0 0 0 1px rgba(192,192,192,.06);}
+.comm-card[data-cat="code"]:hover::before{background:linear-gradient(180deg,rgba(0,200,255,.65) 0%,rgba(0,160,200,.18) 100%);}
+.comm-card[data-cat="audio"]:hover::before{background:linear-gradient(180deg,rgba(160,100,255,.65) 0%,rgba(120,70,210,.18) 100%);}
+.comm-card.is-mine::after{content:'YOURS';position:absolute;top:10px;right:10px;font-family:var(--font-mono);font-size:.55rem;letter-spacing:.12em;color:rgba(212,216,226,.4);pointer-events:none;}
+.comm-bg-icon{position:absolute;bottom:-10px;right:-6px;font-size:5.5rem;color:var(--color-primary);opacity:.03;pointer-events:none;transition:opacity .3s ease;line-height:1;}
+.comm-card:hover .comm-bg-icon{opacity:.06;}
 
-/* ── COMMISSION CARD ─────────────────────────────────────────────────────────  */
-.comm-card {
-  background: var(--color-card);
-  border: var(--border);
-  border-top: 1px solid rgba(212,216,226,.22);
-  padding: 24px;
-  transition: background .3s ease, box-shadow .3s ease;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  /* Entrance animation — delay driven by --i CSS var set per-card in JS */
-  opacity: 0;
-  animation: cardIn .45s ease forwards;
-  animation-delay: calc(var(--i, 0) * 75ms);
-}
-/* Left accent bar — slides up on hover */
-.comm-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 2px;
-  height: 0;
-  background: var(--silver-gradient);
-  transition: height .4s ease;
-  box-shadow: 0 0 8px rgba(192,192,192,.2);
-  z-index: 1;
-}
-.comm-card:hover::before { height: 100%; }
-.comm-card:hover {
-  background: rgba(13,19,39,.98);
-  box-shadow: 0 8px 40px rgba(0,0,0,.35), inset 0 0 0 1px rgba(192,192,192,.06);
-}
+/* Card header */
+.comm-card-header{display:flex;align-items:center;gap:12px;}
+.comm-avatar{width:40px;height:40px;border-radius:50%;background:rgba(192,192,192,.07);border:1px solid rgba(192,192,192,.2);display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;color:var(--color-primary);flex-shrink:0;overflow:hidden;letter-spacing:.04em;}
+.comm-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.comm-artist{flex:1;min-width:0;}
+.comm-artist-name{font-size:.78rem;font-weight:700;color:var(--color-text-light);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.comm-category-label{font-family:var(--font-mono);font-size:.6rem;margin-top:3px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-text-muted);transition:var(--transition);}
+.comm-category-label[data-cat="art"]{color:rgba(212,205,170,.55);}
+.comm-category-label[data-cat="code"]{color:rgba(0,200,255,.5);}
+.comm-category-label[data-cat="audio"]{color:rgba(165,110,255,.5);}
+.comm-status{font-family:var(--font-mono);font-size:.58rem;font-weight:700;letter-spacing:.13em;padding:3px 9px;border-radius:2px;flex-shrink:0;text-transform:uppercase;}
+.comm-status.open{background:rgba(76,175,80,.1);color:#4CAF50;border:1px solid rgba(76,175,80,.28);}
+.comm-status.closed{background:rgba(244,67,54,.07);color:#f44336;border:1px solid rgba(244,67,54,.2);}
 
-/* Category-specific left accent color overrides on hover */
-.comm-card[data-cat="code"]:hover::before    { background: linear-gradient(180deg, rgba(0,200,255,.7) 0%, rgba(0,160,200,.2) 100%); }
-.comm-card[data-cat="audio"]:hover::before   { background: linear-gradient(180deg, rgba(160,100,255,.7) 0%, rgba(120,70,210,.2) 100%); }
-
-/* Closed cards — dimmed but not hidden */
-.comm-card.is-closed { opacity: 0; /* overridden by animation fill */ }
-.comm-card.is-closed.anim-done { opacity: .65; }
-
-/* Large faded background watermark icon */
-.comm-bg-icon {
-  position: absolute;
-  bottom: -10px;
-  right: -6px;
-  font-size: 5.5rem;
-  color: var(--color-primary);
-  opacity: .035;
-  pointer-events: none;
-  transition: opacity .3s ease;
-  line-height: 1;
-}
-.comm-card:hover .comm-bg-icon { opacity: .065; }
-
-/* ── CARD HEADER ─────────────────────────────────────────────────────────────  */
-.comm-card-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.comm-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(192,192,192,.07);
-  border: 1px solid rgba(192,192,192,.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: .78rem;
-  font-weight: 700;
-  color: var(--color-primary);
-  flex-shrink: 0;
-  overflow: hidden;
-  letter-spacing: .04em;
-}
-.comm-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.comm-artist { flex: 1; min-width: 0; }
-.comm-artist-name {
-  font-size: .78rem;
-  font-weight: 700;
-  color: var(--color-text-light);
-  letter-spacing: .04em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-/* Category label — colour-coded by type */
-.comm-category-label {
-  font-family: var(--font-mono);
-  font-size: .6rem;
-  margin-top: 3px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--color-text-muted); /* default */
-  transition: var(--transition);
-}
-.comm-category-label[data-cat="art"]   { color: rgba(212,205,170,.55); }
-.comm-category-label[data-cat="code"]  { color: rgba(0,200,255,.5); }
-.comm-category-label[data-cat="audio"] { color: rgba(165,110,255,.5); }
-
-/* Status badge */
-.comm-status {
-  font-family: var(--font-mono);
-  font-size: .58rem;
-  font-weight: 700;
-  letter-spacing: .13em;
-  padding: 3px 9px;
-  border-radius: 2px;
-  flex-shrink: 0;
-  text-transform: uppercase;
-}
-.comm-status.open  { background: rgba(76,175,80,.1);  color: #4CAF50; border: 1px solid rgba(76,175,80,.28); }
-.comm-status.closed { background: rgba(244,67,54,.07); color: #f44336; border: 1px solid rgba(244,67,54,.2); }
-
-/* ── CARD BODY ────────────────────────────────────────────────────────────────  */
-.comm-title {
-  font-size: .88rem;
-  font-weight: 700;
-  color: var(--color-text-light);
-  letter-spacing: .09em;
-  margin: 0;
-  text-transform: uppercase;
-  line-height: 1.3;
-}
-.comm-desc {
-  font-family: var(--font-mono);
-  font-size: .78rem;
-  color: var(--color-text-muted);
-  line-height: 1.75;
-  margin: 0;
-}
-
-/* Specialization tags */
-.comm-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.comm-tag {
-  font-family: var(--font-mono);
-  font-size: .6rem;
-  letter-spacing: .07em;
-  padding: 3px 9px;
-  border-radius: 2px;
-  background: rgba(192,192,192,.03);
-  border: 1px solid rgba(192,192,192,.1);
-  color: var(--color-text-muted);
-  transition: var(--transition);
-}
-.comm-card:hover .comm-tag {
-  border-color: rgba(192,192,192,.18);
-  color: var(--color-text-light);
-}
-
-/* ── CARD FOOTER ──────────────────────────────────────────────────────────────  */
-.comm-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: auto;
-  padding-top: 14px;
-  border-top: 1px solid rgba(192,192,192,.07);
-}
-.comm-price {
-  font-family: var(--font-mono);
-  font-size: .7rem;
-  color: var(--color-text-muted);
-  letter-spacing: .04em;
-}
-.comm-actions { display: flex; gap: 8px; }
+/* Card body */
+.comm-title{font-size:.88rem;font-weight:700;color:var(--color-text-light);letter-spacing:.09em;margin:0;text-transform:uppercase;line-height:1.3;}
+.comm-desc{font-family:var(--font-mono);font-size:.78rem;color:var(--color-text-muted);line-height:1.75;margin:0;}
+.comm-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.comm-tag{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.07em;padding:3px 9px;border-radius:2px;background:rgba(192,192,192,.03);border:1px solid rgba(192,192,192,.1);color:var(--color-text-muted);transition:var(--transition);}
+.comm-card:hover .comm-tag{border-color:rgba(192,192,192,.18);color:var(--color-text-light);}
+.comm-card-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:14px;border-top:1px solid rgba(192,192,192,.07);}
+.comm-price{font-family:var(--font-mono);font-size:.7rem;color:var(--color-text-muted);letter-spacing:.04em;}
+.comm-actions{display:flex;gap:8px;}
 
 /* Empty state */
-.comm-empty {
-  font-family: var(--font-mono);
-  font-size: .8rem;
-  color: var(--color-text-muted);
-  letter-spacing: .1em;
-  text-align: center;
-  padding: 60px 20px;
-  grid-column: 1 / -1;
-  opacity: 0;
-  animation: fadeInUp .5s ease forwards;
-}
-.comm-empty i { font-size: 2.2rem; opacity: .18; display: block; margin-bottom: 16px; }
+.comm-empty{font-family:var(--font-mono);font-size:.8rem;color:var(--color-text-muted);letter-spacing:.1em;text-align:center;padding:60px 20px;grid-column:1/-1;opacity:0;animation:fadeInUp .5s ease forwards;}
+.comm-empty i{font-size:2.2rem;opacity:.18;display:block;margin-bottom:16px;}
 
-/* ── HOW IT WORKS ─────────────────────────────────────────────────────────────  */
-.how-it-works {
-  background: var(--color-card);
-  border: var(--border);
-  border-top: 1px solid rgba(212,216,226,.22);
-  padding: 28px 32px;
-  margin-top: 40px;
-  position: relative;
-  overflow: hidden;
-}
-.how-it-works::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 2px; height: 0;
-  background: var(--silver-gradient);
-  transition: height .4s ease;
-}
-.how-it-works:hover::before { height: 100%; }
-.how-it-works h3 {
-  font-size: .85rem;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  background: var(--silver-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin: 0 0 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.hiw-steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
-}
-.hiw-step {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid rgba(192,192,192,.07);
-  border-radius: 4px;
-  background: rgba(192,192,192,.02);
-  transition: var(--transition);
-}
-.hiw-step:hover { border-color: rgba(192,192,192,.2); background: rgba(192,192,192,.04); }
-.hiw-num {
-  width: 28px; height: 28px;
-  background: rgba(192,192,192,.07);
-  border: 1px solid rgba(192,192,192,.2);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .7rem; font-weight: 700;
-  color: var(--color-text-light);
-  flex-shrink: 0;
-}
-.hiw-text { font-family: var(--font-mono); font-size: .78rem; color: var(--color-text-muted); line-height: 1.65; }
-.hiw-text strong { color: var(--color-text-light); }
+/* Member CTA strip */
+.comm-member-cta{margin-top:40px;background:var(--color-card);border:var(--border);border-top:1px solid rgba(212,216,226,.22);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;transition:var(--transition);}
+.comm-member-cta:hover{background:rgba(13,19,39,.98);}
+.comm-member-cta-text{flex:1;}
+.comm-member-cta-label{font-size:.85rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;background:var(--silver-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
+.comm-member-cta-sub{font-family:var(--font-mono);font-size:.78rem;color:var(--color-text-muted);line-height:1.6;}
+#memberCtaSection{display:none;}
 
-/* ── MODALS ───────────────────────────────────────────────────────────────────  */
-.comm-detail-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(192,192,192,.1);
-}
-.comm-detail-av {
-  width: 54px; height: 54px;
-  border-radius: 50%;
-  background: rgba(192,192,192,.07);
-  border: 1px solid rgba(192,192,192,.2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.1rem; font-weight: 700;
-  color: var(--color-primary);
-  flex-shrink: 0; overflow: hidden;
-}
-.comm-detail-av img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.comm-detail-title {
-  font-size: .95rem; font-weight: 700;
-  color: var(--color-text-light);
-  letter-spacing: .07em;
-  margin: 0 0 5px;
-  text-transform: uppercase;
-}
-.comm-detail-artist {
-  font-family: var(--font-mono); font-size: .72rem;
-  color: var(--color-text-muted);
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-}
-.comm-detail-body { max-height: 58vh; overflow-y: auto; padding-right: 6px; }
-.comm-detail-body::-webkit-scrollbar { width: 3px; }
-.comm-detail-body::-webkit-scrollbar-thumb { background: rgba(192,192,192,.14); border-radius: 2px; }
-.comm-detail-section { margin-bottom: 18px; }
-.comm-detail-label {
-  font-family: var(--font-mono); font-size: .62rem;
-  color: var(--color-text-muted);
-  letter-spacing: .16em; text-transform: uppercase;
-  margin-bottom: 8px; padding-bottom: 6px;
-  border-bottom: 1px solid rgba(192,192,192,.07);
-}
-.comm-detail-text { font-family: var(--font-mono); font-size: .8rem; color: var(--color-text-muted); line-height: 1.8; }
-.comm-detail-text strong { color: var(--color-text-light); }
+/* How It Works */
+.how-it-works{background:var(--color-card);border:var(--border);border-top:1px solid rgba(212,216,226,.22);padding:28px 32px;margin-top:1px;position:relative;overflow:hidden;}
+.how-it-works::before{content:'';position:absolute;top:0;left:0;width:2px;height:0;background:var(--silver-gradient);transition:height .4s ease;}
+.how-it-works:hover::before{height:100%;}
+.how-it-works h3{font-size:.85rem;letter-spacing:.22em;text-transform:uppercase;background:var(--silver-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0 0 20px;display:flex;align-items:center;gap:10px;}
+.hiw-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
+.hiw-step{display:flex;align-items:flex-start;gap:12px;padding:14px;border:1px solid rgba(192,192,192,.07);border-radius:4px;background:rgba(192,192,192,.02);transition:var(--transition);}
+.hiw-step:hover{border-color:rgba(192,192,192,.2);background:rgba(192,192,192,.04);}
+.hiw-num{width:28px;height:28px;background:rgba(192,192,192,.07);border:1px solid rgba(192,192,192,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--color-text-light);flex-shrink:0;}
+.hiw-text{font-family:var(--font-mono);font-size:.78rem;color:var(--color-text-muted);line-height:1.65;}
+.hiw-text strong{color:var(--color-text-light);}
 
-/* Contact rows */
-.comm-contact-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 12px;
-  background: rgba(192,192,192,.02);
-  border: 1px solid rgba(192,192,192,.08);
-  border-radius: 4px;
-  margin-bottom: 8px;
-  font-family: var(--font-mono); font-size: .78rem;
-  transition: var(--transition);
-}
-.comm-contact-row:hover { border-color: rgba(192,192,192,.2); background: rgba(192,192,192,.04); }
-.comm-contact-icon {
-  width: 28px; height: 28px;
-  background: rgba(192,192,192,.05);
-  border: 1px solid rgba(192,192,192,.12);
-  border-radius: 4px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .8rem; color: var(--color-primary); flex-shrink: 0;
-}
-.comm-contact-label {
-  color: var(--color-text-muted); min-width: 64px;
-  font-size: .62rem; letter-spacing: .1em; text-transform: uppercase;
-}
-.comm-contact-value { color: var(--color-text-light); flex: 1; }
+/* Detail / modal content */
+.comm-detail-header{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(192,192,192,.1);}
+.comm-detail-av{width:54px;height:54px;border-radius:50%;background:rgba(192,192,192,.07);border:1px solid rgba(192,192,192,.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:var(--color-primary);flex-shrink:0;overflow:hidden;}
+.comm-detail-av img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.comm-detail-title{font-size:.95rem;font-weight:700;color:var(--color-text-light);letter-spacing:.07em;margin:0 0 5px;text-transform:uppercase;}
+.comm-detail-artist{font-family:var(--font-mono);font-size:.72rem;color:var(--color-text-muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.comm-detail-body{max-height:58vh;overflow-y:auto;padding-right:6px;}
+.comm-detail-body::-webkit-scrollbar{width:3px;}
+.comm-detail-body::-webkit-scrollbar-thumb{background:rgba(192,192,192,.14);border-radius:2px;}
+.comm-detail-section{margin-bottom:18px;}
+.comm-detail-label{font-family:var(--font-mono);font-size:.62rem;color:var(--color-text-muted);letter-spacing:.16em;text-transform:uppercase;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(192,192,192,.07);}
+.comm-detail-text{font-family:var(--font-mono);font-size:.8rem;color:var(--color-text-muted);line-height:1.8;}
+.comm-detail-text strong{color:var(--color-text-light);}
+.comm-contact-row{display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(192,192,192,.02);border:1px solid rgba(192,192,192,.08);border-radius:4px;margin-bottom:8px;font-family:var(--font-mono);font-size:.78rem;transition:var(--transition);}
+.comm-contact-row:hover{border-color:rgba(192,192,192,.2);background:rgba(192,192,192,.04);}
+.comm-contact-icon{width:28px;height:28px;background:rgba(192,192,192,.05);border:1px solid rgba(192,192,192,.12);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--color-primary);flex-shrink:0;}
+.comm-contact-label{color:var(--color-text-muted);min-width:64px;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;}
+.comm-contact-value{color:var(--color-text-light);flex:1;}
+.comm-request-block{background:rgba(0,0,0,.22);border:1px solid rgba(192,192,192,.07);border-left:2px solid rgba(192,192,192,.26);border-radius:0 4px 4px 0;padding:14px;margin-top:8px;}
+.comm-request-block pre{font-family:var(--font-mono);font-size:.72rem;color:var(--color-text-muted);white-space:pre-wrap;margin:0;line-height:1.75;}
+/* Inquiry box */
+.comm-inquiry-wrap{margin-top:18px;padding-top:16px;border-top:1px solid rgba(192,192,192,.08);}
+.comm-inquiry-wrap textarea{width:100%;resize:vertical;min-height:80px;}
 
-/* Request format */
-.comm-request-block {
-  background: rgba(0,0,0,.22);
-  border: 1px solid rgba(192,192,192,.07);
-  border-left: 2px solid rgba(192,192,192,.26);
-  border-radius: 0 4px 4px 0;
-  padding: 14px; margin-top: 8px;
-}
-.comm-request-block pre {
-  font-family: var(--font-mono); font-size: .72rem;
-  color: var(--color-text-muted);
-  white-space: pre-wrap; margin: 0; line-height: 1.75;
-}
+/* Submit / manage form */
+select.input-field{appearance:none;-webkit-appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b0bac9' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+.field-section-divider{font-family:var(--font-mono);font-size:.62rem;color:var(--color-text-muted);letter-spacing:.16em;text-transform:uppercase;padding:6px 0;margin:10px 0 4px;border-top:1px solid rgba(192,192,192,.07);}
+.manage-listing-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;background:rgba(192,192,192,.02);border:1px solid rgba(192,192,192,.08);border-radius:4px;margin-bottom:10px;flex-wrap:wrap;}
+.manage-listing-info{flex:1;min-width:0;}
+.manage-listing-title{font-size:.85rem;font-weight:700;color:var(--color-text-light);letter-spacing:.06em;margin-bottom:3px;text-transform:uppercase;}
+.manage-listing-meta{font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);}
+.manage-listing-actions{display:flex;gap:8px;}
 
-/* ── NAV ACTIVE LINK ──────────────────────────────────────────────────────────  */
-nav a.nav-active { color: var(--color-text-light); }
-nav a.nav-active::after { width: 100%; }
+/* Nav active */
+nav a.nav-active{color:var(--color-text-light);}
+nav a.nav-active::after{width:100%;}
 
-/* ── RESPONSIVE ───────────────────────────────────────────────────────────────  */
-@media (max-width: 768px) {
-  .page-hero { padding: 60px 16px 36px; }
-  .comm-stats-strip { display: none; } /* avoid cramped layout on mobile */
-  .comm-grid { grid-template-columns: 1fr; }
-  .hiw-steps { grid-template-columns: 1fr; }
-  .how-it-works { padding: 20px; }
-  .comm-section { padding-top: 24px; }
+@media(max-width:768px){
+  .page-hero{padding:60px 16px 36px;}
+  .comm-stats-strip{display:none;}
+  .comm-grid{grid-template-columns:1fr;}
+  .hiw-steps{grid-template-columns:1fr;}
+  .how-it-works{padding:20px;}
+  .comm-section{padding-top:24px;}
+  .comm-member-cta{padding:20px;}
 }
 </style>
 </head>
 <body>
 <div id="particles-js"></div>
+<div id="nexusToast"></div>
 
-<!-- COMMISSION INFO MODAL -->
+<!-- ── AUTH MODAL ──────────────────────────────────────────────────────────── -->
+<div class="modal" id="loginModal">
+  <div class="modal-container" style="max-width:400px;">
+    <button class="close-btn" id="closeModal">&#x2715;</button>
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:1.4rem;font-weight:900;background:var(--silver-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:.12em;filter:drop-shadow(0 0 6px rgba(192,192,192,.2));margin-bottom:4px;">TheSizNexus</div>
+      <h2 id="modalTitle" style="margin:0;font-size:.85rem;letter-spacing:.2em;color:var(--color-text-muted);font-weight:400;">ACCESS NEXUS</h2>
+    </div>
+    <div class="error-message" id="errorMessage"></div>
+    <form class="login-form" id="loginForm" novalidate>
+      <div class="input-group">
+        <label for="loginEmail"><i class="fas fa-envelope" style="margin-right:5px;opacity:.5;font-size:.7rem;"></i>Email</label>
+        <input type="email" id="loginEmail" autocomplete="email" required placeholder="operative@nexus.corp">
+      </div>
+      <div class="input-group">
+        <label for="loginPassword"><i class="fas fa-lock" style="margin-right:5px;opacity:.5;font-size:.7rem;"></i>Password</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn-primary" style="justify-content:center;width:100%;margin-top:4px;"><i class="fas fa-sign-in-alt"></i> Login</button>
+    </form>
+    <form class="login-form" id="registerForm" style="display:none" novalidate>
+      <div class="input-group">
+        <label for="registerEmail"><i class="fas fa-envelope" style="margin-right:5px;opacity:.5;font-size:.7rem;"></i>Email</label>
+        <input type="email" id="registerEmail" autocomplete="email" required placeholder="operative@nexus.corp">
+      </div>
+      <div class="input-group">
+        <label for="registerPassword"><i class="fas fa-lock" style="margin-right:5px;opacity:.5;font-size:.7rem;"></i>Password <span style="opacity:.5;font-weight:400;">(min 6 chars)</span></label>
+        <input type="password" id="registerPassword" autocomplete="new-password" minlength="6" required placeholder="Create a password">
+      </div>
+      <div class="input-group">
+        <label for="confirmPassword"><i class="fas fa-lock" style="margin-right:5px;opacity:.5;font-size:.7rem;"></i>Confirm Password</label>
+        <input type="password" id="confirmPassword" autocomplete="new-password" minlength="6" required placeholder="Repeat password">
+      </div>
+      <button type="submit" class="btn-primary" style="justify-content:center;width:100%;margin-top:4px;"><i class="fas fa-user-plus"></i> Create Account</button>
+    </form>
+    <div class="toggle-form" style="margin-top:14px;"><span id="toggleForm">Don't have an account? <strong style="color:var(--color-primary);cursor:pointer;">Register here</strong></span></div>
+    <div id="forgotLinkWrap" style="text-align:center;margin-top:6px;"><span id="forgotLink" style="font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);cursor:pointer;text-decoration:underline;">Forgot your password?</span></div>
+    <div class="auth-divider">OR CONTINUE WITH</div>
+    <div class="social-login" style="flex-direction:column;gap:8px;">
+      <button type="button" class="social-btn" id="googleLogin" style="flex:unset;justify-content:center;"><i class="fab fa-google" style="color:#DB4437;"></i> Continue with Google</button>
+      <button type="button" class="social-btn" id="anonLogin" style="flex:unset;justify-content:center;"><i class="fas fa-user-secret" style="opacity:.6;"></i> Browse as Guest</button>
+    </div>
+    <p style="font-family:var(--font-mono);font-size:.6rem;color:rgba(192,192,192,.2);text-align:center;margin-top:14px;line-height:1.5;">By joining you agree to follow corp rules.<br>Guests have limited access.</p>
+  </div>
+</div>
+
+<!-- ── PASSWORD RESET MODAL ────────────────────────────────────────────────── -->
+<div class="modal" id="resetModal">
+  <div class="modal-container" style="max-width:380px">
+    <button class="close-btn" id="closeReset">&#x2715;</button>
+    <h2><i class="fas fa-key" style="margin-right:8px;font-size:.85rem;"></i>Reset Password</h2>
+    <p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);margin:0 0 16px;line-height:1.6;">Enter your email and we'll send you a reset link. If you don't see it, check your <strong>spam or junk folder</strong>.</p>
+    <div class="error-message" id="resetError"></div>
+    <div class="success-msg" id="resetSuccess" style="display:none;">Reset email sent! Check your inbox and spam folder.</div>
+    <div class="input-group" style="margin-bottom:14px;">
+      <label for="resetEmail">Email</label>
+      <input type="email" id="resetEmail" autocomplete="email" placeholder="your@email.com">
+    </div>
+    <button class="btn-primary" id="sendResetBtn" style="width:100%;justify-content:center;"><i class="fas fa-paper-plane"></i> Send Reset Email</button>
+  </div>
+</div>
+
+<!-- ── COMMISSION INFO MODAL ───────────────────────────────────────────────── -->
 <div class="modal" id="commInfoModal">
   <div class="modal-container" style="max-width:560px;">
     <button class="close-btn" id="closeCommInfo">&#x2715;</button>
@@ -574,15 +248,87 @@ nav a.nav-active::after { width: 100%; }
   </div>
 </div>
 
-<!-- CONTACT MODAL -->
+<!-- ── CONTACT / INQUIRY MODAL ─────────────────────────────────────────────── -->
 <div class="modal" id="commContactModal">
-  <div class="modal-container" style="max-width:460px;">
+  <div class="modal-container" style="max-width:480px;">
     <button class="close-btn" id="closeCommContact">&#x2715;</button>
     <div id="commContactContent"></div>
   </div>
 </div>
 
-<!-- NAV -->
+<!-- ── SUBMIT LISTING MODAL ─────────────────────────────────────────────────── -->
+<div class="modal" id="submitListingModal">
+  <div class="modal-container" style="max-width:580px;">
+    <button class="close-btn" id="closeSubmitListing">&#x2715;</button>
+    <h2 style="margin-bottom:4px;"><i class="fas fa-plus-circle" style="margin-right:8px;font-size:.85rem;"></i>Submit Your Listing</h2>
+    <p style="font-family:var(--font-mono);font-size:.72rem;color:var(--color-text-muted);margin:0 0 16px;line-height:1.6;">Fill out the form below to list your service. It will appear on the commissions page immediately.</p>
+    <div class="error-message" id="submitError"></div>
+    <div class="success-msg" id="submitSuccess" style="display:none;">Listing submitted! It's now live on the commissions page.</div>
+    <div class="comm-detail-body" style="max-height:65vh;">
+      <form id="submitListingForm" novalidate>
+        <div class="field-group">
+          <label class="field-label" for="slTitle">Service Title <span style="opacity:.4;">*</span></label>
+          <input type="text" id="slTitle" class="input-field" maxlength="80" required placeholder="e.g. 3D Character Modeling">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="slCategory">Category <span style="opacity:.4;">*</span></label>
+          <select id="slCategory" class="input-field" required>
+            <option value="">Select category...</option>
+            <option value="art">Art</option>
+            <option value="code">Code</option>
+            <option value="audio">Audio</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="slDesc">Short Description <span style="opacity:.4;">* max 200</span></label>
+          <input type="text" id="slDesc" class="input-field" maxlength="200" required placeholder="One-line summary of your service">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="slDetails">Full Details</label>
+          <textarea id="slDetails" class="input-field" maxlength="1000" rows="4" placeholder="Describe your service, typical turnaround, what's included, etc."></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="slTags">Specialization Tags <span style="opacity:.4;">comma-separated, max 5</span></label>
+          <input type="text" id="slTags" class="input-field" placeholder="e.g. Character Design, Rigging, Texturing">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="slPrice">Pricing</label>
+          <input type="text" id="slPrice" class="input-field" maxlength="100" placeholder="e.g. DM for pricing  or  $10–$50">
+        </div>
+        <div class="field-section-divider"><i class="fas fa-address-card" style="margin-right:5px;"></i>Contact Methods</div>
+        <div class="field-group">
+          <label class="field-label" for="slDiscord">Discord</label>
+          <input type="text" id="slDiscord" class="input-field" placeholder="Your#tag or @username">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="slEmail">Email</label>
+          <input type="email" id="slEmail" class="input-field" placeholder="you@example.com">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="slRecroom">RecRoom</label>
+          <input type="text" id="slRecroom" class="input-field" placeholder="@username">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="slRequestFormat">Request Format <span style="opacity:.4;">what info to include</span></label>
+          <textarea id="slRequestFormat" class="input-field" maxlength="500" rows="3" placeholder="DM me with:&#10;— Project description&#10;— Budget range&#10;— Deadline"></textarea>
+        </div>
+        <button type="submit" class="btn-primary" id="submitListingBtn" style="width:100%;justify-content:center;margin-top:4px;"><i class="fas fa-paper-plane"></i> Submit Listing</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── MANAGE LISTINGS MODAL ────────────────────────────────────────────────── -->
+<div class="modal" id="manageListingsModal">
+  <div class="modal-container" style="max-width:560px;">
+    <button class="close-btn" id="closeManageListings">&#x2715;</button>
+    <h2><i class="fas fa-id-badge" style="margin-right:8px;font-size:.85rem;"></i>My Listings</h2>
+    <div id="manageListingsContent"><div class="loading-spinner"></div></div>
+  </div>
+</div>
+
+<!-- ── NAV ────────────────────────────────────────────────────────────────── -->
 <nav>
   <div class="nav-content">
     <div class="nav-logo" onclick="window.location.href='index.html'">TheSizNexus</div>
@@ -601,47 +347,47 @@ nav a.nav-active::after { width: 100%; }
           <i class="fas fa-user" id="defaultIcon"></i>
         </button>
         <div class="dropdown-menu" id="dropdownMenu">
-          <a href="index.html" id="loginBtn"><i class="fas fa-sign-in-alt" style="font-size:12px;width:14px"></i> Log In</a>
-          <a href="index.html" id="myProfileBtn" style="display:none"><i class="fas fa-id-card" style="font-size:12px;width:14px"></i> My Profile</a>
+          <a href="#" id="loginBtn"><i class="fas fa-sign-in-alt" style="font-size:12px;width:14px"></i> Log In</a>
+          <a href="#" id="submitListingNavBtn" style="display:none"><i class="fas fa-plus-circle" style="font-size:12px;width:14px"></i> Submit Listing</a>
+          <a href="#" id="myListingsNavBtn" style="display:none"><i class="fas fa-id-badge" style="font-size:12px;width:14px"></i> My Listings</a>
+          <a href="index.html" id="mainSiteBtn" style="display:none"><i class="fas fa-home" style="font-size:12px;width:14px"></i> Main Site</a>
           <a href="#" id="logoutBtn" style="display:none"><i class="fas fa-sign-out-alt" style="font-size:12px;width:14px"></i> Log Out</a>
         </div>
       </div>
     </div>
   </div>
 </nav>
-
 <div class="mobile-menu" id="mobileMenu">
   <a href="index.html">Home</a>
   <a href="about.html">Information</a>
   <a href="Commission.html">Commissions</a>
 </div>
 
-<!-- HERO -->
+<!-- ── HERO ───────────────────────────────────────────────────────────────── -->
 <div class="page-hero">
   <div class="page-hero-glow"></div>
   <div class="page-hero-eyebrow">// CORPORATION SERVICES</div>
   <h1>COMMISSIONS<span class="cursor-blink">_</span></h1>
   <p class="page-hero-sub">Commission skilled $iz members for custom work across art, code, audio, and more. Browse available services and reach out directly.</p>
   <div class="page-hero-cta">
-    <a href="https://discord.gg/73Mb3syadB" class="btn-primary" target="_blank" rel="noopener noreferrer">
-      <i class="fab fa-discord"></i> Join Discord
-    </a>
+    <a href="https://discord.gg/73Mb3syadB" class="btn-primary" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord"></i> Join Discord</a>
+    <button class="btn-secondary" id="heroSignInBtn" style="display:none"><i class="fas fa-list-alt"></i> List Your Service</button>
   </div>
 </div>
 
-<!-- TICKER -->
+<!-- ── TICKER ─────────────────────────────────────────────────────────────── -->
 <div class="ticker-wrapper">
   <div class="ticker-content">
     <span class="ticker-label">COMMISSION FEED</span>
     Prices and availability vary by operative
     <span class="ticker-dot">◆</span> Contact artists directly for custom requests
     <span class="ticker-dot">◆</span> Join Discord to stay updated on new listings
-    <span class="ticker-dot">◆</span> New services added regularly — check back often
+    <span class="ticker-dot">◆</span> Members can submit their own service listing
     <span class="ticker-dot">◆</span>
   </div>
 </div>
 
-<!-- STATS STRIP -->
+<!-- ── STATS STRIP ─────────────────────────────────────────────────────────── -->
 <div class="comm-stats-strip">
   <div class="comm-stat-item">
     <div class="comm-stat-num" id="statOpen">—</div>
@@ -657,12 +403,12 @@ nav a.nav-active::after { width: 100%; }
   </div>
 </div>
 
-<!-- MAIN CONTENT -->
+<!-- ── MAIN CONTENT ──────────────────────────────────────────────────────────  -->
 <div class="comm-section">
 
   <div class="comm-section-header">
     <span class="comm-section-title">Available Services</span>
-    <span class="comm-section-sub" id="commCount">—</span>
+    <span class="comm-section-sub" id="commCount">Loading...</span>
   </div>
 
   <div class="comm-filter-bar">
@@ -671,34 +417,31 @@ nav a.nav-active::after { width: 100%; }
     <button class="comm-filter-btn" data-filter="art">Art</button>
     <button class="comm-filter-btn" data-filter="code">Code</button>
     <button class="comm-filter-btn" data-filter="audio">Audio</button>
+    <button class="comm-filter-btn" data-filter="other">Other</button>
   </div>
 
-  <div class="comm-grid" id="commGrid"></div>
+  <div class="comm-grid" id="commGrid">
+    <div class="loading-spinner" style="grid-column:1/-1;padding:60px 0;"></div>
+  </div>
 
   <!-- How It Works -->
   <div class="how-it-works">
-    <h3>
-      <span class="section-icon"><i class="fas fa-terminal"></i></span>
-      How It Works
-    </h3>
+    <h3><span class="section-icon"><i class="fas fa-terminal"></i></span>How It Works</h3>
     <div class="hiw-steps">
-      <div class="hiw-step">
-        <div class="hiw-num">01</div>
-        <div class="hiw-text"><strong>Browse Services</strong> — Find a commission that fits what you need. Check each artist's open/closed status before reaching out.</div>
-      </div>
-      <div class="hiw-step">
-        <div class="hiw-num">02</div>
-        <div class="hiw-text"><strong>Read the Details</strong> — Click "Info" to see full description, turnaround time, and specialization areas.</div>
-      </div>
-      <div class="hiw-step">
-        <div class="hiw-num">03</div>
-        <div class="hiw-text"><strong>Reach Out</strong> — Click "Contact" for the artist's preferred contact method and how to format your request.</div>
-      </div>
-      <div class="hiw-step">
-        <div class="hiw-num">04</div>
-        <div class="hiw-text"><strong>Commission</strong> — Work directly with the artist. All pricing and terms are set by each operative individually.</div>
-      </div>
+      <div class="hiw-step"><div class="hiw-num">01</div><div class="hiw-text"><strong>Browse Services</strong> — Find a commission that fits your need. Check each artist's open/closed status before reaching out.</div></div>
+      <div class="hiw-step"><div class="hiw-num">02</div><div class="hiw-text"><strong>Read the Details</strong> — Click "Info" to see the full description, turnaround time, and specialization.</div></div>
+      <div class="hiw-step"><div class="hiw-num">03</div><div class="hiw-text"><strong>Reach Out</strong> — Click "Contact" for the artist's contact methods and how to format your request. Members can send an inquiry directly.</div></div>
+      <div class="hiw-step"><div class="hiw-num">04</div><div class="hiw-text"><strong>Commission</strong> — Work directly with the artist. All pricing and terms are set by each operative individually.</div></div>
     </div>
+  </div>
+
+  <!-- Member CTA -->
+  <div class="comm-member-cta" id="memberCtaSection">
+    <div class="comm-member-cta-text">
+      <div class="comm-member-cta-label">Offer Your Services</div>
+      <div class="comm-member-cta-sub">You're signed in as a member. Submit a listing to showcase your skills and get commissioned by others in the corp.</div>
+    </div>
+    <button class="btn-primary" id="memberCtaBtn"><i class="fas fa-plus-circle"></i> Submit Listing</button>
   </div>
 
 </div>
@@ -710,282 +453,563 @@ nav a.nav-active::after { width: 100%; }
 </footer>
 
 <script>
-// DevTools block
-document.onkeydown = function(e) {
-  if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && [73,74,67].includes(e.keyCode)) || (e.ctrlKey && e.keyCode === 85)) return false;
-};
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
+/* ── DEVTOOLS BLOCK ──────────────────────────────────────────────────────── */
+document.addEventListener('dragstart', e => { if (e.target?.tagName === 'IMG') e.preventDefault(); });
 
-// Particles — silver to match main site
+/* ── DOMAIN LOCK (matches main site) ────────────────────────────────────── */
+const ALLOWED_DOMAIN = 'siznexus.org';
+let domainLockEnabled = true;
+let isDeveloperMode = sessionStorage.getItem('devMode') === 'true';
+function getCurrentDomain(){ return window.location.hostname.replace('www.',''); }
+function isAllowedDomain(){ if(!domainLockEnabled) return true; const d = getCurrentDomain(); return d === ALLOWED_DOMAIN || d === 'localhost' || d.startsWith('127.'); }
+async function sha256(str){ const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str)); return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join(''); }
+function showDomainLock(){
+  const o = document.createElement('div');
+  o.id = 'domain-lock-overlay';
+  o.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#060a12,#0a0e1a);display:flex;align-items:center;justify-content:center;z-index:10000;font-family:var(--font-mono);';
+  o.innerHTML = `<div style="text-align:center;max-width:500px;padding:30px;background:rgba(10,14,26,.97);border:1px solid rgba(192,192,192,.25);border-top:1px solid rgba(212,216,226,.35);border-radius:8px;box-shadow:0 0 30px rgba(192,192,192,.12);">
+    <div style="font-size:2rem;margin-bottom:20px;"><i class="fas fa-lock" style="color:#C0C0C0;"></i></div>
+    <h1 style="color:#D4D8E2;margin:0 0 10px;font-size:1.5rem;letter-spacing:.1em;">Access Restricted</h1>
+    <p style="color:#B0BAC9;margin:0 0 20px;font-size:.9rem;line-height:1.6;">This application is restricted to <strong>siznexus.org</strong>.</p>
+    <p style="color:#7A8499;margin:0 0 15px;font-size:.75rem;opacity:.7;">Current domain: <code style="color:#C0C0C0;">${getCurrentDomain()}</code></p>
+    <button id="dev-unlock-btn" style="margin-top:20px;padding:8px 16px;background:rgba(192,192,192,.07);border:1px solid rgba(192,192,192,.25);color:#C0C0C0;cursor:pointer;font-family:var(--font-mono);font-size:.7rem;border-radius:4px;opacity:.5;">Developer</button>
+  </div>`;
+  document.body.appendChild(o);
+  document.getElementById('dev-unlock-btn').addEventListener('click', async () => {
+    const key = prompt('Enter developer key:'); if (!key) return;
+    const btn = document.getElementById('dev-unlock-btn'); btn.disabled = true; btn.textContent = 'Validating...';
+    try {
+      const doc = await db.collection('_configKEY').doc('devKeyHash').get();
+      if (!doc.exists) { alert('Developer key not configured.'); btn.disabled = false; btn.textContent = 'Developer'; return; }
+      if (await sha256(key.trim()) === doc.data().hash) {
+        sessionStorage.setItem('devMode','true'); document.getElementById('domain-lock-overlay')?.remove(); window.location.reload();
+      } else { alert('Invalid key.'); btn.disabled = false; btn.textContent = 'Developer'; }
+    } catch(e) { console.error(e); alert('Error validating key.'); btn.disabled = false; btn.textContent = 'Developer'; }
+  });
+}
+if (!isAllowedDomain() && !isDeveloperMode) {
+  document.addEventListener('DOMContentLoaded', showDomainLock);
+}
+
+/* ── PARTICLES (exact match to main site) ───────────────────────────────── */
 particlesJS('particles-js', {
   particles: {
-    number: { value: window.innerWidth < 768 ? 40 : 80, density: { enable: true, value_area: 800 } },
-    color: { value: '#C0C0C0' },
+    number: { value: window.innerWidth < 768 ? 30 : 60, density: { enable: true, value_area: window.innerWidth < 768 ? 400 : 800 } },
+    color: { value: '#A8B2C1' },
     shape: { type: 'circle' },
-    opacity: { value: .25, random: true },
-    size: { value: 1, random: true },
-    move: { enable: true, speed: .4, direction: 'none', random: true }
+    opacity: { value: .15, random: true },
+    size: { value: window.innerWidth < 768 ? .8 : 1.2, random: true },
+    line_linked: { enable: true, distance: 150, color: '#A8B2C1', opacity: .05, width: 1 },
+    move: { enable: true, speed: window.innerWidth < 768 ? .3 : .5, direction: 'none', random: true }
   },
   interactivity: { events: { onhover: { enable: window.innerWidth >= 768, mode: 'repulse' } } }
 });
 
-// ── Commission data ──────────────────────────────────────────────────────────
-// To add a listing: append an object here. Fields:
-//   id (int), title, description, category ('art'|'code'|'audio'),
-//   open (bool), artist, initials, specialization [], price,
-//   details, contact { discord?, email?, recroom? }, requestFormat
-const COMMISSIONS = [
-  {
-    id: 1,
-    title: '3D Character Modeling',
-    description: 'Custom 3D character models for games, VR platforms, and animations.',
-    category: 'art',
-    open: true,
-    artist: '[$iz] ModelMaster',
-    initials: 'MM',
-    specialization: ['Character Design', 'Rigging', 'Texturing'],
-    price: 'DM for pricing',
-    details: 'High-quality 3D character models for games, VR, and animations. Both stylized and realistic styles available. Each model includes basic rigging and texture maps. Typical turnaround: 1–2 weeks depending on complexity.',
-    contact: { discord: 'ModelMaster#1234', email: 'modelmaster.siz@gmail.com', recroom: '@ModelMaster' },
-    requestFormat: 'DM on Discord with:\n— Character description\n— Reference images\n— Style preference (stylized / realistic)\n— Deadline (if any)\n— Budget range'
-  },
-  {
-    id: 2,
-    title: 'Game Scripting',
-    description: 'Custom scripts for Roblox, Unity, and other platforms.',
-    category: 'code',
-    open: true,
-    artist: '[$iz] CodeWizard',
-    initials: 'CW',
-    specialization: ['Lua', 'C#', 'JavaScript'],
-    price: 'DM for pricing',
-    details: 'Custom game scripts for Roblox, Unity, and more. Game mechanics, UI systems, and backend services. Works with Lua, C#, and JavaScript. Projects typically complete in 1–3 weeks depending on scope.',
-    contact: { discord: 'CodeWizard#5678', email: 'codewizard.siz@gmail.com', recroom: '@CodeWizard' },
-    requestFormat: 'DM on Discord with:\n— Platform (Roblox / Unity / other)\n— Script purpose and functionality\n— Technical requirements\n— Deadline (if any)\n— Budget range'
-  },
-  {
-    id: 3,
-    title: 'Custom Audio Production',
-    description: 'Original music and sound effects for games and video projects.',
-    category: 'audio',
-    open: false,
-    artist: '[$iz] SoundSmith',
-    initials: 'SS',
-    specialization: ['Music Composition', 'Sound Design', 'Audio Implementation'],
-    price: 'Currently closed',
-    details: 'Custom music and sound effects for games, videos, and other media. Electronic and orchestral styles, adaptable to various genres. Deliverables include high-quality WAV/MP3 files. Not currently accepting new commissions — check back or follow Discord for updates.',
-    contact: { discord: 'SoundSmith#9012', email: 'soundsmith.siz@gmail.com', recroom: '@SoundSmith' },
-    requestFormat: 'When commissions reopen, DM with:\n— Project description and context\n— Style references (similar tracks)\n— Required duration\n— Usage context\n— Budget range'
+/* ── FIREBASE ────────────────────────────────────────────────────────────── */
+const auth = firebase.auth();
+const db   = firebase.firestore();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+let currentUser     = null;
+let currentUserData = null;
+let commissionsUnsub = null;
+let allCommissions  = [];   // live Firestore snapshot
+let activeFilter    = 'all';
+
+/* ── HELPERS ─────────────────────────────────────────────────────────────── */
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function initials(n){ if(!n) return '?'; return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+function avHtml(photo, name){ if(photo) return `<img src="${esc(photo)}" alt="" loading="lazy">`; return `<span>${initials(name)}</span>`; }
+let _toastTimer = null;
+function showToast(msg){ const t = document.getElementById('nexusToast'); t.textContent = msg; t.classList.add('show'); clearTimeout(_toastTimer); _toastTimer = setTimeout(() => t.classList.remove('show'), 3200); }
+function openModal(id){ document.getElementById(id).classList.add('active'); document.body.style.overflow = 'hidden'; }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); if (!document.querySelector('.modal.active')) document.body.style.overflow = ''; }
+const PAGE_MODALS = ['loginModal','resetModal','commInfoModal','commContactModal','submitListingModal','manageListingsModal'];
+PAGE_MODALS.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('click', e => { if (e.target === el) closeModal(id); });
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') PAGE_MODALS.forEach(id => { if (document.getElementById(id)?.classList.contains('active')) closeModal(id); }); });
+
+/* ── CLOSE BUTTONS ────────────────────────────────────────────────────────── */
+document.getElementById('closeModal').addEventListener('click',       () => closeModal('loginModal'));
+document.getElementById('closeReset').addEventListener('click',       () => closeModal('resetModal'));
+document.getElementById('closeCommInfo').addEventListener('click',    () => closeModal('commInfoModal'));
+document.getElementById('closeCommContact').addEventListener('click', () => closeModal('commContactModal'));
+document.getElementById('closeSubmitListing').addEventListener('click', () => closeModal('submitListingModal'));
+document.getElementById('closeManageListings').addEventListener('click', () => closeModal('manageListingsModal'));
+
+/* ── AUTH MODAL LOGIC ─────────────────────────────────────────────────────── */
+let showingLogin = true;
+function clearError(){ const e = document.getElementById('errorMessage'); e.textContent=''; e.style.display='none'; }
+function showError(msg){ const e = document.getElementById('errorMessage'); e.textContent = msg; e.style.display = 'block'; }
+function setAuthMode(login){
+  showingLogin = login;
+  document.getElementById('loginForm').style.display    = login ? 'flex'  : 'none';
+  document.getElementById('registerForm').style.display = login ? 'none'  : 'flex';
+  document.getElementById('forgotLinkWrap').style.display = login ? 'block' : 'none';
+  document.getElementById('modalTitle').textContent     = login ? 'ACCESS NEXUS' : 'CREATE ACCOUNT';
+  document.getElementById('toggleForm').innerHTML       = login
+    ? `Don't have an account? <strong style="color:var(--color-primary);cursor:pointer;">Register here</strong>`
+    : `Already have an account? <strong style="color:var(--color-primary);cursor:pointer;">Login here</strong>`;
+  clearError();
+}
+document.getElementById('toggleForm').addEventListener('click', () => setAuthMode(!showingLogin));
+
+function mapAuthError(code){
+  const m = { 'auth/user-not-found':'No account found with that email.','auth/wrong-password':'Incorrect password.','auth/invalid-email':'Invalid email address.','auth/email-already-in-use':'An account with that email already exists.','auth/weak-password':'Password must be at least 6 characters.','auth/too-many-requests':'Too many attempts. Try again later.','auth/invalid-credential':'Invalid email or password.' };
+  return m[code] || 'An error occurred. Please try again.';
+}
+
+document.getElementById('loginForm').addEventListener('submit', async e => {
+  e.preventDefault(); clearError();
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+  try { await auth.signInWithEmailAndPassword(email, pass); closeModal('loginModal'); }
+  catch(err) { showError(mapAuthError(err.code)); }
+  finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login'; }
+});
+
+document.getElementById('registerForm').addEventListener('submit', async e => {
+  e.preventDefault(); clearError();
+  const email   = document.getElementById('registerEmail').value.trim();
+  const pass    = document.getElementById('registerPassword').value;
+  const confirm = document.getElementById('confirmPassword').value;
+  if (pass !== confirm) { showError('Passwords do not match.'); return; }
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await db.collection('users').doc(cred.user.uid).set({
+      displayName: email.split('@')[0], email, photoURL:'',
+      rank:'Member', bio:'', status:'online', friends:[],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    closeModal('loginModal');
+  } catch(err) { showError(mapAuthError(err.code)); }
+  finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account'; }
+});
+
+document.getElementById('googleLogin').addEventListener('click', async () => {
+  try {
+    const res = await auth.signInWithPopup(googleProvider);
+    const snap = await db.collection('users').doc(res.user.uid).get();
+    if (!snap.exists) {
+      await db.collection('users').doc(res.user.uid).set({
+        displayName: res.user.displayName || res.user.email.split('@')[0],
+        email: res.user.email, photoURL: res.user.photoURL || '',
+        rank:'Member', bio:'', status:'online', friends:[],
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+    closeModal('loginModal');
+  } catch(err) { showError(mapAuthError(err.code)); }
+});
+
+document.getElementById('anonLogin').addEventListener('click', async () => {
+  try { await auth.signInAnonymously(); closeModal('loginModal'); }
+  catch(err) { showError(mapAuthError(err.code)); }
+});
+
+/* Password reset */
+document.getElementById('forgotLink').addEventListener('click', () => { closeModal('loginModal'); openModal('resetModal'); });
+document.getElementById('sendResetBtn').addEventListener('click', async () => {
+  const email = document.getElementById('resetEmail').value.trim();
+  const errEl = document.getElementById('resetError'); const okEl = document.getElementById('resetSuccess');
+  errEl.style.display='none'; okEl.style.display='none';
+  if (!email) { errEl.textContent='Please enter your email.'; errEl.style.display='block'; return; }
+  const btn = document.getElementById('sendResetBtn');
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+  try {
+    await auth.sendPasswordResetEmail(email, { url: window.location.origin });
+    okEl.style.display = 'block';
+  } catch(err) { errEl.textContent = mapAuthError(err.code); errEl.style.display='block'; }
+  finally { btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> Send Reset Email'; }
+});
+
+/* ── AUTH STATE ───────────────────────────────────────────────────────────── */
+auth.onAuthStateChanged(async user => {
+  currentUser = user;
+  if (user && !user.isAnonymous) {
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      currentUserData = snap.exists ? snap.data() : null;
+    } catch(_) { currentUserData = null; }
+  } else {
+    currentUserData = null;
   }
-];
+  updateNav(user);
+  updateMemberSections(user);
+  // Re-render grid so "is-mine" badges and Manage buttons update
+  renderGrid(getFiltered());
+});
 
-// Category icon map
-const CAT_ICONS = { art: 'fa-palette', code: 'fa-code', audio: 'fa-music' };
+function updateNav(user){
+  const avatarImg   = document.getElementById('userAvatar');
+  const defaultIcon = document.getElementById('defaultIcon');
+  const loginBtn    = document.getElementById('loginBtn');
+  const submitBtn   = document.getElementById('submitListingNavBtn');
+  const myBtn       = document.getElementById('myListingsNavBtn');
+  const mainBtn     = document.getElementById('mainSiteBtn');
+  const logoutBtn   = document.getElementById('logoutBtn');
+  const heroBtn     = document.getElementById('heroSignInBtn');
 
-// ── Rendering ────────────────────────────────────────────────────────────────
-let activeFilter = 'all';
+  if (user && !user.isAnonymous) {
+    const photo = currentUserData?.photoURL || user.photoURL || '';
+    if (photo) { avatarImg.src = photo; avatarImg.style.cssText = 'display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;position:absolute;top:0;left:0;'; defaultIcon.style.display='none'; }
+    else { avatarImg.style.display='none'; defaultIcon.style.display='block'; }
+    loginBtn.style.display  = 'none';
+    submitBtn.style.display = 'flex';
+    myBtn.style.display     = 'flex';
+    mainBtn.style.display   = 'flex';
+    logoutBtn.style.display = 'flex';
+    heroBtn.style.display   = 'inline-flex';
+    heroBtn.textContent     = '';
+    heroBtn.innerHTML       = '<i class="fas fa-list-alt"></i> List Your Service';
+  } else if (user?.isAnonymous) {
+    avatarImg.style.display='none'; defaultIcon.className='fas fa-user-secret'; defaultIcon.style.display='block';
+    loginBtn.style.display  = 'none';
+    submitBtn.style.display = 'none';
+    myBtn.style.display     = 'none';
+    mainBtn.style.display   = 'flex';
+    logoutBtn.style.display = 'flex';
+    heroBtn.style.display   = 'none';
+  } else {
+    avatarImg.style.display='none'; defaultIcon.className='fas fa-user'; defaultIcon.style.display='block';
+    loginBtn.style.display  = 'flex';
+    submitBtn.style.display = 'none';
+    myBtn.style.display     = 'none';
+    mainBtn.style.display   = 'none';
+    logoutBtn.style.display = 'none';
+    heroBtn.style.display   = 'none';
+  }
+}
 
-function getFiltered() {
-  return COMMISSIONS.filter(c => {
-    if (activeFilter === 'open') return c.open;
-    if (activeFilter === 'all') return true;
+function updateMemberSections(user){
+  const cta = document.getElementById('memberCtaSection');
+  cta.style.display = (user && !user.isAnonymous) ? 'flex' : 'none';
+}
+
+/* Logout */
+document.getElementById('logoutBtn').addEventListener('click', e => { e.preventDefault(); auth.signOut(); });
+
+/* Login trigger */
+document.getElementById('loginBtn').addEventListener('click', e => { e.preventDefault(); setAuthMode(true); openModal('loginModal'); });
+
+/* ── COMMISSIONS — FIRESTORE LIVE LISTENER ────────────────────────────────── */
+const CAT_ICONS = { art:'fa-palette', code:'fa-code', audio:'fa-music', other:'fa-star' };
+
+function startCommissionsListener(){
+  if (commissionsUnsub) commissionsUnsub();
+  commissionsUnsub = db.collection('commissions')
+    .where('status', '==', 'active')
+    .orderBy('createdAt', 'desc')
+    .onSnapshot(snap => {
+      allCommissions = [];
+      snap.forEach(doc => allCommissions.push({ id: doc.id, ...doc.data() }));
+      renderGrid(getFiltered());
+      renderStats(allCommissions);
+    }, err => {
+      console.error('Commissions listener error:', err);
+      document.getElementById('commGrid').innerHTML = `<div class="comm-empty"><i class="fas fa-exclamation-circle"></i>Failed to load commissions. Check your connection.</div>`;
+    });
+}
+
+function getFiltered(){
+  return allCommissions.filter(c => {
+    if (activeFilter === 'open')  return c.open;
+    if (activeFilter === 'all')   return true;
     return c.category === activeFilter;
   });
 }
 
-function buildCard(c, index) {
+function buildCard(c, index){
+  const isOwner = currentUser && !currentUser.isAnonymous && currentUser.uid === c.uid;
   const el = document.createElement('div');
-  el.className = 'comm-card' + (c.open ? '' : ' is-closed');
-  el.dataset.cat = c.category;
+  el.className = 'comm-card' + (isOwner ? ' is-mine' : '');
+  el.dataset.cat = c.category || 'other';
   el.style.setProperty('--i', index);
 
-  const icon = CAT_ICONS[c.category] || 'fa-star';
+  const icon   = CAT_ICONS[c.category] || 'fa-star';
+  const tags   = (c.tags || []).slice(0,5).map(t => `<span class="comm-tag">${esc(t)}</span>`).join('');
+  const photo  = c.artistPhoto || '';
+  const avContent = photo ? `<img src="${esc(photo)}" alt="">` : initials(c.artistName || 'Unknown');
+
+  const infoBtn    = `<button class="btn-sm" onclick="openInfo('${c.id}')"><i class="fas fa-info-circle"></i> Info</button>`;
+  const contactBtn = `<button class="btn-sm secondary" onclick="openContact('${c.id}')"><i class="fas fa-paper-plane"></i> Contact</button>`;
+  const manageBtn  = `<button class="btn-sm" onclick="openManageListings()"><i class="fas fa-cog"></i> Manage</button>`;
 
   el.innerHTML = `
     <i class="fas ${icon} comm-bg-icon" aria-hidden="true"></i>
     <div class="comm-card-header">
-      <div class="comm-avatar">${c.initials}</div>
+      <div class="comm-avatar">${avContent}</div>
       <div class="comm-artist">
-        <div class="comm-artist-name">${c.artist}</div>
-        <div class="comm-category-label" data-cat="${c.category}">${c.category}</div>
+        <div class="comm-artist-name">${esc(c.artistName || 'Unknown Operative')}</div>
+        <div class="comm-category-label" data-cat="${esc(c.category || 'other')}">${esc(c.category || 'other')}</div>
       </div>
       <span class="comm-status ${c.open ? 'open' : 'closed'}">${c.open ? 'OPEN' : 'CLOSED'}</span>
     </div>
-    <h3 class="comm-title">${c.title}</h3>
-    <p class="comm-desc">${c.description}</p>
-    <div class="comm-tags">${c.specialization.map(t => `<span class="comm-tag">${t}</span>`).join('')}</div>
+    <h3 class="comm-title">${esc(c.title || 'Untitled')}</h3>
+    <p class="comm-desc">${esc(c.description || '')}</p>
+    ${tags ? `<div class="comm-tags">${tags}</div>` : ''}
     <div class="comm-card-footer">
-      <div class="comm-price">${c.price}</div>
+      <div class="comm-price">${esc(c.price || '')}</div>
       <div class="comm-actions">
-        <button class="btn-sm" onclick="openInfo(${c.id})"><i class="fas fa-info-circle"></i> Info</button>
-        <button class="btn-sm secondary" onclick="openContact(${c.id})"><i class="fas fa-paper-plane"></i> Contact</button>
+        ${infoBtn}
+        ${isOwner ? manageBtn : contactBtn}
       </div>
     </div>
   `;
 
-  // After animation completes, mark closed cards with dimmed class for correct opacity
-  if (!c.open) {
-    el.addEventListener('animationend', () => el.classList.add('anim-done'), { once: true });
-  }
-
+  if (!c.open) el.addEventListener('animationend', () => { el.style.opacity = '.65'; }, { once: true });
   return el;
 }
 
-function renderGrid() {
+function renderGrid(list){
   const grid = document.getElementById('commGrid');
-  const list = getFiltered();
   grid.innerHTML = '';
-
   if (!list.length) {
-    grid.innerHTML = '<div class="comm-empty"><i class="fas fa-satellite-dish"></i>No commissions match this filter.</div>';
-  } else {
-    list.forEach((c, i) => grid.appendChild(buildCard(c, i)));
+    const isEmpty = allCommissions.length === 0;
+    grid.innerHTML = `<div class="comm-empty">
+      <i class="fas fa-${isEmpty ? 'satellite-dish' : 'filter'}"></i>
+      ${isEmpty ? 'No commission listings yet. Be the first to submit one.' : 'No listings match this filter.'}
+    </div>`;
+    document.getElementById('commCount').textContent = '0 results';
+    return;
   }
-
+  list.forEach((c, i) => grid.appendChild(buildCard(c, i)));
   const open = list.filter(c => c.open).length;
   document.getElementById('commCount').textContent = `${open} open · ${list.length} total`;
 }
 
-function renderStats() {
-  const open  = COMMISSIONS.filter(c => c.open).length;
-  const cats  = new Set(COMMISSIONS.map(c => c.category)).size;
-  document.getElementById('statOpen').textContent  = open;
-  document.getElementById('statTotal').textContent = COMMISSIONS.length;
-  document.getElementById('statCats').textContent  = cats;
+function renderStats(list){
+  document.getElementById('statOpen').textContent  = list.filter(c => c.open).length;
+  document.getElementById('statTotal').textContent = list.length;
+  document.getElementById('statCats').textContent  = new Set(list.map(c => c.category).filter(Boolean)).size || 0;
 }
 
-// ── Modals ───────────────────────────────────────────────────────────────────
-function openInfo(id) {
-  const c = COMMISSIONS.find(x => x.id === id);
-  if (!c) return;
-
+/* ── INFO MODAL ───────────────────────────────────────────────────────────── */
+function openInfo(id){
+  const c = allCommissions.find(x => x.id === id); if (!c) return;
+  const photo = c.artistPhoto || '';
+  const tags  = (c.tags || []).slice(0,5).map(t => `<span class="comm-tag">${esc(t)}</span>`).join('');
   document.getElementById('commInfoContent').innerHTML = `
     <div class="comm-detail-header">
-      <div class="comm-detail-av">${c.initials}</div>
+      <div class="comm-detail-av">${photo ? `<img src="${esc(photo)}" alt="">` : initials(c.artistName)}</div>
       <div>
-        <div class="comm-detail-title">${c.title}</div>
-        <div class="comm-detail-artist">
-          ${c.artist}
-          <span class="comm-status ${c.open ? 'open' : 'closed'}">${c.open ? 'OPEN' : 'CLOSED'}</span>
-        </div>
+        <div class="comm-detail-title">${esc(c.title)}</div>
+        <div class="comm-detail-artist">${esc(c.artistName || 'Unknown')} ${c.artistRank ? `<span style="font-size:.6rem;opacity:.5;">${esc(c.artistRank)}</span>` : ''} <span class="comm-status ${c.open ? 'open' : 'closed'}">${c.open ? 'OPEN' : 'CLOSED'}</span></div>
       </div>
     </div>
     <div class="comm-detail-body">
-      <div class="comm-detail-section">
-        <div class="comm-detail-label">Description</div>
-        <div class="comm-detail-text">${c.details}</div>
-      </div>
-      <div class="comm-detail-section">
-        <div class="comm-detail-label">Specialization</div>
-        <div class="comm-tags" style="margin-top:6px;">${c.specialization.map(t => `<span class="comm-tag">${t}</span>`).join('')}</div>
-      </div>
-      <div class="comm-detail-section">
-        <div class="comm-detail-label">Pricing</div>
-        <div class="comm-detail-text">${c.price}</div>
-      </div>
-    </div>
-  `;
-
-  document.getElementById('commInfoModal').classList.add('active');
+      ${c.details ? `<div class="comm-detail-section"><div class="comm-detail-label">Description</div><div class="comm-detail-text">${esc(c.details)}</div></div>` : ''}
+      ${tags ? `<div class="comm-detail-section"><div class="comm-detail-label">Specialization</div><div class="comm-tags" style="margin-top:6px;">${tags}</div></div>` : ''}
+      ${c.price ? `<div class="comm-detail-section"><div class="comm-detail-label">Pricing</div><div class="comm-detail-text">${esc(c.price)}</div></div>` : ''}
+    </div>`;
+  openModal('commInfoModal');
 }
 
-function openContact(id) {
-  const c = COMMISSIONS.find(x => x.id === id);
-  if (!c) return;
-
+/* ── CONTACT / INQUIRY MODAL ──────────────────────────────────────────────── */
+function openContact(id){
+  const c = allCommissions.find(x => x.id === id); if (!c) return;
+  const ct = c.contact || {};
   const rows = [
-    c.contact.discord && `<div class="comm-contact-row"><div class="comm-contact-icon"><i class="fab fa-discord"></i></div><span class="comm-contact-label">Discord</span><span class="comm-contact-value">${c.contact.discord}</span></div>`,
-    c.contact.email   && `<div class="comm-contact-row"><div class="comm-contact-icon"><i class="fas fa-envelope"></i></div><span class="comm-contact-label">Email</span><span class="comm-contact-value">${c.contact.email}</span></div>`,
-    c.contact.recroom && `<div class="comm-contact-row"><div class="comm-contact-icon"><i class="fas fa-gamepad"></i></div><span class="comm-contact-label">RecRoom</span><span class="comm-contact-value">${c.contact.recroom}</span></div>`
+    ct.discord  && `<div class="comm-contact-row"><div class="comm-contact-icon"><i class="fab fa-discord"></i></div><span class="comm-contact-label">Discord</span><span class="comm-contact-value">${esc(ct.discord)}</span></div>`,
+    ct.email    && `<div class="comm-contact-row"><div class="comm-contact-icon"><i class="fas fa-envelope"></i></div><span class="comm-contact-label">Email</span><span class="comm-contact-value">${esc(ct.email)}</span></div>`,
+    ct.recroom  && `<div class="comm-contact-row"><div class="comm-contact-icon"><i class="fas fa-gamepad"></i></div><span class="comm-contact-label">RecRoom</span><span class="comm-contact-value">${esc(ct.recroom)}</span></div>`
   ].filter(Boolean).join('');
 
+  const canInquire = currentUser && !currentUser.isAnonymous;
+  const inquirySection = canInquire ? `
+    <div class="comm-inquiry-wrap">
+      <div class="comm-detail-label"><i class="fas fa-paper-plane" style="margin-right:4px;"></i>Send Inquiry</div>
+      <div class="input-group" style="margin-bottom:10px;">
+        <textarea id="inquiryMsg" class="input-field" maxlength="500" rows="3" placeholder="Briefly describe your project, budget, and timeline..."></textarea>
+      </div>
+      <button class="btn-primary" id="sendInquiryBtn" style="width:100%;justify-content:center;" onclick="sendInquiry('${id}','${c.uid}','${esc(c.title)}')">
+        <i class="fas fa-paper-plane"></i> Send Inquiry
+      </button>
+      <div class="success-msg" id="inquirySuccess" style="display:none;margin-top:8px;">Inquiry sent! The artist will see it and reach out.</div>
+    </div>` : (currentUser ? '' : `
+    <div class="comm-inquiry-wrap" style="text-align:center;padding:16px 0 4px;">
+      <p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);margin:0 0 10px;"><i class="fas fa-lock" style="margin-right:6px;opacity:.5;"></i>Sign in to send a direct inquiry.</p>
+      <button class="btn-sm" onclick="closeModal('commContactModal');setAuthMode(true);openModal('loginModal');"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+    </div>`);
+
   document.getElementById('commContactContent').innerHTML = `
-    <h2 style="margin-bottom:18px;">
-      <i class="fas fa-paper-plane" style="margin-right:8px;font-size:.85rem;"></i>Contact ${c.artist}
-    </h2>
-    ${rows}
-    <div class="comm-detail-section" style="margin-top:18px;">
-      <div class="comm-detail-label">How to Request</div>
-      <div class="comm-request-block"><pre>${c.requestFormat}</pre></div>
-    </div>
-  `;
-
-  document.getElementById('commContactModal').classList.add('active');
+    <h2 style="margin-bottom:18px;"><i class="fas fa-paper-plane" style="margin-right:8px;font-size:.85rem;"></i>Contact ${esc(c.artistName || 'Artist')}</h2>
+    ${rows || '<p style="font-family:var(--font-mono);font-size:.8rem;color:var(--color-text-muted);">No contact methods listed.</p>'}
+    ${c.requestFormat ? `<div class="comm-detail-section" style="margin-top:16px;"><div class="comm-detail-label">How to Request</div><div class="comm-request-block"><pre>${esc(c.requestFormat)}</pre></div></div>` : ''}
+    ${inquirySection}`;
+  openModal('commContactModal');
 }
 
-function closeModal(id) {
-  document.getElementById(id).classList.remove('active');
+async function sendInquiry(commissionId, artistUid, commissionTitle){
+  if (!currentUser || currentUser.isAnonymous) return;
+  const msgEl = document.getElementById('inquiryMsg');
+  const msg = msgEl?.value.trim();
+  if (!msg) { showToast('Please write a message before sending.'); return; }
+  const btn = document.getElementById('sendInquiryBtn');
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+  try {
+    await db.collection('inquiries').add({
+      commissionId, artistUid, commissionTitle,
+      fromUid:   currentUser.uid,
+      fromName:  currentUserData?.displayName || currentUser.email || 'Unknown',
+      fromPhoto: currentUserData?.photoURL || '',
+      message:   msg,
+      status:    'pending',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('inquirySuccess').style.display = 'block';
+    btn.style.display = 'none';
+    msgEl.value = '';
+  } catch(err) {
+    console.error(err);
+    showToast(err.code === 'permission-denied' ? 'Permission denied — check Firestore rules.' : 'Failed to send inquiry.');
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Inquiry';
+  }
 }
 
-document.getElementById('closeCommInfo').addEventListener('click',    () => closeModal('commInfoModal'));
-document.getElementById('closeCommContact').addEventListener('click', () => closeModal('commContactModal'));
-document.querySelectorAll('.modal').forEach(m => {
-  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
+/* ── SUBMIT LISTING ───────────────────────────────────────────────────────── */
+function openSubmitListing(){
+  if (!currentUser || currentUser.isAnonymous) { setAuthMode(true); openModal('loginModal'); return; }
+  document.getElementById('submitListingForm').reset();
+  document.getElementById('submitError').style.display = 'none';
+  document.getElementById('submitSuccess').style.display = 'none';
+  openModal('submitListingModal');
+}
+
+document.getElementById('submitListingForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!currentUser || currentUser.isAnonymous) return;
+  const errEl = document.getElementById('submitError'); errEl.style.display='none';
+  const title    = document.getElementById('slTitle').value.trim();
+  const category = document.getElementById('slCategory').value;
+  const desc     = document.getElementById('slDesc').value.trim();
+  if (!title || !category || !desc) { errEl.textContent='Title, category, and description are required.'; errEl.style.display='block'; return; }
+  const tags = document.getElementById('slTags').value.split(',').map(t=>t.trim()).filter(Boolean).slice(0,5);
+  const btn = document.getElementById('submitListingBtn');
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+  try {
+    await db.collection('commissions').add({
+      uid:          currentUser.uid,
+      artistName:   currentUserData?.displayName || currentUser.displayName || currentUser.email?.split('@')[0] || 'Unknown',
+      artistPhoto:  currentUserData?.photoURL || currentUser.photoURL || '',
+      artistRank:   currentUserData?.rank || 'Member',
+      title,
+      description:  desc,
+      details:      document.getElementById('slDetails').value.trim(),
+      category,
+      tags,
+      price:        document.getElementById('slPrice').value.trim(),
+      open:         true,
+      contact: {
+        discord:  document.getElementById('slDiscord').value.trim(),
+        email:    document.getElementById('slEmail').value.trim(),
+        recroom:  document.getElementById('slRecroom').value.trim()
+      },
+      requestFormat: document.getElementById('slRequestFormat').value.trim(),
+      status:       'active',
+      createdAt:    firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt:    firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('submitSuccess').style.display = 'block';
+    document.getElementById('submitListingForm').reset();
+    btn.style.display = 'none';
+    showToast('Listing submitted and live!');
+  } catch(err) {
+    console.error(err);
+    errEl.textContent = err.code === 'permission-denied' ? 'Permission denied — check that Firestore rules allow member writes to the commissions collection.' : (err.message || 'Submission failed.');
+    errEl.style.display = 'block';
+  } finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Listing'; }
 });
 
-// ── Filter bar ───────────────────────────────────────────────────────────────
+/* ── MANAGE MY LISTINGS ───────────────────────────────────────────────────── */
+async function openManageListings(){
+  if (!currentUser || currentUser.isAnonymous) return;
+  openModal('manageListingsModal');
+  const content = document.getElementById('manageListingsContent');
+  content.innerHTML = '<div class="loading-spinner"></div>';
+  try {
+    const snap = await db.collection('commissions').where('uid','==',currentUser.uid).where('status','==','active').orderBy('createdAt','desc').get();
+    if (snap.empty) { content.innerHTML = '<p style="font-family:var(--font-mono);font-size:.8rem;color:var(--color-text-muted);text-align:center;padding:20px 0;">You have no active listings.</p>'; return; }
+    content.innerHTML = '';
+    snap.forEach(doc => {
+      const c = { id: doc.id, ...doc.data() };
+      const row = document.createElement('div');
+      row.className = 'manage-listing-row';
+      row.innerHTML = `
+        <div class="manage-listing-info">
+          <div class="manage-listing-title">${esc(c.title)}</div>
+          <div class="manage-listing-meta">${esc(c.category)} · <span class="comm-status ${c.open?'open':'closed'}" style="padding:2px 6px;">${c.open?'OPEN':'CLOSED'}</span></div>
+        </div>
+        <div class="manage-listing-actions">
+          <button class="btn-sm secondary" data-id="${c.id}" data-open="${c.open}" onclick="toggleListingOpen('${c.id}',${c.open})">
+            ${c.open ? '<i class="fas fa-pause-circle"></i> Close' : '<i class="fas fa-play-circle"></i> Open'}
+          </button>
+          <button class="btn-sm danger" onclick="deleteListing('${c.id}')"><i class="fas fa-trash"></i></button>
+        </div>`;
+      content.appendChild(row);
+    });
+  } catch(err) {
+    console.error(err);
+    content.innerHTML = '<p style="font-family:var(--font-mono);font-size:.8rem;color:#f55;text-align:center;padding:20px 0;">Failed to load listings.</p>';
+  }
+}
+
+async function toggleListingOpen(id, isCurrentlyOpen){
+  try {
+    await db.collection('commissions').doc(id).update({ open: !isCurrentlyOpen, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    showToast(`Listing marked ${!isCurrentlyOpen ? 'open' : 'closed'}.`);
+    openManageListings();
+  } catch(err) { console.error(err); showToast('Failed to update listing.'); }
+}
+
+async function deleteListing(id){
+  if (!confirm('Remove this listing? This cannot be undone.')) return;
+  try {
+    await db.collection('commissions').doc(id).update({ status: 'removed', updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    showToast('Listing removed.');
+    openManageListings();
+  } catch(err) { console.error(err); showToast('Failed to remove listing.'); }
+}
+
+/* ── FILTER BAR ───────────────────────────────────────────────────────────── */
 document.querySelectorAll('.comm-filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.comm-filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     activeFilter = btn.dataset.filter;
-    renderGrid();
+    renderGrid(getFiltered());
   });
 });
 
-// ── Nav hamburger ─────────────────────────────────────────────────────────────
-const hamburger   = document.getElementById('hamburger');
-const mobileMenu  = document.getElementById('mobileMenu');
+/* ── NAV HAMBURGER ────────────────────────────────────────────────────────── */
+const hamburger  = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
 hamburger.addEventListener('click', () => {
   const open = hamburger.classList.toggle('open');
   hamburger.setAttribute('aria-expanded', open);
   mobileMenu.classList.toggle('open', open);
 });
 
-// ── Profile dropdown ──────────────────────────────────────────────────────────
-const profileBtn  = document.getElementById('profileButton');
+/* ── PROFILE DROPDOWN ─────────────────────────────────────────────────────── */
+const profileBtn   = document.getElementById('profileButton');
 const dropdownMenu = document.getElementById('dropdownMenu');
-profileBtn.addEventListener('click', e => {
-  e.stopPropagation();
-  dropdownMenu.classList.toggle('open');
-});
+profileBtn.addEventListener('click', e => { e.stopPropagation(); dropdownMenu.classList.toggle('open'); });
 document.addEventListener('click', () => dropdownMenu.classList.remove('open'));
 
-// ── Firebase auth ─────────────────────────────────────────────────────────────
-firebase.auth().onAuthStateChanged(user => {
-  const avatarImg    = document.getElementById('userAvatar');
-  const defaultIcon  = document.getElementById('defaultIcon');
-  const loginBtn     = document.getElementById('loginBtn');
-  const myProfileBtn = document.getElementById('myProfileBtn');
-  const logoutBtn    = document.getElementById('logoutBtn');
+/* ── DROPDOWN ACTIONS ─────────────────────────────────────────────────────── */
+document.getElementById('submitListingNavBtn').addEventListener('click', e => { e.preventDefault(); dropdownMenu.classList.remove('open'); openSubmitListing(); });
+document.getElementById('myListingsNavBtn').addEventListener('click',   e => { e.preventDefault(); dropdownMenu.classList.remove('open'); openManageListings(); });
+document.getElementById('memberCtaBtn').addEventListener('click',        () => openSubmitListing());
+document.getElementById('heroSignInBtn').addEventListener('click',       () => openSubmitListing());
 
-  if (user && !user.isAnonymous) {
-    if (user.photoURL) {
-      avatarImg.src = user.photoURL;
-      avatarImg.style.display = 'block';
-      defaultIcon.style.display = 'none';
-    }
-    loginBtn.style.display    = 'none';
-    myProfileBtn.style.display = 'flex';
-    logoutBtn.style.display   = 'flex';
-  } else {
-    avatarImg.style.display    = 'none';
-    defaultIcon.style.display  = 'block';
-    loginBtn.style.display     = 'flex';
-    myProfileBtn.style.display = 'none';
-    logoutBtn.style.display    = 'none';
-  }
-});
-
-document.getElementById('logoutBtn').addEventListener('click', e => {
-  e.preventDefault();
-  firebase.auth().signOut();
-});
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-renderStats();
-renderGrid();
+/* ── INIT ─────────────────────────────────────────────────────────────────── */
+startCommissionsListener();
 </script>
 </body>
 <!-- © 2023–2026 $iz. All designs, layouts, and content are property of $iz. Do not duplicate or redistribute without permission. -->
