@@ -709,6 +709,10 @@ async function openChat(otherUser){
   document.getElementById('msgInput').value='';
   openModal('msgModal');
   const cid=chatId(currentUser.uid,otherUser.id);
+  // Ensure chat doc exists so the participants check in message rules can resolve
+  await db.collection('chats').doc(cid).set({
+    participants:[currentUser.uid,otherUser.id]
+  },{merge:true}).catch(()=>{});
   msgUnsubscribe=db.collection('chats').doc(cid).collection('messages').orderBy('createdAt','asc').onSnapshot(snap=>{
     renderMessages(snap.docs);
   },err=>{
@@ -726,7 +730,7 @@ function renderMessages(docs){
   const cid=chatId(currentUser.uid,currentChatUid);
   let lastDate='';
   docs.forEach(d=>{
-    const m=d.data(),isMine=m.senderUid===currentUser.uid;
+    const m=d.data(),isMine=m.sender===currentUser.uid;
     const ds=m.createdAt?fmtDate(m.createdAt):'';
     if(ds&&ds!==lastDate){lastDate=ds;const div=document.createElement('div');div.className='msg-date-div';div.textContent=ds;body.appendChild(div);}
     const wrap=document.createElement('div');wrap.style.cssText='position:relative;display:flex;align-items:flex-end;gap:4px;'+(isMine?'justify-content:flex-end;':'');
@@ -759,18 +763,18 @@ async function sendMessage(){
   input.value='';
   const cid=chatId(currentUser.uid,currentChatUid);
   try{
+    // Ensure chat doc exists (participants needed by message create rule)
+    await db.collection('chats').doc(cid).set({
+      participants:[currentUser.uid,currentChatUid],
+      lastMessage:text,
+      lastAt:firebase.firestore.FieldValue.serverTimestamp()
+    },{merge:true});
     await db.collection('chats').doc(cid).collection('messages').add({
-      senderUid:currentUser.uid,
+      sender:currentUser.uid,
       senderName:currentUserData?.displayName||'Unknown',
       text,
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
-    // Update last message
-    db.collection('chats').doc(cid).set({
-      participants:[currentUser.uid,currentChatUid],
-      lastMessage:text,
-      lastAt:firebase.firestore.FieldValue.serverTimestamp()
-    },{merge:true}).catch(()=>{});
     // Write notification
     db.collection('notifications').add({
       to:currentChatUid,
