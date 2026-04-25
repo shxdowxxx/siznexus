@@ -358,16 +358,30 @@
       <h2 style="margin:0;"><i class="fas fa-shield-alt" style="margin-right:8px;font-size:.85rem;color:#C0C0C0;filter:drop-shadow(0 0 6px rgba(192,192,192,.4));"></i>Admin Panel</h2>
       <span id="adminViewerRank" style="font-family:var(--font-mono);font-size:.62rem;padding:3px 10px;border-radius:3px;background:rgba(192,192,192,.05);border:1px solid rgba(192,192,192,.15);"></span>
     </div>
-    <div class="admin-tabs">
-      <button class="admin-tab active" data-tab="roles"><i class="fas fa-id-badge"></i> Roles</button>
-      <button class="admin-tab" data-tab="badges"><i class="fas fa-medal"></i> Badges</button>
-      <button class="admin-tab" data-tab="announce"><i class="fas fa-bullhorn"></i> Announce</button>
-      <button class="admin-tab" data-tab="history"><i class="fas fa-history"></i> History</button>
-      <button class="admin-tab" data-tab="missions"><i class="fas fa-key"></i> Keys</button>
-      <button class="admin-tab" data-tab="reports"><i class="fas fa-flag" style="color:#ff9800;"></i> Reports</button>
-      <button class="admin-tab" data-tab="bans"><i class="fas fa-gavel" style="color:#f44336;"></i> Bans</button>
-      <button class="admin-tab" data-tab="spotlight"><i class="fas fa-star" style="color:#FFD700;"></i> Spotlight</button>
-    </div>
+    <div class="admin-shell">
+      <nav class="admin-sidebar">
+        <div class="admin-sidebar-group">
+          <p class="admin-sidebar-label">Members</p>
+          <button class="admin-tab active" data-tab="roles"><i class="fas fa-id-badge"></i> <span>Roles</span></button>
+          <button class="admin-tab" data-tab="badges"><i class="fas fa-medal"></i> <span>Badges</span></button>
+          <button class="admin-tab" data-tab="spotlight"><i class="fas fa-star" style="color:#FFD700;"></i> <span>Spotlight</span></button>
+        </div>
+        <div class="admin-sidebar-group">
+          <p class="admin-sidebar-label">Communications</p>
+          <button class="admin-tab" data-tab="announce"><i class="fas fa-bullhorn"></i> <span>Announce</span></button>
+          <button class="admin-tab" data-tab="history"><i class="fas fa-history"></i> <span>History</span></button>
+        </div>
+        <div class="admin-sidebar-group">
+          <p class="admin-sidebar-label">Operations</p>
+          <button class="admin-tab" data-tab="missions"><i class="fas fa-key"></i> <span>Mission Keys</span></button>
+        </div>
+        <div class="admin-sidebar-group">
+          <p class="admin-sidebar-label">Moderation</p>
+          <button class="admin-tab" data-tab="reports"><i class="fas fa-flag" style="color:#ff9800;"></i> <span>Reports</span></button>
+          <button class="admin-tab" data-tab="bans"><i class="fas fa-gavel" style="color:#f44336;"></i> <span>Bans</span></button>
+        </div>
+      </nav>
+      <div class="admin-content">
     <!-- ROLES TAB -->
     <div class="admin-panel-section active" id="adminTabRoles">
       <div class="admin-stat-row" id="adminStats"></div>
@@ -433,6 +447,8 @@
       </div>
       <div class="success-msg" id="spotlightSavedMsg">Spotlight updated!</div>
     </div>
+      </div><!-- /.admin-content -->
+    </div><!-- /.admin-shell -->
   </div>
 </div>
 
