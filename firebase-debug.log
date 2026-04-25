@@ -1,0 +1,54 @@
+[debug] [2026-04-25T22:16:35.435Z] ----------------------------------------------------------------------
+[debug] [2026-04-25T22:16:35.447Z] Command:       /usr/bin/node /usr/bin/firebase serve --only hosting --port 5000 --host localhost
+[debug] [2026-04-25T22:16:35.448Z] CLI Version:   15.15.0
+[debug] [2026-04-25T22:16:35.448Z] Platform:      linux
+[debug] [2026-04-25T22:16:35.449Z] Node Version:  v24.14.1
+[debug] [2026-04-25T22:16:35.449Z] Time:          Sat Apr 25 2026 15:16:35 GMT-0700 (Pacific Daylight Time)
+[debug] [2026-04-25T22:16:35.449Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-04-25T22:16:38.530Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-04-25T22:16:38.531Z] > authorizing via signed-in user (itzzzshxdow@gmail.com)
+[debug] [2026-04-25T22:16:38.532Z] [iam] checking project thesiznexus for permissions ["firebase.projects.get"]
+[debug] [2026-04-25T22:16:38.534Z] Checked if tokens are valid: true, expires at: 1777158780291
+[debug] [2026-04-25T22:16:38.534Z] Checked if tokens are valid: true, expires at: 1777158780291
+[debug] [2026-04-25T22:16:38.536Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/thesiznexus:testIamPermissions [none]
+[debug] [2026-04-25T22:16:38.537Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/thesiznexus:testIamPermissions  x-goog-user-project=thesiznexus
+[debug] [2026-04-25T22:16:38.537Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/thesiznexus:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2026-04-25T22:16:38.900Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/thesiznexus:testIamPermissions 200
+[debug] [2026-04-25T22:16:38.902Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/thesiznexus:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2026-04-25T22:16:38.905Z] Checked if tokens are valid: true, expires at: 1777158780291
+[debug] [2026-04-25T22:16:38.905Z] Checked if tokens are valid: true, expires at: 1777158780291
+[debug] [2026-04-25T22:16:38.906Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/thesiznexus/services/cloudresourcemanager.googleapis.com [none]
+[debug] [2026-04-25T22:16:38.906Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/thesiznexus/services/cloudresourcemanager.googleapis.com  x-goog-user-project=thesiznexus
+[debug] [2026-04-25T22:16:39.393Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/thesiznexus/services/cloudresourcemanager.googleapis.com 200
+[debug] [2026-04-25T22:16:39.393Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/thesiznexus/services/cloudresourcemanager.googleapis.com [omitted]
+[debug] [2026-04-25T22:16:39.407Z] Checked if tokens are valid: true, expires at: 1777158780291
+[debug] [2026-04-25T22:16:39.408Z] Checked if tokens are valid: true, expires at: 1777158780291
+[debug] [2026-04-25T22:16:39.408Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/thesiznexus [none]
+[debug] [2026-04-25T22:16:39.539Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/thesiznexus 200
+[debug] [2026-04-25T22:16:39.539Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/thesiznexus {"projectNumber":"654294052068","projectId":"thesiznexus","lifecycleState":"ACTIVE","name":"TheSizNexus","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2026-04-05T10:06:56.016Z"}
+[debug] [2026-04-25T22:16:39.543Z] Checked if tokens are valid: true, expires at: 1777158780291
+[debug] [2026-04-25T22:16:39.543Z] Checked if tokens are valid: true, expires at: 1777158780291
+[debug] [2026-04-25T22:16:39.543Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/thesiznexus/sites 
+[debug] [2026-04-25T22:16:40.325Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/thesiznexus/sites 200
+[debug] [2026-04-25T22:16:40.325Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/thesiznexus/sites {"sites":[{"name":"projects/thesiznexus/sites/thesiznexus","defaultUrl":"https://thesiznexus.web.app","appId":"1:654294052068:web:0cc5a7d3fd79f533a710f1","type":"DEFAULT_SITE"}]}
+[debug] [2026-04-25T22:16:40.325Z] Checked if tokens are valid: true, expires at: 1777158780291
+[debug] [2026-04-25T22:16:40.325Z] Checked if tokens are valid: true, expires at: 1777158780291
+[debug] [2026-04-25T22:16:40.326Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/thesiznexus/webApps/1:654294052068:web:0cc5a7d3fd79f533a710f1/config [none]
+[debug] [2026-04-25T22:16:40.726Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/thesiznexus/webApps/1:654294052068:web:0cc5a7d3fd79f533a710f1/config 200
+[debug] [2026-04-25T22:16:40.726Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/thesiznexus/webApps/1:654294052068:web:0cc5a7d3fd79f533a710f1/config {"projectId":"thesiznexus","appId":"1:654294052068:web:0cc5a7d3fd79f533a710f1","storageBucket":"thesiznexus.firebasestorage.app","apiKey":"AIzaSyBcfVGWx4PFU__CeYkpSlmac3SasqODBx4","authDomain":"thesiznexus.firebaseapp.com","messagingSenderId":"654294052068","measurementId":"G-R8EJ0QB1XT","projectNumber":"654294052068","version":"2"}
+[debug] [2026-04-25T22:16:40.739Z] Checked if tokens are valid: true, expires at: 1777158780291
+[debug] [2026-04-25T22:16:40.739Z] Checked if tokens are valid: true, expires at: 1777158780291
+[debug] [2026-04-25T22:16:40.740Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/thesiznexus [none]
+[debug] [2026-04-25T22:16:40.891Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/thesiznexus 200
+[debug] [2026-04-25T22:16:40.893Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/thesiznexus {"projectId":"thesiznexus","projectNumber":"654294052068","displayName":"TheSizNexus","name":"projects/thesiznexus","resources":{"hostingSite":"thesiznexus"},"state":"ACTIVE","etag":"1_8b659949-a166-4cbd-9975-888afbf7c156"}
+[info] ✔  hosting[thesiznexus]: Local server: http://localhost:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: http://localhost:5000"}}
+[info] i  hosting: 127.0.0.1 - - [25/Apr/2026:22:16:41 +0000] "GET / HTTP/1.1" 200 51817 "-" "curl/8.5.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [25/Apr/2026:22:16:41 +0000] \"GET / HTTP/1.1\" 200 51817 \"-\" \"curl/8.5.0\""}}
+[info] i  hosting: 127.0.0.1 - - [25/Apr/2026:22:16:58 +0000] "GET / HTTP/1.1" 200 - "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [25/Apr/2026:22:16:58 +0000] \"GET / HTTP/1.1\" 200 - \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0\""}}
+[info] i  hosting: 127.0.0.1 - - [25/Apr/2026:22:16:59 +0000] "GET /siznexus.css HTTP/1.1" 200 - "http://localhost:5000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [25/Apr/2026:22:16:59 +0000] \"GET /siznexus.css HTTP/1.1\" 200 - \"http://localhost:5000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0\""}}
+[info] i  hosting: 127.0.0.1 - - [25/Apr/2026:22:16:59 +0000] "GET /siznexus.js HTTP/1.1" 200 - "http://localhost:5000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [25/Apr/2026:22:16:59 +0000] \"GET /siznexus.js HTTP/1.1\" 200 - \"http://localhost:5000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0\""}}
+[info] i  hosting: 127.0.0.1 - - [25/Apr/2026:22:16:59 +0000] "GET /favicon/apple-touch-icon.png HTTP/1.1" 200 31736 "http://localhost:5000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [25/Apr/2026:22:16:59 +0000] \"GET /favicon/apple-touch-icon.png HTTP/1.1\" 200 31736 \"http://localhost:5000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0\""}}
+[info] i  hosting: 127.0.0.1 - - [25/Apr/2026:22:16:59 +0000] "GET /favicon/favicon-16x16.png HTTP/1.1" 200 663 "http://localhost:5000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [25/Apr/2026:22:16:59 +0000] \"GET /favicon/favicon-16x16.png HTTP/1.1\" 200 663 \"http://localhost:5000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0\""}}
+[info] i  hosting: 127.0.0.1 - - [25/Apr/2026:22:28:03 +0000] "GET / HTTP/1.1" 200 - "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [25/Apr/2026:22:28:03 +0000] \"GET / HTTP/1.1\" 200 - \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0\""}}
+[info] i  hosting: 127.0.0.1 - - [25/Apr/2026:22:28:03 +0000] "GET /siznexus.js HTTP/1.1" 200 - "http://localhost:5000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [25/Apr/2026:22:28:03 +0000] \"GET /siznexus.js HTTP/1.1\" 200 - \"http://localhost:5000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0\""}}
+[info] i  hosting: 127.0.0.1 - - [25/Apr/2026:22:28:04 +0000] "GET /siznexus.css HTTP/1.1" 200 - "http://localhost:5000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [25/Apr/2026:22:28:04 +0000] \"GET /siznexus.css HTTP/1.1\" 200 - \"http://localhost:5000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0\""}}

@@ -510,15 +510,20 @@ async function updateNotifBadge(){
     else{badge.classList.remove('show');}
   }catch(e){console.error('Badge error:',e);}
 }
+let _lastNotifTab='requests';
 async function openNotifications(){
   openModal('notifModal');
-  // Load notif tabs
-  loadNotifTab('requests');
+  // Sync tab UI with the tab we're about to load
+  document.querySelectorAll('.notif-tab').forEach(b=>{
+    b.classList.toggle('active',b.dataset.ntab===_lastNotifTab);
+  });
+  loadNotifTab(_lastNotifTab);
   // Setup tabs
   document.querySelectorAll('.notif-tab').forEach(btn=>{
     btn.onclick=()=>{
       document.querySelectorAll('.notif-tab').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
+      _lastNotifTab=btn.dataset.ntab;
       loadNotifTab(btn.dataset.ntab);
     };
   });
@@ -714,49 +719,6 @@ async function runGlobalSearch(q){
     out.innerHTML=`<p style="font-family:var(--font-mono);font-size:.7rem;color:#f55;padding:14px 0;text-align:center;">Search failed: ${esc(err.message)}</p>`;
   }
 }
-document.getElementById('exportDataBtn')?.addEventListener('click',async()=>{
-  if(!currentUser)return;
-  const btn=document.getElementById('exportDataBtn');
-  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Gathering...';
-  try{
-    const [meSnap,subsSnap,sentReqSnap,recvReqSnap]=await Promise.all([
-      db.collection('users').doc(currentUser.uid).get(),
-      db.collection('missionSubmissions').where('uid','==',currentUser.uid).get().catch(()=>({docs:[]})),
-      db.collection('friendRequests').where('from','==',currentUser.uid).get().catch(()=>({docs:[]})),
-      db.collection('friendRequests').where('to','==',currentUser.uid).get().catch(()=>({docs:[]}))
-    ]);
-    const profile=meSnap.exists?meSnap.data():{};
-    const friendIds=profile.friends||[];
-    const friendDocs=await Promise.all(friendIds.map(fid=>db.collection('users').doc(fid).get().catch(()=>null)));
-    const friends=friendDocs.filter(s=>s&&s.exists).map(s=>{const d=s.data();return {uid:s.id,displayName:d.displayName,rank:d.rank};});
-    const payload={
-      exportedAt:new Date().toISOString(),
-      uid:currentUser.uid,
-      profile,
-      missionSubmissions:subsSnap.docs.map(d=>({id:d.id,...d.data()})),
-      friendRequestsSent:sentReqSnap.docs.map(d=>({id:d.id,...d.data()})),
-      friendRequestsReceived:recvReqSnap.docs.map(d=>({id:d.id,...d.data()})),
-      friends
-    };
-    // Convert Firestore timestamps recursively
-    const stringify=(v)=>JSON.stringify(v,(k,val)=>{
-      if(val&&typeof val==='object'&&typeof val.toDate==='function')return val.toDate().toISOString();
-      return val;
-    },2);
-    const blob=new Blob([stringify(payload)],{type:'application/json'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download=`siznexus-${(profile.displayName||currentUser.uid).replace(/[^a-z0-9_-]/gi,'_')}-${new Date().toISOString().slice(0,10)}.json`;
-    document.body.appendChild(a);a.click();a.remove();
-    URL.revokeObjectURL(url);
-    showToast('Profile data exported.');
-  }catch(err){
-    showToast('Export failed: '+err.message);
-  }finally{
-    btn.disabled=false;btn.innerHTML='<i class="fas fa-download"></i> Export My Data (JSON)';
-  }
-});
 document.getElementById('searchBtn').addEventListener('click',()=>{
   openModal('searchModal');
   setTimeout(()=>document.getElementById('globalSearchInput')?.focus(),50);
@@ -1364,7 +1326,24 @@ auth.onAuthStateChanged(async user=>{
     refreshDashboardSurface();
   }
 });
-window.addEventListener('beforeunload',()=>{if(currentUser)db.collection('users').doc(currentUser.uid).update({status:'offline'}).catch(()=>{});});
+window.addEventListener('beforeunload',()=>{
+  if(!currentUser)return;
+  if(currentUser.isAnonymous){
+    // Best-effort guest cleanup so anonymous docs don't pile up.
+    try{db.collection('users').doc(currentUser.uid).delete();}catch(_){}
+    try{currentUser.delete();}catch(_){}
+  }else{
+    db.collection('users').doc(currentUser.uid).update({status:'offline'}).catch(()=>{});
+  }
+});
+async function cleanupAnonBeforeUpgrade(){
+  // Called before a guest upgrades to a real account (email/password or Google).
+  // Removes the anonymous Auth account + Firestore user doc so we don't accumulate orphans.
+  if(!currentUser?.isAnonymous)return;
+  const oldUid=currentUser.uid;
+  try{await db.collection('users').doc(oldUid).delete();}catch(_){}
+  try{await currentUser.delete();}catch(_){}
+}
 /* ── AUTH FORMS ── */
 function showError(msg){const el=document.getElementById('errorMessage');el.textContent=msg;el.style.display='block';}
 function clearError(){
@@ -1377,7 +1356,7 @@ function clearError(){
 document.getElementById('loginForm').addEventListener('submit',async e=>{
   e.preventDefault();clearError();const btn=e.target.querySelector('button[type=submit]');
   btn.disabled=true;btn.textContent='LOGGING IN...';
-  try{await auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value,document.getElementById('loginPassword').value);closeModal('loginModal');}
+  try{await cleanupAnonBeforeUpgrade();await auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value,document.getElementById('loginPassword').value);closeModal('loginModal');}
   catch(err){showError(err.message);}
   finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-sign-in-alt"></i> LOGIN';}
 });
@@ -1386,13 +1365,13 @@ document.getElementById('registerForm').addEventListener('submit',async e=>{
   const pw=document.getElementById('registerPassword').value,cpw=document.getElementById('confirmPassword').value;
   if(pw!==cpw){showError("Passwords don't match");return;}
   const btn=e.target.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='CREATING ACCOUNT...';
-  try{const uc=await auth.createUserWithEmailAndPassword(document.getElementById('registerEmail').value,pw);await createUserDoc(uc.user);closeModal('loginModal');}
+  try{await cleanupAnonBeforeUpgrade();const uc=await auth.createUserWithEmailAndPassword(document.getElementById('registerEmail').value,pw);await createUserDoc(uc.user);closeModal('loginModal');}
   catch(err){showError(err.message);}
   finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-user-plus"></i> REGISTER';}
 });
 document.getElementById('googleLogin').addEventListener('click',async()=>{
   clearError();
-  try{const r=await auth.signInWithPopup(googleProvider);if(r.additionalUserInfo.isNewUser)await createUserDoc(r.user);closeModal('loginModal');}
+  try{await cleanupAnonBeforeUpgrade();const r=await auth.signInWithPopup(googleProvider);if(r.additionalUserInfo.isNewUser)await createUserDoc(r.user);closeModal('loginModal');}
   catch(err){showError(err.message);}
 });
 /* ── ANONYMOUS / GUEST LOGIN ── */
