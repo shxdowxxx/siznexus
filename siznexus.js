@@ -632,7 +632,7 @@ async function loadAnnNotifTab(){
       const a=d.data();
       const item=document.createElement('div');item.className='ann-item';
       item.style.position='relative';
-      item.innerHTML=`<button class="notif-dismiss" title="Dismiss" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--color-text-muted);font-size:.8rem;cursor:pointer;padding:2px 4px;line-height:1;transition:var(--transition);" onmouseover="this.style.color='#f55'" onmouseout="this.style.color='var(--color-text-muted)'">&#x2715;</button><div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${mdLite(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>${reactionsBarHtml(a.reactions,'announcements',d.id)}`;
+      item.innerHTML=`<button class="notif-dismiss" title="Dismiss" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--color-text-muted);font-size:.8rem;cursor:pointer;padding:2px 4px;line-height:1;transition:var(--transition);" onmouseover="this.style.color='#f55'" onmouseout="this.style.color='var(--color-text-muted)'">&#x2715;</button><div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${mdLite(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>`;
       item.querySelector('.notif-dismiss').addEventListener('click',async()=>{
         // Update dismissed
         await db.collection('users').doc(currentUser.uid).update({
@@ -955,7 +955,6 @@ async function openMyProfile(){
     rankEl.className=rankClass(d.rank);
     document.getElementById('editDisplayName').value=d.displayName||'';
     document.getElementById('editBio').value=d.bio||'';
-    document.getElementById('editPhotoURL').value=d.photoURL||'';
     const actEl=document.getElementById('editActivityStatus');
     if(actEl)actEl.value=d.activityStatus||'';
     const titleEl=document.getElementById('editTitle');
@@ -967,13 +966,18 @@ async function openMyProfile(){
         s.classList.toggle('selected',(s.dataset.accent||'')===cur);
       });
     }
-    const bannerEl=document.getElementById('editBannerURL');
-    if(bannerEl)bannerEl.value=d.bannerURL||'';
+    // Reset pending uploads
+    _pendingAvatarDataURL=null;_pendingBannerDataURL=null;
+    // Show existing banner if any
+    const bImg=document.getElementById('bannerPreviewImg');
+    const bCta=document.getElementById('bannerUploadCta');
+    const bClear=document.getElementById('bannerClearBtn');
+    if(bImg&&d.bannerURL){bImg.src=d.bannerURL;bImg.style.display='block';if(bCta)bCta.style.display='none';if(bClear)bClear.style.display='block';}
+    else if(bImg){bImg.style.display='none';bImg.src='';if(bCta)bCta.style.display='';if(bClear)bClear.style.display='none';}
     document.getElementById('profileSaveSuccess').style.display='none';
     const imgEl=document.getElementById('editAvatarImg'),phEl=document.getElementById('editAvatarPlaceholder');
     if(d.photoURL){imgEl.src=d.photoURL;imgEl.style.display='block';phEl.style.display='none';}
     else{imgEl.style.display='none';phEl.style.display='flex';phEl.textContent=initials(d.displayName||'G');}
-    document.getElementById('editPhotoURL').oninput=function(){if(this.value){imgEl.src=this.value;imgEl.style.display='block';phEl.style.display='none';}else{imgEl.style.display='none';phEl.style.display='flex';}};
     // Status buttons
     document.querySelectorAll('[data-pstatus]').forEach(btn=>{
       const isActive=btn.dataset.pstatus===(d.status||'online');
@@ -982,7 +986,7 @@ async function openMyProfile(){
     });
     // Guest lock
     const saveBtn=document.getElementById('saveProfileBtn');
-    const editFields=['editDisplayName','editBio','editPhotoURL','editActivityStatus'];
+    const editFields=['editDisplayName','editBio','editActivityStatus','editTitle'];
     if(isGuest){
       saveBtn.disabled=true;saveBtn.title='Guest accounts cannot edit their profile.';
       editFields.forEach(id=>{const el=document.getElementById(id);if(el){el.disabled=true;el.classList.add('input-locked');}});
@@ -1279,12 +1283,14 @@ document.getElementById('saveProfileBtn').addEventListener('click',async()=>{
   try{
     const newName=document.getElementById('editDisplayName').value.trim();
     const newBio=document.getElementById('editBio').value.trim();
-    const newPhoto=document.getElementById('editPhotoURL').value.trim();
     const newActivity=document.getElementById('editActivityStatus')?.value.trim()||'';
     const newAccent=document.querySelector('#accentPicker .accent-swatch.selected')?.dataset.accent||'';
     const newTitle=document.getElementById('editTitle')?.value.trim()||'';
-    const newBanner=document.getElementById('editBannerURL')?.value.trim()||'';
-    const updates={bio:newBio,photoURL:newPhoto,activityStatus:newActivity,accentColor:newAccent,operatorTitle:newTitle,bannerURL:newBanner};if(newName)updates.displayName=newName;
+    const updates={bio:newBio,activityStatus:newActivity,accentColor:newAccent,operatorTitle:newTitle};
+    if(newName)updates.displayName=newName;
+    if(_pendingAvatarDataURL){updates.photoURL=_pendingAvatarDataURL;}
+    if(_pendingBannerDataURL==='__CLEAR__'){updates.bannerURL='';}
+    else if(_pendingBannerDataURL){updates.bannerURL=_pendingBannerDataURL;}
     await db.collection('users').doc(currentUser.uid).update(updates);
     currentUserData=(await db.collection('users').doc(currentUser.uid).get()).data();
     setNavAvatar(currentUser,currentUserData);
@@ -1296,17 +1302,68 @@ document.getElementById('saveProfileBtn').addEventListener('click',async()=>{
 });
 document.getElementById('editAvatarBtn').addEventListener('click',()=>document.getElementById('avatarFileInput').click());
 document.getElementById('editAvatarBtn').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();document.getElementById('avatarFileInput').click();}});
-document.getElementById('avatarFileInput').addEventListener('change',function(){
+/* Resize an uploaded image via canvas and return a base64 JPEG data URL. */
+function resizeImageToDataURL(file,maxW,maxH,quality=0.85){
+  return new Promise((resolve,reject)=>{
+    if(!file||!file.type.startsWith('image/'))return reject(new Error('Not an image file.'));
+    const reader=new FileReader();
+    reader.onerror=()=>reject(new Error('Could not read file.'));
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width,h=img.height;
+        const ratio=Math.min(maxW/w,maxH/h,1);
+        w=Math.round(w*ratio);h=Math.round(h*ratio);
+        const canvas=document.createElement('canvas');
+        canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext('2d');
+        ctx.fillStyle='#0A0E1A';ctx.fillRect(0,0,w,h);
+        ctx.drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg',quality));
+      };
+      img.onerror=()=>reject(new Error('Could not decode image.'));
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+let _pendingAvatarDataURL=null,_pendingBannerDataURL=null;
+document.getElementById('avatarFileInput').addEventListener('change',async function(){
   const file=this.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    document.getElementById('editPhotoURL').value='';
-    document.getElementById('editAvatarImg').src=e.target.result;
+  this.value='';
+  try{
+    const dataURL=await resizeImageToDataURL(file,256,256,0.86);
+    _pendingAvatarDataURL=dataURL;
+    document.getElementById('editAvatarImg').src=dataURL;
     document.getElementById('editAvatarImg').style.display='block';
     document.getElementById('editAvatarPlaceholder').style.display='none';
-    showToast('Preview set! Upload to Postimages.org then paste the Direct link above.');
-  };
-  reader.readAsDataURL(file);
+    showToast('Avatar ready. Click Save Changes to apply.');
+  }catch(err){showToast('Image error: '+err.message);}
+});
+document.getElementById('bannerUploadBox')?.addEventListener('click',e=>{
+  if(e.target.closest('.banner-clear'))return;
+  document.getElementById('bannerFileInput').click();
+});
+document.getElementById('bannerFileInput')?.addEventListener('change',async function(){
+  const file=this.files[0];if(!file)return;
+  this.value='';
+  try{
+    const dataURL=await resizeImageToDataURL(file,1200,400,0.8);
+    _pendingBannerDataURL=dataURL;
+    const img=document.getElementById('bannerPreviewImg');
+    img.src=dataURL;img.style.display='block';
+    document.getElementById('bannerUploadCta').style.display='none';
+    document.getElementById('bannerClearBtn').style.display='block';
+    showToast('Banner ready. Click Save Changes to apply.');
+  }catch(err){showToast('Image error: '+err.message);}
+});
+document.getElementById('bannerClearBtn')?.addEventListener('click',e=>{
+  e.stopPropagation();
+  _pendingBannerDataURL='__CLEAR__';
+  document.getElementById('bannerPreviewImg').style.display='none';
+  document.getElementById('bannerPreviewImg').src='';
+  document.getElementById('bannerUploadCta').style.display='';
+  document.getElementById('bannerClearBtn').style.display='none';
 });
 /* ── AUTH STATE ── */
 auth.onAuthStateChanged(async user=>{
@@ -2216,8 +2273,7 @@ async function loadCorpLog(filter='all'){
       const icon=typeIcon[log.type]||'fa-circle';
       item.innerHTML=`<div class="log-item-main"><i class="fas ${icon}" style="margin-right:6px;font-size:.65rem;opacity:.6;"></i><strong>${esc(log.displayName||'Unknown')}</strong> ${esc(log.message)}</div>
         <div class="log-item-meta"><span class="${rankClass(log.rank)}">${esc(log.rank||'Member')}</span> &middot; ${time}</div>
-        ${isMViewer&&log.extra&&Object.keys(log.extra).length?`<div class="log-item-detail"><i class="fas fa-info-circle" style="margin-right:4px;opacity:.5;font-size:.6rem;"></i>${esc(JSON.stringify(log.extra))}</div>`:''}
-        ${reactionsBarHtml(log.reactions,'corpLog',d.id)}`;
+        ${isMViewer&&log.extra&&Object.keys(log.extra).length?`<div class="log-item-detail"><i class="fas fa-info-circle" style="margin-right:4px;opacity:.5;font-size:.6rem;"></i>${esc(JSON.stringify(log.extra))}</div>`:''}`;
       feed.appendChild(item);
     });
   },err=>{feed.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;});
@@ -2586,8 +2642,7 @@ async function loadIntelBoard(){
       const item=document.createElement('div');item.className='intel-post';item.dataset.cardId=d.id;
       item.innerHTML=`<div class="intel-post-title">${p.tag?`<span class="intel-tag">${esc(p.tag)}</span>`:''}${esc(p.title||'Intel')}</div>
         <div class="intel-post-body">${mdLite(p.body||'')}</div>
-        <div class="intel-post-meta"><span>${esc(p.authorName||'Admin')} &middot; ${esc(p.authorRank||'')}</span><span>${p.createdAt?fmtDate(p.createdAt):''}</span></div>
-        ${reactionsBarHtml(p.reactions,'intelPosts',d.id)}`;
+        <div class="intel-post-meta"><span>${esc(p.authorName||'Admin')} &middot; ${esc(p.authorRank||'')}</span><span>${p.createdAt?fmtDate(p.createdAt):''}</span></div>`;
       list.appendChild(item);
     });
   }catch(err){list.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;}
@@ -4131,89 +4186,6 @@ function mdLite(text){
   t=t.replace(/\n/g,'<br>');
   return t;
 }
-/* ── REACTIONS ── */
-const REACTION_EMOJI=['👍','❤️','🔥','👀','💀','💯'];
-function reactionsBarHtml(reactions={},collection,docId){
-  const myUid=currentUser?.uid;
-  let html='<div class="reactions-bar" data-coll="'+esc(collection)+'" data-id="'+esc(docId)+'">';
-  REACTION_EMOJI.forEach(emoji=>{
-    const list=reactions[emoji]||[];
-    const mine=myUid&&list.includes(myUid);
-    const cnt=list.length;
-    html+=`<button type="button" class="react-btn${mine?' mine':''}${cnt?'':' empty'}" data-emoji="${emoji}"><span class="react-emoji">${emoji}</span>${cnt?`<span class="react-count">${cnt}</span>`:''}</button>`;
-  });
-  html+='</div>';
-  return html;
-}
-async function toggleReaction(collection,docId,emoji){
-  if(!currentUser||currentUser.isAnonymous){promptGuestRegister('Create a free account to react.');return;}
-  try{
-    const ref=db.collection(collection).doc(docId);
-    const snap=await ref.get();
-    if(!snap.exists)return;
-    const cur=(snap.data().reactions||{})[emoji]||[];
-    const has=cur.includes(currentUser.uid);
-    await ref.update({
-      [`reactions.${emoji}`]:has?firebase.firestore.FieldValue.arrayRemove(currentUser.uid):firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
-    });
-  }catch(err){showToast('React failed: '+err.message);}
-}
-// Single document-level click delegate
-document.addEventListener('click',e=>{
-  const btn=e.target.closest('.react-btn');
-  if(!btn)return;
-  const bar=btn.closest('.reactions-bar');
-  if(!bar)return;
-  toggleReaction(bar.dataset.coll,bar.dataset.id,btn.dataset.emoji);
-});
-
-/* ── AMBIENT AUDIO (synthesized cyberpunk drone) ── */
-(function initAmbient(){
-  const btn=document.getElementById('ambientToggle');
-  if(!btn)return;
-  let ctx=null,master=null,nodes=[],playing=false;
-  function start(){
-    if(playing)return;
-    ctx=new (window.AudioContext||window.webkitAudioContext)();
-    master=ctx.createGain();
-    master.gain.value=0;
-    master.connect(ctx.destination);
-    // Slow gain ramp-in
-    master.gain.linearRampToValueAtTime(.04,ctx.currentTime+1.2);
-    // Three layered drone oscillators with subtle detune & filter
-    [55,110,165].forEach((freq,i)=>{
-      const osc=ctx.createOscillator();
-      osc.type=i===0?'sawtooth':'sine';
-      osc.frequency.value=freq;
-      const filter=ctx.createBiquadFilter();
-      filter.type='lowpass';
-      filter.frequency.value=380+i*120;
-      filter.Q.value=2;
-      const lfo=ctx.createOscillator();
-      lfo.frequency.value=.07+i*.04;
-      const lfoGain=ctx.createGain();
-      lfoGain.gain.value=80;
-      lfo.connect(lfoGain);lfoGain.connect(filter.frequency);
-      const og=ctx.createGain();og.gain.value=.45-i*.1;
-      osc.connect(filter);filter.connect(og);og.connect(master);
-      osc.start();lfo.start();
-      nodes.push(osc,lfo);
-    });
-    playing=true;
-    btn.classList.add('on');
-    btn.querySelector('i').className='fas fa-volume-up';
-  }
-  function stop(){
-    if(!playing||!ctx)return;
-    master.gain.cancelScheduledValues(ctx.currentTime);
-    master.gain.linearRampToValueAtTime(0,ctx.currentTime+.6);
-    setTimeout(()=>{nodes.forEach(n=>{try{n.stop();}catch(_){}});ctx.close().catch(()=>{});ctx=null;nodes=[];playing=false;},700);
-    btn.classList.remove('on');
-    btn.querySelector('i').className='fas fa-volume-mute';
-  }
-  btn.addEventListener('click',()=>{playing?stop():start();});
-})();
-
 /* ── KONAMI EASTER EGG ── */
 (function initKonami(){
   const seq=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];

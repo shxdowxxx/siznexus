@@ -34,12 +34,6 @@
     <input type="text" id="terminalInput" autocomplete="off" spellcheck="false" placeholder="type a command (e.g. /help)">
   </div>
 </div>
-<button class="terminal-launcher" id="terminalLauncher" title="Open Operator Console (` key)" aria-label="Operator console">
-  <i class="fas fa-terminal"></i>
-</button>
-<button class="ambient-toggle" id="ambientToggle" title="Toggle ambient audio" aria-label="Toggle ambient audio">
-  <i class="fas fa-volume-mute"></i>
-</button>
 
 <!-- ONBOARDING TOUR OVERLAY -->
 <div id="tourOverlay" aria-hidden="true">
@@ -245,13 +239,17 @@
         </div>
       </div>
       <div class="field-group">
-        <label class="field-label" for="editPhotoURL">Photo URL</label>
-        <input type="url" id="editPhotoURL" class="input-field" placeholder="https://...">
-        <p class="photo-hint"><i class="fas fa-image" style="margin-right:4px;font-size:.7rem;"></i>Upload free at <a href="https://postimages.org/" target="_blank" rel="noopener noreferrer">Postimages.org</a> — paste the Direct link above.</p>
-      </div>
-      <div class="field-group">
-        <label class="field-label" for="editBannerURL">Profile Banner <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(wide hero image, optional)</span></label>
-        <input type="url" id="editBannerURL" class="input-field" placeholder="https://...">
+        <label class="field-label">Profile Banner <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(wide hero image, optional)</span></label>
+        <div class="banner-upload" id="bannerUploadBox">
+          <img id="bannerPreviewImg" alt="" style="display:none;">
+          <div class="banner-upload-cta" id="bannerUploadCta">
+            <i class="fas fa-image"></i>
+            <span>Click to upload banner</span>
+            <small>Max 1200×400 · auto-compressed to JPEG</small>
+          </div>
+          <button type="button" class="banner-clear" id="bannerClearBtn" title="Remove banner" style="display:none;">&times;</button>
+          <input type="file" id="bannerFileInput" accept="image/*" style="display:none;">
+        </div>
       </div>
       <button class="btn-primary" id="saveProfileBtn" style="width:100%;justify-content:center;margin-top:4px;"><i class="fas fa-save"></i> Save Changes</button>
       <div class="success-msg" id="profileSaveSuccess">Profile updated!</div>
@@ -643,6 +641,9 @@
       </button>
       <button class="notif-btn search-btn" id="searchBtn" aria-label="Global search" title="Search corp" style="margin-right:6px;">
         <i class="fas fa-search"></i>
+      </button>
+      <button class="notif-btn" id="terminalLauncher" aria-label="Operator console" title="Operator Console (press \`)" style="margin-right:6px;">
+        <i class="fas fa-terminal"></i>
       </button>
       <button class="notif-btn" id="notifBtn" aria-label="Notifications">
         <i class="fas fa-bell"></i>
