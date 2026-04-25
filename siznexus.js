@@ -325,7 +325,8 @@ async function openViewProfile(u){
   const showDangerRow=isLoggedIn&&!viewerIsGuest&&currentUser.uid!==u.id;
   const alreadyBlocked=isBlocked(u.id);
   content.innerHTML=`
-    <div class="profile-modal-hero">
+    <div class="profile-modal-hero${u.bannerURL?' has-banner':''}" ${u.bannerURL?`style="--banner:url('${esc(u.bannerURL)}');"`:''}>
+      ${u.bannerURL?'<div class="profile-banner-overlay"></div>':''}
       <div class="profile-hero-top">
         <div class="profile-hero-av">${photo?`<img src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`${initials(name)}`}</div>
         <div class="profile-hero-info">
@@ -349,6 +350,10 @@ async function openViewProfile(u){
       <div class="profile-bio-text">${esc(u.bio||'No bio set yet.')}</div>
     </div>
     ${(u.badges||[]).length?`<div class="profile-bio-section"><div class="profile-section-label"><i class="fas fa-medal" style="margin-right:4px;"></i>Badges</div>${renderBadges(u.badges)}</div>`:''}
+    <div class="profile-bio-section">
+      <div class="profile-section-label"><i class="fas fa-th" style="margin-right:4px;"></i>Activity (last 12 weeks)</div>
+      <div id="vpHeatmap"><div class="loading-spinner" style="grid-column:unset;padding:10px 0;"></div></div>
+    </div>
     <div class="profile-bio-section" id="vpOpHistorySection">
       <div class="profile-section-label"><i class="fas fa-crosshairs" style="margin-right:4px;"></i>Op History</div>
       <div id="vpOpHistory"><div class="loading-spinner" style="grid-column:unset;padding:10px 0;"></div></div>
@@ -361,6 +366,7 @@ async function openViewProfile(u){
     </div>`:''}`;
   openModal('profileModal');
   loadOpHistory(u.id,'vpOpHistory');
+  loadActivityHeatmap(u.id,'vpHeatmap');
   if(isLoggedIn&&currentUser.uid!==u.id){
     document.getElementById('vpGuestPrompt')?.addEventListener('click',()=>{closeModal('profileModal');promptGuestRegister('Create a free account to connect with operatives and send messages.');});
     document.getElementById('vpSendReq')?.addEventListener('click',()=>sendFriendRequest(u.id,name));
@@ -961,6 +967,8 @@ async function openMyProfile(){
         s.classList.toggle('selected',(s.dataset.accent||'')===cur);
       });
     }
+    const bannerEl=document.getElementById('editBannerURL');
+    if(bannerEl)bannerEl.value=d.bannerURL||'';
     document.getElementById('profileSaveSuccess').style.display='none';
     const imgEl=document.getElementById('editAvatarImg'),phEl=document.getElementById('editAvatarPlaceholder');
     if(d.photoURL){imgEl.src=d.photoURL;imgEl.style.display='block';phEl.style.display='none';}
@@ -1185,6 +1193,42 @@ function relativeTime(ts){
   if(sec<604800)return `${Math.floor(sec/86400)}d ago`;
   return d.toLocaleDateString();
 }
+async function loadActivityHeatmap(uid,targetId){
+  const el=document.getElementById(targetId);
+  if(!el)return;
+  el.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:10px 0;"></div>';
+  try{
+    // Pull last 12 weeks of corpLog for this user
+    const cutoff=new Date();cutoff.setUTCDate(cutoff.getUTCDate()-83);
+    const snap=await db.collection('corpLog').where('uid','==',uid).where('createdAt','>=',firebase.firestore.Timestamp.fromDate(cutoff)).get().catch(()=>null);
+    const counts={};
+    if(snap){
+      snap.forEach(d=>{
+        const t=d.data().createdAt?.toDate?.();
+        if(!t)return;
+        const k=ymdUTC(t);
+        counts[k]=(counts[k]||0)+1;
+      });
+    }
+    // Build 12 weeks x 7 days grid
+    const cells=[];
+    const today=new Date();
+    for(let i=83;i>=0;i--){
+      const d=new Date(today);d.setUTCDate(d.getUTCDate()-i);
+      const k=ymdUTC(d);
+      const c=counts[k]||0;
+      let lvl=0;
+      if(c>=1)lvl=1;
+      if(c>=3)lvl=2;
+      if(c>=6)lvl=3;
+      if(c>=10)lvl=4;
+      cells.push(`<div class="hm-cell hm-l${lvl}" title="${k}: ${c} action${c===1?'':'s'}"></div>`);
+    }
+    el.innerHTML=`<div class="heatmap-grid">${cells.join('')}</div><div class="heatmap-legend"><span>Less</span><div class="hm-cell hm-l0"></div><div class="hm-cell hm-l1"></div><div class="hm-cell hm-l2"></div><div class="hm-cell hm-l3"></div><div class="hm-cell hm-l4"></div><span>More</span></div>`;
+  }catch(err){
+    el.innerHTML=`<p style="font-family:var(--font-mono);font-size:.7rem;color:#f55;">${esc(err.message)}</p>`;
+  }
+}
 async function loadOpHistory(uid,targetId){
   const el=document.getElementById(targetId);
   if(!el)return;
@@ -1239,7 +1283,8 @@ document.getElementById('saveProfileBtn').addEventListener('click',async()=>{
     const newActivity=document.getElementById('editActivityStatus')?.value.trim()||'';
     const newAccent=document.querySelector('#accentPicker .accent-swatch.selected')?.dataset.accent||'';
     const newTitle=document.getElementById('editTitle')?.value.trim()||'';
-    const updates={bio:newBio,photoURL:newPhoto,activityStatus:newActivity,accentColor:newAccent,operatorTitle:newTitle};if(newName)updates.displayName=newName;
+    const newBanner=document.getElementById('editBannerURL')?.value.trim()||'';
+    const updates={bio:newBio,photoURL:newPhoto,activityStatus:newActivity,accentColor:newAccent,operatorTitle:newTitle,bannerURL:newBanner};if(newName)updates.displayName=newName;
     await db.collection('users').doc(currentUser.uid).update(updates);
     currentUserData=(await db.collection('users').doc(currentUser.uid).get()).data();
     setNavAvatar(currentUser,currentUserData);
