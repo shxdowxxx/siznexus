@@ -19,6 +19,24 @@
 <link rel="stylesheet" href="siznexus.css">
 </head>
 <body>
+<!-- OPERATOR TERMINAL -->
+<div id="operatorTerminal" aria-hidden="true">
+  <div class="terminal-bar">
+    <div class="terminal-bar-left">
+      <span class="terminal-prompt-tag">SIZNEXUS // OPERATOR CONSOLE</span>
+      <span class="terminal-hint">Press <kbd>`</kbd> to toggle, <kbd>Esc</kbd> to close, <kbd>/help</kbd> for commands</span>
+    </div>
+    <button class="terminal-close" id="terminalClose" aria-label="Close terminal">&times;</button>
+  </div>
+  <div class="terminal-output" id="terminalOutput"></div>
+  <div class="terminal-input-row">
+    <span class="terminal-prompt">&gt;</span>
+    <input type="text" id="terminalInput" autocomplete="off" spellcheck="false" placeholder="type a command (e.g. /help)">
+  </div>
+</div>
+<button class="terminal-launcher" id="terminalLauncher" title="Open Operator Console (` key)" aria-label="Operator console">
+  <i class="fas fa-terminal"></i>
+</button>
 
 <!-- SPLASH -->
 <div id="splash">

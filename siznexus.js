@@ -3790,3 +3790,155 @@ function updateDirStats(users){
   if(friendsEl&&currentUserData)friendsEl.textContent=users.filter(u=>(currentUserData.friends||[]).includes(u.id)).length;
   setTimeout(applyDirFilter,50);
 }
+
+/* ═══════════════════════════════════════════════════════
+   OPERATOR TERMINAL
+═══════════════════════════════════════════════════════ */
+(function initOperatorTerminal(){
+  const term=document.getElementById('operatorTerminal');
+  const launcher=document.getElementById('terminalLauncher');
+  const out=document.getElementById('terminalOutput');
+  const input=document.getElementById('terminalInput');
+  const closeBtn=document.getElementById('terminalClose');
+  if(!term||!input)return;
+  let history=[],historyIdx=-1;
+  function termPrint(html,cls=''){
+    const line=document.createElement('div');
+    line.className='terminal-line '+cls;
+    line.innerHTML=html;
+    out.appendChild(line);
+    out.scrollTop=out.scrollHeight;
+  }
+  function termOpen(){
+    term.classList.add('open');
+    term.setAttribute('aria-hidden','false');
+    setTimeout(()=>input.focus(),60);
+    if(!out.children.length){
+      termPrint('<span class="t-dim">SizNexus Operator Console v1.0 — type <strong>/help</strong> to see what you can do.</span>','t-info');
+    }
+  }
+  function termClose(){
+    term.classList.remove('open');
+    term.setAttribute('aria-hidden','true');
+  }
+  function termToggle(){term.classList.contains('open')?termClose():termOpen();}
+  launcher.addEventListener('click',termToggle);
+  closeBtn.addEventListener('click',termClose);
+  document.addEventListener('keydown',e=>{
+    // Backtick toggles, but ignore when typing in any input/textarea
+    const tag=document.activeElement?.tagName;
+    if(e.key==='`'&&tag!=='INPUT'&&tag!=='TEXTAREA'){
+      e.preventDefault();termToggle();return;
+    }
+    if(e.key==='Escape'&&term.classList.contains('open')){termClose();}
+  });
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){
+      const raw=input.value.trim();if(!raw)return;
+      input.value='';
+      history.push(raw);historyIdx=history.length;
+      termPrint(`<span class="t-prompt">&gt;</span> <span class="t-cmd">${esc(raw)}</span>`);
+      runCommand(raw);
+    }else if(e.key==='ArrowUp'){
+      if(historyIdx>0){historyIdx--;input.value=history[historyIdx];}e.preventDefault();
+    }else if(e.key==='ArrowDown'){
+      if(historyIdx<history.length-1){historyIdx++;input.value=history[historyIdx];}else{historyIdx=history.length;input.value='';}
+      e.preventDefault();
+    }
+  });
+  async function runCommand(raw){
+    const parts=raw.split(/\s+/);
+    const cmd=parts[0].toLowerCase().replace(/^\//,'');
+    const arg=parts.slice(1).join(' ');
+    try{
+      switch(cmd){
+        case 'help':
+          termPrint([
+            '<span class="t-info">Available commands:</span>',
+            '  <span class="t-cmd">/help</span>            this list',
+            '  <span class="t-cmd">/whois &lt;name|uid&gt;</span> look up an operative',
+            '  <span class="t-cmd">/missions</span>        list active missions',
+            '  <span class="t-cmd">/leaderboard</span>     top 5 operatives by points',
+            '  <span class="t-cmd">/rank</span>            your rank, points, streak',
+            '  <span class="t-cmd">/squad</span>           your current squad',
+            '  <span class="t-cmd">/online</span>          count of online operatives',
+            '  <span class="t-cmd">/spotlight</span>       current featured member',
+            '  <span class="t-cmd">/intel</span>           latest 3 intel posts',
+            '  <span class="t-cmd">/clear</span>           clear console',
+            '  <span class="t-cmd">/about</span>           about the corp'
+          ].join('<br>'));
+          break;
+        case 'clear':out.innerHTML='';break;
+        case 'about':
+          termPrint('TheSizNexus — intelligence corporation operating across multiple platforms. Member tools, missions, intel, and operations live inside this console and the Corp Hub.');
+          break;
+        case 'rank':{
+          if(!currentUser||currentUser.isAnonymous){termPrint('<span class="t-err">You must be signed in.</span>');break;}
+          const me=currentUserData||{};
+          termPrint(`<span class="t-key">name:</span> ${esc(me.displayName||'Unknown')}<br><span class="t-key">rank:</span> ${esc(me.rank||'Member')}<br><span class="t-key">points:</span> ${me.points||0}<br><span class="t-key">streak:</span> ${me.currentStreak||0} day${(me.currentStreak||0)===1?'':'s'} (best: ${me.longestStreak||0})<br><span class="t-key">badges:</span> ${(me.badges||[]).length}`);
+          break;
+        }
+        case 'whois':{
+          if(!arg){termPrint('<span class="t-err">Usage: /whois &lt;name|uid&gt;</span>');break;}
+          const snap=await db.collection('users').get();
+          const ql=arg.toLowerCase();
+          const u=snap.docs.map(d=>({...d.data(),id:d.id})).find(u=>!u.isAnonymous&&((u.displayName||'').toLowerCase()===ql||(u.displayName||'').toLowerCase().includes(ql)||u.id===arg));
+          if(!u){termPrint('<span class="t-err">No operative found.</span>');break;}
+          termPrint(`<span class="t-key">name:</span> ${esc(u.displayName||'Unknown')}${u.operatorTitle?` — <span class="t-dim">${esc(u.operatorTitle)}</span>`:''}<br><span class="t-key">rank:</span> ${esc(u.rank||'Member')}<br><span class="t-key">points:</span> ${u.points||0}<br><span class="t-key">status:</span> ${esc(u.status||'offline')}${u.activityStatus?` "${esc(u.activityStatus)}"`:''}<br><span class="t-key">badges:</span> ${(u.badges||[]).length}<br><span class="t-key">bio:</span> ${esc(u.bio||'—')}`);
+          break;
+        }
+        case 'missions':{
+          const snap=await db.collection('missions').where('active','==',true).get();
+          if(snap.empty){termPrint('<span class="t-dim">No active missions.</span>');break;}
+          const lines=snap.docs.slice(0,8).map(d=>{const m=d.data();return `  • <strong>${esc(m.title||'Mission')}</strong> <span class="t-dim">(${m.points||0} pts)${m.category?` [${esc(m.category)}]`:''}</span>`;});
+          termPrint(`<span class="t-info">${snap.size} active mission${snap.size===1?'':'s'}:</span><br>${lines.join('<br>')}`);
+          break;
+        }
+        case 'leaderboard':{
+          const snap=await db.collection('users').get();
+          const users=snap.docs.map(d=>({...d.data(),id:d.id})).filter(u=>!u.isAnonymous).sort((a,b)=>(b.points||0)-(a.points||0)).slice(0,5);
+          if(!users.length){termPrint('<span class="t-dim">No operatives ranked yet.</span>');break;}
+          termPrint(`<span class="t-info">Top 5 operatives:</span><br>${users.map((u,i)=>`  <span class="t-key">${i+1}.</span> ${esc(u.displayName||'Unknown')} <span class="t-dim">— ${u.points||0} pts</span>`).join('<br>')}`);
+          break;
+        }
+        case 'online':{
+          const snap=await db.collection('users').where('status','==','online').get();
+          const n=snap.docs.filter(d=>!d.data().isAnonymous).length;
+          termPrint(`<span class="t-key">${n}</span> operative${n===1?'':'s'} online right now.`);
+          break;
+        }
+        case 'spotlight':{
+          const cur=await db.collection('_configKEY').doc('featured').get();
+          if(!cur.exists||!cur.data()?.uid){termPrint('<span class="t-dim">No spotlight pinned. Auto-rotation active.</span>');break;}
+          const d=cur.data();
+          const us=await db.collection('users').doc(d.uid).get();
+          const u=us.exists?us.data():{};
+          termPrint(`<span class="t-key">spotlight:</span> ${esc(u.displayName||d.uid)}${d.note?`<br><span class="t-dim">"${esc(d.note)}"</span>`:''}`);
+          break;
+        }
+        case 'squad':{
+          if(!currentUser||currentUser.isAnonymous){termPrint('<span class="t-err">You must be signed in.</span>');break;}
+          const snap=await db.collection('squads').where('members','array-contains',currentUser.uid).get();
+          if(snap.empty){termPrint('<span class="t-dim">You are not in a squad. Form one from the Hub → Squads tab.</span>');break;}
+          const s=snap.docs[0].data();
+          termPrint(`<span class="t-key">squad:</span> ${esc(s.name||'')} ${s.tag?`[${esc(s.tag)}]`:''}<br><span class="t-key">members:</span> ${(s.members||[]).length} / 5<br><span class="t-key">leader:</span> ${s.leaderUid===currentUser.uid?'YOU':esc(s.leaderUid||'')}`);
+          break;
+        }
+        case 'intel':{
+          const snap=await db.collection('intelPosts').orderBy('createdAt','desc').limit(3).get().catch(()=>null);
+          if(!snap||snap.empty){termPrint('<span class="t-dim">No intel posts available.</span>');break;}
+          termPrint(`<span class="t-info">Latest intel:</span><br>${snap.docs.map(d=>{const p=d.data();return `  • <strong>${esc(p.title||'Intel')}</strong>${p.tag?` <span class="t-dim">[${esc(p.tag)}]</span>`:''}`;}).join('<br>')}`);
+          break;
+        }
+        case 'secret':case 'lore':{
+          termPrint('<span class="t-info">[CLASSIFIED] // </span><span class="t-dim">Pattern recognized. Some files only open with the right phrase. Keep watching the corpLog.</span>');
+          break;
+        }
+        default:
+          termPrint(`<span class="t-err">unknown command:</span> ${esc(cmd)}. Try <strong>/help</strong>.`);
+      }
+    }catch(err){
+      termPrint(`<span class="t-err">error:</span> ${esc(err.message)}`);
+    }
+  }
+})();
