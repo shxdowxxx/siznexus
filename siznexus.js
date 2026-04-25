@@ -1348,6 +1348,15 @@ async function loadAdminKeys(){
         <input type="text" id="missionKeyInput" class="input-field" placeholder="SECRET KEY (share in Discord)" maxlength="30" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;flex:1;">
         <input type="number" id="missionPtsInput" class="input-field" placeholder="Pts" min="5" max="500" value="50" style="font-size:.75rem;width:70px;">
       </div>
+      <select id="missionCategoryInput" class="input-field" style="font-size:.75rem;">
+        <option value="">Select category (optional)...</option>
+        <option value="recon">Recon</option>
+        <option value="combat">Combat</option>
+        <option value="support">Support</option>
+        <option value="intel">Intel</option>
+        <option value="logistics">Logistics</option>
+        <option value="other">Other</option>
+      </select>
       <button class="btn-primary" id="createMissionBtn" style="justify-content:center;font-size:.75rem;padding:8px;"><i class="fas fa-plus"></i> Create Mission</button>
       <div class="success-msg" id="missionCreateMsg">Mission created!</div>
     </div>
@@ -1363,7 +1372,8 @@ async function loadAdminKeys(){
     if(!currentUser||!(isDev(currentUserData)||currentUser.uid===OWNER_UID)){showToast('Developer+ required to create missions.');return;}
     const btn=document.getElementById('createMissionBtn');
     btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
-    try{await safeExec(db.collection('missions').add({title,description:desc,secretKey:key,points:pts,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}),'Mission created');
+    const category=document.getElementById('missionCategoryInput')?.value||'';
+    try{await safeExec(db.collection('missions').add({title,description:desc,secretKey:key,points:pts,category,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}),'Mission created');
       const s=document.getElementById('missionCreateMsg');s.style.display='block';setTimeout(()=>s.style.display='none',2500);
     }catch(e){}
     btn.disabled=false;btn.innerHTML='<i class="fas fa-plus"></i> Create Mission';
@@ -1958,6 +1968,15 @@ async function loadCorpLog(filter='all'){
     });
   },err=>{feed.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;});
 }
+// Mission category filter buttons
+document.querySelectorAll('.mission-cat-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.mission-cat-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    _missionCategoryFilter=btn.dataset.cat;
+    loadMissions();
+  });
+});
 // Filter buttons
 document.querySelectorAll('.log-filter-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
@@ -1969,6 +1988,7 @@ document.querySelectorAll('.log-filter-btn').forEach(btn=>{
 /* ═══════════════════════════════════════════════════════
    MISSIONS
 ═══════════════════════════════════════════════════════ */
+let _missionCategoryFilter='all';
 async function loadMissions(){
   const list=document.getElementById('missionsList');
   list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
@@ -1991,7 +2011,18 @@ async function loadMissions(){
       note:'Mission cards show live status, point value, and any existing submission state.'
     });
     const sevenDaysAgo=Date.now()-7*86400000;
-    const sortedMissions=[...missionsSnap.docs].sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));
+    let sortedMissions=[...missionsSnap.docs].sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));
+    if(_missionCategoryFilter!=='all'){
+      sortedMissions=sortedMissions.filter(d=>{
+        const c=d.data().category||'';
+        return _missionCategoryFilter==='uncategorized'?!c:c===_missionCategoryFilter;
+      });
+    }
+    if(!sortedMissions.length){
+      list.innerHTML=`<div class="hub-empty">No missions in <strong>${esc(_missionCategoryFilter)}</strong>.</div>`;
+      updateHubSectionInfo({label:'Active Missions',count:0,note:'No missions match the current filter.'});
+      return;
+    }
     sortedMissions.forEach(d=>{
       const m=d.data(),mid=d.id;
       const mySub=mySubsMap[mid];
@@ -2018,12 +2049,13 @@ async function loadMissions(){
         </div>
         <p style="font-family:var(--font-mono);font-size:.62rem;color:rgba(192,192,192,.35);margin-top:5px;">Use the <strong style="color:rgba(192,192,192,.55);">/key</strong> bot command in Discord to get the KEY for this mission.</p>`;
       }
+      const catBadge=m.category?`<span class="mission-cat-badge mission-cat-${esc(m.category)}">${esc(m.category)}</span>`:'';
       card.innerHTML=`
         ${isNewThisWeek?'<span class="mission-new-ribbon"><i class="fas fa-bolt"></i> NEW THIS WEEK</span>':''}
         <div class="mission-header">
           <div class="mission-icon"><i class="fas fa-crosshairs"></i></div>
           <div class="mission-info">
-            <div class="mission-title">${esc(m.title||'Mission')}</div>
+            <div class="mission-title">${esc(m.title||'Mission')} ${catBadge}</div>
             <div class="mission-desc">${esc(m.description||'')}</div>
           </div>
         </div>
