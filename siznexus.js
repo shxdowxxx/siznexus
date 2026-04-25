@@ -561,6 +561,7 @@ async function loadRequestsTab(){
     });
   }catch(err){console.error(err);document.getElementById('notifList').innerHTML=`<div class="notif-empty" style="color:#f55;">Error: ${err.code||err.message}</div>`;}
 }
+let _notifMsgFilter='all';
 async function loadMsgNotifTab(){
   const list=document.getElementById('notifMsgList');
   list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
@@ -569,9 +570,10 @@ async function loadMsgNotifTab(){
   document.getElementById('notifTabAnnouncements').style.display='none';
   try{
     const snap=await db.collection('notifications').where('to','==',currentUser.uid).where('type','==','message').get();
-    const items=snap.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));
+    let items=snap.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));
+    if(_notifMsgFilter==='unread')items=items.filter(d=>!d.data().read);
     list.innerHTML='';
-    if(!items.length){list.innerHTML='<div class="notif-empty">No message notifications.</div>';return;}
+    if(!items.length){list.innerHTML=`<div class="notif-empty">${_notifMsgFilter==='unread'?'All caught up. No unread messages.':'No message notifications.'}</div>`;return;}
     for(const d of items){
       const n=d.data();
       const item=document.createElement('div');
@@ -593,8 +595,6 @@ async function loadMsgNotifTab(){
       });
       list.appendChild(item);
     }
-    // Mark all as read
-    snap.docs.filter(d=>!d.data().read).forEach(d=>db.collection('notifications').doc(d.id).update({read:true}).catch(()=>{}));
     updateNotifBadge();
   }catch(err){console.error(err);list.innerHTML=`<div class="notif-empty" style="color:#f55;">Error: ${err.code||err.message}</div>`;}
 }
@@ -656,6 +656,15 @@ document.getElementById('notifBtn').addEventListener('click',e=>{
     return;
   }
   openNotifications();
+});
+// Notif message filter buttons
+document.querySelectorAll('.notif-filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.notif-filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    _notifMsgFilter=btn.dataset.nfilter;
+    loadMsgNotifTab();
+  });
 });
 // Mark all read button
 document.getElementById('markAllReadBtn').addEventListener('click',async()=>{

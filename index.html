@@ -475,7 +475,13 @@
       <button class="notif-tab" data-ntab="announcements"><i class="fas fa-bullhorn" style="margin-right:4px;"></i>Updates</button>
     </div>
     <div id="notifTabRequests"><div id="notifList" class="notif-list"></div></div>
-    <div id="notifTabMessages" style="display:none;"><div id="notifMsgList" class="notif-list"></div></div>
+    <div id="notifTabMessages" style="display:none;">
+      <div class="notif-filter-row">
+        <button type="button" class="notif-filter-btn active" data-nfilter="all">All</button>
+        <button type="button" class="notif-filter-btn" data-nfilter="unread">Unread</button>
+      </div>
+      <div id="notifMsgList" class="notif-list"></div>
+    </div>
     <div id="notifTabAnnouncements" style="display:none;"><div id="notifAnnList" class="notif-list"></div></div>
   </div>
 </div>
