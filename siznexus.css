@@ -1401,3 +1401,14 @@ footer .contact a:hover{text-decoration:underline;}
 .mission-card.mission-fresh{border-color:rgba(255,215,0,.35);box-shadow:0 0 0 1px rgba(255,215,0,.08), inset 0 0 24px rgba(255,215,0,.04);}
 .mission-new-ribbon{position:absolute;top:-1px;right:-1px;background:linear-gradient(135deg,#FFD700,#FF8C28);color:#0A0E1A;font-family:var(--font-mono);font-size:.55rem;font-weight:700;letter-spacing:.16em;padding:4px 10px;border-radius:0 0 0 6px;box-shadow:0 2px 8px rgba(255,140,40,.35);}
 .mission-new-ribbon i{font-size:.55rem;margin-right:3px;}
+
+/* Accent color picker (profile edit) */
+.accent-picker{display:flex;flex-wrap:wrap;gap:8px;padding:6px 0;}
+.accent-swatch{width:32px;height:32px;border-radius:50%;border:2px solid rgba(192,192,192,.18);cursor:pointer;padding:0;transition:transform .15s ease, border-color .15s ease, box-shadow .2s ease;}
+.accent-swatch:hover{transform:scale(1.12);border-color:rgba(192,192,192,.45);}
+.accent-swatch.selected{border-color:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.6), 0 0 12px rgba(255,255,255,.35);transform:scale(1.08);}
+
+/* Operator title (one-line codename under name) */
+.operator-title{font-family:var(--font-mono);font-size:.62rem;color:var(--color-text-muted);letter-spacing:.18em;text-transform:uppercase;margin-top:2px;opacity:.75;}
+.profile-hero-info .operator-title{margin-top:1px;margin-bottom:3px;}
+.friend-info .operator-title{margin-top:0;margin-bottom:4px;font-size:.58rem;}

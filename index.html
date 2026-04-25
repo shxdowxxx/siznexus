@@ -175,6 +175,22 @@
         <input type="text" id="editActivityStatus" class="input-field" maxlength="60" placeholder="e.g. Grinding missions, On patrol..." autocomplete="off">
       </div>
       <div class="field-group">
+        <label class="field-label">Accent Color <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(tints your name across the corp)</span></label>
+        <div class="accent-picker" id="accentPicker">
+          <button type="button" class="accent-swatch" data-accent="" title="Default Silver" style="background:#C0C0C0;"></button>
+          <button type="button" class="accent-swatch" data-accent="#FF3B5C" title="Crimson" style="background:#FF3B5C;"></button>
+          <button type="button" class="accent-swatch" data-accent="#3FCFFF" title="Cyan" style="background:#3FCFFF;"></button>
+          <button type="button" class="accent-swatch" data-accent="#FFD700" title="Gold" style="background:#FFD700;"></button>
+          <button type="button" class="accent-swatch" data-accent="#9B5CFF" title="Violet" style="background:#9B5CFF;"></button>
+          <button type="button" class="accent-swatch" data-accent="#3FE08C" title="Emerald" style="background:#3FE08C;"></button>
+          <button type="button" class="accent-swatch" data-accent="#FF8C28" title="Ember" style="background:#FF8C28;"></button>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="editTitle">Operator Title <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(one-line codename, optional)</span></label>
+        <input type="text" id="editTitle" class="input-field" maxlength="40" placeholder="e.g. Signal Analyst, Overwatch..." autocomplete="off">
+      </div>
+      <div class="field-group">
         <label class="field-label">Presence Status</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="rsvp-btn yes" id="profileStatusOnline" data-pstatus="online" style="font-family:var(--font-mono);font-size:.65rem;"><span class="status-dot online" style="width:7px;height:7px;margin-right:4px;vertical-align:middle;"></span>Online</button>

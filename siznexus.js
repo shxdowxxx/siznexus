@@ -230,7 +230,7 @@ function startActiveMembersListener(){
     if(!members.length){list.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);padding:8px 0;">No operatives online right now.</p>';return;}
     members.forEach(u=>{
       const row=document.createElement('div');row.className='active-member-row';
-      row.innerHTML=`<div class="active-dot"></div><div class="active-member-av">${avHtml(u.photoURL,u.displayName)}</div><span class="active-member-name">${esc(u.displayName||'Unknown')}</span><span class="active-member-rank ${rankClass(u.rank)}">${esc(u.rank||'Member')}</span>`;
+      row.innerHTML=`<div class="active-dot"></div><div class="active-member-av">${avHtml(u.photoURL,u.displayName)}</div><span class="active-member-name">${nameHtml(u)}</span><span class="active-member-rank ${rankClass(u.rank)}">${esc(u.rank||'Member')}</span>`;
       row.addEventListener('click',()=>{if(currentUser&&u.id===currentUser.uid)openMyProfile();else openViewProfile(u);});
       list.appendChild(row);
     });
@@ -245,7 +245,7 @@ startActiveMembersListener();
 function buildMemberCard(u,isSelf){
   const div=document.createElement('div');div.className='friend-card';div.dataset.uid=u.id;
   const photo=u.photoURL||'',name=u.displayName||'Unknown',bio=u.bio||'No bio set',status=u.status||'offline',rank=u.rank||'Member';
-  div.innerHTML=`<div class="friend-avatar-wrap">${photo?`<img class="friend-avatar" src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`<div class="friend-avatar-placeholder">${initials(name)}</div>`}</div><div class="friend-info"><h3 class="friend-name">${esc(name)}${isSelf?' <span style="font-size:.6rem;color:var(--color-text-muted);font-family:var(--font-mono);">[YOU]</span>':''}</h3><p class="friend-bio">${esc(bio)}</p><div class="friend-footer"><span class="friend-status status-${status}">${status}</span><span class="friend-rank ${rankClass(rank)}">${esc(rank)}</span></div></div>`;
+  div.innerHTML=`<div class="friend-avatar-wrap">${photo?`<img class="friend-avatar" src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`<div class="friend-avatar-placeholder">${initials(name)}</div>`}</div><div class="friend-info"><h3 class="friend-name">${nameHtml(u,'Unknown')}${isSelf?' <span style="font-size:.6rem;color:var(--color-text-muted);font-family:var(--font-mono);">[YOU]</span>':''}</h3>${titleHtml(u)}<p class="friend-bio">${esc(bio)}</p><div class="friend-footer"><span class="friend-status status-${status}">${status}</span><span class="friend-rank ${rankClass(rank)}">${esc(rank)}</span></div></div>`;
   div.addEventListener('click',()=>{if(isSelf)openMyProfile();else openViewProfile(u);});
   return div;
 }
@@ -327,7 +327,8 @@ async function openViewProfile(u){
       <div class="profile-hero-top">
         <div class="profile-hero-av">${photo?`<img src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`${initials(name)}`}</div>
         <div class="profile-hero-info">
-          <div class="profile-hero-name">${esc(name)}</div>
+          <div class="profile-hero-name">${nameHtml(u,name)}</div>
+          ${titleHtml(u)}
           <div class="profile-hero-rank"><span class="${rankClass(u.rank)}">${esc(u.rank||'Member')}</span></div>
           <div class="profile-hero-status"><span class="status-dot ${u.status||'offline'}"></span><span>${statusLabel}</span></div>
           ${u.activityStatus?`<div class="profile-activity-pill"><i class="fas fa-circle-notch" style="font-size:.55rem;opacity:.5;"></i> ${esc(u.activityStatus)}</div>`:''}
@@ -814,6 +815,15 @@ async function openMyProfile(){
     document.getElementById('editPhotoURL').value=d.photoURL||'';
     const actEl=document.getElementById('editActivityStatus');
     if(actEl)actEl.value=d.activityStatus||'';
+    const titleEl=document.getElementById('editTitle');
+    if(titleEl)titleEl.value=d.operatorTitle||'';
+    const picker=document.getElementById('accentPicker');
+    if(picker){
+      const cur=d.accentColor||'';
+      picker.querySelectorAll('.accent-swatch').forEach(s=>{
+        s.classList.toggle('selected',(s.dataset.accent||'')===cur);
+      });
+    }
     document.getElementById('profileSaveSuccess').style.display='none';
     const imgEl=document.getElementById('editAvatarImg'),phEl=document.getElementById('editAvatarPlaceholder');
     if(d.photoURL){imgEl.src=d.photoURL;imgEl.style.display='block';phEl.style.display='none';}
@@ -932,7 +942,7 @@ function renderProfilePreview(d){
       <div class="profile-hero-top">
         <div class="profile-hero-av">${d.photoURL?`<img src="${esc(d.photoURL)}" alt="">`:`${initials(d.displayName||'?')}`}</div>
         <div class="profile-hero-info">
-          <div class="profile-hero-name">${esc(d.displayName||'Unknown')}</div>
+          <div class="profile-hero-name">${nameHtml(d)}</div>${titleHtml(d)}
           <div class="profile-hero-rank"><span class="${rankClass(d.rank)}">${esc(d.rank||'Member')}</span></div>
           <div class="profile-hero-status"><span class="status-dot ${d.status||'offline'}"></span><span>${statusLabel}</span></div>
           ${d.activityStatus?`<div class="profile-activity-pill"><i class="fas fa-circle-notch" style="font-size:.55rem;opacity:.5;"></i> ${esc(d.activityStatus)}</div>`:''}
@@ -976,7 +986,7 @@ async function renderMyFriendsList(friendIds){
         <span class="connection-av-dot status-dot ${fd.status||'offline'}"></span>
       </div>
       <div class="connection-info">
-        <div class="connection-name">${esc(fd.displayName||'Unknown')}</div>
+        <div class="connection-name">${nameHtml(fd)}</div>
         <div class="connection-rank ${rankClass(fd.rank)}">${esc(fd.rank||'Member')}</div>
         ${fd.activityStatus?`<div class="connection-activity">"${esc(fd.activityStatus)}"</div>`:''}
       </div>
@@ -992,6 +1002,21 @@ async function renderMyFriendsList(friendIds){
   }
 }
 /* ── SAVE PROFILE ── */
+document.querySelectorAll('#accentPicker .accent-swatch').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#accentPicker .accent-swatch').forEach(s=>s.classList.remove('selected'));
+    btn.classList.add('selected');
+  });
+});
+function nameHtml(u,fallback='Unknown'){
+  const name=esc(u?.displayName||fallback);
+  const c=u?.accentColor;
+  return c?`<span style="color:${esc(c)};">${name}</span>`:name;
+}
+function titleHtml(u){
+  const t=u?.operatorTitle;
+  return t?`<div class="operator-title">${esc(t)}</div>`:'';
+}
 document.getElementById('saveProfileBtn').addEventListener('click',async()=>{
   if(!currentUser)return;
   const btn=document.getElementById('saveProfileBtn');
@@ -1001,7 +1026,9 @@ document.getElementById('saveProfileBtn').addEventListener('click',async()=>{
     const newBio=document.getElementById('editBio').value.trim();
     const newPhoto=document.getElementById('editPhotoURL').value.trim();
     const newActivity=document.getElementById('editActivityStatus')?.value.trim()||'';
-    const updates={bio:newBio,photoURL:newPhoto,activityStatus:newActivity};if(newName)updates.displayName=newName;
+    const newAccent=document.querySelector('#accentPicker .accent-swatch.selected')?.dataset.accent||'';
+    const newTitle=document.getElementById('editTitle')?.value.trim()||'';
+    const updates={bio:newBio,photoURL:newPhoto,activityStatus:newActivity,accentColor:newAccent,operatorTitle:newTitle};if(newName)updates.displayName=newName;
     await db.collection('users').doc(currentUser.uid).update(updates);
     currentUserData=(await db.collection('users').doc(currentUser.uid).get()).data();
     setNavAvatar(currentUser,currentUserData);
@@ -1734,7 +1761,7 @@ function setFeaturedMember(user,position=0){
     card.classList.remove('is-interactive');
     return;
   }
-  nameEl.textContent=user.displayName||'Unknown Operative';
+  nameEl.innerHTML=nameHtml(user,'Unknown Operative')+titleHtml(user);
   descEl.textContent=user._curatedNote||buildFeaturedDescription(user,position);
   const tags=user._curatedNote?['Editorial Pick',user.rank||'Member']:buildFeaturedTags(user,position);
   badgesEl.innerHTML=tags.length
@@ -2042,7 +2069,7 @@ async function loadLeaderboard(){
       if(isMe)row.style.borderColor='rgba(192,192,192,.3)';
       row.innerHTML=`<span class="lb-rank ${rankCls}">${rankIcon}</span>
         <div class="lb-av">${avHtml(u.photoURL,u.displayName)}</div>
-        <span class="lb-name">${esc(u.displayName||'Unknown')}${isMe?'<span class="lb-you">[YOU]</span>':''}</span>
+        <span class="lb-name">${nameHtml(u)}${isMe?'<span class="lb-you">[YOU]</span>':''}</span>
         <span class="lb-pts"><i class="fas fa-star" style="font-size:.6rem;margin-right:3px;"></i>${u.points||0}</span>`;
       list.appendChild(row);
     });
