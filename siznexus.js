@@ -2750,7 +2750,87 @@ function refreshDashboardSurface(){
   loadHomePreview(homePreviewTab);
   loadNetworkSnapshot();
   loadFeaturedMembers();
+  refreshStreakPanel();
 }
+
+/* ── DAILY CHECK-IN STREAK ── */
+function ymdUTC(d=new Date()){
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+}
+function daysBetweenYMD(a,b){
+  const da=new Date(a+'T00:00:00Z'),db=new Date(b+'T00:00:00Z');
+  return Math.round((db-da)/86400000);
+}
+function refreshStreakPanel(){
+  const panel=document.getElementById('streak-panel');
+  if(!panel)return;
+  if(isGuestViewer()){panel.classList.add('guest-hidden');return;}
+  panel.classList.remove('guest-hidden');
+  const cur=currentUserData?.currentStreak||0;
+  const best=Math.max(currentUserData?.longestStreak||0,cur);
+  const lastYmd=currentUserData?.lastCheckIn?.toDate?ymdUTC(currentUserData.lastCheckIn.toDate()):'';
+  const today=ymdUTC();
+  const checkedToday=lastYmd===today;
+  document.getElementById('streakCurrent').textContent=cur;
+  document.getElementById('streakBest').textContent=`Personal best: ${best} day${best===1?'':'s'}`;
+  const sub=document.getElementById('streakSublabel');
+  const btn=document.getElementById('streakCheckInBtn');
+  const lbl=document.getElementById('streakCheckInLabel');
+  const hint=document.getElementById('streakHint');
+  if(checkedToday){
+    sub.textContent='Checked in today. Come back tomorrow.';
+    btn.disabled=true;
+    btn.classList.add('streak-done');
+    lbl.textContent='Locked In';
+    hint.textContent=`Next check-in resets in ~${24-new Date().getUTCHours()}h (UTC).`;
+  }else{
+    btn.disabled=false;
+    btn.classList.remove('streak-done');
+    lbl.textContent=cur>0?`Continue Streak (Day ${cur+1})`:'Start Your Streak';
+    sub.textContent=cur>0?`On day ${cur}. Don't break the chain.`:'Start tracking your activity today.';
+    hint.textContent='A daily check-in keeps your streak alive. Miss a UTC day and it resets to 1.';
+  }
+}
+async function doDailyCheckIn(){
+  if(!currentUser||currentUser.isAnonymous){
+    promptGuestRegister('Create a free account to start your daily streak.');
+    return;
+  }
+  const today=ymdUTC();
+  const lastYmd=currentUserData?.lastCheckIn?.toDate?ymdUTC(currentUserData.lastCheckIn.toDate()):'';
+  if(lastYmd===today){showToast('Already checked in today.');return;}
+  const prevStreak=currentUserData?.currentStreak||0;
+  const prevBest=currentUserData?.longestStreak||0;
+  let newStreak=1;
+  if(lastYmd){
+    const delta=daysBetweenYMD(lastYmd,today);
+    if(delta===1)newStreak=prevStreak+1;
+    // delta>=2 → reset to 1
+  }
+  const newBest=Math.max(prevBest,newStreak);
+  const btn=document.getElementById('streakCheckInBtn');
+  btn.disabled=true;
+  try{
+    await db.collection('users').doc(currentUser.uid).update({
+      lastCheckIn:firebase.firestore.FieldValue.serverTimestamp(),
+      currentStreak:newStreak,
+      longestStreak:newBest
+    });
+    if(currentUserData){
+      currentUserData.lastCheckIn={toDate:()=>new Date()};
+      currentUserData.currentStreak=newStreak;
+      currentUserData.longestStreak=newBest;
+    }
+    const milestone=[7,14,30,60,100,365].includes(newStreak)?` 🔥 ${newStreak}-day milestone!`:'';
+    writeCorpLog('streak',`checked in (day ${newStreak})${milestone}`,{streak:newStreak});
+    showToast(`Checked in. Streak: ${newStreak} day${newStreak===1?'':'s'}.${milestone}`);
+    refreshStreakPanel();
+  }catch(err){
+    showToast('Check-in failed: '+err.message);
+    btn.disabled=false;
+  }
+}
+document.getElementById('streakCheckInBtn')?.addEventListener('click',doDailyCheckIn);
 
 document.querySelectorAll('.command-tab').forEach(btn=>{
   btn.addEventListener('click',()=>loadHomePreview(btn.dataset.previewTab));

@@ -600,6 +600,26 @@
       </div>
     </section>
 
+    <section class="bubble panel-compact guest-hidden" id="streak-panel" data-member-only="true">
+      <p class="panel-kicker">// DAILY OPERATION</p>
+      <h2><span class="section-icon"><i class="fas fa-calendar-check"></i></span> Check-In Streak</h2>
+      <div class="streak-display">
+        <div class="streak-flame">
+          <i class="fas fa-fire"></i>
+          <strong class="streak-current" id="streakCurrent">0</strong>
+        </div>
+        <div class="streak-meta">
+          <span class="streak-label">Current Streak</span>
+          <span class="streak-sublabel" id="streakSublabel">Sign in tomorrow to start.</span>
+          <span class="streak-best" id="streakBest">Personal best: 0 days</span>
+        </div>
+      </div>
+      <button type="button" class="btn-primary streak-btn" id="streakCheckInBtn" style="width:100%;justify-content:center;">
+        <i class="fas fa-check"></i> <span id="streakCheckInLabel">Check In Today</span>
+      </button>
+      <p class="streak-hint" id="streakHint">A daily check-in keeps your streak alive. Miss a day and it resets.</p>
+    </section>
+
     <section class="bubble panel-compact" id="socials">
       <p class="panel-kicker">// CHANNELS</p>
       <h2><span class="section-icon"><i class="fas fa-satellite-dish"></i></span> Socials</h2>
