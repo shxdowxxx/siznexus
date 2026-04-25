@@ -245,7 +245,9 @@ startActiveMembersListener();
 function buildMemberCard(u,isSelf){
   const div=document.createElement('div');div.className='friend-card';div.dataset.uid=u.id;
   const photo=u.photoURL||'',name=u.displayName||'Unknown',bio=u.bio||'No bio set',status=u.status||'offline',rank=u.rank||'Member';
-  div.innerHTML=`<div class="friend-avatar-wrap">${photo?`<img class="friend-avatar" src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`<div class="friend-avatar-placeholder">${initials(name)}</div>`}</div><div class="friend-info"><h3 class="friend-name">${nameHtml(u,'Unknown')}${isSelf?' <span style="font-size:.6rem;color:var(--color-text-muted);font-family:var(--font-mono);">[YOU]</span>':''}</h3>${titleHtml(u)}<p class="friend-bio">${esc(bio)}</p><div class="friend-footer"><span class="friend-status status-${status}">${status}</span><span class="friend-rank ${rankClass(rank)}">${esc(rank)}</span></div></div>`;
+  const seen=relativeTime(u.lastActive);
+  const seenHtml=seen?`<span class="friend-lastseen" title="Last active">${esc(seen)}</span>`:'';
+  div.innerHTML=`<div class="friend-avatar-wrap">${photo?`<img class="friend-avatar" src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`<div class="friend-avatar-placeholder">${initials(name)}</div>`}</div><div class="friend-info"><h3 class="friend-name">${nameHtml(u,'Unknown')}${isSelf?' <span style="font-size:.6rem;color:var(--color-text-muted);font-family:var(--font-mono);">[YOU]</span>':''}</h3>${titleHtml(u)}<p class="friend-bio">${esc(bio)}</p><div class="friend-footer"><span class="friend-status status-${status}">${status}</span><span class="friend-rank ${rankClass(rank)}">${esc(rank)}</span>${seenHtml}</div></div>`;
   div.addEventListener('click',()=>{if(isSelf)openMyProfile();else openViewProfile(u);});
   return div;
 }
@@ -1034,6 +1036,25 @@ document.querySelectorAll('#accentPicker .accent-swatch').forEach(btn=>{
     btn.classList.add('selected');
   });
 });
+let _presenceHeartbeatId=null;
+function startPresenceHeartbeat(){
+  if(_presenceHeartbeatId)clearInterval(_presenceHeartbeatId);
+  _presenceHeartbeatId=setInterval(()=>{
+    if(!currentUser||document.hidden)return;
+    db.collection('users').doc(currentUser.uid).update({lastActive:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});
+  },60000);
+}
+function relativeTime(ts){
+  if(!ts)return '';
+  const d=ts.toDate?ts.toDate():(ts instanceof Date?ts:null);
+  if(!d)return '';
+  const sec=Math.floor((Date.now()-d.getTime())/1000);
+  if(sec<60)return 'just now';
+  if(sec<3600)return `${Math.floor(sec/60)}m ago`;
+  if(sec<86400)return `${Math.floor(sec/3600)}h ago`;
+  if(sec<604800)return `${Math.floor(sec/86400)}d ago`;
+  return d.toLocaleDateString();
+}
 async function loadOpHistory(uid,targetId){
   const el=document.getElementById(targetId);
   if(!el)return;
@@ -1106,6 +1127,7 @@ auth.onAuthStateChanged(async user=>{
       currentUserData=snap.exists?snap.data():await createUserDoc(user);
       setNavAvatar(user,currentUserData);
       db.collection('users').doc(user.uid).update({lastActive:firebase.firestore.FieldValue.serverTimestamp(),status:'online'}).catch(()=>{});
+      startPresenceHeartbeat();
       if(!user.isAnonymous)checkBanStatus();
       // Owner rank check
       if(user.uid===OWNER_UID&&currentUserData?.rank!=='Founder'){
@@ -2522,6 +2544,42 @@ async function loadHubQuickStats(){
     });
   }
 }
+const HUB_TAB_COLLECTIONS={
+  log:{collection:'corpLog',ts:'createdAt'},
+  missions:{collection:'missions',ts:'createdAt'},
+  calendar:{collection:'events',ts:'createdAt'},
+  intel:{collection:'intelPosts',ts:'createdAt'},
+  polls:{collection:'polls',ts:'createdAt'}
+};
+async function refreshHubTabBadges(){
+  if(!currentUser||currentUser.isAnonymous)return;
+  const seenMap=currentUserData?.hubTabLastSeen||{};
+  for(const [tab,cfg] of Object.entries(HUB_TAB_COLLECTIONS)){
+    const badge=document.getElementById(`hubBadge${tab.charAt(0).toUpperCase()+tab.slice(1)}`);
+    if(!badge)continue;
+    const seen=seenMap[tab]?.toMillis?.()||0;
+    try{
+      const snap=await db.collection(cfg.collection).orderBy(cfg.ts,'desc').limit(20).get();
+      const fresh=snap.docs.filter(d=>(d.data()[cfg.ts]?.toMillis?.()||0)>seen).length;
+      if(fresh>0){badge.textContent=fresh>9?'9+':String(fresh);badge.classList.add('show');}
+      else{badge.textContent='';badge.classList.remove('show');}
+    }catch(_){
+      badge.textContent='';badge.classList.remove('show');
+    }
+  }
+}
+async function markHubTabSeen(tab){
+  if(!currentUser||currentUser.isAnonymous||!HUB_TAB_COLLECTIONS[tab])return;
+  try{
+    await db.collection('users').doc(currentUser.uid).update({
+      [`hubTabLastSeen.${tab}`]:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    if(!currentUserData.hubTabLastSeen)currentUserData.hubTabLastSeen={};
+    currentUserData.hubTabLastSeen[tab]={toMillis:()=>Date.now()};
+    const badge=document.getElementById(`hubBadge${tab.charAt(0).toUpperCase()+tab.slice(1)}`);
+    if(badge){badge.textContent='';badge.classList.remove('show');}
+  }catch(_){}
+}
 async function openEngagementHub(tab='log',targetId=''){
   if(!currentUser||currentUser.isAnonymous){
     promptGuestRegister('Create a free account to access the Corp Hub.');
@@ -2530,10 +2588,12 @@ async function openEngagementHub(tab='log',targetId=''){
   openModal('engagementModal');
   updateHubChrome(tab);
   loadHubQuickStats();
+  refreshHubTabBadges();
   // Activate correct tab
   document.querySelectorAll('.hub-tab').forEach(b=>{b.classList.toggle('active',b.dataset.hub===tab);});
   document.querySelectorAll('.hub-section').forEach(s=>{s.classList.toggle('active',s.id==='hub'+tab.charAt(0).toUpperCase()+tab.slice(1));});
   await loadHubTab(tab);
+  markHubTabSeen(tab);
   if(targetId)highlightHubCard(targetId);
   // Tab switching
   document.querySelectorAll('.hub-tab').forEach(btn=>{
@@ -2545,6 +2605,7 @@ async function openEngagementHub(tab='log',targetId=''){
       if(section)section.classList.add('active');
       updateHubChrome(btn.dataset.hub);
       await loadHubTab(btn.dataset.hub);
+      markHubTabSeen(btn.dataset.hub);
     };
   });
 }

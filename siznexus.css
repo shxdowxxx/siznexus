@@ -1440,3 +1440,11 @@ footer .contact a:hover{text-decoration:underline;}
 .op-history-item .op-body{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
 .op-history-item strong{font-family:var(--font-mono);font-size:.78rem;color:var(--color-text);}
 .op-history-item .op-meta{font-family:var(--font-mono);font-size:.62rem;color:var(--color-text-muted);}
+
+/* "Last seen" pill in directory cards */
+.friend-lastseen{font-family:var(--font-mono);font-size:.55rem;color:var(--color-text-muted);letter-spacing:.06em;margin-left:auto;opacity:.7;}
+
+/* Hub tab "what's new" badges */
+.hub-tab{position:relative;}
+.hub-tab-badge{display:none;position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 5px;background:#FF3B5C;color:#fff;font-family:var(--font-mono);font-size:.55rem;font-weight:700;border-radius:8px;border:1px solid rgba(0,0,0,.5);align-items:center;justify-content:center;line-height:1;box-shadow:0 0 6px rgba(255,59,92,.4);}
+.hub-tab-badge.show{display:inline-flex;}
