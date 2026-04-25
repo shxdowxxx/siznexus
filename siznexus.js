@@ -2437,67 +2437,102 @@ async function loadLeaderboard(){
 /* ═══════════════════════════════════════════════════════
    CALENDAR
 ═══════════════════════════════════════════════════════ */
+let _calendarMonth=new Date(Date.UTC(new Date().getUTCFullYear(),new Date().getUTCMonth(),1));
+let _calendarSelected=null;
 async function loadCalendar(){
   const list=document.getElementById('calendarList');
   list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
-  updateHubSectionInfo({label:'Upcoming Events',count:'—',note:'Loading scheduled operations and attendance signals.'});
+  updateHubSectionInfo({label:'Calendar',count:'—',note:'Loading event grid.'});
   try{
     const snap=await db.collection('events').get();
-    const events=snap.docs.sort((a,b)=>(a.data().eventDate?.toMillis?.()??0)-(b.data().eventDate?.toMillis?.()??0));
-    list.innerHTML='';
-    const upcomingEvents=events.filter(d=>{
-      const eventDate=d.data().eventDate?.toDate?.();
-      return !eventDate||eventDate>=new Date();
-    });
-    if(!events.length){
-      updateHubSectionInfo({label:'Upcoming Events',count:0,note:'No events have been scheduled yet.'});
-      list.innerHTML='<div class="hub-empty">No events scheduled yet.</div>';return;
-    }
-    updateHubSectionInfo({
-      label:'Upcoming Events',
-      count:upcomingEvents.length,
-      note:upcomingEvents.length
-        ? 'Upcoming operations are ordered by date and show current RSVP status.'
-        : 'All current events have already passed.'
-    });
-    for(const d of events){
-      const ev=d.data(),eid=d.id;
-      const evDate=ev.eventDate?.toDate?.();
-      const dateStr=evDate?evDate.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'TBD';
-      const isPast=evDate&&evDate<new Date();
-      const myRsvp=(ev.rsvpYes||[]).includes(currentUser.uid)?'yes':(ev.rsvpNo||[]).includes(currentUser.uid)?'no':null;
-      const card=document.createElement('div');card.className='event-card';card.dataset.cardId=eid;
-      if(isPast)card.style.opacity='.55';
-      card.innerHTML=`<div class="event-title">${esc(ev.title||'Event')}</div>
-        <div class="event-desc">${esc(ev.description||'')}</div>
-        <div class="event-meta">
-          <span class="event-date"><i class="fas fa-clock"></i> ${dateStr}</span>
-          <span class="rsvp-count" id="rsvpCount_${eid}">✅ ${(ev.rsvpYes||[]).length} going</span>
-        </div>
-        ${!isPast?`<div class="event-rsvp-row">
-          <button class="rsvp-btn yes${myRsvp==='yes'?' active':''}" data-eid="${eid}" data-action="yes">✅ Going</button>
-          <button class="rsvp-btn no${myRsvp==='no'?' active':''}" data-eid="${eid}" data-action="no">❌ Can't go</button>
-        </div>`:'<p style="font-family:var(--font-mono);font-size:.65rem;color:rgba(192,192,192,.3);margin-top:6px;">This event has passed.</p>'}`;
-      // Wire RSVP buttons
-      card.querySelectorAll('.rsvp-btn').forEach(btn=>{
-        btn.addEventListener('click',async function(){
-          const action=this.dataset.action,eid=this.dataset.eid;
-          const ref=db.collection('events').doc(eid);
-          const updateData={};
-          if(action==='yes'){
-            updateData.rsvpYes=firebase.firestore.FieldValue.arrayUnion(currentUser.uid);
-            updateData.rsvpNo=firebase.firestore.FieldValue.arrayRemove(currentUser.uid);
-          }else{
-            updateData.rsvpNo=firebase.firestore.FieldValue.arrayUnion(currentUser.uid);
-            updateData.rsvpYes=firebase.firestore.FieldValue.arrayRemove(currentUser.uid);
-          }
-          await ref.update(updateData).catch(e=>showToast(e.message));
-          loadCalendar();
-        });
-      });
-      list.appendChild(card);
-    }
+    const events=snap.docs.map(d=>({...d.data(),id:d.id})).filter(e=>e.eventDate?.toDate);
+    const upcoming=events.filter(e=>e.eventDate.toDate()>=new Date()).length;
+    updateHubSectionInfo({label:'Calendar',count:upcoming,note:`${upcoming} upcoming event${upcoming===1?'':'s'}. Click any day to see what's scheduled.`});
+    renderCalendarGrid(list,events);
   }catch(err){list.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;}
+}
+function renderCalendarGrid(container,events){
+  const month=_calendarMonth;
+  const monthName=month.toLocaleString([],{month:'long',year:'numeric'});
+  const firstDow=new Date(Date.UTC(month.getUTCFullYear(),month.getUTCMonth(),1)).getUTCDay();
+  const daysInMonth=new Date(Date.UTC(month.getUTCFullYear(),month.getUTCMonth()+1,0)).getUTCDate();
+  // Group events by YMD
+  const byDay={};
+  events.forEach(e=>{
+    const ed=e.eventDate.toDate();
+    const k=ymdUTC(ed);
+    (byDay[k]=byDay[k]||[]).push(e);
+  });
+  const todayKey=ymdUTC();
+  let html=`<div class="cal-shell">
+    <div class="cal-header">
+      <button class="cal-nav" id="calPrev"><i class="fas fa-chevron-left"></i></button>
+      <span class="cal-title">${esc(monthName)}</span>
+      <button class="cal-nav" id="calNext"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div class="cal-dow">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<span>${d}</span>`).join('')}</div>
+    <div class="cal-grid">`;
+  // Empty cells before day 1
+  for(let i=0;i<firstDow;i++)html+='<div class="cal-cell empty"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const dt=new Date(Date.UTC(month.getUTCFullYear(),month.getUTCMonth(),d));
+    const k=ymdUTC(dt);
+    const evs=byDay[k]||[];
+    const isToday=k===todayKey;
+    const isSelected=k===_calendarSelected;
+    const dotsHtml=evs.slice(0,3).map(()=>'<span class="cal-dot"></span>').join('');
+    html+=`<button class="cal-cell${isToday?' today':''}${isSelected?' selected':''}${evs.length?' has-events':''}" data-day="${k}"><span class="cal-day-num">${d}</span>${dotsHtml}${evs.length>3?`<span class="cal-more">+${evs.length-3}</span>`:''}</button>`;
+  }
+  html+='</div></div><div class="cal-detail" id="calDetail"></div>';
+  container.innerHTML=html;
+  container.querySelector('#calPrev').addEventListener('click',()=>{_calendarMonth=new Date(Date.UTC(month.getUTCFullYear(),month.getUTCMonth()-1,1));loadCalendar();});
+  container.querySelector('#calNext').addEventListener('click',()=>{_calendarMonth=new Date(Date.UTC(month.getUTCFullYear(),month.getUTCMonth()+1,1));loadCalendar();});
+  container.querySelectorAll('.cal-cell[data-day]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      _calendarSelected=btn.dataset.day;
+      container.querySelectorAll('.cal-cell.selected').forEach(c=>c.classList.remove('selected'));
+      btn.classList.add('selected');
+      renderCalendarDayDetail(byDay[_calendarSelected]||[],_calendarSelected);
+    });
+  });
+  // Auto-select today on first render
+  if(!_calendarSelected){_calendarSelected=todayKey;renderCalendarDayDetail(byDay[todayKey]||[],todayKey);}
+  else renderCalendarDayDetail(byDay[_calendarSelected]||[],_calendarSelected);
+}
+function renderCalendarDayDetail(events,dayKey){
+  const detail=document.getElementById('calDetail');
+  if(!detail)return;
+  const dt=new Date(dayKey+'T00:00:00Z');
+  const head=`<div class="cal-detail-head"><strong>${dt.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})}</strong><span>${events.length} event${events.length===1?'':'s'}</span></div>`;
+  if(!events.length){detail.innerHTML=head+'<p class="cal-empty">No events on this day.</p>';return;}
+  let html=head;
+  events.sort((a,b)=>a.eventDate.toMillis()-b.eventDate.toMillis()).forEach(ev=>{
+    const evDate=ev.eventDate.toDate();
+    const isPast=evDate<new Date();
+    const myRsvp=(ev.rsvpYes||[]).includes(currentUser.uid)?'yes':(ev.rsvpNo||[]).includes(currentUser.uid)?'no':null;
+    const time=evDate.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    html+=`<div class="event-card${isPast?' past':''}" data-card-id="${esc(ev.id)}">
+      <div class="event-title"><i class="fas fa-clock" style="font-size:.65rem;opacity:.6;margin-right:5px;"></i>${esc(time)} — ${esc(ev.title||'Event')}</div>
+      <div class="event-desc">${esc(ev.description||'')}</div>
+      <div class="event-meta"><span class="rsvp-count">✅ ${(ev.rsvpYes||[]).length} going</span></div>
+      ${!isPast?`<div class="event-rsvp-row">
+        <button class="rsvp-btn yes${myRsvp==='yes'?' active':''}" data-eid="${esc(ev.id)}" data-action="yes">✅ Going</button>
+        <button class="rsvp-btn no${myRsvp==='no'?' active':''}" data-eid="${esc(ev.id)}" data-action="no">❌ Can't go</button>
+      </div>`:'<p style="font-family:var(--font-mono);font-size:.65rem;color:rgba(192,192,192,.3);margin-top:6px;">This event has passed.</p>'}
+    </div>`;
+  });
+  detail.innerHTML=html;
+  detail.querySelectorAll('.rsvp-btn').forEach(btn=>{
+    btn.addEventListener('click',async function(){
+      const action=this.dataset.action,eid=this.dataset.eid;
+      const ref=db.collection('events').doc(eid);
+      const updateData={};
+      if(action==='yes'){updateData.rsvpYes=firebase.firestore.FieldValue.arrayUnion(currentUser.uid);updateData.rsvpNo=firebase.firestore.FieldValue.arrayRemove(currentUser.uid);}
+      else{updateData.rsvpNo=firebase.firestore.FieldValue.arrayUnion(currentUser.uid);updateData.rsvpYes=firebase.firestore.FieldValue.arrayRemove(currentUser.uid);}
+      await ref.update(updateData).catch(e=>showToast(e.message));
+      loadCalendar();
+    });
+  });
 }
 /* ═══════════════════════════════════════════════════════
    INTEL BOARD
