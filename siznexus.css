@@ -1432,3 +1432,11 @@ footer .contact a:hover{text-decoration:underline;}
 .mission-cat-intel{color:#9B5CFF;border-color:rgba(155,92,255,.4);}
 .mission-cat-logistics{color:#FFD700;border-color:rgba(255,215,0,.4);}
 .mission-cat-other{color:rgba(192,192,192,.7);}
+
+/* Op History timeline */
+.op-history-list{display:flex;flex-direction:column;gap:8px;padding:4px 0;}
+.op-history-item{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;background:rgba(192,192,192,.03);border:1px solid rgba(192,192,192,.08);border-radius:3px;}
+.op-history-item .op-dot{width:8px;height:8px;border-radius:50%;background:#4CAF50;margin-top:6px;flex-shrink:0;box-shadow:0 0 6px rgba(76,175,80,.5);}
+.op-history-item .op-body{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
+.op-history-item strong{font-family:var(--font-mono);font-size:.78rem;color:var(--color-text);}
+.op-history-item .op-meta{font-family:var(--font-mono);font-size:.62rem;color:var(--color-text-muted);}

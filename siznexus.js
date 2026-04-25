@@ -346,6 +346,10 @@ async function openViewProfile(u){
       <div class="profile-bio-text">${esc(u.bio||'No bio set yet.')}</div>
     </div>
     ${(u.badges||[]).length?`<div class="profile-bio-section"><div class="profile-section-label"><i class="fas fa-medal" style="margin-right:4px;"></i>Badges</div>${renderBadges(u.badges)}</div>`:''}
+    <div class="profile-bio-section" id="vpOpHistorySection">
+      <div class="profile-section-label"><i class="fas fa-crosshairs" style="margin-right:4px;"></i>Op History</div>
+      <div id="vpOpHistory"><div class="loading-spinner" style="grid-column:unset;padding:10px 0;"></div></div>
+    </div>
     ${showDangerRow?`<div class="profile-danger-row">
       <button class="btn-report" id="vpReport"><i class="fas fa-flag"></i> Report</button>
       ${alreadyBlocked
@@ -353,6 +357,7 @@ async function openViewProfile(u){
         :`<button class="btn-block" id="vpBlock"><i class="fas fa-ban"></i> Block</button>`}
     </div>`:''}`;
   openModal('profileModal');
+  loadOpHistory(u.id,'vpOpHistory');
   if(isLoggedIn&&currentUser.uid!==u.id){
     document.getElementById('vpGuestPrompt')?.addEventListener('click',()=>{closeModal('profileModal');promptGuestRegister('Create a free account to connect with operatives and send messages.');});
     document.getElementById('vpSendReq')?.addEventListener('click',()=>sendFriendRequest(u.id,name));
@@ -1029,6 +1034,23 @@ document.querySelectorAll('#accentPicker .accent-swatch').forEach(btn=>{
     btn.classList.add('selected');
   });
 });
+async function loadOpHistory(uid,targetId){
+  const el=document.getElementById(targetId);
+  if(!el)return;
+  try{
+    const snap=await db.collection('missionSubmissions').where('uid','==',uid).where('status','==','approved').get();
+    if(snap.empty){el.innerHTML='<p style="font-family:var(--font-mono);font-size:.7rem;color:var(--color-text-muted);padding:4px 0;">No completed operations yet.</p>';return;}
+    const items=snap.docs.map(d=>({...d.data(),id:d.id}));
+    items.sort((a,b)=>(b.reviewedAt?.toMillis?.()??b.submittedAt?.toMillis?.()??0)-(a.reviewedAt?.toMillis?.()??a.submittedAt?.toMillis?.()??0));
+    el.innerHTML=`<div class="op-history-list">${items.slice(0,20).map(s=>{
+      const t=s.reviewedAt||s.submittedAt;
+      const when=t?fmtDate(t):'—';
+      return `<div class="op-history-item"><div class="op-dot"></div><div class="op-body"><strong>${esc(s.missionTitle||'Mission')}</strong><span class="op-meta">+${s.points||0} pts • ${when}</span></div></div>`;
+    }).join('')}</div>`;
+  }catch(err){
+    el.innerHTML=`<p style="font-family:var(--font-mono);font-size:.7rem;color:#f55;">${esc(err.message)}</p>`;
+  }
+}
 function nameHtml(u,fallback='Unknown'){
   const name=esc(u?.displayName||fallback);
   const c=u?.accentColor;
