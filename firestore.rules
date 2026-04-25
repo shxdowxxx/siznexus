@@ -181,8 +181,14 @@ service cloud.firestore {
         && validString('title', 120)
         && validString('body', 2000);
 
-      allow update, delete: if isAuthenticated()
+      allow delete: if isAuthenticated()
         && (isOwner() || isDevOrAbove());
+      allow update: if isAuthenticated()
+        && (
+          (isOwner() || isDevOrAbove())
+          // Allow any auth member to toggle reactions only — no other field changes.
+          || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])
+        );
     }
 
     // ──────────────────────────────────────────────
@@ -196,7 +202,10 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll(['type', 'message'])
         && validString('message', 500);
 
-      allow update, delete: if isOwner();
+      allow delete: if isOwner();
+      allow update: if isOwner()
+        || (isAuthenticated()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']));
     }
 
     // ──────────────────────────────────────────────
@@ -286,8 +295,13 @@ service cloud.firestore {
         && validString('title', 200)
         && validString('body', 5000);
 
-      allow update, delete: if isAuthenticated()
+      allow delete: if isAuthenticated()
         && (isOwner() || isModOrAbove());
+      allow update: if isAuthenticated()
+        && (
+          (isOwner() || isModOrAbove())
+          || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])
+        );
     }
 
     // ──────────────────────────────────────────────

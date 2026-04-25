@@ -1678,3 +1678,14 @@ footer .contact a:hover{text-decoration:underline;}
 .cal-detail-head span{font-size:.65rem;color:var(--color-text-muted);letter-spacing:.12em;}
 .cal-empty{font-family:var(--font-mono);font-size:.7rem;color:var(--color-text-muted);text-align:center;padding:14px 0;}
 .event-card.past{opacity:.55;}
+
+/* ── Reactions Bar ── */
+.reactions-bar{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;padding-top:6px;border-top:1px dashed rgba(192,192,192,.06);}
+.react-btn{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:rgba(192,192,192,.04);border:1px solid rgba(192,192,192,.1);color:var(--color-text);font-family:var(--font-mono);font-size:.7rem;border-radius:999px;cursor:pointer;transition:all .15s ease;}
+.react-btn:hover{background:rgba(192,192,192,.1);border-color:rgba(192,192,192,.3);transform:scale(1.05);}
+.react-btn.empty{opacity:.4;}
+.react-btn.empty:hover{opacity:1;}
+.react-btn.mine{background:rgba(155,92,255,.15);border-color:rgba(155,92,255,.5);box-shadow:0 0 8px rgba(155,92,255,.2);}
+.react-btn .react-emoji{font-size:.8rem;line-height:1;}
+.react-btn .react-count{font-size:.62rem;color:var(--color-text-muted);}
+.react-btn.mine .react-count{color:#fff;font-weight:700;}

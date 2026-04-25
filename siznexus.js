@@ -632,7 +632,7 @@ async function loadAnnNotifTab(){
       const a=d.data();
       const item=document.createElement('div');item.className='ann-item';
       item.style.position='relative';
-      item.innerHTML=`<button class="notif-dismiss" title="Dismiss" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--color-text-muted);font-size:.8rem;cursor:pointer;padding:2px 4px;line-height:1;transition:var(--transition);" onmouseover="this.style.color='#f55'" onmouseout="this.style.color='var(--color-text-muted)'">&#x2715;</button><div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${esc(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>`;
+      item.innerHTML=`<button class="notif-dismiss" title="Dismiss" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--color-text-muted);font-size:.8rem;cursor:pointer;padding:2px 4px;line-height:1;transition:var(--transition);" onmouseover="this.style.color='#f55'" onmouseout="this.style.color='var(--color-text-muted)'">&#x2715;</button><div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${esc(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>${reactionsBarHtml(a.reactions,'announcements',d.id)}`;
       item.querySelector('.notif-dismiss').addEventListener('click',async()=>{
         // Update dismissed
         await db.collection('users').doc(currentUser.uid).update({
@@ -2216,7 +2216,8 @@ async function loadCorpLog(filter='all'){
       const icon=typeIcon[log.type]||'fa-circle';
       item.innerHTML=`<div class="log-item-main"><i class="fas ${icon}" style="margin-right:6px;font-size:.65rem;opacity:.6;"></i><strong>${esc(log.displayName||'Unknown')}</strong> ${esc(log.message)}</div>
         <div class="log-item-meta"><span class="${rankClass(log.rank)}">${esc(log.rank||'Member')}</span> &middot; ${time}</div>
-        ${isMViewer&&log.extra&&Object.keys(log.extra).length?`<div class="log-item-detail"><i class="fas fa-info-circle" style="margin-right:4px;opacity:.5;font-size:.6rem;"></i>${esc(JSON.stringify(log.extra))}</div>`:''}`;
+        ${isMViewer&&log.extra&&Object.keys(log.extra).length?`<div class="log-item-detail"><i class="fas fa-info-circle" style="margin-right:4px;opacity:.5;font-size:.6rem;"></i>${esc(JSON.stringify(log.extra))}</div>`:''}
+        ${reactionsBarHtml(log.reactions,'corpLog',d.id)}`;
       feed.appendChild(item);
     });
   },err=>{feed.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;});
@@ -2585,7 +2586,8 @@ async function loadIntelBoard(){
       const item=document.createElement('div');item.className='intel-post';item.dataset.cardId=d.id;
       item.innerHTML=`<div class="intel-post-title">${p.tag?`<span class="intel-tag">${esc(p.tag)}</span>`:''}${esc(p.title||'Intel')}</div>
         <div class="intel-post-body">${esc(p.body||'')}</div>
-        <div class="intel-post-meta"><span>${esc(p.authorName||'Admin')} &middot; ${esc(p.authorRank||'')}</span><span>${p.createdAt?fmtDate(p.createdAt):''}</span></div>`;
+        <div class="intel-post-meta"><span>${esc(p.authorName||'Admin')} &middot; ${esc(p.authorRank||'')}</span><span>${p.createdAt?fmtDate(p.createdAt):''}</span></div>
+        ${reactionsBarHtml(p.reactions,'intelPosts',d.id)}`;
       list.appendChild(item);
     });
   }catch(err){list.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;}
@@ -4114,3 +4116,39 @@ function updateDirStats(users){
     render(filtered);
   },()=>{});
 })();
+
+/* ── REACTIONS ── */
+const REACTION_EMOJI=['👍','❤️','🔥','👀','💀','💯'];
+function reactionsBarHtml(reactions={},collection,docId){
+  const myUid=currentUser?.uid;
+  let html='<div class="reactions-bar" data-coll="'+esc(collection)+'" data-id="'+esc(docId)+'">';
+  REACTION_EMOJI.forEach(emoji=>{
+    const list=reactions[emoji]||[];
+    const mine=myUid&&list.includes(myUid);
+    const cnt=list.length;
+    html+=`<button type="button" class="react-btn${mine?' mine':''}${cnt?'':' empty'}" data-emoji="${emoji}"><span class="react-emoji">${emoji}</span>${cnt?`<span class="react-count">${cnt}</span>`:''}</button>`;
+  });
+  html+='</div>';
+  return html;
+}
+async function toggleReaction(collection,docId,emoji){
+  if(!currentUser||currentUser.isAnonymous){promptGuestRegister('Create a free account to react.');return;}
+  try{
+    const ref=db.collection(collection).doc(docId);
+    const snap=await ref.get();
+    if(!snap.exists)return;
+    const cur=(snap.data().reactions||{})[emoji]||[];
+    const has=cur.includes(currentUser.uid);
+    await ref.update({
+      [`reactions.${emoji}`]:has?firebase.firestore.FieldValue.arrayRemove(currentUser.uid):firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+    });
+  }catch(err){showToast('React failed: '+err.message);}
+}
+// Single document-level click delegate
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.react-btn');
+  if(!btn)return;
+  const bar=btn.closest('.reactions-bar');
+  if(!bar)return;
+  toggleReaction(bar.dataset.coll,bar.dataset.id,btn.dataset.emoji);
+});
