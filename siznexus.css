@@ -1622,3 +1622,15 @@ footer .contact a:hover{text-decoration:underline;}
 .briefing-feedback{margin-top:10px;font-family:var(--font-mono);font-size:.7rem;min-height:1em;}
 .briefing-feedback.ok{color:#3FE08C;}
 .briefing-feedback.err{color:#FF6E6E;}
+
+/* ── XP / Level Bars ── */
+.level-bar-wrap{margin-top:8px;}
+.level-bar-head{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:.6rem;letter-spacing:.16em;color:var(--color-text-muted);margin-bottom:4px;}
+.level-bar-name{color:#FFD700;text-shadow:0 0 6px rgba(255,215,0,.3);font-weight:700;}
+.level-bar-track{height:5px;background:rgba(0,0,0,.5);border-radius:3px;overflow:hidden;border:1px solid rgba(192,192,192,.08);}
+.level-bar-fill{height:100%;background:linear-gradient(90deg, #9B5CFF, #3FCFFF, #FFD700);box-shadow:0 0 8px rgba(155,92,255,.4);transition:width .4s ease;border-radius:3px;}
+/* Compact level pill (used in featured member, etc.) */
+.level-pill{display:inline-flex;align-items:center;gap:6px;margin-top:6px;padding:3px 8px;background:rgba(0,0,0,.4);border:1px solid rgba(155,92,255,.25);border-radius:999px;}
+.level-pill-num{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.12em;color:#FFD700;font-weight:700;}
+.level-pill-bar{flex:1;min-width:40px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;}
+.level-pill-fill{height:100%;background:linear-gradient(90deg, #9B5CFF, #FFD700);}

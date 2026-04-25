@@ -332,6 +332,7 @@ async function openViewProfile(u){
           <div class="profile-hero-name">${nameHtml(u,name)}</div>
           ${titleHtml(u)}
           <div class="profile-hero-rank"><span class="${rankClass(u.rank)}">${esc(u.rank||'Member')}</span></div>
+          ${levelHtml(u)}
           <div class="profile-hero-status"><span class="status-dot ${u.status||'offline'}"></span><span>${statusLabel}</span></div>
           ${u.activityStatus?`<div class="profile-activity-pill"><i class="fas fa-circle-notch" style="font-size:.55rem;opacity:.5;"></i> ${esc(u.activityStatus)}</div>`:''}
         </div>
@@ -1078,7 +1079,7 @@ function renderProfilePreview(d){
       <div class="profile-hero-top">
         <div class="profile-hero-av">${d.photoURL?`<img src="${esc(d.photoURL)}" alt="">`:`${initials(d.displayName||'?')}`}</div>
         <div class="profile-hero-info">
-          <div class="profile-hero-name">${nameHtml(d)}</div>${titleHtml(d)}
+          <div class="profile-hero-name">${nameHtml(d)}</div>${titleHtml(d)}${levelHtml(d)}
           <div class="profile-hero-rank"><span class="${rankClass(d.rank)}">${esc(d.rank||'Member')}</span></div>
           <div class="profile-hero-status"><span class="status-dot ${d.status||'offline'}"></span><span>${statusLabel}</span></div>
           ${d.activityStatus?`<div class="profile-activity-pill"><i class="fas fa-circle-notch" style="font-size:.55rem;opacity:.5;"></i> ${esc(d.activityStatus)}</div>`:''}
@@ -1200,6 +1201,23 @@ async function loadOpHistory(uid,targetId){
   }catch(err){
     el.innerHTML=`<p style="font-family:var(--font-mono);font-size:.7rem;color:#f55;">${esc(err.message)}</p>`;
   }
+}
+/* ── XP / LEVEL SYSTEM ── */
+const LEVEL_XP=100; // points per level
+function computeLevel(points){
+  const p=Math.max(0,points||0);
+  const level=Math.floor(p/LEVEL_XP)+1;
+  const intoLevel=p%LEVEL_XP;
+  return {level,intoLevel,toNext:LEVEL_XP-intoLevel,total:LEVEL_XP};
+}
+function levelHtml(u,opts={}){
+  const {level,intoLevel,total}=computeLevel(u?.points||0);
+  const pct=Math.min(100,Math.round((intoLevel/total)*100));
+  const compact=opts.compact;
+  if(compact){
+    return `<div class="level-pill" title="Level ${level} · ${intoLevel}/${total} XP"><span class="level-pill-num">L${level}</span><span class="level-pill-bar"><span class="level-pill-fill" style="width:${pct}%;"></span></span></div>`;
+  }
+  return `<div class="level-bar-wrap"><div class="level-bar-head"><span class="level-bar-name">LEVEL ${level}</span><span class="level-bar-xp">${intoLevel}/${total} XP</span></div><div class="level-bar-track"><div class="level-bar-fill" style="width:${pct}%;"></div></div></div>`;
 }
 function nameHtml(u,fallback='Unknown'){
   const name=esc(u?.displayName||fallback);
@@ -1982,7 +2000,7 @@ function setFeaturedMember(user,position=0){
     card.classList.remove('is-interactive');
     return;
   }
-  nameEl.innerHTML=nameHtml(user,'Unknown Operative')+titleHtml(user);
+  nameEl.innerHTML=nameHtml(user,'Unknown Operative')+titleHtml(user)+levelHtml(user,{compact:true});
   descEl.textContent=user._curatedNote||buildFeaturedDescription(user,position);
   const tags=user._curatedNote?['Editorial Pick',user.rank||'Member']:buildFeaturedTags(user,position);
   badgesEl.innerHTML=tags.length
