@@ -1942,10 +1942,14 @@ async function loadMissions(){
       count:missionsSnap.size,
       note:'Mission cards show live status, point value, and any existing submission state.'
     });
-    missionsSnap.forEach(d=>{
+    const sevenDaysAgo=Date.now()-7*86400000;
+    const sortedMissions=[...missionsSnap.docs].sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));
+    sortedMissions.forEach(d=>{
       const m=d.data(),mid=d.id;
       const mySub=mySubsMap[mid];
+      const isNewThisWeek=(m.createdAt?.toMillis?.()||0)>sevenDaysAgo;
       const card=document.createElement('div');card.className='mission-card';card.dataset.cardId=mid;
+      if(isNewThisWeek)card.classList.add('mission-fresh');
       let statusHtml='<span class="mission-status open">Open</span>';
       let actionHtml='';
       if(mySub){
@@ -1967,6 +1971,7 @@ async function loadMissions(){
         <p style="font-family:var(--font-mono);font-size:.62rem;color:rgba(192,192,192,.35);margin-top:5px;">Use the <strong style="color:rgba(192,192,192,.55);">/key</strong> bot command in Discord to get the KEY for this mission.</p>`;
       }
       card.innerHTML=`
+        ${isNewThisWeek?'<span class="mission-new-ribbon"><i class="fas fa-bolt"></i> NEW THIS WEEK</span>':''}
         <div class="mission-header">
           <div class="mission-icon"><i class="fas fa-crosshairs"></i></div>
           <div class="mission-info">

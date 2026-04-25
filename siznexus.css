@@ -1395,3 +1395,9 @@ footer .contact a:hover{text-decoration:underline;}
 #streak-panel .streak-btn{font-size:.72rem;padding:9px;}
 #streak-panel .streak-btn.streak-done{background:rgba(76,175,80,.08);border-color:rgba(76,175,80,.25);color:#4CAF50;cursor:default;}
 #streak-panel .streak-hint{font-family:var(--font-mono);font-size:.62rem;color:var(--color-text-muted);margin-top:8px;line-height:1.55;opacity:.7;}
+
+/* Weekly mission drop ribbon */
+.mission-card{position:relative;}
+.mission-card.mission-fresh{border-color:rgba(255,215,0,.35);box-shadow:0 0 0 1px rgba(255,215,0,.08), inset 0 0 24px rgba(255,215,0,.04);}
+.mission-new-ribbon{position:absolute;top:-1px;right:-1px;background:linear-gradient(135deg,#FFD700,#FF8C28);color:#0A0E1A;font-family:var(--font-mono);font-size:.55rem;font-weight:700;letter-spacing:.16em;padding:4px 10px;border-radius:0 0 0 6px;box-shadow:0 2px 8px rgba(255,140,40,.35);}
+.mission-new-ribbon i{font-size:.55rem;margin-right:3px;}
