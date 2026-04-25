@@ -1412,3 +1412,10 @@ footer .contact a:hover{text-decoration:underline;}
 .operator-title{font-family:var(--font-mono);font-size:.62rem;color:var(--color-text-muted);letter-spacing:.18em;text-transform:uppercase;margin-top:2px;opacity:.75;}
 .profile-hero-info .operator-title{margin-top:1px;margin-bottom:3px;}
 .friend-info .operator-title{margin-top:0;margin-bottom:4px;font-size:.58rem;}
+
+/* Connection notes (private) */
+.connection-note-row{display:flex;align-items:center;margin-top:5px;}
+.connection-note-input{flex:1;background:transparent;border:none;border-bottom:1px dashed rgba(192,192,192,.18);color:var(--color-text);font-family:var(--font-mono);font-size:.65rem;padding:3px 0;outline:none;transition:border-color .2s ease;}
+.connection-note-input:focus{border-bottom-color:rgba(192,192,192,.55);}
+.connection-note-input::placeholder{color:rgba(192,192,192,.25);}
+.connection-note-input.saved{border-bottom-color:rgba(76,175,80,.6);}

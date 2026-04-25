@@ -980,6 +980,7 @@ async function renderMyFriendsList(friendIds){
     const fd=snap.data();
     if(q&&!(fd.displayName||'').toLowerCase().includes(q))continue;
     const card=document.createElement('div');card.className='connection-card';
+    const myNote=(currentUserData?.connectionNotes||{})[fid]||'';
     card.innerHTML=`
       <div class="connection-av">
         ${fd.photoURL?`<img src="${esc(fd.photoURL)}" alt="" loading="lazy">`:`${initials(fd.displayName)}`}
@@ -989,6 +990,10 @@ async function renderMyFriendsList(friendIds){
         <div class="connection-name">${nameHtml(fd)}</div>
         <div class="connection-rank ${rankClass(fd.rank)}">${esc(fd.rank||'Member')}</div>
         ${fd.activityStatus?`<div class="connection-activity">"${esc(fd.activityStatus)}"</div>`:''}
+        <div class="connection-note-row">
+          <i class="fas fa-sticky-note" style="font-size:.6rem;opacity:.5;margin-right:4px;"></i>
+          <input type="text" class="connection-note-input" data-uid="${fid}" maxlength="120" placeholder="Add a private note (only you see this)..." value="${esc(myNote)}">
+        </div>
       </div>
       <div class="connection-actions">
         <button class="btn-sm" style="padding:5px 9px;font-size:.65rem;" title="Message"><i class="fas fa-comment"></i></button>
@@ -998,6 +1003,22 @@ async function renderMyFriendsList(friendIds){
     card.querySelector('.connection-name').addEventListener('click',()=>{closeModal('myProfileModal');openViewProfile({...fd,id:fid});});
     card.querySelectorAll('.btn-sm:not(.danger)').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();closeModal('myProfileModal');openChat({...fd,id:fid});}));
     card.querySelector('.btn-sm.danger').addEventListener('click',async e=>{e.stopPropagation();const btn=e.currentTarget;await removeFriend(btn.dataset.uid,btn.dataset.name);await openMyProfile();});
+    const noteInput=card.querySelector('.connection-note-input');
+    if(noteInput){
+      noteInput.addEventListener('click',e=>e.stopPropagation());
+      noteInput.addEventListener('blur',async()=>{
+        const newVal=noteInput.value.trim();
+        const uid=noteInput.dataset.uid;
+        const cur=(currentUserData?.connectionNotes||{})[uid]||'';
+        if(newVal===cur)return;
+        try{
+          await db.collection('users').doc(currentUser.uid).update({[`connectionNotes.${uid}`]:newVal||firebase.firestore.FieldValue.delete()});
+          if(!currentUserData.connectionNotes)currentUserData.connectionNotes={};
+          if(newVal)currentUserData.connectionNotes[uid]=newVal;else delete currentUserData.connectionNotes[uid];
+          noteInput.classList.add('saved');setTimeout(()=>noteInput.classList.remove('saved'),900);
+        }catch(err){showToast('Note save failed: '+err.message);}
+      });
+    }
     inner.appendChild(card);
   }
 }
