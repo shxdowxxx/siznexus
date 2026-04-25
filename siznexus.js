@@ -211,7 +211,7 @@ document.getElementById('closeDirectory').addEventListener('click',()=>{closeMod
 document.getElementById('closeProfile').addEventListener('click',()=>closeModal('profileModal'));
 document.getElementById('closeMyProfile').addEventListener('click',()=>closeModal('myProfileModal'));
 document.getElementById('closeNotif').addEventListener('click',()=>closeModal('notifModal'));
-function closeMsgChat(){closeModal('msgModal');if(msgUnsubscribe){msgUnsubscribe();msgUnsubscribe=null;}currentChatUid=null;}
+function closeMsgChat(){closeModal('msgModal');if(msgUnsubscribe){msgUnsubscribe();msgUnsubscribe=null;}if(typingUnsub){typingUnsub();typingUnsub=null;}clearTypingPing();currentChatUid=null;}
 document.getElementById('closeMsgModal').addEventListener('click',closeMsgChat);
 document.getElementById('msgBackBtn').addEventListener('click',closeMsgChat);
 /* ── ACTIVE MEMBERS PANEL ── */
@@ -731,6 +731,33 @@ async function openChat(otherUser){
     console.error('Chat listener error:',err);
     document.getElementById('msgBody').innerHTML=`<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;text-align:center;margin:auto;">Could not load messages (${err.code||err.message}). Make sure Firestore rules are published.</p>`;
   });
+  // Typing indicator listener (other side)
+  if(typingUnsub){typingUnsub();typingUnsub=null;}
+  typingUnsub=db.collection('chats').doc(cid).onSnapshot(d=>{
+    const data=d.data()||{};
+    const t=data.typing?.[otherUser.id]?.toMillis?.()||0;
+    const fresh=Date.now()-t<6000;
+    const indicator=document.getElementById('msgTypingIndicator');
+    if(indicator)indicator.style.display=fresh?'flex':'none';
+  });
+}
+let typingUnsub=null,typingTimeout=null,_lastTypingPing=0;
+function pingTyping(){
+  if(!currentUser||!currentChatUid)return;
+  const now=Date.now();
+  if(now-_lastTypingPing<2000)return; // throttle to once per 2s
+  _lastTypingPing=now;
+  const cid=chatId(currentUser.uid,currentChatUid);
+  db.collection('chats').doc(cid).update({
+    [`typing.${currentUser.uid}`]:firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(()=>{});
+}
+function clearTypingPing(){
+  if(!currentUser||!currentChatUid)return;
+  const cid=chatId(currentUser.uid,currentChatUid);
+  db.collection('chats').doc(cid).update({
+    [`typing.${currentUser.uid}`]:firebase.firestore.FieldValue.delete()
+  }).catch(()=>{});
 }
 function renderMessages(docs){
   const body=document.getElementById('msgBody');
@@ -773,6 +800,7 @@ async function sendMessage(){
   const input=document.getElementById('msgInput');
   const text=input.value.trim();if(!text)return;
   input.value='';
+  clearTypingPing();
   const cid=chatId(currentUser.uid,currentChatUid);
   try{
     // Ensure chat doc exists (participants needed by message create rule)
@@ -806,6 +834,11 @@ async function sendMessage(){
 }
 document.getElementById('msgSendBtn').addEventListener('click',sendMessage);
 document.getElementById('msgInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
+document.getElementById('msgInput').addEventListener('input',()=>{
+  pingTyping();
+  if(typingTimeout)clearTimeout(typingTimeout);
+  typingTimeout=setTimeout(clearTypingPing,4000);
+});
 /* ── MY PROFILE ── */
 async function openMyProfile(){
   if(!currentUser)return;
