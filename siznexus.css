@@ -1559,3 +1559,37 @@ footer .contact a:hover{text-decoration:underline;}
 /* Floating launcher button (bottom-right) */
 .terminal-launcher{position:fixed;bottom:18px;right:18px;width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,rgba(20,24,38,.96),rgba(5,7,15,.96));border:1px solid rgba(192,192,192,.25);color:var(--color-primary);font-size:1.05rem;cursor:pointer;z-index:8500;box-shadow:0 4px 18px rgba(0,0,0,.5), 0 0 0 1px rgba(192,192,192,.05), inset 0 0 12px rgba(192,192,192,.05);transition:all .2s ease;display:flex;align-items:center;justify-content:center;}
 .terminal-launcher:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.6), 0 0 18px rgba(192,192,192,.25);color:#fff;}
+
+/* ── Live News Ticker ── */
+.news-ticker{
+  position:relative;
+  display:flex;align-items:center;gap:0;
+  background:linear-gradient(90deg, rgba(20,24,38,.9), rgba(8,12,22,.85));
+  border-bottom:1px solid rgba(192,192,192,.1);
+  height:30px;overflow:hidden;
+  font-family:var(--font-mono);font-size:.7rem;
+  z-index:80;
+}
+.news-ticker-label{
+  flex-shrink:0;
+  background:linear-gradient(135deg,#FF3B5C,#9B5CFF);
+  color:#fff;font-weight:700;letter-spacing:.18em;
+  padding:0 14px;height:100%;display:flex;align-items:center;gap:6px;
+  font-size:.6rem;
+  box-shadow:0 0 14px rgba(155,92,255,.3);
+}
+.news-ticker-label i{font-size:.65rem;animation:tickerPulse 1.6s ease-in-out infinite;}
+@keyframes tickerPulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+.news-ticker-track{
+  display:inline-flex;align-items:center;gap:0;flex-shrink:0;
+  white-space:nowrap;
+  animation:tickerScroll 90s linear infinite;
+  padding-left:24px;
+  color:var(--color-text);
+}
+.news-ticker:hover .news-ticker-track{animation-play-state:paused;}
+.news-ticker-item{padding:0 14px;flex-shrink:0;}
+.news-ticker-item i{margin-right:5px;color:var(--color-primary);opacity:.8;}
+.news-ticker-item strong{color:var(--color-primary);}
+.news-ticker-sep{color:rgba(192,192,192,.3);font-size:.55rem;flex-shrink:0;}
+@keyframes tickerScroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}

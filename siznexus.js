@@ -3942,3 +3942,24 @@ function updateDirStats(users){
     }
   }
 })();
+
+/* ── LIVE NEWS TICKER ── */
+(function initNewsTicker(){
+  const track=document.getElementById('newsTickerTrack');
+  if(!track)return;
+  const TYPE_ICONS={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn',streak:'fa-fire',motw:'fa-trophy',squad:'fa-users-rectangle'};
+  function render(docs){
+    if(!docs.length){track.innerHTML='<span class="news-ticker-item">Standing by — no recent activity yet.</span>';return;}
+    const items=docs.map(d=>{
+      const log=d.data();
+      const icon=TYPE_ICONS[log.type]||'fa-circle';
+      return `<span class="news-ticker-item"><i class="fas ${icon}"></i> <strong>${esc(log.displayName||'Unknown')}</strong> ${esc(log.message||'')}</span>`;
+    });
+    // Duplicate items so the marquee loop is seamless.
+    track.innerHTML=items.join('<span class="news-ticker-sep">◆</span>')+'<span class="news-ticker-sep">◆</span>'+items.join('<span class="news-ticker-sep">◆</span>');
+  }
+  db.collection('corpLog').orderBy('createdAt','desc').limit(12).onSnapshot(snap=>{
+    const filtered=snap.docs.filter(d=>!['status','profile'].includes(d.data().type));
+    render(filtered);
+  },()=>{});
+})();
