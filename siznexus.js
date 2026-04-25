@@ -1901,7 +1901,7 @@ async function loadCorpLog(filter='all'){
       item.dataset.cardId=d.id;
       const time=log.createdAt?fmtDate(log.createdAt)+' '+fmtTime(log.createdAt):'';
       // Icon per type
-      const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn'};
+      const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn',streak:'fa-fire',motw:'fa-trophy'};
       const icon=typeIcon[log.type]||'fa-circle';
       item.innerHTML=`<div class="log-item-main"><i class="fas ${icon}" style="margin-right:6px;font-size:.65rem;opacity:.6;"></i><strong>${esc(log.displayName||'Unknown')}</strong> ${esc(log.message)}</div>
         <div class="log-item-meta"><span class="${rankClass(log.rank)}">${esc(log.rank||'Member')}</span> &middot; ${time}</div>
@@ -2581,7 +2581,7 @@ async function loadHomeLogPreview(){
     return true;
   });
   if(!visibleDocs.length)return '<div class="hub-empty">No activity yet.</div>';
-  const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn'};
+  const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn',streak:'fa-fire',motw:'fa-trophy'};
   return visibleDocs.map(d=>{
     const log=d.data();
     const time=log.createdAt?`${fmtDate(log.createdAt)} ${fmtTime(log.createdAt)}`:'Recent';
@@ -3177,6 +3177,9 @@ async function loadAdminSpotlight(){
     const filtered=q?_spotlightAllUsers.filter(u=>(u.displayName||'').toLowerCase().includes(q)||(u.id||'').toLowerCase().includes(q)):_spotlightAllUsers;
     renderSpotlightUserList(filtered);
   };
+  // MOTW auto-pin
+  await updateMotwStatus();
+  document.getElementById('motwAutoBtn').onclick=runMotwAutoPin;
   // Save
   saveBtn.onclick=async()=>{
     if(!_spotlightSelectedUid)return;
@@ -3211,6 +3214,67 @@ async function loadAdminSpotlight(){
       showToast('Failed: '+err.message);
     }
   };
+}
+function isoWeekKey(d=new Date()){
+  // ISO week per RFC: YYYY-Www
+  const t=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()));
+  const day=t.getUTCDay()||7;
+  t.setUTCDate(t.getUTCDate()+4-day);
+  const yearStart=new Date(Date.UTC(t.getUTCFullYear(),0,1));
+  const week=Math.ceil(((t-yearStart)/86400000+1)/7);
+  return `${t.getUTCFullYear()}-W${String(week).padStart(2,'0')}`;
+}
+async function updateMotwStatus(){
+  const status=document.getElementById('motwStatus');
+  const btn=document.getElementById('motwAutoBtn');
+  if(!status||!btn)return;
+  const week=isoWeekKey();
+  try{
+    const cur=await db.collection('_configKEY').doc('featured').get();
+    const data=cur.exists?cur.data():null;
+    if(data?.motwWeek===week){
+      status.innerHTML=`<i class="fas fa-check-circle" style="color:#4CAF50;"></i> Already posted for week <strong>${esc(week)}</strong>. Member: <strong>${esc(data.setByName||data.uid||'')}</strong>.`;
+      btn.disabled=true;btn.style.opacity='.5';
+      btn.innerHTML='<i class="fas fa-check"></i> Posted This Week';
+    }else{
+      status.innerHTML=`Week <strong>${esc(week)}</strong> has not been posted yet. Auto-pin will select the top operative by points and announce them.`;
+      btn.disabled=false;btn.style.opacity='1';
+      btn.innerHTML='<i class="fas fa-magic"></i> Auto-Pin Top Operative as MOTW';
+    }
+  }catch(err){
+    status.innerHTML=`<span style="color:#f55;">Failed to check status: ${esc(err.message)}</span>`;
+  }
+}
+async function runMotwAutoPin(){
+  if(!confirm('Pick the top operative by points and pin them as Member of the Week?'))return;
+  const btn=document.getElementById('motwAutoBtn');
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Working...';
+  try{
+    const snap=await db.collection('users').get();
+    const users=[];
+    snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous&&!u.isBanned)users.push(u);});
+    if(!users.length)throw new Error('No eligible operatives.');
+    users.sort((a,b)=>(b.points||0)-(a.points||0));
+    const top=users[0];
+    const week=isoWeekKey();
+    const note=`Member of the Week ${week} — top operative with ${top.points||0} points.`;
+    await db.collection('_configKEY').doc('featured').set({
+      uid:top.id,
+      note,
+      motwWeek:week,
+      setBy:currentUser.uid,
+      setByName:top.displayName||'',
+      setAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await writeCorpLog('motw',`pinned ${top.displayName||'top operative'} as Member of the Week (${week})`,{uid:top.id,points:top.points||0,week});
+    showToast(`MOTW posted: ${top.displayName||'Unknown'}`);
+    loadAdminSpotlight();
+    loadFeaturedMembers();
+  }catch(err){
+    showToast('MOTW failed: '+err.message);
+    btn.disabled=false;
+    btn.innerHTML='<i class="fas fa-magic"></i> Auto-Pin Top Operative as MOTW';
+  }
 }
 function renderSpotlightUserList(users){
   const listEl=document.getElementById('spotlightUserList');
