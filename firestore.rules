@@ -342,8 +342,9 @@ service cloud.firestore {
     //  App Configuration
     // ──────────────────────────────────────────────
     match /_configKEY/{docId} {
-      allow read: if docId == 'app' || docId == 'devKeyHash';
-      allow write: if isOwner();
+      allow read: if docId == 'app' || docId == 'devKeyHash' || docId == 'featured';
+      allow write: if isOwner()
+                   || (docId == 'featured' && isCoAdminOrAbove());
     }
 
     // ──────────────────────────────────────────────

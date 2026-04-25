@@ -334,6 +334,7 @@
       <button class="admin-tab" data-tab="missions"><i class="fas fa-key"></i> Keys</button>
       <button class="admin-tab" data-tab="reports"><i class="fas fa-flag" style="color:#ff9800;"></i> Reports</button>
       <button class="admin-tab" data-tab="bans"><i class="fas fa-gavel" style="color:#f44336;"></i> Bans</button>
+      <button class="admin-tab" data-tab="spotlight"><i class="fas fa-star" style="color:#FFD700;"></i> Spotlight</button>
     </div>
     <!-- ROLES TAB -->
     <div class="admin-panel-section active" id="adminTabRoles">
@@ -380,6 +381,20 @@
       </div>
       <p class="admin-section-title" style="margin-top:8px;border-top:var(--border);padding-top:10px;">Currently Banned</p>
       <div id="bannedUserList" style="max-height:160px;overflow-y:auto;"></div>
+    </div>
+    <!-- SPOTLIGHT TAB -->
+    <div class="admin-panel-section" id="adminTabSpotlight">
+      <p class="admin-section-title"><i class="fas fa-star" style="margin-right:5px;color:#FFD700;"></i>Featured Member — Editorial Override</p>
+      <p style="font-family:var(--font-mono);font-size:.7rem;color:var(--color-text-muted);line-height:1.6;margin-bottom:10px;">Pin a single member to the homepage spotlight. Clearing the pin returns the spotlight to automatic rotation based on activity score.</p>
+      <div id="spotlightCurrent" style="margin-bottom:12px;padding:10px;border:var(--border);background:rgba(192,192,192,.03);font-family:var(--font-mono);font-size:.75rem;">Loading current spotlight...</div>
+      <input type="text" class="admin-search" id="spotlightSearch" placeholder="Search member to feature...">
+      <div id="spotlightUserList" style="max-height:240px;overflow-y:auto;margin-bottom:10px;"></div>
+      <textarea id="spotlightNote" placeholder="Optional editorial note (shown beneath member name)..." maxlength="200" style="width:100%;min-height:60px;padding:8px;background:rgba(0,0,0,.4);border:var(--border);color:var(--color-text);font-family:var(--font-mono);font-size:.75rem;resize:vertical;margin-bottom:8px;"></textarea>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-primary" id="spotlightSaveBtn" style="flex:1;justify-content:center;font-size:.75rem;padding:8px;" disabled><i class="fas fa-star"></i> Pin Selected Member</button>
+        <button class="btn-secondary" id="spotlightClearBtn" style="font-size:.75rem;padding:8px;"><i class="fas fa-times"></i> Clear Pin</button>
+      </div>
+      <div class="success-msg" id="spotlightSavedMsg">Spotlight updated!</div>
     </div>
   </div>
 </div>

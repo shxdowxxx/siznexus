@@ -1265,6 +1265,7 @@ async function openAdminPanel(){
     missions: !isModerator,      // Dev+
     reports: isCoAdminPlus,      // Co-Admin+
     bans: isCoAdminPlus,         // Co-Admin+
+    spotlight: isCoAdminPlus,    // Co-Admin+
   };
   // Show/hide tabs
   document.querySelectorAll('.admin-tab').forEach(btn=>{
@@ -1368,6 +1369,7 @@ async function loadAdminTab(tab){
   else if(tab==='badges')await loadAdminBadges();
   else if(tab==='reports')await loadAdminReports();
   else if(tab==='bans')await loadAdminBans();
+  else if(tab==='spotlight')await loadAdminSpotlight();
 }
 async function loadAdminBadges(){
   const list=document.getElementById('adminBadgesList');
@@ -1660,9 +1662,7 @@ customStatusInput.addEventListener('keydown',async e=>{
     await db.collection('users').doc(currentUser.uid).update({activityStatus:txt}).catch(()=>{});
     if(currentUserData)currentUserData.activityStatus=txt;
     document.getElementById('statusPicker').classList.remove('open');
-    // Update display
-    const actEl=document.getElementById('profileActivityStatus');
-    if(actEl)actEl.textContent=txt?`"${txt}"`:'';
+    refreshDashboardSurface();
     showToast(txt?`Activity set: "${txt}"`:'Activity status cleared.');
   }
 });
@@ -1735,8 +1735,8 @@ function setFeaturedMember(user,position=0){
     return;
   }
   nameEl.textContent=user.displayName||'Unknown Operative';
-  descEl.textContent=buildFeaturedDescription(user,position);
-  const tags=buildFeaturedTags(user,position);
+  descEl.textContent=user._curatedNote||buildFeaturedDescription(user,position);
+  const tags=user._curatedNote?['Editorial Pick',user.rank||'Member']:buildFeaturedTags(user,position);
   badgesEl.innerHTML=tags.length
     ? tags.map(tag=>`<span class="achievement-badge">${esc(tag)}</span>`).join('')
     : '<span class="achievement-badge">Member Network</span>';
@@ -1764,6 +1764,23 @@ async function loadFeaturedMembers(){
   const card=document.querySelector('#featured-member .featured-card');
   if(!card)return;
   try{
+    // 1) Curated override — if an admin has pinned a featured member, use that exclusively.
+    const curatedDoc=await db.collection('_configKEY').doc('featured').get().catch(()=>null);
+    if(curatedDoc&&curatedDoc.exists){
+      const cur=curatedDoc.data()||{};
+      if(cur.uid){
+        const userDoc=await db.collection('users').doc(cur.uid).get().catch(()=>null);
+        if(userDoc&&userDoc.exists){
+          const user={...userDoc.data(),id:userDoc.id,_curatedNote:cur.note||''};
+          featuredMemberPool=[user];
+          featuredMemberIndex=0;
+          if(featuredRotationTimer){clearInterval(featuredRotationTimer);featuredRotationTimer=null;}
+          setFeaturedMember(user,0);
+          return;
+        }
+      }
+    }
+    // 2) Heuristic fallback — score-based rotation.
     const snap=await db.collection('users').get();
     const users=[];
     snap.forEach(d=>{
@@ -1881,6 +1898,7 @@ async function loadCorpLog(filter='all'){
     visibleDocs.forEach(d=>{
       const log=d.data();
       const item=document.createElement('div');item.className='log-item';
+      item.dataset.cardId=d.id;
       const time=log.createdAt?fmtDate(log.createdAt)+' '+fmtTime(log.createdAt):'';
       // Icon per type
       const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn'};
@@ -1927,7 +1945,7 @@ async function loadMissions(){
     missionsSnap.forEach(d=>{
       const m=d.data(),mid=d.id;
       const mySub=mySubsMap[mid];
-      const card=document.createElement('div');card.className='mission-card';
+      const card=document.createElement('div');card.className='mission-card';card.dataset.cardId=mid;
       let statusHtml='<span class="mission-status open">Open</span>';
       let actionHtml='';
       if(mySub){
@@ -2015,6 +2033,7 @@ async function loadLeaderboard(){
       const rankIcon=rankNum===1?'🥇':rankNum===2?'🥈':rankNum===3?'🥉':rankNum;
       const isMe=u.id===currentUser.uid;
       const row=document.createElement('div');row.className='lb-row'+(isMe?' ':"");
+      row.dataset.cardId=u.id;
       if(isMe)row.style.borderColor='rgba(192,192,192,.3)';
       row.innerHTML=`<span class="lb-rank ${rankCls}">${rankIcon}</span>
         <div class="lb-av">${avHtml(u.photoURL,u.displayName)}</div>
@@ -2056,7 +2075,7 @@ async function loadCalendar(){
       const dateStr=evDate?evDate.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'TBD';
       const isPast=evDate&&evDate<new Date();
       const myRsvp=(ev.rsvpYes||[]).includes(currentUser.uid)?'yes':(ev.rsvpNo||[]).includes(currentUser.uid)?'no':null;
-      const card=document.createElement('div');card.className='event-card';
+      const card=document.createElement('div');card.className='event-card';card.dataset.cardId=eid;
       if(isPast)card.style.opacity='.55';
       card.innerHTML=`<div class="event-title">${esc(ev.title||'Event')}</div>
         <div class="event-desc">${esc(ev.description||'')}</div>
@@ -2137,7 +2156,7 @@ async function loadIntelBoard(){
     });
     posts.forEach(d=>{
       const p=d.data();
-      const item=document.createElement('div');item.className='intel-post';
+      const item=document.createElement('div');item.className='intel-post';item.dataset.cardId=d.id;
       item.innerHTML=`<div class="intel-post-title">${p.tag?`<span class="intel-tag">${esc(p.tag)}</span>`:''}${esc(p.title||'Intel')}</div>
         <div class="intel-post-body">${esc(p.body||'')}</div>
         <div class="intel-post-meta"><span>${esc(p.authorName||'Admin')} &middot; ${esc(p.authorRank||'')}</span><span>${p.createdAt?fmtDate(p.createdAt):''}</span></div>`;
@@ -2396,7 +2415,7 @@ async function loadHubQuickStats(){
     });
   }
 }
-async function openEngagementHub(tab='log'){
+async function openEngagementHub(tab='log',targetId=''){
   if(!currentUser||currentUser.isAnonymous){
     promptGuestRegister('Create a free account to access the Corp Hub.');
     return;
@@ -2408,6 +2427,7 @@ async function openEngagementHub(tab='log'){
   document.querySelectorAll('.hub-tab').forEach(b=>{b.classList.toggle('active',b.dataset.hub===tab);});
   document.querySelectorAll('.hub-section').forEach(s=>{s.classList.toggle('active',s.id==='hub'+tab.charAt(0).toUpperCase()+tab.slice(1));});
   await loadHubTab(tab);
+  if(targetId)highlightHubCard(targetId);
   // Tab switching
   document.querySelectorAll('.hub-tab').forEach(btn=>{
     btn.onclick=async()=>{
@@ -2420,6 +2440,21 @@ async function openEngagementHub(tab='log'){
       await loadHubTab(btn.dataset.hub);
     };
   });
+}
+function highlightHubCard(targetId){
+  // Allow listeners/onSnapshot a moment to render before we look for the node.
+  let attempts=0;
+  const tryFind=()=>{
+    const node=document.querySelector(`#engagementModal [data-card-id="${CSS.escape(targetId)}"]`);
+    if(node){
+      node.scrollIntoView({behavior:'smooth',block:'center'});
+      node.classList.add('deep-link-flash');
+      setTimeout(()=>node.classList.remove('deep-link-flash'),2400);
+      return;
+    }
+    if(++attempts<8)setTimeout(tryFind,150);
+  };
+  tryFind();
 }
 async function loadHubTab(tab){
   if(tab==='log')loadCorpLog(document.querySelector('.log-filter-btn.active')?.dataset.filter||'all');
@@ -2480,8 +2515,9 @@ function truncateText(text,maxLen=120){
   return clean.slice(0,maxLen-1)+'…';
 }
 
-function buildPreviewRow({icon,title,text,meta,badge=''}){
-  return `<button type="button" class="preview-row preview-row-button">
+function buildPreviewRow({icon,title,text,meta,badge='',targetId=''}){
+  const targetAttr=targetId?` data-target-id="${esc(targetId)}"`:'';
+  return `<button type="button" class="preview-row preview-row-button"${targetAttr}>
     <div class="preview-row-icon"><i class="fas ${icon}"></i></div>
     <div class="preview-row-body">
       <div class="preview-row-title">${title}${badge?`<span class="preview-state">${badge}</span>`:''}</div>
@@ -2554,7 +2590,8 @@ async function loadHomeLogPreview(){
       title:esc(log.displayName||'Unknown'),
       text:esc(log.message||'No details available.'),
       meta:`${esc(log.rank||'Member')} • ${time}`,
-      badge:esc(log.type||'update')
+      badge:esc(log.type||'update'),
+      targetId:d.id
     });
   }).join('');
 }
@@ -2580,7 +2617,8 @@ async function loadHomeMissionPreview(){
       title:esc(m.title||'Mission'),
       text:esc(truncateText(m.description||'Mission briefing unavailable.',110)),
       meta:`${m.points||50} pts`,
-      badge
+      badge,
+      targetId:d.id
     });
   }).join('');
 }
@@ -2597,7 +2635,8 @@ async function loadHomeLeaderboardPreview(){
     title:`#${index+1} ${esc(u.displayName||'Unknown')}`,
     text:`Current rank: ${esc(u.rank||'Member')}${u.id===currentUser.uid?' • You are on the board.':''}`,
     meta:`${u.points||0} pts`,
-    badge:u.id===currentUser.uid?'You':'Top'
+    badge:u.id===currentUser.uid?'You':'Top',
+    targetId:u.id
   })).join('');
 }
 
@@ -2612,7 +2651,8 @@ async function loadHomeIntelPreview(){
       title:esc(post.title||'Intel'),
       text:esc(truncateText(post.body||'No details available.',120)),
       meta:`${esc(post.authorName||'Admin')} • ${post.createdAt?fmtDate(post.createdAt):'Recent'}`,
-      badge:esc(post.tag||'Intel')
+      badge:esc(post.tag||'Intel'),
+      targetId:d.id
     });
   }).join('');
 }
@@ -2716,12 +2756,13 @@ document.querySelectorAll('.command-tab').forEach(btn=>{
   btn.addEventListener('click',()=>loadHomePreview(btn.dataset.previewTab));
 });
 document.getElementById('homePreviewList').addEventListener('click',e=>{
-  if(!e.target.closest('.preview-row-button'))return;
+  const btn=e.target.closest('.preview-row-button');
+  if(!btn)return;
   if(isGuestViewer()){
     promptGuestRegister('Create a free account to access the Corp Hub and operational boards.');
     return;
   }
-  openEngagementHub(homePreviewTab);
+  openEngagementHub(homePreviewTab,btn.dataset.targetId||'');
 });
 document.getElementById('homePreviewOpenBtn').addEventListener('click',()=>{
   if(isGuestViewer()){
@@ -3008,6 +3049,108 @@ async function loadAdminBans(){
       bannedList.appendChild(row);
     });
   }catch(err){bannedList.innerHTML=`<p style="font-family:var(--font-mono);font-size:.72rem;color:#f55;">${err.message}</p>`;}
+}
+/* ── SPOTLIGHT (Featured Member) ── */
+let _spotlightSelectedUid=null;
+let _spotlightAllUsers=[];
+async function loadAdminSpotlight(){
+  const currentEl=document.getElementById('spotlightCurrent');
+  const listEl=document.getElementById('spotlightUserList');
+  const searchEl=document.getElementById('spotlightSearch');
+  const noteEl=document.getElementById('spotlightNote');
+  const saveBtn=document.getElementById('spotlightSaveBtn');
+  const clearBtn=document.getElementById('spotlightClearBtn');
+  const savedMsg=document.getElementById('spotlightSavedMsg');
+  _spotlightSelectedUid=null;
+  saveBtn.disabled=true;
+  // Load current pinned spotlight
+  try{
+    const cur=await db.collection('_configKEY').doc('featured').get();
+    if(cur.exists&&cur.data()?.uid){
+      const d=cur.data();
+      const u=await db.collection('users').doc(d.uid).get().catch(()=>null);
+      const name=u?.exists?(u.data().displayName||'Unknown'):'Unknown member';
+      const setBy=d.setByName?` · set by ${esc(d.setByName)}`:'';
+      currentEl.innerHTML=`<strong style="color:var(--color-primary);">Currently Pinned:</strong> ${esc(name)}${d.note?`<br><span style="color:var(--color-text-muted);">"${esc(d.note)}"</span>`:''}<br><span style="font-size:.65rem;color:var(--color-text-muted);">${esc(d.uid)}${setBy}</span>`;
+      noteEl.value=d.note||'';
+    }else{
+      currentEl.innerHTML='<span style="color:var(--color-text-muted);">No member pinned. Spotlight is on automatic rotation.</span>';
+      noteEl.value='';
+    }
+  }catch(err){
+    currentEl.innerHTML=`<span style="color:#f55;">Failed to load current spotlight: ${esc(err.message)}</span>`;
+  }
+  // Load member list
+  listEl.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:16px 0;"></div>';
+  try{
+    const snap=await db.collection('users').get();
+    _spotlightAllUsers=[];
+    snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous)_spotlightAllUsers.push(u);});
+    _spotlightAllUsers.sort((a,b)=>(a.displayName||'').localeCompare(b.displayName||''));
+    renderSpotlightUserList(_spotlightAllUsers);
+  }catch(err){
+    listEl.innerHTML=`<p style="font-family:var(--font-mono);font-size:.72rem;color:#f55;">${esc(err.message)}</p>`;
+  }
+  // Search filter
+  searchEl.oninput=()=>{
+    const q=searchEl.value.trim().toLowerCase();
+    const filtered=q?_spotlightAllUsers.filter(u=>(u.displayName||'').toLowerCase().includes(q)||(u.id||'').toLowerCase().includes(q)):_spotlightAllUsers;
+    renderSpotlightUserList(filtered);
+  };
+  // Save
+  saveBtn.onclick=async()=>{
+    if(!_spotlightSelectedUid)return;
+    saveBtn.disabled=true;
+    try{
+      await db.collection('_configKEY').doc('featured').set({
+        uid:_spotlightSelectedUid,
+        note:noteEl.value.trim(),
+        setBy:currentUser.uid,
+        setByName:currentUserData?.displayName||'',
+        setAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
+      savedMsg.textContent='Spotlight pinned!';savedMsg.style.display='block';
+      setTimeout(()=>savedMsg.style.display='none',2500);
+      loadAdminSpotlight(); // refresh
+      loadFeaturedMembers(); // refresh homepage
+    }catch(err){
+      showToast('Failed: '+err.message);
+      saveBtn.disabled=false;
+    }
+  };
+  // Clear
+  clearBtn.onclick=async()=>{
+    if(!confirm('Clear the pinned spotlight and return to automatic rotation?'))return;
+    try{
+      await db.collection('_configKEY').doc('featured').delete();
+      savedMsg.textContent='Pin cleared. Returning to auto-rotation.';savedMsg.style.display='block';
+      setTimeout(()=>savedMsg.style.display='none',2500);
+      loadAdminSpotlight();
+      loadFeaturedMembers();
+    }catch(err){
+      showToast('Failed: '+err.message);
+    }
+  };
+}
+function renderSpotlightUserList(users){
+  const listEl=document.getElementById('spotlightUserList');
+  const saveBtn=document.getElementById('spotlightSaveBtn');
+  if(!users.length){listEl.innerHTML='<p style="font-family:var(--font-mono);font-size:.72rem;color:var(--color-text-muted);padding:10px;">No matches.</p>';return;}
+  listEl.innerHTML='';
+  users.slice(0,50).forEach(u=>{
+    const row=document.createElement('div');
+    row.className='admin-user-row';
+    row.style.cursor='pointer';
+    row.innerHTML=`<div class="active-member-av">${avHtml(u.photoURL,u.displayName)}</div><div style="flex:1;"><strong style="font-size:.78rem;">${esc(u.displayName||'Unknown')}</strong><br><span style="font-size:.65rem;color:var(--color-text-muted);font-family:var(--font-mono);">${esc(u.rank||'Member')} · ${u.points||0} pts</span></div>`;
+    row.onclick=()=>{
+      _spotlightSelectedUid=u.id;
+      saveBtn.disabled=false;
+      saveBtn.innerHTML=`<i class="fas fa-star"></i> Pin: ${esc(u.displayName||'Unknown')}`;
+      listEl.querySelectorAll('.admin-user-row').forEach(r=>r.style.background='');
+      row.style.background='rgba(192,192,192,.08)';
+    };
+    listEl.appendChild(row);
+  });
 }
 /* ── SEARCH & DIRECTORY ── */
 let _st=null, _dirFilter='all';
