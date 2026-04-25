@@ -206,6 +206,7 @@
       </div>
       <button class="btn-primary" id="saveProfileBtn" style="width:100%;justify-content:center;margin-top:4px;"><i class="fas fa-save"></i> Save Changes</button>
       <div class="success-msg" id="profileSaveSuccess">Profile updated!</div>
+      <button type="button" class="btn-secondary" id="exportDataBtn" style="width:100%;justify-content:center;margin-top:8px;font-size:.7rem;padding:8px;"><i class="fas fa-download"></i> Export My Data (JSON)</button>
     </div>
     <!-- PREVIEW TAB -->
     <div class="profile-tab-section" id="profileTabPreview">
@@ -430,6 +431,18 @@
   </div>
 </div>
 
+<!-- GLOBAL SEARCH MODAL -->
+<div class="modal" id="searchModal">
+  <div class="modal-container" style="max-width:560px;">
+    <button class="close-btn" id="closeSearch">&#x2715;</button>
+    <h2><i class="fas fa-search" style="margin-right:8px;font-size:.85rem;color:var(--color-primary);"></i>Search Corp</h2>
+    <input type="text" id="globalSearchInput" class="input-field" placeholder="Search members, missions, intel..." style="margin-top:8px;font-size:.85rem;" autocomplete="off">
+    <div id="globalSearchResults" style="margin-top:10px;max-height:50vh;overflow-y:auto;">
+      <p style="font-family:var(--font-mono);font-size:.7rem;color:var(--color-text-muted);padding:14px 0;text-align:center;">Type to search across members, missions, intel posts, and announcements.</p>
+    </div>
+  </div>
+</div>
+
 <!-- MESSAGE NOTIFICATION TOAST -->
 <div class="msg-notif-toast" id="msgNotifToast">
   <div class="msg-notif-av" id="msgNotifAv"></div>
@@ -523,6 +536,9 @@
     <div class="nav-right">
       <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
         <span></span><span></span><span></span>
+      </button>
+      <button class="notif-btn search-btn" id="searchBtn" aria-label="Global search" title="Search corp" style="margin-right:6px;">
+        <i class="fas fa-search"></i>
       </button>
       <button class="notif-btn" id="notifBtn" aria-label="Notifications">
         <i class="fas fa-bell"></i>

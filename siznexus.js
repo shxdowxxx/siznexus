@@ -187,7 +187,7 @@ function showToast(msg){const t=document.getElementById('nexusToast');t.textCont
 /* ── MODAL UTILITIES ── */
 function openModal(id){document.getElementById(id).classList.add('active');document.body.style.overflow='hidden';}
 function closeModal(id){document.getElementById(id).classList.remove('active');if(!document.querySelector('.modal.active'))document.body.style.overflow='';}
-const ALL_MODALS=['loginModal','userDirectory','profileModal','myProfileModal','notifModal','msgModal','resetModal','intelDevModal','adminModal','engagementModal','reportModal'];
+const ALL_MODALS=['loginModal','userDirectory','profileModal','myProfileModal','notifModal','msgModal','resetModal','intelDevModal','adminModal','engagementModal','reportModal','searchModal'];
 ALL_MODALS.forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){
     if(e.target===this){
@@ -648,6 +648,131 @@ async function loadAnnNotifTab(){
     }catch(e2){list.innerHTML=`<div class="notif-empty" style="color:#f55;">Error: ${e2.code||e2.message}</div>`;}
   }
 }
+/* ── GLOBAL SEARCH ── */
+let _searchDebounce=null;
+async function runGlobalSearch(q){
+  const out=document.getElementById('globalSearchResults');
+  if(!q||q.length<2){
+    out.innerHTML='<p style="font-family:var(--font-mono);font-size:.7rem;color:var(--color-text-muted);padding:14px 0;text-align:center;">Type at least 2 characters to search.</p>';
+    return;
+  }
+  out.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  const ql=q.toLowerCase();
+  try{
+    const [usersSnap,missionsSnap,intelSnap,annSnap]=await Promise.all([
+      db.collection('users').get(),
+      db.collection('missions').get().catch(()=>({docs:[]})),
+      db.collection('intelPosts').get().catch(()=>({docs:[]})),
+      db.collection('announcements').get().catch(()=>({docs:[]}))
+    ]);
+    const users=usersSnap.docs.map(d=>({...d.data(),id:d.id})).filter(u=>!u.isAnonymous&&((u.displayName||'').toLowerCase().includes(ql)||(u.bio||'').toLowerCase().includes(ql)||(u.operatorTitle||'').toLowerCase().includes(ql))).slice(0,8);
+    const missions=missionsSnap.docs.map(d=>({...d.data(),id:d.id})).filter(m=>(m.title||'').toLowerCase().includes(ql)||(m.description||'').toLowerCase().includes(ql)).slice(0,6);
+    const intel=intelSnap.docs.map(d=>({...d.data(),id:d.id})).filter(p=>(p.title||'').toLowerCase().includes(ql)||(p.body||'').toLowerCase().includes(ql)).slice(0,6);
+    const anns=annSnap.docs.map(d=>({...d.data(),id:d.id})).filter(a=>(a.title||'').toLowerCase().includes(ql)||(a.body||'').toLowerCase().includes(ql)).slice(0,4);
+    let html='';
+    if(users.length){
+      html+='<div class="search-section"><div class="search-section-label">Members</div>';
+      users.forEach(u=>{
+        html+=`<button type="button" class="search-result" data-type="user" data-id="${esc(u.id)}"><div class="active-member-av">${avHtml(u.photoURL,u.displayName)}</div><div class="search-result-body"><strong>${nameHtml(u)}</strong><span>${esc(u.rank||'Member')} · ${esc((u.bio||'').slice(0,60))}</span></div></button>`;
+      });
+      html+='</div>';
+    }
+    if(missions.length){
+      html+='<div class="search-section"><div class="search-section-label">Missions</div>';
+      missions.forEach(m=>{
+        html+=`<button type="button" class="search-result" data-type="mission" data-id="${esc(m.id)}"><div class="search-result-icon"><i class="fas fa-crosshairs"></i></div><div class="search-result-body"><strong>${esc(m.title||'Mission')}</strong><span>${esc((m.description||'').slice(0,80))}</span></div></button>`;
+      });
+      html+='</div>';
+    }
+    if(intel.length){
+      html+='<div class="search-section"><div class="search-section-label">Intel</div>';
+      intel.forEach(p=>{
+        html+=`<button type="button" class="search-result" data-type="intel" data-id="${esc(p.id)}"><div class="search-result-icon"><i class="fas fa-satellite-dish"></i></div><div class="search-result-body"><strong>${esc(p.title||'Intel')}</strong><span>${esc((p.body||'').slice(0,80))}</span></div></button>`;
+      });
+      html+='</div>';
+    }
+    if(anns.length){
+      html+='<div class="search-section"><div class="search-section-label">Announcements</div>';
+      anns.forEach(a=>{
+        html+=`<div class="search-result" style="cursor:default;"><div class="search-result-icon"><i class="fas fa-bullhorn"></i></div><div class="search-result-body"><strong>${esc(a.title||'')}</strong><span>${esc((a.body||'').slice(0,80))}</span></div></div>`;
+      });
+      html+='</div>';
+    }
+    if(!html)html='<p style="font-family:var(--font-mono);font-size:.7rem;color:var(--color-text-muted);padding:14px 0;text-align:center;">No matches.</p>';
+    out.innerHTML=html;
+    out.querySelectorAll('.search-result[data-type]').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const type=el.dataset.type,id=el.dataset.id;
+        closeModal('searchModal');
+        if(type==='user'){
+          const u=users.find(x=>x.id===id);if(u){if(currentUser&&u.id===currentUser.uid)openMyProfile();else openViewProfile(u);}
+        }else if(type==='mission'){openEngagementHub('missions',id);}
+        else if(type==='intel'){openEngagementHub('intel',id);}
+      });
+    });
+  }catch(err){
+    out.innerHTML=`<p style="font-family:var(--font-mono);font-size:.7rem;color:#f55;padding:14px 0;text-align:center;">Search failed: ${esc(err.message)}</p>`;
+  }
+}
+document.getElementById('exportDataBtn')?.addEventListener('click',async()=>{
+  if(!currentUser)return;
+  const btn=document.getElementById('exportDataBtn');
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Gathering...';
+  try{
+    const [meSnap,subsSnap,sentReqSnap,recvReqSnap]=await Promise.all([
+      db.collection('users').doc(currentUser.uid).get(),
+      db.collection('missionSubmissions').where('uid','==',currentUser.uid).get().catch(()=>({docs:[]})),
+      db.collection('friendRequests').where('from','==',currentUser.uid).get().catch(()=>({docs:[]})),
+      db.collection('friendRequests').where('to','==',currentUser.uid).get().catch(()=>({docs:[]}))
+    ]);
+    const profile=meSnap.exists?meSnap.data():{};
+    const friendIds=profile.friends||[];
+    const friendDocs=await Promise.all(friendIds.map(fid=>db.collection('users').doc(fid).get().catch(()=>null)));
+    const friends=friendDocs.filter(s=>s&&s.exists).map(s=>{const d=s.data();return {uid:s.id,displayName:d.displayName,rank:d.rank};});
+    const payload={
+      exportedAt:new Date().toISOString(),
+      uid:currentUser.uid,
+      profile,
+      missionSubmissions:subsSnap.docs.map(d=>({id:d.id,...d.data()})),
+      friendRequestsSent:sentReqSnap.docs.map(d=>({id:d.id,...d.data()})),
+      friendRequestsReceived:recvReqSnap.docs.map(d=>({id:d.id,...d.data()})),
+      friends
+    };
+    // Convert Firestore timestamps recursively
+    const stringify=(v)=>JSON.stringify(v,(k,val)=>{
+      if(val&&typeof val==='object'&&typeof val.toDate==='function')return val.toDate().toISOString();
+      return val;
+    },2);
+    const blob=new Blob([stringify(payload)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`siznexus-${(profile.displayName||currentUser.uid).replace(/[^a-z0-9_-]/gi,'_')}-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);a.click();a.remove();
+    URL.revokeObjectURL(url);
+    showToast('Profile data exported.');
+  }catch(err){
+    showToast('Export failed: '+err.message);
+  }finally{
+    btn.disabled=false;btn.innerHTML='<i class="fas fa-download"></i> Export My Data (JSON)';
+  }
+});
+document.getElementById('searchBtn').addEventListener('click',()=>{
+  openModal('searchModal');
+  setTimeout(()=>document.getElementById('globalSearchInput')?.focus(),50);
+});
+document.getElementById('closeSearch').addEventListener('click',()=>closeModal('searchModal'));
+document.getElementById('globalSearchInput').addEventListener('input',e=>{
+  const q=e.target.value.trim();
+  if(_searchDebounce)clearTimeout(_searchDebounce);
+  _searchDebounce=setTimeout(()=>runGlobalSearch(q),200);
+});
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='k'){
+    e.preventDefault();
+    document.getElementById('searchBtn').click();
+  }
+});
 document.getElementById('notifBtn').addEventListener('click',e=>{
   e.stopPropagation();
   if(!currentUser){showToast('Log in to view notifications.');return;}
