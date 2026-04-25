@@ -1473,3 +1473,22 @@ footer .contact a:hover{text-decoration:underline;}
 .search-result-body strong{font-family:var(--font-mono);font-size:.78rem;}
 .search-result-body span{font-family:var(--font-mono);font-size:.65rem;color:var(--color-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .search-btn{margin-right:6px;}
+
+/* Squads */
+.squad-mine{padding:10px 12px;background:rgba(192,192,192,.04);border:1px solid rgba(192,192,192,.18);border-radius:3px;font-family:var(--font-mono);font-size:.75rem;color:var(--color-text);}
+.squad-mine-name{color:var(--color-primary);margin-left:6px;}
+.squad-leader-pill{margin-left:8px;font-size:.55rem;letter-spacing:.18em;padding:2px 6px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.4);color:#FFD700;border-radius:2px;}
+.squad-card{padding:14px;border:1px solid rgba(192,192,192,.12);background:rgba(192,192,192,.02);border-radius:3px;margin-bottom:10px;position:relative;}
+.squad-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.squad-info{flex:1;min-width:0;}
+.squad-name{font-family:var(--font-headings);font-size:1rem;color:var(--color-text);letter-spacing:.05em;}
+.squad-tag{font-family:var(--font-mono);font-size:.7rem;color:var(--color-primary);margin-right:4px;}
+.squad-leader{font-family:var(--font-mono);font-size:.62rem;color:var(--color-text-muted);margin-top:3px;}
+.squad-total{text-align:right;display:flex;flex-direction:column;align-items:flex-end;}
+.squad-total strong{font-family:var(--font-mono);font-size:1.2rem;color:#FFD700;text-shadow:0 0 6px rgba(255,215,0,.3);line-height:1;}
+.squad-total span{font-family:var(--font-mono);font-size:.55rem;color:var(--color-text-muted);letter-spacing:.18em;text-transform:uppercase;}
+.squad-members{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.squad-member-av{width:32px;height:32px;border-radius:50%;overflow:hidden;border:1px solid rgba(192,192,192,.25);background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:.55rem;color:var(--color-text-muted);}
+.squad-meta{font-family:var(--font-mono);font-size:.62rem;color:var(--color-text-muted);margin-bottom:8px;}
+.squad-actions{display:flex;gap:6px;}
+.squad-actions .btn-sm{font-size:.62rem;padding:5px 9px;}

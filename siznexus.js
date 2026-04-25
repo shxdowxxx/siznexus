@@ -2798,6 +2798,148 @@ async function loadHubTab(tab){
   else if(tab==='calendar')loadCalendar();
   else if(tab==='intel')loadIntelBoard();
   else if(tab==='polls')loadPolls();
+  else if(tab==='squads')loadSquads();
+}
+/* ── SQUADS ── */
+const SQUAD_MAX_MEMBERS=5;
+async function loadSquads(){
+  const list=document.getElementById('squadsList');
+  const controls=document.getElementById('squadsControls');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  updateHubSectionInfo({label:'Squads',count:'—',note:'Loading squad rosters and combined point totals.'});
+  try{
+    const [squadsSnap,usersSnap]=await Promise.all([
+      db.collection('squads').get(),
+      db.collection('users').get()
+    ]);
+    const usersById={};
+    usersSnap.forEach(d=>{usersById[d.id]={...d.data(),id:d.id};});
+    const squads=squadsSnap.docs.map(d=>({...d.data(),id:d.id}));
+    const mySquad=squads.find(s=>(s.members||[]).includes(currentUser.uid));
+    // Controls
+    if(mySquad){
+      const isLeader=mySquad.leaderUid===currentUser.uid;
+      controls.innerHTML=`<div class="squad-mine"><strong>You're in:</strong> <span class="squad-mine-name">${esc(mySquad.name||'Unnamed Squad')}</span> ${isLeader?'<span class="squad-leader-pill">LEADER</span>':''}</div>`;
+    }else{
+      controls.innerHTML=`<button class="btn-primary" id="createSquadBtn" style="font-size:.75rem;padding:8px 12px;"><i class="fas fa-plus"></i> Create Squad</button>`;
+      document.getElementById('createSquadBtn').addEventListener('click',createSquadPrompt);
+    }
+    // Sort by total points desc
+    const withTotals=squads.map(s=>{
+      const total=(s.members||[]).reduce((sum,uid)=>sum+(usersById[uid]?.points||0),0);
+      return {...s,_total:total};
+    }).sort((a,b)=>b._total-a._total);
+    if(!withTotals.length){
+      list.innerHTML='<div class="hub-empty">No squads formed yet. Be the first to create one.</div>';
+      updateHubSectionInfo({label:'Squads',count:0,note:'No squads exist yet.'});
+      return;
+    }
+    updateHubSectionInfo({label:'Squads',count:withTotals.length,note:'Members combine their points into a shared squad total. Max 5 per squad.'});
+    list.innerHTML='';
+    withTotals.forEach(s=>{
+      const isLeader=s.leaderUid===currentUser.uid;
+      const isMember=(s.members||[]).includes(currentUser.uid);
+      const card=document.createElement('div');card.className='squad-card';card.dataset.cardId=s.id;
+      const memberAvs=(s.members||[]).map(uid=>{
+        const u=usersById[uid]||{};
+        return `<div class="squad-member-av" title="${esc(u.displayName||uid)}">${avHtml(u.photoURL,u.displayName)}</div>`;
+      }).join('');
+      const tag=s.tag?`<span class="squad-tag">[${esc(s.tag)}]</span>`:'';
+      card.innerHTML=`
+        <div class="squad-header">
+          <div class="squad-info">
+            <div class="squad-name">${tag} ${esc(s.name||'Unnamed')}</div>
+            <div class="squad-leader">Led by ${esc(usersById[s.leaderUid]?.displayName||'—')}</div>
+          </div>
+          <div class="squad-total"><strong>${s._total}</strong><span>pts</span></div>
+        </div>
+        <div class="squad-members">${memberAvs}</div>
+        <div class="squad-meta">${(s.members||[]).length} / ${SQUAD_MAX_MEMBERS} operatives</div>
+        <div class="squad-actions">
+          ${isLeader?`<button class="btn-sm" data-act="manage" data-sid="${s.id}"><i class="fas fa-users-cog"></i> Manage</button><button class="btn-sm danger" data-act="disband" data-sid="${s.id}"><i class="fas fa-trash"></i> Disband</button>`:''}
+          ${isMember&&!isLeader?`<button class="btn-sm danger" data-act="leave" data-sid="${s.id}"><i class="fas fa-sign-out-alt"></i> Leave</button>`:''}
+        </div>`;
+      card.querySelectorAll('button[data-act]').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          const act=btn.dataset.act;
+          if(act==='manage')manageSquad(s,usersById);
+          else if(act==='disband')disbandSquad(s.id);
+          else if(act==='leave')leaveSquad(s.id);
+        });
+      });
+      list.appendChild(card);
+    });
+  }catch(err){
+    list.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${esc(err.message)}</div>`;
+  }
+}
+async function createSquadPrompt(){
+  const name=prompt('Squad name (max 30 chars):');
+  if(!name)return;
+  const tag=prompt('Optional tag (3-5 letters, leave blank for none):')||'';
+  try{
+    const ref=await db.collection('squads').add({
+      name:name.slice(0,30),
+      tag:tag.slice(0,5).toUpperCase(),
+      leaderUid:currentUser.uid,
+      members:[currentUser.uid],
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    writeCorpLog('squad',`formed squad "${name}"`,{squadId:ref.id});
+    showToast('Squad created.');
+    loadSquads();
+  }catch(err){showToast('Create failed: '+err.message);}
+}
+async function manageSquad(squad,usersById){
+  const members=squad.members||[];
+  const action=prompt(`Squad "${squad.name}"\nMembers: ${members.length}/${SQUAD_MAX_MEMBERS}\n\nType:\n  add <uid|name> — recruit a member\n  remove <uid|name> — remove a member\n  rename <new name> — rename squad\n\nCurrent members:\n${members.map(uid=>'  '+(usersById[uid]?.displayName||uid)).join('\n')}`);
+  if(!action)return;
+  const [cmd,...rest]=action.trim().split(/\s+/);
+  const arg=rest.join(' ').trim();
+  try{
+    if(cmd==='add'){
+      if(members.length>=SQUAD_MAX_MEMBERS){showToast('Squad is full.');return;}
+      const target=Object.values(usersById).find(u=>u.id===arg||(u.displayName||'').toLowerCase()===arg.toLowerCase());
+      if(!target){showToast('No matching user.');return;}
+      if(members.includes(target.id)){showToast('Already in squad.');return;}
+      // Make sure they're not in another squad
+      const others=await db.collection('squads').where('members','array-contains',target.id).get();
+      if(!others.empty){showToast(`${target.displayName} is already in a squad.`);return;}
+      await db.collection('squads').doc(squad.id).update({members:firebase.firestore.FieldValue.arrayUnion(target.id)});
+      writeCorpLog('squad',`recruited ${target.displayName||'an operative'} into ${squad.name}`,{squadId:squad.id});
+      showToast(`Added ${target.displayName}.`);
+    }else if(cmd==='remove'){
+      const target=Object.values(usersById).find(u=>u.id===arg||(u.displayName||'').toLowerCase()===arg.toLowerCase());
+      if(!target){showToast('No matching user.');return;}
+      if(target.id===squad.leaderUid){showToast('Leader cannot be removed. Disband or transfer.');return;}
+      await db.collection('squads').doc(squad.id).update({members:firebase.firestore.FieldValue.arrayRemove(target.id)});
+      showToast(`Removed ${target.displayName}.`);
+    }else if(cmd==='rename'){
+      if(!arg){showToast('Provide a new name.');return;}
+      await db.collection('squads').doc(squad.id).update({name:arg.slice(0,30)});
+      showToast('Renamed.');
+    }else{
+      showToast('Unknown command.');return;
+    }
+    loadSquads();
+  }catch(err){showToast('Failed: '+err.message);}
+}
+async function disbandSquad(sid){
+  if(!confirm('Disband this squad? This cannot be undone.'))return;
+  try{
+    await db.collection('squads').doc(sid).delete();
+    writeCorpLog('squad','disbanded their squad',{squadId:sid});
+    showToast('Squad disbanded.');
+    loadSquads();
+  }catch(err){showToast('Failed: '+err.message);}
+}
+async function leaveSquad(sid){
+  if(!confirm('Leave this squad?'))return;
+  try{
+    await db.collection('squads').doc(sid).update({members:firebase.firestore.FieldValue.arrayRemove(currentUser.uid)});
+    showToast('Left squad.');
+    loadSquads();
+  }catch(err){showToast('Failed: '+err.message);}
 }
 document.getElementById('closeEngagement').addEventListener('click',()=>{
   closeModal('engagementModal');
