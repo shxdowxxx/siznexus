@@ -37,6 +37,33 @@
 <button class="terminal-launcher" id="terminalLauncher" title="Open Operator Console (` key)" aria-label="Operator console">
   <i class="fas fa-terminal"></i>
 </button>
+<button class="ambient-toggle" id="ambientToggle" title="Toggle ambient audio" aria-label="Toggle ambient audio">
+  <i class="fas fa-volume-mute"></i>
+</button>
+
+<!-- ONBOARDING TOUR OVERLAY -->
+<div id="tourOverlay" aria-hidden="true">
+  <div class="tour-card" id="tourCard">
+    <div class="tour-step-num"><span id="tourStepIdx">1</span> / 4</div>
+    <h3 id="tourTitle">Welcome, Operative</h3>
+    <p id="tourBody">Let's run a quick orientation.</p>
+    <div class="tour-actions">
+      <button class="btn-secondary" id="tourSkip" style="font-size:.7rem;padding:7px 12px;">Skip</button>
+      <button class="btn-primary" id="tourNext" style="font-size:.72rem;padding:7px 14px;"><span id="tourNextLbl">Next</span> <i class="fas fa-chevron-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- LORE / CLASSIFIED OVERLAY (Konami code easter egg) -->
+<div id="loreOverlay" aria-hidden="true">
+  <div class="lore-frame">
+    <div class="lore-stamp">// CLASSIFIED — EYES ONLY</div>
+    <h2 class="lore-title">PROJECT NEXUS</h2>
+    <p class="lore-body">You weren't supposed to see this. The Nexus was never just an organization — it was a network. Pattern-recognition. Intel-stitching across operatives who didn't know they were operatives. Some of them still don't.<br><br>The console hears more than it shows. Try <code>/secret</code>. Try <code>/lore</code>. Watch the corpLog. Some of the entries aren't from members.</p>
+    <p class="lore-sig">— SIZ</p>
+    <button class="btn-secondary" id="closeLore" style="font-size:.7rem;">CLOSE</button>
+  </div>
+</div>
 
 <!-- SPLASH -->
 <div id="splash">

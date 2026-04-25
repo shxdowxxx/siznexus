@@ -632,7 +632,7 @@ async function loadAnnNotifTab(){
       const a=d.data();
       const item=document.createElement('div');item.className='ann-item';
       item.style.position='relative';
-      item.innerHTML=`<button class="notif-dismiss" title="Dismiss" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--color-text-muted);font-size:.8rem;cursor:pointer;padding:2px 4px;line-height:1;transition:var(--transition);" onmouseover="this.style.color='#f55'" onmouseout="this.style.color='var(--color-text-muted)'">&#x2715;</button><div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${esc(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>${reactionsBarHtml(a.reactions,'announcements',d.id)}`;
+      item.innerHTML=`<button class="notif-dismiss" title="Dismiss" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--color-text-muted);font-size:.8rem;cursor:pointer;padding:2px 4px;line-height:1;transition:var(--transition);" onmouseover="this.style.color='#f55'" onmouseout="this.style.color='var(--color-text-muted)'">&#x2715;</button><div class="ann-item-title">${esc(a.title||'Announcement')}</div><div class="ann-item-body">${mdLite(a.body||'')}</div><div class="ann-item-meta"><span>— ${esc(a.authorName||'Admin')}</span><span>${a.createdAt?fmtDate(a.createdAt):''}</span></div>${reactionsBarHtml(a.reactions,'announcements',d.id)}`;
       item.querySelector('.notif-dismiss').addEventListener('click',async()=>{
         // Update dismissed
         await db.collection('users').doc(currentUser.uid).update({
@@ -2585,7 +2585,7 @@ async function loadIntelBoard(){
       const p=d.data();
       const item=document.createElement('div');item.className='intel-post';item.dataset.cardId=d.id;
       item.innerHTML=`<div class="intel-post-title">${p.tag?`<span class="intel-tag">${esc(p.tag)}</span>`:''}${esc(p.title||'Intel')}</div>
-        <div class="intel-post-body">${esc(p.body||'')}</div>
+        <div class="intel-post-body">${mdLite(p.body||'')}</div>
         <div class="intel-post-meta"><span>${esc(p.authorName||'Admin')} &middot; ${esc(p.authorRank||'')}</span><span>${p.createdAt?fmtDate(p.createdAt):''}</span></div>
         ${reactionsBarHtml(p.reactions,'intelPosts',d.id)}`;
       list.appendChild(item);
@@ -4117,6 +4117,20 @@ function updateDirStats(users){
   },()=>{});
 })();
 
+/* ── Mini Markdown (bold, italic, code, links, line breaks) ── */
+function mdLite(text){
+  let t=esc(text||'');
+  // code spans
+  t=t.replace(/`([^`]+)`/g,'<code class="md-code">$1</code>');
+  // bold then italic
+  t=t.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  t=t.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g,'<em>$1</em>');
+  // urls (very loose)
+  t=t.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener noreferrer" class="md-link">$1</a>');
+  // line breaks
+  t=t.replace(/\n/g,'<br>');
+  return t;
+}
 /* ── REACTIONS ── */
 const REACTION_EMOJI=['👍','❤️','🔥','👀','💀','💯'];
 function reactionsBarHtml(reactions={},collection,docId){
@@ -4152,3 +4166,118 @@ document.addEventListener('click',e=>{
   if(!bar)return;
   toggleReaction(bar.dataset.coll,bar.dataset.id,btn.dataset.emoji);
 });
+
+/* ── AMBIENT AUDIO (synthesized cyberpunk drone) ── */
+(function initAmbient(){
+  const btn=document.getElementById('ambientToggle');
+  if(!btn)return;
+  let ctx=null,master=null,nodes=[],playing=false;
+  function start(){
+    if(playing)return;
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    master=ctx.createGain();
+    master.gain.value=0;
+    master.connect(ctx.destination);
+    // Slow gain ramp-in
+    master.gain.linearRampToValueAtTime(.04,ctx.currentTime+1.2);
+    // Three layered drone oscillators with subtle detune & filter
+    [55,110,165].forEach((freq,i)=>{
+      const osc=ctx.createOscillator();
+      osc.type=i===0?'sawtooth':'sine';
+      osc.frequency.value=freq;
+      const filter=ctx.createBiquadFilter();
+      filter.type='lowpass';
+      filter.frequency.value=380+i*120;
+      filter.Q.value=2;
+      const lfo=ctx.createOscillator();
+      lfo.frequency.value=.07+i*.04;
+      const lfoGain=ctx.createGain();
+      lfoGain.gain.value=80;
+      lfo.connect(lfoGain);lfoGain.connect(filter.frequency);
+      const og=ctx.createGain();og.gain.value=.45-i*.1;
+      osc.connect(filter);filter.connect(og);og.connect(master);
+      osc.start();lfo.start();
+      nodes.push(osc,lfo);
+    });
+    playing=true;
+    btn.classList.add('on');
+    btn.querySelector('i').className='fas fa-volume-up';
+  }
+  function stop(){
+    if(!playing||!ctx)return;
+    master.gain.cancelScheduledValues(ctx.currentTime);
+    master.gain.linearRampToValueAtTime(0,ctx.currentTime+.6);
+    setTimeout(()=>{nodes.forEach(n=>{try{n.stop();}catch(_){}});ctx.close().catch(()=>{});ctx=null;nodes=[];playing=false;},700);
+    btn.classList.remove('on');
+    btn.querySelector('i').className='fas fa-volume-mute';
+  }
+  btn.addEventListener('click',()=>{playing?stop():start();});
+})();
+
+/* ── KONAMI EASTER EGG ── */
+(function initKonami(){
+  const seq=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+  let idx=0;
+  document.addEventListener('keydown',e=>{
+    const k=e.key.length===1?e.key.toLowerCase():e.key;
+    if(k===seq[idx]){idx++;if(idx===seq.length){revealLore();idx=0;}}
+    else idx=k===seq[0]?1:0;
+  });
+  function revealLore(){
+    const o=document.getElementById('loreOverlay');
+    if(!o)return;
+    o.classList.add('show');
+    o.setAttribute('aria-hidden','false');
+  }
+  document.getElementById('closeLore')?.addEventListener('click',()=>{
+    const o=document.getElementById('loreOverlay');
+    o.classList.remove('show');o.setAttribute('aria-hidden','true');
+  });
+})();
+
+/* ── ONBOARDING TOUR ── */
+(function initOnboardingTour(){
+  const overlay=document.getElementById('tourOverlay');
+  const card=document.getElementById('tourCard');
+  if(!overlay||!card)return;
+  const steps=[
+    {sel:'#command-board',title:'Welcome, Operative',body:'This is your Command Board — your live overview of corp activity, missions, leaderboard, and intel. Click the preview tabs above to switch.'},
+    {sel:'#streak-panel',title:'Daily Check-In',body:'Sign in once per UTC day to keep your streak alive. Miss a day and it resets. Visit often, climb the leaderboard.'},
+    {sel:'#searchBtn',title:'Search & Console',body:'Press Ctrl/⌘+K for global search across members, missions, and intel. Press the backtick (`) key to open the Operator Console for slash-commands like /whois, /missions, /rank.'},
+    {sel:'.profile-button',title:'Your Profile',body:'Open your profile to set an accent color, operator title, and banner. Build your file. Welcome to the Nexus.'}
+  ];
+  let cur=0;
+  function show(i){
+    cur=i;
+    const step=steps[i];
+    document.getElementById('tourStepIdx').textContent=i+1;
+    document.getElementById('tourTitle').textContent=step.title;
+    document.getElementById('tourBody').textContent=step.body;
+    document.getElementById('tourNextLbl').textContent=i===steps.length-1?'Got it':'Next';
+    // Spotlight target element if visible
+    document.querySelectorAll('.tour-spotlight').forEach(el=>el.classList.remove('tour-spotlight'));
+    const target=document.querySelector(step.sel);
+    if(target){target.classList.add('tour-spotlight');target.scrollIntoView({behavior:'smooth',block:'center'});}
+  }
+  function open(){
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden','false');
+    show(0);
+  }
+  function close(){
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden','true');
+    document.querySelectorAll('.tour-spotlight').forEach(el=>el.classList.remove('tour-spotlight'));
+    try{localStorage.setItem('siz_onboarded','1');}catch(_){}
+  }
+  document.getElementById('tourSkip').addEventListener('click',close);
+  document.getElementById('tourNext').addEventListener('click',()=>{
+    if(cur<steps.length-1)show(cur+1);else close();
+  });
+  // Auto-fire after first sign-in for non-anonymous, non-onboarded users.
+  auth.onAuthStateChanged(u=>{
+    if(!u||u.isAnonymous)return;
+    try{if(localStorage.getItem('siz_onboarded'))return;}catch(_){}
+    setTimeout(open,1400);
+  });
+})();

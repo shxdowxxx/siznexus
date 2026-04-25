@@ -1689,3 +1689,38 @@ footer .contact a:hover{text-decoration:underline;}
 .react-btn .react-emoji{font-size:.8rem;line-height:1;}
 .react-btn .react-count{font-size:.62rem;color:var(--color-text-muted);}
 .react-btn.mine .react-count{color:#fff;font-weight:700;}
+
+/* ── Mini-Markdown rendering ── */
+.md-code{background:rgba(0,0,0,.4);border:1px solid rgba(192,192,192,.12);padding:1px 6px;border-radius:2px;font-family:var(--font-mono);font-size:.78em;color:#FFD700;}
+.md-link{color:var(--color-primary);text-decoration:underline;text-underline-offset:2px;}
+.md-link:hover{color:#fff;}
+
+/* ── Ambient audio toggle ── */
+.ambient-toggle{position:fixed;bottom:18px;left:18px;width:38px;height:38px;border-radius:50%;background:rgba(8,12,22,.92);border:1px solid rgba(192,192,192,.18);color:var(--color-text-muted);font-size:.78rem;cursor:pointer;z-index:8400;box-shadow:0 2px 12px rgba(0,0,0,.5);transition:all .2s ease;display:flex;align-items:center;justify-content:center;}
+.ambient-toggle:hover{transform:translateY(-2px);color:var(--color-text);}
+.ambient-toggle.on{color:#3FE08C;border-color:rgba(63,224,140,.4);box-shadow:0 0 14px rgba(63,224,140,.3);}
+
+/* ── Lore / Classified overlay ── */
+#loreOverlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9500;display:none;align-items:center;justify-content:center;padding:30px;animation:loreReveal .35s ease;}
+#loreOverlay.show{display:flex;}
+@keyframes loreReveal{from{opacity:0;}to{opacity:1;}}
+.lore-frame{max-width:560px;background:linear-gradient(180deg,rgba(20,8,8,.95),rgba(8,4,4,.98));border:1px solid rgba(255,59,92,.4);box-shadow:0 0 60px rgba(255,59,92,.2), inset 0 0 30px rgba(255,59,92,.05);padding:32px;font-family:var(--font-mono);color:#fff;position:relative;}
+.lore-frame::before{content:'';position:absolute;top:8px;left:8px;right:8px;bottom:8px;border:1px dashed rgba(255,59,92,.25);pointer-events:none;}
+.lore-stamp{font-size:.62rem;letter-spacing:.3em;color:#FF3B5C;text-shadow:0 0 12px rgba(255,59,92,.4);margin-bottom:12px;animation:loreStampFlicker 3s ease-in-out infinite;}
+@keyframes loreStampFlicker{0%,90%,100%{opacity:1;}93%,97%{opacity:.4;}}
+.lore-title{font-family:var(--font-headings);font-size:2rem;letter-spacing:.18em;color:#FF3B5C;text-shadow:0 0 16px rgba(255,59,92,.3);margin:0 0 16px;}
+.lore-body{font-size:.85rem;line-height:1.7;color:rgba(255,255,255,.85);margin-bottom:18px;}
+.lore-body code{background:rgba(255,255,255,.08);padding:1px 6px;color:#FFD700;}
+.lore-sig{font-size:.7rem;color:rgba(255,59,92,.7);text-align:right;margin-bottom:18px;letter-spacing:.2em;}
+
+/* ── Onboarding Tour ── */
+#tourOverlay{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:9300;display:none;align-items:flex-end;justify-content:center;padding:20px;animation:tourFadeIn .25s ease;}
+#tourOverlay.show{display:flex;}
+@keyframes tourFadeIn{from{opacity:0;}to{opacity:1;}}
+.tour-card{max-width:480px;width:100%;background:linear-gradient(180deg,rgba(15,18,30,.98),rgba(8,11,20,.98));border:1px solid rgba(155,92,255,.4);box-shadow:0 0 40px rgba(155,92,255,.2);padding:22px;border-radius:6px;font-family:var(--font-mono);color:var(--color-text);margin-bottom:60px;}
+.tour-step-num{font-size:.6rem;letter-spacing:.22em;color:#9B5CFF;margin-bottom:8px;}
+.tour-card h3{font-family:var(--font-headings);font-size:1.1rem;color:var(--color-text-light);margin:0 0 8px;letter-spacing:.05em;}
+.tour-card p{font-size:.78rem;line-height:1.6;color:var(--color-text);margin-bottom:14px;}
+.tour-actions{display:flex;justify-content:flex-end;gap:8px;}
+.tour-spotlight{position:relative;z-index:9301;outline:2px solid #9B5CFF;outline-offset:6px;border-radius:4px;box-shadow:0 0 0 9999px rgba(0,0,0,.55), 0 0 30px rgba(155,92,255,.5);animation:tourPulse 1.6s ease-in-out infinite;}
+@keyframes tourPulse{0%,100%{outline-color:#9B5CFF;}50%{outline-color:#FFD700;}}
