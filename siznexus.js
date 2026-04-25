@@ -187,7 +187,7 @@ function showToast(msg){const t=document.getElementById('nexusToast');t.textCont
 /* ── MODAL UTILITIES ── */
 function openModal(id){document.getElementById(id).classList.add('active');document.body.style.overflow='hidden';}
 function closeModal(id){document.getElementById(id).classList.remove('active');if(!document.querySelector('.modal.active'))document.body.style.overflow='';}
-const ALL_MODALS=['loginModal','userDirectory','profileModal','myProfileModal','notifModal','msgModal','resetModal','intelDevModal','adminModal','engagementModal','reportModal','searchModal'];
+const ALL_MODALS=['loginModal','userDirectory','profileModal','myProfileModal','notifModal','msgModal','resetModal','intelDevModal','adminModal','engagementModal','reportModal','searchModal','briefingModal'];
 ALL_MODALS.forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){
     if(e.target===this){
@@ -2179,6 +2179,74 @@ document.querySelectorAll('.log-filter-btn').forEach(btn=>{
    MISSIONS
 ═══════════════════════════════════════════════════════ */
 let _missionCategoryFilter='all';
+let _briefingMission=null;
+function openMissionBriefing(mission,mySub){
+  _briefingMission=mission;
+  document.getElementById('briefingTitle').textContent=mission.title||'Mission';
+  document.getElementById('briefingDesc').textContent=mission.description||'No additional details.';
+  document.getElementById('briefingPts').textContent=`${mission.points||0} pts`;
+  const cat=document.getElementById('briefingCat');
+  if(mission.category){cat.textContent=mission.category.toUpperCase();cat.style.display='';cat.className='briefing-cat mission-cat-'+esc(mission.category);}
+  else{cat.style.display='none';}
+  const created=mission.createdAt?.toDate?.();
+  document.getElementById('briefingDate').textContent=created?created.toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'}):'—';
+  const statusEl=document.getElementById('briefingStatus');
+  const myStatus=document.getElementById('briefingMyStatus');
+  const keySection=document.getElementById('briefingKeySection');
+  const fb=document.getElementById('briefingFeedback');
+  fb.textContent='';fb.className='briefing-feedback';
+  document.getElementById('briefingKeyInput').value='';
+  if(mySub?.status==='pending'){
+    statusEl.textContent='PENDING';statusEl.className='briefing-status briefing-status-pending';
+    myStatus.textContent='Awaiting Review';
+    keySection.style.display='none';
+  }else if(mySub?.status==='approved'){
+    statusEl.textContent='COMPLETED';statusEl.className='briefing-status briefing-status-done';
+    myStatus.textContent=`Completed +${mission.points||0} pts`;
+    keySection.style.display='none';
+  }else if(mySub?.status==='rejected'){
+    statusEl.textContent='REJECTED';statusEl.className='briefing-status briefing-status-rejected';
+    myStatus.textContent='KEY Rejected — try again';
+    keySection.style.display='';
+  }else{
+    statusEl.textContent='OPEN';statusEl.className='briefing-status briefing-status-open';
+    myStatus.textContent='Available';
+    keySection.style.display='';
+  }
+  openModal('briefingModal');
+  setTimeout(()=>document.getElementById('briefingKeyInput').focus(),60);
+}
+document.getElementById('closeBriefing')?.addEventListener('click',()=>closeModal('briefingModal'));
+async function submitMissionBriefing(){
+  if(!_briefingMission||!currentUser)return;
+  const m=_briefingMission;
+  const keyVal=document.getElementById('briefingKeyInput').value.trim().toUpperCase();
+  const fb=document.getElementById('briefingFeedback');
+  if(!keyVal){fb.textContent='Enter a KEY first.';fb.className='briefing-feedback err';return;}
+  const btn=document.getElementById('briefingSubmitBtn');
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Transmitting...';
+  try{
+    await db.collection('missionSubmissions').add({
+      uid:currentUser.uid,
+      displayName:currentUserData?.displayName||'Unknown',
+      missionId:m.id,
+      missionTitle:m.title||'Mission',
+      keySubmitted:keyVal,
+      points:m.points||50,
+      status:'pending',
+      submittedAt:firebase.firestore.FieldValue.serverTimestamp(),
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    writeCorpLog('mission',`submitted a KEY for mission: ${m.title}`);
+    fb.textContent='KEY transmitted. Awaiting admin verification.';fb.className='briefing-feedback ok';
+    setTimeout(()=>{closeModal('briefingModal');loadMissions();},1400);
+  }catch(err){
+    fb.textContent='Error: '+err.message;fb.className='briefing-feedback err';
+    btn.disabled=false;btn.innerHTML='<i class="fas fa-key"></i> Submit';
+  }
+}
+document.getElementById('briefingSubmitBtn')?.addEventListener('click',submitMissionBriefing);
+document.getElementById('briefingKeyInput')?.addEventListener('keydown',e=>{if(e.key==='Enter')submitMissionBriefing();});
 async function loadMissions(){
   const list=document.getElementById('missionsList');
   list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
@@ -2233,11 +2301,7 @@ async function loadMissions(){
           actionHtml=`<p style="font-family:var(--font-mono);font-size:.7rem;color:#f44336;margin-top:8px;"><i class="fas fa-times-circle"></i> Key rejected. ${esc(mySub.rejectReason||'Try again or contact an admin.')}</p>`;
         }
       }else{
-        actionHtml=`<div class="key-input-row">
-          <input type="text" class="key-input" id="keyInput_${mid}" placeholder="Enter mission KEY..." maxlength="30">
-          <button class="key-submit" data-mid="${mid}" data-pts="${m.points||50}"><i class="fas fa-key"></i> Submit</button>
-        </div>
-        <p style="font-family:var(--font-mono);font-size:.62rem;color:rgba(192,192,192,.35);margin-top:5px;">Use the <strong style="color:rgba(192,192,192,.55);">/key</strong> bot command in Discord to get the KEY for this mission.</p>`;
+        actionHtml=`<button class="btn-primary briefing-open" data-mid="${mid}" style="margin-top:10px;width:100%;justify-content:center;font-size:.72rem;padding:9px;"><i class="fas fa-file-invoice"></i> Open Briefing</button>`;
       }
       const catBadge=m.category?`<span class="mission-cat-badge mission-cat-${esc(m.category)}">${esc(m.category)}</span>`:'';
       card.innerHTML=`
@@ -2251,28 +2315,17 @@ async function loadMissions(){
         </div>
         <div class="mission-footer"><span class="mission-pts"><i class="fas fa-star"></i> ${m.points||50} pts</span>${statusHtml}</div>
         ${actionHtml}`;
-      // Wire submit button
-      const submitBtn=card.querySelector('.key-submit');
-      if(submitBtn){
-        submitBtn.addEventListener('click',async function(){
-          const keyVal=document.getElementById('keyInput_'+this.dataset.mid)?.value.trim().toUpperCase();
-          if(!keyVal){showToast('Enter a KEY first.');return;}
-          this.disabled=true;this.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
-          try{
-            await db.collection('missionSubmissions').add({
-              uid:currentUser.uid,
-              displayName:currentUserData?.displayName||'Unknown',
-              missionId:this.dataset.mid,
-              missionTitle:m.title||'Mission',
-              keySubmitted:keyVal,
-              points:parseInt(this.dataset.pts)||50,
-              status:'pending',
-              createdAt:firebase.firestore.FieldValue.serverTimestamp()
-            });
-            showToast('KEY submitted! Awaiting admin review.');
-            writeCorpLog('mission',`submitted a KEY for mission: ${m.title}`);
-            loadMissions();
-          }catch(err){showToast('Error: '+err.message);this.disabled=false;this.innerHTML='<i class="fas fa-key"></i> Submit';}
+      // Wire briefing open button
+      const briefingBtn=card.querySelector('.briefing-open');
+      if(briefingBtn){
+        briefingBtn.addEventListener('click',e=>{e.stopPropagation();openMissionBriefing({...m,id:mid},mySub);});
+      }
+      // Click anywhere on a not-yet-attempted card opens briefing too
+      if(!mySub){
+        card.style.cursor='pointer';
+        card.addEventListener('click',e=>{
+          if(e.target.closest('.briefing-open'))return;
+          openMissionBriefing({...m,id:mid},mySub);
         });
       }
       list.appendChild(card);

@@ -470,6 +470,40 @@
   </div>
 </div>
 
+<!-- OPERATIONS BRIEFING MODAL -->
+<div class="modal" id="briefingModal">
+  <div class="modal-container briefing-container">
+    <button class="close-btn" id="closeBriefing">&#x2715;</button>
+    <div class="briefing-header">
+      <div class="briefing-tag">// CLASSIFIED OPERATIONS BRIEFING</div>
+      <div class="briefing-status" id="briefingStatus">OPEN</div>
+    </div>
+    <div class="briefing-objective">
+      <span class="briefing-label">Objective</span>
+      <h2 id="briefingTitle">Mission Title</h2>
+      <span class="briefing-cat" id="briefingCat"></span>
+    </div>
+    <div class="briefing-grid">
+      <div class="briefing-stat"><span>Reward</span><strong id="briefingPts">0 pts</strong></div>
+      <div class="briefing-stat"><span>Status</span><strong id="briefingMyStatus">Available</strong></div>
+      <div class="briefing-stat"><span>Created</span><strong id="briefingDate">—</strong></div>
+    </div>
+    <div class="briefing-section">
+      <span class="briefing-label">Mission Details</span>
+      <p id="briefingDesc" class="briefing-desc">—</p>
+    </div>
+    <div class="briefing-key-section" id="briefingKeySection">
+      <span class="briefing-label">Submit Mission KEY</span>
+      <p class="briefing-hint">Use the <strong>/key</strong> command in Discord to retrieve the KEY for this mission.</p>
+      <div class="briefing-key-row">
+        <input type="text" class="briefing-key-input" id="briefingKeyInput" placeholder="ENTER KEY..." maxlength="30" autocomplete="off">
+        <button class="btn-primary" id="briefingSubmitBtn"><i class="fas fa-key"></i> Submit</button>
+      </div>
+      <div class="briefing-feedback" id="briefingFeedback"></div>
+    </div>
+  </div>
+</div>
+
 <!-- GLOBAL SEARCH MODAL -->
 <div class="modal" id="searchModal">
   <div class="modal-container" style="max-width:560px;">
