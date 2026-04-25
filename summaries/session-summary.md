@@ -1,56 +1,63 @@
 ---
-session_id: SIZ-20260413-1800
-date: 2026-04-13
-time: 18:00 UTC
+session_id: SIZ-20260425-1827
+date: 2026-04-25
+time: 18:27 UTC
 project: TheSizCorporation / SizNexus
-agent: SessionCloseoutAgent
+agent: Codex
 version: 1.0
 current_phase: Phase 2 — Feature & Optimization Work
 related_files:
   - summaries/session-summary.md
+  - context/project-state.md
   - context/claude.md
   - context/gemini.md
-  - context/project-state.md
-github_commit: 188ff0f
+  - /home/itzzzshxdow/CODEX.md
+  - /home/itzzzshxdow/CLAUDE.md
+  - /home/itzzzshxdow/GEMINI.md
+github_commit: local-uncommitted
 ---
 
-# Session Summary — 2026-04-13 (Session 2)
+# Session Summary — 2026-04-25
 
 ## Director's Vision
-The director's intent this session was threefold: (1) resolve the profile tab performance issue that was deferred from the previous session, (2) overhaul the favicon set to a new branded design, and (3) investigate and improve the password reset experience — both the delivery reliability problem (spam filtering) and the UX around errors and loading state. The session also included routine workspace hygiene to remove Windows metadata artifacts.
+The goal this session was to make the SizNexus homepage look professional and useful instead of reading like an equal-weight info grid. The director wanted a layout with meaningful side surfaces and a strong middle, but without losing the cyberpunk identity or turning the page into decorative marketing UI.
 
 ## Decisions Made
-1. The profile tab open delay was fixed by reordering `openModal()` before the async friends list fetch, and by replacing sequential `for...of await` Firestore fetches with `Promise.all()` for parallel execution.
-2. A new favicon set was introduced under a `favicon/` subdirectory. All HTML files (`index.html`, `Commission.html`) and `site.webmanifest` were updated to reference the new paths.
-3. `site.webmanifest` was updated with the canonical app name "TheSizNexus" and the cyberpunk theme color `#0a0a0f`.
-4. Custom email sending via Resend (to avoid Firebase's `noreply@thesiznexus.firebaseapp.com` going to spam) was evaluated and deferred — it requires paid services and was not approved for this session.
-5. Instead of custom sending, spam folder guidance was added directly to the reset modal description and success message so users know where to look.
-6. The password reset button received a loading spinner and friendlier, human-readable error messages for `auth/user-not-found`, `auth/invalid-email`, and `auth/too-many-requests`.
-7. `actionCodeSettings` with `window.location.origin` was added to the `sendPasswordResetEmail()` call.
-8. All `Zone.Identifier` Windows metadata files were removed from the workspace.
+1. The homepage should be a real dashboard, not a flat set of matching cards.
+2. The center column should be the strongest operational surface, not filler. `Command Board` became that surface.
+3. Supporting content moved into side rails so the page gains hierarchy: left for overview/presence, right for mission pulse/spotlight/join.
+4. Homepage previews should route into the full `Corporation Hub`, so the main page and modal behave like one system.
+5. `Featured Member` should use real Firestore data from `users`, not placeholder rotation content.
+6. Guest visitors should see useful locked states and clear upgrade paths instead of dead space.
 
 ## Work Completed
-- **Profile tab performance fix:** Resolved the ~1 second open delay. `openModal()` now fires immediately; the friends list renders in the background via `Promise.all()` parallel Firestore fetches instead of sequential awaits.
-- **Favicon overhaul:** New favicon set deployed under `favicon/` subdirectory. `index.html`, `Commission.html`, and `site.webmanifest` updated. Old scattered favicon files (favicon.png, favicon.svg, favicon.ico, web-app-manifest-*.png, stray screenshot PNG) removed. Director iterated the favicon logo design twice during the session — `Zone.Identifier` artifacts were cleaned after each upload.
-- **Password reset UX improvements:** Loading spinner on reset button, mapped auth error codes to plain-English messages, added spam folder hint to modal copy, added `actionCodeSettings` to the reset email call.
-- **Workspace cleanup:** All `Zone.Identifier` Windows metadata files deleted.
-- **Password reset infrastructure investigation:** Evaluated Firebase Trigger Email + Resend custom domain approach. DNS records on Porkbun were added for Resend successfully. SendGrid was rejected (account review). Decision made to defer custom email entirely for now.
+- **Homepage layout overhaul:** Reworked `index.html` and `siznexus.css` from an equal-weight card grid into a left rail / center command board / right rail layout.
+- **Center command surface:** Added access-aware identity, quick actions, preview tabs, and deep-link behavior for activity, missions, leaderboard, and intel.
+- **Right rail utility:** Rebuilt `Mission Pulse` into a data snapshot with lead lines and hub links; kept `How to Join` as a clear next-step panel.
+- **Featured member rebuild:** Removed placeholder featured-member logic and replaced it with Firestore-driven spotlight scoring/rotation based on real `users` data.
+- **Corporation Hub polish:** Upgraded `#engagementModal` with stronger summary chrome, quick stats, tab-aware hero copy, section counts, notes, and better responsive framing.
+- **Dashboard helper logic:** Added or extended `refreshDashboardSurface()`, `loadHomePreview()`, `loadNetworkSnapshot()`, `loadFeaturedMembers()`, `updateHubChrome()`, `updateHubSectionInfo()`, and `loadHubQuickStats()`.
+- **Cross-agent closeout:** Updated project-local context files, rolling project state, this session summary, shared knowledge, and the top-level `CODEX.md`, `CLAUDE.md`, and `GEMINI.md` handoff files.
 
 ## Current State
-Phase 1 is complete. Phase 2 is underway. All session changes are committed and pushed to `main`. The profile tab now opens instantly. The favicon set is fresh and consistent across all pages. Password reset UX is meaningfully improved even without custom email infrastructure. The deferred custom email work is documented and ready to revisit when budget allows.
+SizNexus now has a clearer homepage information architecture and a more coherent member dashboard surface. The homepage and Corporation Hub visually and structurally belong to the same product. The work is currently local in the repository and was not committed or pushed during this session. Local preview was served at `http://127.0.0.1:4173/index.html`.
+
+## Verification
+- `node --check siznexus.js` passed
+- Manual preview served locally over HTTP
 
 ## Blockers & Challenges
-- **SendGrid account rejection:** SendGrid rejected the account during review — custom email via SendGrid is not viable without resolving this. Resend was substituted but ultimately the entire custom email path was deferred due to cost.
-- **Resend requires paid tier:** The functionality needed (custom domain sending to avoid spam) is behind a paid plan. Director chose not to proceed at this time.
-- **Firebase spam classification:** Firebase's default reset email sender (`noreply@thesiznexus.firebaseapp.com`) is classified as spam by many providers. Mitigation applied: in-app copy now tells users to check spam. Full fix remains deferred.
+- **Firestore rules still need manual publish:** `firestore.rules` remains authored in-repo but not yet confirmed published in Firebase Console.
+- **Homepage data quality depends on live collections:** spotlighting and pulse detail are only as strong as the underlying `users`, `missions`, `events`, `intelPosts`, and `announcements` content.
+- **Featured spotlight is still heuristic:** current logic is useful, but it is not yet an admin-curated editorial system.
 
 ## Next Steps
-1. **Custom email sending (deferred):** Revisit Resend or an equivalent service when budget allows. The DNS records on Porkbun are already in place for Resend. Goal: send reset emails from a custom domain to avoid spam classification.
-2. **Continue Phase 2 feature work:** No specific next feature was designated this session — director to define the next priority at session start.
-3. **Review `getElementById('profileActivityStatus')` dead reference:** Still present, still guarded by an if-check. Assess whether to implement the activity status feature or remove it.
+1. Publish `firestore.rules` in Firebase Console if that has not been done yet.
+2. Consider replacing score-based spotlight selection with an admin-controlled featured member or featured announcement document.
+3. Continue tightening the coupling between homepage preview cards and their full Corporation Hub views.
+4. Decide whether `profileActivityStatus` should stay dormant or become a visible homepage/member-state feature.
 
 ## Notes
-- The favicon directory convention is now `favicon/` relative to the project root. All future favicon references should use this path.
-- The `site.webmanifest` canonical app name is "TheSizNexus" with theme color `#0a0a0f`. Do not change these without director instruction.
-- The director iterated on the favicon design twice during the session. Each iteration involved uploading new files from Windows (generating Zone.Identifier artifacts) and then cleaning them.
-- Previous session summary (SIZ-20260413-0000) is superseded by this file. Only the most recent summary is retained in this rolling document.
+- The actual main entry file is `index.html`, not `siznexus.html`.
+- The center column is now the primary dashboard surface. Future iterations should preserve that hierarchy.
+- Previous rolling summary content is superseded by this file.

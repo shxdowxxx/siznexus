@@ -122,9 +122,7 @@ function animateCounters(){document.querySelectorAll('.stat-number[data-target]'
 const so=new IntersectionObserver(en=>{en.forEach(e=>{if(e.isIntersecting){animateCounters();so.disconnect();}});},{threshold:.5});
 const sbe=document.querySelector('.stats-bar');if(sbe)so.observe(sbe);
 /* ── FEATURED MEMBER ── */
-const featuredData=[{name:'No Operative Selected',desc:'No operative has been featured yet.',achievements:['???','???','???']}];
-function updateFeatured(){const e=featuredData[Math.floor(Math.random()*featuredData.length)];document.getElementById('featured-name').textContent=e.name;document.getElementById('featured-desc').textContent=e.desc;document.getElementById('member-achievements').innerHTML=e.achievements.map(a=>`<span class="achievement-badge">${a}</span>`).join('');}
-setInterval(updateFeatured,8000);updateFeatured();
+let featuredRotationTimer=null,featuredMemberPool=[],featuredMemberIndex=0,currentFeaturedMember=null;
 /* ── FIREBASE ── */
 const auth=firebase.auth(),db=firebase.firestore();
 const googleProvider=new firebase.auth.GoogleAuthProvider();
@@ -223,10 +221,12 @@ function startActiveMembersListener(){
     const list=document.getElementById('activeMembersList');
     const countLabel=document.getElementById('onlineCountLabel');
     const statCount=document.getElementById('activeMemberCount');
+    const commandCount=document.getElementById('commandOnlineValue');
     list.innerHTML='';
     const blockedList=currentUserData?.blockedUsers||[];
     const members=[];snap.forEach(d=>{const u=d.data();u.id=d.id;if(!blockedList.includes(u.id))members.push(u);});
     countLabel.textContent=members.length;statCount.textContent=members.length;
+    if(commandCount)commandCount.textContent=members.length;
     if(!members.length){list.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);padding:8px 0;">No operatives online right now.</p>';return;}
     members.forEach(u=>{
       const row=document.createElement('div');row.className='active-member-row';
@@ -234,7 +234,11 @@ function startActiveMembersListener(){
       row.addEventListener('click',()=>{if(currentUser&&u.id===currentUser.uid)openMyProfile();else openViewProfile(u);});
       list.appendChild(row);
     });
-  },()=>{document.getElementById('activeMembersList').innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;padding:8px 0;">Failed to load active members.</p>';});
+  },()=>{
+    document.getElementById('activeMembersList').innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:#f55;padding:8px 0;">Failed to load active members.</p>';
+    const commandCount=document.getElementById('commandOnlineValue');
+    if(commandCount)commandCount.textContent='—';
+  });
 }
 startActiveMembersListener();
 /* ── MEMBER CARDS / DIRECTORY ── */
@@ -1090,6 +1094,7 @@ auth.onAuthStateChanged(async user=>{
       });
     });
     db.collection('friendRequests').where('to','==',user.uid).onSnapshot(()=>updateNotifBadge());
+    refreshDashboardSurface();
   }else{
     currentUserData=null;
     document.getElementById('userAvatar').style.display='none';document.getElementById('defaultIcon').style.display='block';
@@ -1097,6 +1102,7 @@ auth.onAuthStateChanged(async user=>{
     document.getElementById('adminPanelBtn').style.display='none';
     applyGuestRestrictions(true); // logged-out = guest
     if(notifUnsubscribe){notifUnsubscribe();notifUnsubscribe=null;}
+    refreshDashboardSurface();
   }
 });
 window.addEventListener('beforeunload',()=>{if(currentUser)db.collection('users').doc(currentUser.uid).update({status:'offline'}).catch(()=>{});});
@@ -1684,6 +1690,111 @@ function renderBadges(badges){
 function awardBadge(uid,badgeKey){
   return db.collection('users').doc(uid).update({badges:firebase.firestore.FieldValue.arrayUnion(badgeKey)});
 }
+function featuredScore(user){
+  return (user.points||0)+((user.badges||[]).length*18)+((user.friends||[]).length*4)+(user.status==='online'?10:0)+(user.activityStatus?4:0);
+}
+function buildFeaturedDescription(user,position){
+  if(!user)return'No operative has been featured yet.';
+  if(position===0&&(user.points||0)>0){
+    return `${user.displayName||'This operative'} is currently setting the pace with ${user.points||0} pts and ${user.rank||'Member'} clearance.`;
+  }
+  if(user.activityStatus){
+    return `Current activity: "${user.activityStatus}". ${(user.bio&&user.bio.trim())?user.bio.trim():`${user.rank||'Member'} operative active in the Nexus network.`}`;
+  }
+  if(user.bio&&user.bio.trim())return truncateText(user.bio.trim(),150);
+  if((user.points||0)>0){
+    return `${user.displayName||'This operative'} has accumulated ${user.points||0} pts through missions, activity, and member engagement.`;
+  }
+  return `${user.rank||'Member'} operative active in the Nexus network.`;
+}
+function buildFeaturedTags(user,position){
+  if(!user)return[];
+  const tags=[];
+  if(position===0&&(user.points||0)>0)tags.push('Top Operative');
+  if(user.rank)tags.push(user.rank);
+  if((user.points||0)>0)tags.push(`${user.points||0} pts`);
+  if((user.friends||[]).length>0)tags.push(`${(user.friends||[]).length} connections`);
+  (user.badges||[]).forEach(b=>{
+    if(tags.length<5&&BADGE_DEFS[b]?.label)tags.push(BADGE_DEFS[b].label);
+  });
+  if(tags.length<3&&user.status)tags.push(STATUS_LABELS[user.status]||user.status);
+  return tags.slice(0,5);
+}
+function setFeaturedMember(user,position=0){
+  const card=document.querySelector('#featured-member .featured-card');
+  const nameEl=document.getElementById('featured-name');
+  const descEl=document.getElementById('featured-desc');
+  const badgesEl=document.getElementById('member-achievements');
+  currentFeaturedMember=user||null;
+  if(!nameEl||!descEl||!badgesEl||!card)return;
+  if(!user){
+    nameEl.textContent='No Operative Selected';
+    descEl.textContent='No operative has been featured yet.';
+    badgesEl.innerHTML='<span class="achievement-badge">Spotlight Pending</span>';
+    card.classList.remove('is-interactive');
+    return;
+  }
+  nameEl.textContent=user.displayName||'Unknown Operative';
+  descEl.textContent=buildFeaturedDescription(user,position);
+  const tags=buildFeaturedTags(user,position);
+  badgesEl.innerHTML=tags.length
+    ? tags.map(tag=>`<span class="achievement-badge">${esc(tag)}</span>`).join('')
+    : '<span class="achievement-badge">Member Network</span>';
+  card.classList.add('is-interactive');
+}
+function rotateFeaturedMember(){
+  if(!featuredMemberPool.length){
+    setFeaturedMember(null);
+    return;
+  }
+  const displayIndex=featuredMemberIndex;
+  setFeaturedMember(featuredMemberPool[displayIndex],displayIndex);
+  featuredMemberIndex=(featuredMemberIndex+1)%featuredMemberPool.length;
+}
+function startFeaturedRotation(){
+  if(featuredRotationTimer){
+    clearInterval(featuredRotationTimer);
+    featuredRotationTimer=null;
+  }
+  if(featuredMemberPool.length>1){
+    featuredRotationTimer=setInterval(rotateFeaturedMember,10000);
+  }
+}
+async function loadFeaturedMembers(){
+  const card=document.querySelector('#featured-member .featured-card');
+  if(!card)return;
+  try{
+    const snap=await db.collection('users').get();
+    const users=[];
+    snap.forEach(d=>{
+      const user=d.data();
+      if(user.isAnonymous)return;
+      users.push({...user,id:d.id});
+    });
+    users.sort((a,b)=>{
+      const scoreDiff=featuredScore(b)-featuredScore(a);
+      if(scoreDiff!==0)return scoreDiff;
+      return (a.displayName||'').localeCompare(b.displayName||'');
+    });
+    featuredMemberPool=users.slice(0,6);
+    featuredMemberIndex=0;
+    rotateFeaturedMember();
+    startFeaturedRotation();
+  }catch(err){
+    console.error('Featured member load failed:',err);
+    featuredMemberPool=[];
+    startFeaturedRotation();
+    setFeaturedMember(null);
+  }
+}
+document.querySelector('#featured-member .featured-card')?.addEventListener('click',()=>{
+  if(!currentFeaturedMember?.id)return;
+  if(currentUser&&currentFeaturedMember.id===currentUser.uid){
+    openMyProfile();
+    return;
+  }
+  openViewProfile({...currentFeaturedMember});
+});
 async function checkAndAwardBadges(uid,userData){
   if(!uid||!userData||userData.isAnonymous)return;
   const badges=userData.badges||[];
@@ -1723,13 +1834,27 @@ let corpLogUnsub=null;
 async function loadCorpLog(filter='all'){
   const feed=document.getElementById('corpLogFeed');
   feed.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  updateHubSectionInfo({
+    label:filter==='all'?'Activity Feed':`${filter.charAt(0).toUpperCase()+filter.slice(1)} Activity`,
+    count:'—',
+    note:filter==='all'
+      ? 'Loading recent member actions, system updates, and internal signals.'
+      : `Loading entries filtered to ${filter} activity.`
+  });
   if(corpLogUnsub){corpLogUnsub();corpLogUnsub=null;}
   let q=db.collection('corpLog').orderBy('createdAt','desc').limit(50);
   corpLogUnsub=q.onSnapshot(snap=>{
     feed.innerHTML='';
     let docs=snap.docs;
     if(filter!=='all')docs=docs.filter(d=>d.data().type===filter);
-    if(!docs.length){feed.innerHTML='<div class="hub-empty">No activity yet.</div>';return;}
+    if(!docs.length){
+      updateHubSectionInfo({
+        label:filter==='all'?'Activity Feed':`${filter.charAt(0).toUpperCase()+filter.slice(1)} Activity`,
+        count:0,
+        note:filter==='all'?'No activity has been recorded yet.':`No ${filter} activity is available yet.`
+      });
+      feed.innerHTML='<div class="hub-empty">No activity yet.</div>';return;
+    }
     // Filter log entries
     const isDevViewer=isDev(currentUserData);
     const isMViewer=isMod(currentUserData);
@@ -1738,7 +1863,21 @@ async function loadCorpLog(filter='all'){
       if(PRIVATE_LOG_TYPES.includes(t)&&!isDevViewer)return false;
       return true;
     });
-    if(!visibleDocs.length){feed.innerHTML='<div class="hub-empty">No activity to display.</div>';return;}
+    if(!visibleDocs.length){
+      updateHubSectionInfo({
+        label:filter==='all'?'Activity Feed':`${filter.charAt(0).toUpperCase()+filter.slice(1)} Activity`,
+        count:0,
+        note:'No visible activity is available for your current access level.'
+      });
+      feed.innerHTML='<div class="hub-empty">No activity to display.</div>';return;
+    }
+    updateHubSectionInfo({
+      label:filter==='all'?'Activity Feed':`${filter.charAt(0).toUpperCase()+filter.slice(1)} Activity`,
+      count:visibleDocs.length,
+      note:filter==='all'
+        ? 'Recent member actions, system updates, and internal signals.'
+        : `Showing the latest ${filter} entries across the corporation.`
+    });
     visibleDocs.forEach(d=>{
       const log=d.data();
       const item=document.createElement('div');item.className='log-item';
@@ -1767,6 +1906,7 @@ document.querySelectorAll('.log-filter-btn').forEach(btn=>{
 async function loadMissions(){
   const list=document.getElementById('missionsList');
   list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  updateHubSectionInfo({label:'Active Missions',count:'—',note:'Loading active objectives and your current mission state.'});
   try{
     const [missionsSnap,mySubsSnap]=await Promise.all([
       db.collection('missions').where('active','==',true).get(),
@@ -1775,7 +1915,15 @@ async function loadMissions(){
     const mySubsMap={};
     mySubsSnap.forEach(d=>{mySubsMap[d.data().missionId]=d.data();});
     list.innerHTML='';
-    if(missionsSnap.empty){list.innerHTML='<div class="hub-empty">No active missions. Check back soon.</div>';return;}
+    if(missionsSnap.empty){
+      updateHubSectionInfo({label:'Active Missions',count:0,note:'No active missions are published right now.'});
+      list.innerHTML='<div class="hub-empty">No active missions. Check back soon.</div>';return;
+    }
+    updateHubSectionInfo({
+      label:'Active Missions',
+      count:missionsSnap.size,
+      note:'Mission cards show live status, point value, and any existing submission state.'
+    });
     missionsSnap.forEach(d=>{
       const m=d.data(),mid=d.id;
       const mySub=mySubsMap[mid];
@@ -1844,6 +1992,7 @@ async function loadMissions(){
 async function loadLeaderboard(){
   const list=document.getElementById('leaderboardList');
   list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  updateHubSectionInfo({label:'Ranked Operatives',count:'—',note:'Loading member standings and point totals.'});
   try{
     const snap=await db.collection('users').get();
     const users=[];
@@ -1851,7 +2000,15 @@ async function loadLeaderboard(){
     // Compute score
     users.sort((a,b)=>(b.points||0)-(a.points||0));
     list.innerHTML='';
-    if(!users.length){list.innerHTML='<div class="hub-empty">No operatives ranked yet.</div>';return;}
+    if(!users.length){
+      updateHubSectionInfo({label:'Ranked Operatives',count:0,note:'No ranked operatives are available yet.'});
+      list.innerHTML='<div class="hub-empty">No operatives ranked yet.</div>';return;
+    }
+    updateHubSectionInfo({
+      label:'Ranked Operatives',
+      count:users.length,
+      note:'Leaderboard order is driven by current point totals across visible members.'
+    });
     users.slice(0,20).forEach((u,i)=>{
       const rankNum=i+1;
       const rankCls=rankNum===1?'gold':rankNum===2?'silver':rankNum===3?'bronze':'other';
@@ -1873,11 +2030,26 @@ async function loadLeaderboard(){
 async function loadCalendar(){
   const list=document.getElementById('calendarList');
   list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  updateHubSectionInfo({label:'Upcoming Events',count:'—',note:'Loading scheduled operations and attendance signals.'});
   try{
     const snap=await db.collection('events').get();
     const events=snap.docs.sort((a,b)=>(a.data().eventDate?.toMillis?.()??0)-(b.data().eventDate?.toMillis?.()??0));
     list.innerHTML='';
-    if(!events.length){list.innerHTML='<div class="hub-empty">No events scheduled yet.</div>';return;}
+    const upcomingEvents=events.filter(d=>{
+      const eventDate=d.data().eventDate?.toDate?.();
+      return !eventDate||eventDate>=new Date();
+    });
+    if(!events.length){
+      updateHubSectionInfo({label:'Upcoming Events',count:0,note:'No events have been scheduled yet.'});
+      list.innerHTML='<div class="hub-empty">No events scheduled yet.</div>';return;
+    }
+    updateHubSectionInfo({
+      label:'Upcoming Events',
+      count:upcomingEvents.length,
+      note:upcomingEvents.length
+        ? 'Upcoming operations are ordered by date and show current RSVP status.'
+        : 'All current events have already passed.'
+    });
     for(const d of events){
       const ev=d.data(),eid=d.id;
       const evDate=ev.eventDate?.toDate?.();
@@ -1923,6 +2095,7 @@ async function loadCalendar(){
 async function loadIntelBoard(){
   const list=document.getElementById('intelList');
   list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  updateHubSectionInfo({label:'Intel Posts',count:'—',note:'Loading internal intel, updates, and published alerts.'});
   const canPost=isMod(currentUserData);
   try{
     const snap=await db.collection('intelPosts').get();
@@ -1947,7 +2120,21 @@ async function loadIntelBoard(){
         loadIntelBoard();
       });
     }
-    if(!posts.length){list.innerHTML+='<div class="hub-empty">No intel posts yet.</div>';return;}
+    if(!posts.length){
+      updateHubSectionInfo({
+        label:'Intel Posts',
+        count:0,
+        note:canPost?'No intel posts yet. Staff can publish the first post from this view.':'No intel posts have been published yet.'
+      });
+      list.innerHTML+='<div class="hub-empty">No intel posts yet.</div>';return;
+    }
+    updateHubSectionInfo({
+      label:'Intel Posts',
+      count:posts.length,
+      note:canPost
+        ? 'Recent intel and alerts. Staff can publish directly from this board.'
+        : 'Recent intel, staff updates, and internal notices appear here first.'
+    });
     posts.forEach(d=>{
       const p=d.data();
       const item=document.createElement('div');item.className='intel-post';
@@ -1964,6 +2151,7 @@ async function loadIntelBoard(){
 async function loadPolls(){
   const list=document.getElementById('pollsList');
   list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  updateHubSectionInfo({label:'Active Polls',count:'—',note:'Loading live polls and recent voting prompts.'});
   const canCreate=isAdmin(currentUserData);
   try{
     const snap=await db.collection('polls').get();
@@ -1995,7 +2183,21 @@ async function loadPolls(){
         loadPolls();
       });
     }
-    if(!polls.length){list.innerHTML+='<div class="hub-empty">No polls yet.</div>';return;}
+    if(!polls.length){
+      updateHubSectionInfo({
+        label:'Active Polls',
+        count:0,
+        note:canCreate?'No polls yet. Administrators can create the first poll here.':'No polls are currently active.'
+      });
+      list.innerHTML+='<div class="hub-empty">No polls yet.</div>';return;
+    }
+    updateHubSectionInfo({
+      label:'Active Polls',
+      count:polls.length,
+      note:canCreate
+        ? 'Live voting prompts with admin controls for new poll creation.'
+        : 'Vote once per poll to help steer decisions and member direction.'
+    });
     for(const d of polls){
       const p=d.data(),pid=d.id;
       const votes=p.votes||{};
@@ -2111,12 +2313,97 @@ document.getElementById('corpChatInput').addEventListener('keydown',e=>{if(e.key
 /* ═══════════════════════════════════════════════════════
    ENGAGEMENT HUB MODAL
 ═══════════════════════════════════════════════════════ */
+const HUB_SUMMARY_CONFIG={
+  log:{
+    eyebrow:'Live Coordination',
+    title:'Corporation Feed',
+    meta:'Track joins, ranks, mission submissions, connections, and internal status changes in one stream.',
+    label:'Activity Feed',
+    note:'Recent member actions, system updates, and internal signals.'
+  },
+  missions:{
+    eyebrow:'Objective Queue',
+    title:'Mission Board',
+    meta:'Review active objectives, submit mission keys, and track approval state from a single board.',
+    label:'Active Missions',
+    note:'Mission cards show live status, points, and your current submission state.'
+  },
+  leaderboard:{
+    eyebrow:'Top Performers',
+    title:'Leaderboard',
+    meta:'See who is leading the network by points, activity, and overall operational momentum.',
+    label:'Ranked Operatives',
+    note:'The board reflects live point totals across visible members.'
+  },
+  calendar:{
+    eyebrow:'Upcoming Operations',
+    title:'Calendar',
+    meta:'Review scheduled events, upcoming dates, and attendance signals across the corporation.',
+    label:'Upcoming Events',
+    note:'Use RSVP status to coordinate attendance around future operations.'
+  },
+  intel:{
+    eyebrow:'Internal Updates',
+    title:'Intel Board',
+    meta:'Read internal intel posts, alerts, and operational notes published by staff.',
+    label:'Intel Posts',
+    note:'Recent intel, staff updates, and internal notices appear here first.'
+  },
+  polls:{
+    eyebrow:'Group Decisions',
+    title:'Polls',
+    meta:'Surface member input quickly through live polls and lightweight decision prompts.',
+    label:'Active Polls',
+    note:'Vote once per poll to help steer decisions and member direction.'
+  }
+};
+function updateHubChrome(tab){
+  const cfg=HUB_SUMMARY_CONFIG[tab]||HUB_SUMMARY_CONFIG.log;
+  document.getElementById('hubSummaryEyebrow').textContent=cfg.eyebrow;
+  document.getElementById('hubSummaryTitle').textContent=cfg.title;
+  document.getElementById('hubSummaryMeta').textContent=cfg.meta;
+  document.getElementById('hubSectionLabel').textContent=cfg.label;
+  document.getElementById('hubSectionNote').textContent=cfg.note;
+  document.getElementById('hubSectionCount').textContent='—';
+  document.getElementById('hubViewerRank').textContent=currentUserData?.rank?`${currentUserData.rank} Access`:'Member Access';
+}
+function updateHubSectionInfo({label,count,note}={}){
+  if(label)document.getElementById('hubSectionLabel').textContent=label;
+  if(note)document.getElementById('hubSectionNote').textContent=note;
+  document.getElementById('hubSectionCount').textContent=count===undefined?'—':String(count);
+}
+async function loadHubQuickStats(){
+  try{
+    const [onlineSnap,missionsSnap,eventsSnap,intelSnap]=await Promise.all([
+      db.collection('users').where('status','==','online').get(),
+      db.collection('missions').where('active','==',true).get(),
+      db.collection('events').get(),
+      db.collection('intelPosts').get()
+    ]);
+    const now=Date.now();
+    const upcomingEvents=eventsSnap.docs.filter(d=>{
+      const eventDate=d.data().eventDate?.toDate?.();
+      return !eventDate||eventDate.getTime()>=now;
+    }).length;
+    document.getElementById('hubQuickOnline').textContent=onlineSnap.size;
+    document.getElementById('hubQuickMissions').textContent=missionsSnap.size;
+    document.getElementById('hubQuickEvents').textContent=upcomingEvents;
+    document.getElementById('hubQuickIntel').textContent=intelSnap.size;
+  }catch(err){
+    console.error('Hub quick stats failed:',err);
+    ['hubQuickOnline','hubQuickMissions','hubQuickEvents','hubQuickIntel'].forEach(id=>{
+      document.getElementById(id).textContent='—';
+    });
+  }
+}
 async function openEngagementHub(tab='log'){
   if(!currentUser||currentUser.isAnonymous){
     promptGuestRegister('Create a free account to access the Corp Hub.');
     return;
   }
   openModal('engagementModal');
+  updateHubChrome(tab);
+  loadHubQuickStats();
   // Activate correct tab
   document.querySelectorAll('.hub-tab').forEach(b=>{b.classList.toggle('active',b.dataset.hub===tab);});
   document.querySelectorAll('.hub-section').forEach(s=>{s.classList.toggle('active',s.id==='hub'+tab.charAt(0).toUpperCase()+tab.slice(1));});
@@ -2129,6 +2416,7 @@ async function openEngagementHub(tab='log'){
       btn.classList.add('active');
       const section=document.getElementById('hub'+btn.dataset.hub.charAt(0).toUpperCase()+btn.dataset.hub.slice(1));
       if(section)section.classList.add('active');
+      updateHubChrome(btn.dataset.hub);
       await loadHubTab(btn.dataset.hub);
     };
   });
@@ -2150,6 +2438,323 @@ document.getElementById('corpHubBtn').addEventListener('click',e=>{
   dropdownMenu.classList.remove('open');
   openEngagementHub();
 });
+/* ═══════════════════════════════════════════════════════
+   HOME COMMAND BOARD
+═══════════════════════════════════════════════════════ */
+const HOME_PREVIEW_CONFIG={
+  log:{
+    eyebrow:'Live Activity',
+    title:'Corporation Feed',
+    meta:'Recent signals and ongoing work across the corporation.',
+    openLabel:'Open Activity'
+  },
+  missions:{
+    eyebrow:'Mission Queue',
+    title:'Mission Board',
+    meta:'Active objectives and current submission status.',
+    openLabel:'Open Missions'
+  },
+  leaderboard:{
+    eyebrow:'Top Operatives',
+    title:'Leaderboard',
+    meta:'Current point standings across active members.',
+    openLabel:'Open Rankings'
+  },
+  intel:{
+    eyebrow:'Intel Stream',
+    title:'Intel Board',
+    meta:'Latest internal posts, updates, and alerts.',
+    openLabel:'Open Intel'
+  }
+};
+let homePreviewTab='log';
+let homePreviewRequestId=0;
+
+function isGuestViewer(){
+  return !currentUser||currentUser.isAnonymous||currentUserData?.isAnonymous;
+}
+
+function truncateText(text,maxLen=120){
+  const clean=String(text||'').trim();
+  if(clean.length<=maxLen)return clean;
+  return clean.slice(0,maxLen-1)+'…';
+}
+
+function buildPreviewRow({icon,title,text,meta,badge=''}){
+  return `<button type="button" class="preview-row preview-row-button">
+    <div class="preview-row-icon"><i class="fas ${icon}"></i></div>
+    <div class="preview-row-body">
+      <div class="preview-row-title">${title}${badge?`<span class="preview-state">${badge}</span>`:''}</div>
+      <div class="preview-row-text">${text}</div>
+      <div class="preview-row-meta">${meta}</div>
+    </div>
+    <div class="preview-row-arrow"><i class="fas fa-arrow-right"></i></div>
+  </button>`;
+}
+
+function buildLockedPreview(reason){
+  return `<div class="preview-locked"><strong>Access Required</strong><br>${esc(reason)}</div>`;
+}
+
+function updateCommandBoardIdentity(){
+  const isGuest=isGuestViewer();
+  const accessBadge=document.getElementById('commandAccessBadge');
+  const boardCopy=document.getElementById('commandBoardCopy');
+  const rankValue=document.getElementById('commandRankValue');
+  const primaryLabel=document.getElementById('commandPrimaryLabel');
+  const primaryAction=document.getElementById('commandPrimaryAction');
+  if(isGuest){
+    accessBadge.textContent=currentUser?.isAnonymous?'Guest Access':'Public Access';
+    boardCopy.textContent='A cleaner operational view of corporation activity, missions, leaderboards, and internal signals.';
+    rankValue.textContent=currentUser?.isAnonymous?'Guest':'Visitor';
+    primaryLabel.textContent=currentUser?.isAnonymous?'Unlock Member Access':'Create Account';
+    primaryAction.title='Create a free account to access the full corp hub.';
+    return;
+  }
+  accessBadge.textContent=currentUserData?.rank||'Member';
+  boardCopy.textContent=currentUserData?.activityStatus
+    ? `Live overview for ${(currentUserData.displayName||'this operative')}. Current activity: "${currentUserData.activityStatus}".`
+    : 'Live overview of corporation activity, missions, leaderboards, and internal signals.';
+  rankValue.textContent=currentUserData?.rank||'Member';
+  primaryLabel.textContent='Open Corp Hub';
+  primaryAction.title='Open the full Corporation Hub.';
+}
+
+function updateHomePreviewHeader(tab){
+  const cfg=HOME_PREVIEW_CONFIG[tab]||HOME_PREVIEW_CONFIG.log;
+  document.getElementById('homePreviewEyebrow').textContent=cfg.eyebrow;
+  document.getElementById('homePreviewTitle').textContent=cfg.title;
+  document.getElementById('homePreviewMeta').textContent=cfg.meta;
+  document.getElementById('homePreviewOpenBtn').textContent=cfg.openLabel;
+  document.querySelectorAll('.command-tab').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.previewTab===tab);
+  });
+}
+
+async function loadHomeLogPreview(){
+  const guestItems=[
+    {icon:'fa-satellite-dish',title:'Platform Restructure',text:'TheSizNexus is rebuilding its member platform and tightening the dashboard experience.',meta:'Public status',badge:'Live'},
+    {icon:'fa-comments',title:'Discord Coordination',text:'Discord remains the active public coordination channel while internal tools continue to mature.',meta:'Primary channel',badge:'Active'},
+    {icon:'fa-shield-alt',title:'Access Model',text:'Full corp activity, missions, and internal boards unlock through a free account and clearance rank.',meta:'Member access',badge:'Invite-led'}
+  ];
+  if(isGuestViewer())return guestItems.map(buildPreviewRow).join('');
+  const snap=await db.collection('corpLog').orderBy('createdAt','desc').limit(5).get();
+  const visibleDocs=snap.docs.filter(d=>{
+    const t=d.data().type;
+    if(PRIVATE_LOG_TYPES.includes(t)&&!isDev(currentUserData))return false;
+    return true;
+  });
+  if(!visibleDocs.length)return '<div class="hub-empty">No activity yet.</div>';
+  const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn'};
+  return visibleDocs.map(d=>{
+    const log=d.data();
+    const time=log.createdAt?`${fmtDate(log.createdAt)} ${fmtTime(log.createdAt)}`:'Recent';
+    return buildPreviewRow({
+      icon:typeIcon[log.type]||'fa-circle',
+      title:esc(log.displayName||'Unknown'),
+      text:esc(log.message||'No details available.'),
+      meta:`${esc(log.rank||'Member')} • ${time}`,
+      badge:esc(log.type||'update')
+    });
+  }).join('');
+}
+
+async function loadHomeMissionPreview(){
+  if(isGuestViewer())return buildLockedPreview('Create a free account to unlock missions, key submissions, and the full corp hub.');
+  const [missionsSnap,mySubsSnap]=await Promise.all([
+    db.collection('missions').where('active','==',true).get(),
+    db.collection('missionSubmissions').where('uid','==',currentUser.uid).get()
+  ]);
+  const mySubsMap={};
+  mySubsSnap.forEach(d=>{mySubsMap[d.data().missionId]=d.data();});
+  if(missionsSnap.empty)return '<div class="hub-empty">No active missions right now.</div>';
+  return missionsSnap.docs.slice(0,4).map(d=>{
+    const m=d.data();
+    const mySub=mySubsMap[d.id];
+    let badge='Open';
+    if(mySub?.status==='pending')badge='Pending';
+    else if(mySub?.status==='approved')badge='Completed';
+    else if(mySub?.status==='rejected')badge='Rejected';
+    return buildPreviewRow({
+      icon:'fa-crosshairs',
+      title:esc(m.title||'Mission'),
+      text:esc(truncateText(m.description||'Mission briefing unavailable.',110)),
+      meta:`${m.points||50} pts`,
+      badge
+    });
+  }).join('');
+}
+
+async function loadHomeLeaderboardPreview(){
+  if(isGuestViewer())return buildLockedPreview('Create a free account to see ranking movement, your score, and the full leaderboard.');
+  const snap=await db.collection('users').get();
+  const users=[];
+  snap.forEach(d=>{const u=d.data();u.id=d.id;if(!u.isAnonymous)users.push(u);});
+  users.sort((a,b)=>(b.points||0)-(a.points||0));
+  if(!users.length)return '<div class="hub-empty">No ranked operatives yet.</div>';
+  return users.slice(0,5).map((u,index)=>buildPreviewRow({
+    icon:index===0?'fa-trophy':'fa-chevron-up',
+    title:`#${index+1} ${esc(u.displayName||'Unknown')}`,
+    text:`Current rank: ${esc(u.rank||'Member')}${u.id===currentUser.uid?' • You are on the board.':''}`,
+    meta:`${u.points||0} pts`,
+    badge:u.id===currentUser.uid?'You':'Top'
+  })).join('');
+}
+
+async function loadHomeIntelPreview(){
+  if(isGuestViewer())return buildLockedPreview('Create a free account to unlock internal intel posts and live updates.');
+  const snap=await db.collection('intelPosts').orderBy('createdAt','desc').limit(4).get();
+  if(snap.empty)return '<div class="hub-empty">No intel posts yet.</div>';
+  return snap.docs.map(d=>{
+    const post=d.data();
+    return buildPreviewRow({
+      icon:'fa-satellite-dish',
+      title:esc(post.title||'Intel'),
+      text:esc(truncateText(post.body||'No details available.',120)),
+      meta:`${esc(post.authorName||'Admin')} • ${post.createdAt?fmtDate(post.createdAt):'Recent'}`,
+      badge:esc(post.tag||'Intel')
+    });
+  }).join('');
+}
+
+async function loadHomePreview(tab=homePreviewTab){
+  homePreviewTab=tab;
+  updateHomePreviewHeader(tab);
+  const list=document.getElementById('homePreviewList');
+  const requestId=++homePreviewRequestId;
+  list.innerHTML='<div class="hub-empty">Loading board...</div>';
+  try{
+    let html='';
+    if(tab==='log')html=await loadHomeLogPreview();
+    else if(tab==='missions')html=await loadHomeMissionPreview();
+    else if(tab==='leaderboard')html=await loadHomeLeaderboardPreview();
+    else if(tab==='intel')html=await loadHomeIntelPreview();
+    if(requestId!==homePreviewRequestId)return;
+    list.innerHTML=html;
+  }catch(err){
+    console.error('Home preview load failed:',err);
+    if(requestId!==homePreviewRequestId)return;
+    list.innerHTML='<div class="preview-locked"><strong>Board Offline</strong><br>Unable to load this view right now.</div>';
+  }
+}
+
+async function loadNetworkSnapshot(){
+  const missionEl=document.getElementById('snapshotMissionCount');
+  const eventEl=document.getElementById('snapshotEventCount');
+  const intelEl=document.getElementById('snapshotIntelCount');
+  const missionLeadEl=document.getElementById('snapshotMissionLead');
+  const eventLeadEl=document.getElementById('snapshotEventLead');
+  const intelLeadEl=document.getElementById('snapshotIntelLead');
+  const noticeEl=document.getElementById('snapshotNotice');
+  try{
+    const [missionsSnap,eventsSnap,intelSnap,annSnap]=await Promise.all([
+      db.collection('missions').where('active','==',true).get(),
+      db.collection('events').get(),
+      db.collection('intelPosts').get(),
+      db.collection('announcements').orderBy('createdAt','desc').limit(1).get()
+    ]);
+    const now=Date.now();
+    const upcomingEvents=eventsSnap.docs.filter(d=>{
+      const eventDate=d.data().eventDate?.toDate?.();
+      return !eventDate||eventDate.getTime()>=now;
+    }).length;
+    const sortedMissions=missionsSnap.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()??0)-(a.data().createdAt?.toMillis?.()??0));
+    const sortedEvents=eventsSnap.docs
+      .filter(d=>{
+        const eventDate=d.data().eventDate?.toDate?.();
+        return !eventDate||eventDate.getTime()>=now;
+      })
+      .sort((a,b)=>(a.data().eventDate?.toMillis?.()??Number.MAX_SAFE_INTEGER)-(b.data().eventDate?.toMillis?.()??Number.MAX_SAFE_INTEGER));
+    const sortedIntel=intelSnap.docs.sort((a,b)=>(b.data().createdAt?.toMillis?.()??0)-(a.data().createdAt?.toMillis?.()??0));
+    missionEl.textContent=missionsSnap.size;
+    eventEl.textContent=upcomingEvents;
+    intelEl.textContent=intelSnap.size;
+    missionLeadEl.textContent=sortedMissions.length
+      ? `${sortedMissions[0].data().title||'Mission'} • ${sortedMissions[0].data().points||50} pts`
+      : 'No active missions right now.';
+    if(sortedEvents.length){
+      const nextEvent=sortedEvents[0].data();
+      const eventDate=nextEvent.eventDate?.toDate?.();
+      const eventMeta=eventDate
+        ? eventDate.toLocaleDateString([],{month:'short',day:'numeric'})
+        : 'Date pending';
+      eventLeadEl.textContent=`${nextEvent.title||'Upcoming event'} • ${eventMeta}`;
+    }else{
+      eventLeadEl.textContent='No upcoming events scheduled.';
+    }
+    intelLeadEl.textContent=sortedIntel.length
+      ? `${sortedIntel[0].data().tag?`${sortedIntel[0].data().tag} • `:''}${sortedIntel[0].data().title||'Intel post'}`
+      : 'No intel posts published yet.';
+    if(!annSnap.empty){
+      const ann=annSnap.docs[0].data();
+      noticeEl.textContent=`${ann.title||'Notice'}: ${truncateText(ann.body||'No details available.',120)}`;
+    }else{
+      noticeEl.textContent='No live announcements. Discord remains the current coordination channel.';
+    }
+  }catch(err){
+    console.error('Snapshot load failed:',err);
+    missionEl.textContent='—';
+    eventEl.textContent='—';
+    intelEl.textContent='—';
+    missionLeadEl.textContent='Mission data unavailable.';
+    eventLeadEl.textContent='Event data unavailable.';
+    intelLeadEl.textContent='Intel data unavailable.';
+    noticeEl.textContent=isGuestViewer()
+      ? 'Live counts unlock inside the member dashboard. Discord remains the active public channel.'
+      : 'Snapshot unavailable right now. Try opening the full Corp Hub.';
+  }
+}
+
+function refreshDashboardSurface(){
+  updateCommandBoardIdentity();
+  loadHomePreview(homePreviewTab);
+  loadNetworkSnapshot();
+  loadFeaturedMembers();
+}
+
+document.querySelectorAll('.command-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>loadHomePreview(btn.dataset.previewTab));
+});
+document.getElementById('homePreviewList').addEventListener('click',e=>{
+  if(!e.target.closest('.preview-row-button'))return;
+  if(isGuestViewer()){
+    promptGuestRegister('Create a free account to access the Corp Hub and operational boards.');
+    return;
+  }
+  openEngagementHub(homePreviewTab);
+});
+document.getElementById('homePreviewOpenBtn').addEventListener('click',()=>{
+  if(isGuestViewer()){
+    promptGuestRegister('Create a free account to access the Corp Hub and operational boards.');
+    return;
+  }
+  openEngagementHub(homePreviewTab);
+});
+document.getElementById('commandPrimaryAction').addEventListener('click',()=>{
+  if(isGuestViewer()){
+    promptGuestRegister('Create a free account to access the Corp Hub and live operations.');
+    return;
+  }
+  openEngagementHub(homePreviewTab);
+});
+document.getElementById('commandMembersAction').addEventListener('click',()=>{
+  if(isGuestViewer()){
+    promptGuestRegister('Create a free account to view and connect with other operatives.');
+    return;
+  }
+  openModal('userDirectory');
+  loadAllUsers();
+});
+document.querySelectorAll('[data-snapshot-tab]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    if(isGuestViewer()){
+      promptGuestRegister('Create a free account to access the Corp Hub and live operational data.');
+      return;
+    }
+    openEngagementHub(btn.dataset.snapshotTab);
+  });
+});
+refreshDashboardSurface();
 /* ═══════════════════════════════════════════════════════
    REPORT & BLOCK SYSTEM
 ═══════════════════════════════════════════════════════ */

@@ -218,7 +218,35 @@
 <div class="modal" id="engagementModal">
   <div class="modal-container">
     <button class="close-btn" id="closeEngagement">&#x2715;</button>
-    <h2><i class="fas fa-satellite-dish" style="margin-right:8px;font-size:.85rem;color:#C0C0C0;filter:drop-shadow(0 0 5px rgba(192,192,192,.35));"></i>Corporation Hub</h2>
+    <div class="hub-modal-top">
+      <h2><i class="fas fa-satellite-dish" style="margin-right:8px;font-size:.85rem;color:#C0C0C0;filter:drop-shadow(0 0 5px rgba(192,192,192,.35));"></i>Corporation Hub</h2>
+      <span class="hub-viewer-rank" id="hubViewerRank">Member Access</span>
+    </div>
+    <div class="hub-hero">
+      <div class="hub-hero-copy">
+        <p class="hub-hero-kicker" id="hubSummaryEyebrow">Live Coordination</p>
+        <h3 id="hubSummaryTitle">Corporation Feed</h3>
+        <p id="hubSummaryMeta">Track activity, missions, rankings, events, and internal intel from one command surface.</p>
+      </div>
+      <div class="hub-quick-grid">
+        <div class="hub-quick-stat">
+          <span class="hub-quick-label">Online</span>
+          <strong class="hub-quick-value" id="hubQuickOnline">—</strong>
+        </div>
+        <div class="hub-quick-stat">
+          <span class="hub-quick-label">Missions</span>
+          <strong class="hub-quick-value" id="hubQuickMissions">—</strong>
+        </div>
+        <div class="hub-quick-stat">
+          <span class="hub-quick-label">Events</span>
+          <strong class="hub-quick-value" id="hubQuickEvents">—</strong>
+        </div>
+        <div class="hub-quick-stat">
+          <span class="hub-quick-label">Intel</span>
+          <strong class="hub-quick-value" id="hubQuickIntel">—</strong>
+        </div>
+      </div>
+    </div>
     <div class="hub-tabs">
       <button class="hub-tab active" data-hub="log"><i class="fas fa-scroll"></i> Corp Log</button>
       <button class="hub-tab" data-hub="missions"><i class="fas fa-crosshairs"></i> Missions</button>
@@ -226,6 +254,13 @@
       <button class="hub-tab" data-hub="calendar"><i class="fas fa-calendar-alt"></i> Calendar</button>
       <button class="hub-tab" data-hub="intel"><i class="fas fa-satellite-dish"></i> Intel Board</button>
       <button class="hub-tab" data-hub="polls"><i class="fas fa-poll"></i> Polls</button>
+    </div>
+    <div class="hub-section-bar">
+      <div>
+        <span class="hub-section-label" id="hubSectionLabel">Activity Feed</span>
+        <p class="hub-section-note" id="hubSectionNote">Recent member actions, system updates, and internal signals.</p>
+      </div>
+      <div class="hub-section-count" id="hubSectionCount">—</div>
     </div>
     <!-- CORP LOG -->
     <div class="hub-section active" id="hubLog">
@@ -500,99 +535,188 @@
   <div class="stat-item">
     <div class="stat-number" id="activeMemberCount">—</div>
     <div class="stat-label">Active Members</div>
+    <div class="stat-note">Live presence across the member network</div>
   </div>
   <div class="stat-item">
     <div class="stat-number" data-target="1">0</div>
     <div class="stat-label">Active Projects</div>
+    <div class="stat-note">Current public-facing workstream</div>
   </div>
   <div class="stat-item">
     <div class="stat-number" style="font-size:clamp(1rem,3vw,1.6rem);letter-spacing:.15em;">ACTIVE</div>
     <div class="stat-label">Corporation Status</div>
+    <div class="stat-note">Core systems online and recruiting</div>
   </div>
 </div>
 
-<!-- CONTENT GRID -->
-<main class="info-section">
-
-  <div class="bubble" id="about">
-    <h2><span class="section-icon"><i class="fas fa-info"></i></span> About Us</h2>
-    <ul>
-      <li><strong>Who are we?</strong> — TheSizNexus is an intelligence corporation currently restructuring and migrating to a new platform.</li>
-      <li><strong>What will you get?</strong> — Join a network of operatives, gain rank clearance, and access exclusive intel operations.</li>
-      <li><strong>What can you do?</strong> — Participate in corporation events and rank up to unlock higher clearance levels.</li>
-    </ul>
-    <a href="https://discord.gg/73Mb3syadB" class="discord-button" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord"></i> Join Discord</a>
-  </div>
-
-  <div class="bubble" id="projects" data-member-only="true">
-    <h2><span class="section-icon"><i class="fas fa-flask"></i></span> Projects</h2>
-    <ul>
-      <li><strong>Corporation Developments</strong> — Reworking on the corporation.</li>
-      <li><strong>Corp Events</strong> — Reworking on the corporation.</li>
-      <li><strong>Intel Gathering</strong> — Reworking on the corporation.</li>
-    </ul>
-  </div>
-
-  <div class="bubble" id="information">
-    <h2><span class="section-icon"><i class="fas fa-crosshairs"></i></span> What We Do</h2>
-    <ul>
-      <li><strong>Main:</strong> TheSizNexus is an intelligence corporation — currently restructuring and moving to a new platform.</li>
-      <li>We focus on intelligence operations, corp infrastructure, and community-driven initiatives.</li>
-      <li><strong>We develop:</strong> Internal systems, operative tools, and organizational frameworks.</li>
-    </ul>
-  </div>
-
-  <div class="bubble" id="socials">
-    <h2><span class="section-icon"><i class="fas fa-satellite-dish"></i></span> Socials</h2>
-    <div class="social-links">
-      <a href="https://discord.gg/73Mb3syadB" class="social-link" target="_blank" rel="noopener noreferrer">
-        <div class="social-icon"><i class="fab fa-discord"></i></div>Discord — Active
-      </a>
-      <a class="social-link disabled"><div class="social-icon"><i class="fab fa-youtube"></i></div>YouTube <span class="social-soon">SOON</span></a>
-      <a class="social-link disabled"><div class="social-icon"><i class="fab fa-tiktok"></i></div>TikTok <span class="social-soon">SOON</span></a>
-    </div>
-  </div>
-
-  <!-- ACTIVE MEMBERS PANEL (replaces Ranks) -->
-  <div class="bubble" id="active-members-panel">
-    <h2><span class="section-icon"><i class="fas fa-signal"></i></span> Active Members</h2>
-    <div class="active-count" id="activeMembersCount">Online now: <span id="onlineCountLabel">0</span> operative(s)</div>
-    <div class="active-members-list" id="activeMembersList">
-      <div class="loading-spinner" style="grid-column:unset;padding:16px 0;"></div>
-    </div>
-    <div id="activeMembersGuestMsg" style="display:none;font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);padding:8px 0;line-height:1.6;">
-      <i class="fas fa-lock" style="margin-right:6px;opacity:.5;"></i>
-      <a href="#" id="activeMembersRegisterLink" style="color:var(--color-primary);text-decoration:underline;">Create a free account</a> to see who's online.
-    </div>
-  </div>
-
-  <div class="bubble" id="featured-member" data-member-only="true">
-    <h2><span class="section-icon"><i class="fas fa-star"></i></span> Featured Member</h2>
-    <div class="featured-card">
-      <p class="featured-name" id="featured-name">No Operative Selected</p>
-      <p class="featured-desc" id="featured-desc">No operative has been featured yet.</p>
-      <div class="achievements" id="member-achievements"></div>
-    </div>
-  </div>
-
-  <div class="bubble bubble-full" id="join">
-    <h2><span class="section-icon"><i class="fas fa-door-open"></i></span> How to Join</h2>
-    <div class="join-steps">
-      <div class="join-step">
-        <div class="step-num">01</div>
-        <div class="step-text">Add the tag <strong style="color:var(--color-primary)">ˢᶦᶻ</strong> to your username to identify as a TheSizNexus operative.</div>
+<!-- DASHBOARD -->
+<main class="dashboard-shell">
+  <aside class="dashboard-column dashboard-column-left">
+    <section class="bubble panel-compact" id="about">
+      <p class="panel-kicker">// NEXUS BRIEF</p>
+      <h2><span class="section-icon"><i class="fas fa-info"></i></span> Nexus Overview</h2>
+      <p class="panel-copy">TheSizNexus is rebuilding its intelligence network into a cleaner operational platform with stronger member tools, tighter coordination, and clearer access paths.</p>
+      <div class="signal-list">
+        <div class="signal-row">
+          <span class="signal-label">Current Focus</span>
+          <span class="signal-value">Operations, internal tooling, and platform restructure</span>
+        </div>
+        <div class="signal-row">
+          <span class="signal-label">Member Value</span>
+          <span class="signal-value">Rank clearance, missions, live coordination, and internal intel</span>
+        </div>
+        <div class="signal-row">
+          <span class="signal-label">Working Style</span>
+          <span class="signal-value">Structured, invite-led, and Discord-connected while the platform evolves</span>
+        </div>
       </div>
-      <div class="join-step">
-        <div class="step-num">02</div>
-        <div class="step-text">Join our <a href="https://discord.gg/73Mb3syadB" target="_blank" rel="noopener noreferrer">Discord server</a> and head to the introductions channel.</div>
-      </div>
-      <div class="join-step">
-        <div class="step-num">03</div>
-        <div class="step-text">Introduce yourself and request a clearance rank assignment from an Administrator.</div>
-      </div>
-    </div>
-  </div>
+    </section>
 
+    <section class="bubble panel-compact" id="active-members-panel">
+      <p class="panel-kicker">// LIVE PRESENCE</p>
+      <h2><span class="section-icon"><i class="fas fa-signal"></i></span> Active Members</h2>
+      <div class="active-count" id="activeMembersCount">Online now: <span id="onlineCountLabel">0</span> operative(s)</div>
+      <div class="active-members-list" id="activeMembersList">
+        <div class="loading-spinner" style="grid-column:unset;padding:16px 0;"></div>
+      </div>
+      <div id="activeMembersGuestMsg" style="display:none;font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);padding:8px 0;line-height:1.6;">
+        <i class="fas fa-lock" style="margin-right:6px;opacity:.5;"></i>
+        <a href="#" id="activeMembersRegisterLink" style="color:var(--color-primary);text-decoration:underline;">Create a free account</a> to see who's online.
+      </div>
+    </section>
+
+    <section class="bubble panel-compact" id="socials">
+      <p class="panel-kicker">// CHANNELS</p>
+      <h2><span class="section-icon"><i class="fas fa-satellite-dish"></i></span> Socials</h2>
+      <div class="social-links">
+        <a href="https://discord.gg/73Mb3syadB" class="social-link" target="_blank" rel="noopener noreferrer">
+          <div class="social-icon"><i class="fab fa-discord"></i></div>Discord — Active
+        </a>
+        <a class="social-link disabled"><div class="social-icon"><i class="fab fa-youtube"></i></div>YouTube <span class="social-soon">SOON</span></a>
+        <a class="social-link disabled"><div class="social-icon"><i class="fab fa-tiktok"></i></div>TikTok <span class="social-soon">SOON</span></a>
+      </div>
+    </section>
+  </aside>
+
+  <section class="dashboard-column dashboard-center" id="projects">
+    <section class="bubble command-board" id="command-board">
+      <div class="command-board-header">
+        <div class="command-board-copy">
+          <p class="panel-kicker">// OPERATIONS CENTER</p>
+          <h2><span class="section-icon"><i class="fas fa-satellite-dish"></i></span> Command Board</h2>
+          <p class="command-copy" id="commandBoardCopy">Live overview of corporation activity, missions, leaderboards, and internal signals.</p>
+        </div>
+        <div class="command-access" id="commandAccessBadge">Public Access</div>
+      </div>
+
+      <div class="command-strip">
+        <div class="command-strip-item">
+          <span class="command-strip-label">System</span>
+          <strong class="command-strip-value" id="commandStatusValue">ACTIVE</strong>
+        </div>
+        <div class="command-strip-item">
+          <span class="command-strip-label">Online</span>
+          <strong class="command-strip-value" id="commandOnlineValue">0</strong>
+        </div>
+        <div class="command-strip-item">
+          <span class="command-strip-label">Clearance</span>
+          <strong class="command-strip-value" id="commandRankValue">Visitor</strong>
+        </div>
+      </div>
+
+      <div class="command-actions">
+        <button type="button" class="btn-primary" id="commandPrimaryAction">
+          <i class="fas fa-satellite-dish"></i>
+          <span id="commandPrimaryLabel">Create Account</span>
+        </button>
+        <button type="button" class="btn-secondary" id="commandMembersAction">
+          <i class="fas fa-users"></i>
+          View Members
+        </button>
+        <a href="https://discord.gg/73Mb3syadB" class="btn-secondary" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-discord"></i>
+          Join Discord
+        </a>
+      </div>
+
+      <div class="command-preview-head">
+        <div>
+          <p class="preview-kicker" id="homePreviewEyebrow">Live Activity</p>
+          <h3 id="homePreviewTitle">Corporation Feed</h3>
+          <p class="preview-meta" id="homePreviewMeta">Recent signals and ongoing work across the corporation.</p>
+        </div>
+        <button type="button" class="command-open-link" id="homePreviewOpenBtn">Open Full Hub</button>
+      </div>
+
+      <div class="command-tabs">
+        <button type="button" class="command-tab active" data-preview-tab="log">Activity</button>
+        <button type="button" class="command-tab" data-preview-tab="missions">Missions</button>
+        <button type="button" class="command-tab" data-preview-tab="leaderboard">Leaderboard</button>
+        <button type="button" class="command-tab" data-preview-tab="intel">Intel</button>
+      </div>
+
+      <div class="command-preview-list" id="homePreviewList">
+        <div class="hub-empty">Loading command board...</div>
+      </div>
+    </section>
+  </section>
+
+  <aside class="dashboard-column dashboard-column-right">
+    <section class="bubble panel-compact" id="network-snapshot">
+      <p class="panel-kicker">// NETWORK SNAPSHOT</p>
+      <h2><span class="section-icon"><i class="fas fa-chart-line"></i></span> Mission Pulse</h2>
+      <div class="snapshot-grid">
+        <button type="button" class="snapshot-metric" data-snapshot-tab="missions">
+          <span class="snapshot-label">Open Missions</span>
+          <strong class="snapshot-value" id="snapshotMissionCount">—</strong>
+          <span class="snapshot-detail" id="snapshotMissionLead">Awaiting mission data.</span>
+        </button>
+        <button type="button" class="snapshot-metric" data-snapshot-tab="calendar">
+          <span class="snapshot-label">Upcoming Events</span>
+          <strong class="snapshot-value" id="snapshotEventCount">—</strong>
+          <span class="snapshot-detail" id="snapshotEventLead">Awaiting event schedule.</span>
+        </button>
+        <button type="button" class="snapshot-metric" data-snapshot-tab="intel">
+          <span class="snapshot-label">Intel Posts</span>
+          <strong class="snapshot-value" id="snapshotIntelCount">—</strong>
+          <span class="snapshot-detail" id="snapshotIntelLead">Awaiting intel feed.</span>
+        </button>
+      </div>
+      <div class="snapshot-stream">
+        <span class="snapshot-stream-label">Latest Notice</span>
+        <p class="snapshot-note" id="snapshotNotice">System notice channel is standing by.</p>
+      </div>
+    </section>
+
+    <section class="bubble panel-compact" id="featured-member" data-member-only="true">
+      <p class="panel-kicker">// MEMBER SPOTLIGHT</p>
+      <h2><span class="section-icon"><i class="fas fa-star"></i></span> Featured Member</h2>
+      <div class="featured-card">
+        <p class="featured-name" id="featured-name">No Operative Selected</p>
+        <p class="featured-desc" id="featured-desc">No operative has been featured yet.</p>
+        <div class="achievements" id="member-achievements"></div>
+      </div>
+    </section>
+
+    <section class="bubble panel-compact" id="join">
+      <p class="panel-kicker">// ACCESS PROTOCOL</p>
+      <h2><span class="section-icon"><i class="fas fa-door-open"></i></span> How to Join</h2>
+      <div class="join-steps">
+        <div class="join-step">
+          <div class="step-num">01</div>
+          <div class="step-text">Add the tag <strong style="color:var(--color-primary)">ˢᶦᶻ</strong> to your username to identify as a TheSizNexus operative.</div>
+        </div>
+        <div class="join-step">
+          <div class="step-num">02</div>
+          <div class="step-text">Join our <a href="https://discord.gg/73Mb3syadB" target="_blank" rel="noopener noreferrer">Discord server</a> and head to the introductions channel.</div>
+        </div>
+        <div class="join-step">
+          <div class="step-num">03</div>
+          <div class="step-text">Introduce yourself and request a clearance rank assignment from an Administrator.</div>
+        </div>
+      </div>
+    </section>
+  </aside>
 </main>
 
 <footer>

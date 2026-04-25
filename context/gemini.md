@@ -1,9 +1,9 @@
 ---
-session_id: SIZ-20260413-1800
-date: 2026-04-13
-time: 18:00 UTC
+session_id: SIZ-20260425-1827
+date: 2026-04-25
+time: 18:27 UTC
 project: TheSizCorporation / SizNexus
-agent: SessionCloseoutAgent
+agent: Codex
 version: 1.0
 current_phase: Phase 2 — Feature & Optimization Work
 ---
@@ -11,49 +11,85 @@ current_phase: Phase 2 — Feature & Optimization Work
 # Gemini Context — SizNexus Project
 
 ## Project Overview
-SizNexus is a cyberpunk-themed website built with vanilla HTML, CSS, and JavaScript. The backend is Firebase (Authentication + Firestore). There is no build toolchain — all development is direct file editing. The project is at version 2.1 and is in active Phase 2 feature and optimization work.
+SizNexus is a vanilla HTML/CSS/JS website backed by Firebase Auth and Firestore (`thesiznexus`). This session centered on information architecture and dashboard usability: the homepage was restructured into a professional three-column operational layout, and the Corporation Hub modal was refreshed so it feels like the same product.
 
 ## Repository
 - **Local path:** `/home/itzzzshxdow/siznexus-development/`
-- **Primary files:** `index.html`, `siznexus.css`, `siznexus.js` (the main HTML entry point is `index.html`)
+- **Primary files:** `index.html`, `siznexus.css`, `siznexus.js`
+- **Project handoff files:** `context/project-state.md`, `context/claude.md`, `context/gemini.md`, `summaries/session-summary.md`
 - **Other HTML files:** `Commission.html`, `IndexMarket.html`, `about.html`, `reciever.html`
-- **GitHub:** `https://github.com/shxdowxxx/siznexus` — all work targets the `main` branch. The `master` branch exists on the remote but is inactive; do not push to it.
-- **Git identity:** name `ItzzzShxdow`, email `itzzzshxdow@gmail.com`
+- **GitHub:** `https://github.com/shxdowxxx/siznexus` — use `main`, ignore `master`
 
 ## Current Phase
 **Phase 2 — Feature & Optimization Work**
-Phase 1 (Foundation & Infrastructure) is fully complete as of the first session. Phase 2 covers ongoing feature additions, performance improvements, and UX polish. It has no fixed endpoint and advances each session per the director's priorities.
+Active work is now less about raw feature count and more about making the member-facing experience coherent, useful, and visually disciplined.
 
-## Key Architectural Decisions
-- Stack: vanilla HTML/CSS/JS only. Do not suggest or introduce frameworks or bundlers unless the director explicitly requests it.
-- Backend: Firebase (Auth + Firestore). No additional backend or auth systems should be introduced.
-- Cross-agent shared memory: `/home/itzzzshxdow/.claude/shared-knowledge.md`. All agents read from and write to this file. Consult it at the start of each session.
-- The password reset modal (`#resetModal`) is fully implemented: event listeners for open/close/backdrop, loading spinner on submit, human-readable auth error messages (`auth/user-not-found`, `auth/invalid-email`, `auth/too-many-requests`), spam folder guidance in modal copy, and `actionCodeSettings` passed to `sendPasswordResetEmail()`. Do not re-implement or duplicate this flow.
-- `getElementById('profileActivityStatus')` is a deliberate dead reference, protected by a null-check if-guard. It signals a planned feature. Do not remove it without the director's explicit instruction.
-- Favicon assets live under `favicon/` relative to the project root. The `site.webmanifest` canonical app name is "TheSizNexus" with theme color `#0a0a0f`.
+## New Homepage Layout
+Desktop homepage structure now follows:
+- **Left rail:** `Nexus Overview`, `Active Members`, `Socials`
+- **Center command surface:** `Command Board`
+- **Right rail:** `Mission Pulse`, `Featured Member`, `How to Join`
 
-## Priority Work for Next Session
-1. Director will define the next Phase 2 priority at session start — no specific feature was locked in at the end of the current session.
-2. **Custom email sending (deferred):** Resend DNS records are already configured on Porkbun. Revisit when the director approves budget for a paid Resend plan. Goal: send reset emails from a custom domain to avoid spam classification of Firebase's default `noreply@thesiznexus.firebaseapp.com` sender.
-3. **`profileActivityStatus` dead reference:** Assess whether to implement the activity status feature or remove the reference entirely.
+The center area is not filler. It is the primary operational surface and should stay function-first.
+
+## What Changed In Code
+- `Command Board` gained member-aware identity, access badges, quick actions, and preview tabs for activity, missions, leaderboard, and intel
+- `Mission Pulse` gained live counts plus current lead lines and deep-links into the Corp Hub
+- `Featured Member` now ranks and rotates real Firestore users instead of using placeholder data
+- `Corporation Hub` now has a richer header, quick stats, tab-aware summary copy, and section-level count/note chrome
+
+Key helper flows added or upgraded:
+- `refreshDashboardSurface()`
+- `loadHomePreview()`
+- `loadNetworkSnapshot()`
+- `loadFeaturedMembers()`
+- `updateHubChrome()`
+- `updateHubSectionInfo()`
+- `loadHubQuickStats()`
+
+## Firestore Collections The Dashboard Uses
+- `users`
+- `corpLog`
+- `missions`
+- `missionSubmissions`
+- `events`
+- `intelPosts`
+- `polls`
+- `announcements`
+
+Prior session collections still exist and remain important:
+- `commissions`
+- `inquiries`
+
+## Current State
+- Main dashboard overhaul is implemented locally
+- `node --check siznexus.js` passes
+- Local preview was served at `http://127.0.0.1:4173/index.html`
+- Work from this session is not committed or pushed yet
+
+## Priority Work For Next Session
+1. **Manual director step:** publish `firestore.rules` in Firebase Console
+2. Replace score-based homepage spotlight heuristics with admin-curated featured content if the director wants tighter control
+3. Keep improving hub/home continuity so preview rows feel like an extension of the full Corp Hub
+4. Evaluate whether `profileActivityStatus` should become a real surfaced feature
 
 ## Constraints and Cautions
-- Always push to `main`. Never push to `master`.
-- The remote URL contains an embedded personal access token. Handle git operations carefully and avoid exposing this value unnecessarily.
-- The `siznexus-development/` directory contains multiple HTML pages and the `favicon/` subdirectory. Do not modify pages or assets other than those the director specifies.
-- Maintain the cyberpunk visual and stylistic identity in all changes to the front end.
-- Do not change the `site.webmanifest` app name ("TheSizNexus") or theme color (`#0a0a0f`) without director instruction.
+- The actual main HTML file is `index.html`, not `siznexus.html`
+- Keep the stack vanilla and Firebase-based
+- Maintain the cyberpunk theme, but favor restrained dashboard composition over decorative layouts
+- Do not remove the guarded `profileActivityStatus` reference unless instructed
+- Do not bypass `esc()` when rendering user-generated content
 
 ## Resolved Items (do not re-investigate)
-- Profile tab open delay: resolved. `openModal()` is called before the async friends list fetch; `renderMyFriendsList()` now uses `Promise.all()` for parallel Firestore reads instead of sequential `for...of await`.
-- Password reset modal: fully wired and UX-polished.
-- Favicon: new set deployed under `favicon/`, all HTML files and manifest updated, old files removed.
-- Zone.Identifier Windows metadata files: removed from workspace.
+- Flat homepage card grid replaced with structured dashboard rails plus a center command surface
+- Home previews now route into the Corporation Hub
+- Featured member data is real and Firestore-backed
+- Corp Hub modal now has stronger hierarchy and tab-aware chrome
+- `Commission.html` Firestore rebuild and Firestore rules authoring from the previous session remain valid
 
 ## Agent Ecosystem
-- **siz-developer:** Primary implementation agent for all code changes.
-- **knowledge-assistant:** Documents findings, answers technical questions.
-- **researcher-assistant:** Investigates techniques and best practices before implementation.
-- **session-closeout:** Produces session summaries, updates context files, commits to GitHub at session end.
-- Agent definition files: `/home/itzzzshxdow/.claude/agents/`
-- Shared knowledge file: `/home/itzzzshxdow/.claude/shared-knowledge.md`
+- **siz-developer:** code implementation
+- **knowledge-assistant:** structured notes and answers
+- **researcher-assistant:** external research and pattern work
+- **session-closeout / Codex:** session closeout and cross-agent continuity
+- Shared memory lives at `/home/itzzzshxdow/.claude/shared-knowledge.md`
