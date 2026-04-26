@@ -65,18 +65,34 @@ service cloud.firestore {
     //  Users
     // ──────────────────────────────────────────────
     match /users/{userId} {
+      // Public read is required for /u/<displayName> profile pages and the
+      // public landing wall-of-fame. KEEP user docs free of sensitive data
+      // (e.g. email — the client never writes it; Firebase Auth holds it).
       allow read: if true;
 
+      // Create: only seed innocuous fields. Block staff-controlled fields and email.
       allow create: if isAuthenticated()
         && request.auth.uid == userId
         && request.resource.data.keys().hasAll(['displayName'])
         && validString('displayName', 32)
-        && (!('bio' in request.resource.data) || validString('bio', 300));
+        && (!('bio' in request.resource.data) || validString('bio', 600))
+        && !request.resource.data.keys()
+             .hasAny(['isBanned', 'isOwner', 'email'])
+        && (
+          !('rank' in request.resource.data)
+          || request.resource.data.rank == 'Member'
+          || request.resource.data.rank == 'Unaffiliated'
+        )
+        && (!('points' in request.resource.data) || request.resource.data.points == 0);
 
+      // General self-update: anything except the staff-controlled fields and email.
       allow update: if isAuthenticated()
         && request.auth.uid == userId
         && !request.resource.data.diff(resource.data).affectedKeys()
-            .hasAny(['rank', 'isBanned', 'points', 'badges', 'isOwner']);
+            .hasAny(['rank', 'isBanned', 'points', 'badges', 'isOwner', 'email', 'referredBy'])
+        && (!('bio' in request.resource.data) || validString('bio', 600))
+        && (!('operatorTitle' in request.resource.data) || validString('operatorTitle', 60))
+        && (!('displayName' in request.resource.data) || validString('displayName', 32));
 
       allow update: if isAuthenticated() && (
         isOwner()

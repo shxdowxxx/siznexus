@@ -217,9 +217,12 @@ async function createUserDoc(user){
       localStorage.removeItem('siz_referrer');
     }
   }catch(_){}
+  // Email is intentionally NOT written to the user doc — the users collection is
+  // publicly readable (needed for /u/<name> profiles) and we don't want to leak
+  // every member's email. Firebase Auth keeps the email; client reads it via
+  // auth.currentUser.email when needed.
   const docPayload={
-    displayName:user.displayName||user.email.split('@')[0],
-    email:user.email,
+    displayName:user.displayName||(user.email||'operator').split('@')[0],
     photoURL:user.photoURL||'',
     rank:'Member',bio:'',status:'online',friends:[],
     createdAt:firebase.firestore.FieldValue.serverTimestamp()
