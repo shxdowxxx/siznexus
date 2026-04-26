@@ -361,7 +361,7 @@ async function openViewProfile(u){
       <div class="profile-hero-top">
         <div class="profile-hero-av">${photo?`<img src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`${initials(name)}`}</div>
         <div class="profile-hero-info">
-          <div class="profile-hero-name cipher-text" style="color:var(--color-text-light);" data-cipher="${esc(name)}">${esc(name)}</div>
+          <div class="profile-hero-name cipher-text" style="color:${u.accentColor?esc(u.accentColor):'var(--color-text-light)'};" data-cipher="${esc(name)}">${esc(name)}</div>
           ${titleHtml(u)}
           <div class="profile-hero-rank"><span class="${rankClass(u.rank)}">${esc(u.rank||'Member')}</span></div>
           ${levelHtml(u)}
