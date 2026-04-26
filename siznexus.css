@@ -1864,3 +1864,60 @@ body.glitching::before {
   .pl-grid,.pl-grid-2col{grid-template-columns:1fr;}
   .pl-cta-banner{flex-direction:column;align-items:flex-start;}
 }
+
+/* ──────────────────────────────────────────────
+ * STATIC PAGES (privacy, terms, roadmap)
+ * ────────────────────────────────────────────── */
+body.static-page{background:#0A0E1A;color:var(--color-text);font-family:var(--font-main);}
+.static-nav{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;padding:14px 28px;background:rgba(8,12,22,.92);border-bottom:1px solid rgba(192,192,192,.12);backdrop-filter:blur(8px);z-index:10;}
+.static-back{font-family:var(--font-headings);font-size:.95rem;letter-spacing:.05em;color:var(--color-text-light);text-decoration:none;}
+.static-back:hover{color:#fff;}
+.static-nav-links{display:flex;gap:18px;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.12em;}
+.static-nav-links a{color:var(--color-text-muted);text-decoration:none;text-transform:uppercase;}
+.static-nav-links a:hover{color:var(--color-text-light);}
+.static-main{max-width:780px;margin:40px auto 60px;padding:0 28px;}
+.static-eyebrow{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.28em;color:var(--color-primary);margin-bottom:8px;text-transform:uppercase;}
+.static-main h1{font-family:var(--font-headings);font-size:clamp(1.8rem,5vw,2.8rem);color:var(--color-text-light);letter-spacing:.05em;margin:0 0 16px;}
+.static-main h2{font-family:var(--font-headings);font-size:1.1rem;color:var(--color-text-light);letter-spacing:.05em;margin:30px 0 8px;border-bottom:1px solid rgba(192,192,192,.1);padding-bottom:6px;}
+.static-lead{font-family:var(--font-mono);font-size:.85rem;color:var(--color-text);line-height:1.7;margin-bottom:18px;opacity:.9;}
+.static-main p,.static-main li{font-family:var(--font-mono);font-size:.78rem;color:var(--color-text);line-height:1.7;}
+.static-main ul{padding-left:20px;margin:10px 0 14px;}
+.static-main li{margin-bottom:6px;}
+.static-main code{background:rgba(0,0,0,.4);border:1px solid rgba(192,192,192,.18);padding:1px 6px;border-radius:2px;font-size:.78em;color:var(--color-text-light);}
+.static-main a{color:var(--color-primary);text-decoration:underline;text-underline-offset:2px;}
+.static-main a:hover{color:#fff;}
+.static-foot{margin-top:40px;padding-top:18px;border-top:1px solid rgba(192,192,192,.08);font-size:.72rem;color:var(--color-text-muted);}
+.static-footer{text-align:center;padding:24px;font-family:var(--font-mono);font-size:.65rem;color:var(--color-text-muted);border-top:1px solid rgba(192,192,192,.08);}
+.static-footer a{color:var(--color-text-muted);margin:0 4px;}
+.static-footer a:hover{color:var(--color-text);}
+
+/* Roadmap tags */
+.rm-section{margin-bottom:28px;}
+.rm-tag{display:inline-block;font-family:var(--font-mono);font-size:.55rem;letter-spacing:.22em;padding:3px 10px;border-radius:2px;margin-right:10px;vertical-align:middle;font-weight:700;}
+.rm-tag-now{background:rgba(155,227,155,.12);border:1px solid rgba(155,227,155,.4);color:#9be39b;}
+.rm-tag-soon{background:rgba(192,192,192,.08);border:1px solid rgba(192,192,192,.35);color:var(--color-text-light);}
+.rm-tag-later{background:rgba(168,178,193,.06);border:1px solid rgba(168,178,193,.25);color:var(--color-text-muted);}
+.rm-list{padding-left:0;list-style:none;}
+.rm-list li{padding:8px 12px;border-left:2px solid rgba(192,192,192,.2);margin-bottom:4px;background:rgba(192,192,192,.02);}
+
+@media(max-width:600px){
+  .static-nav{padding:10px 16px;flex-direction:column;gap:8px;align-items:flex-start;}
+  .static-main{padding:0 18px;margin-top:20px;}
+  .static-nav-links{gap:12px;flex-wrap:wrap;}
+}
+
+/* ── Mobile audit fixes for the new public surfaces ── */
+@media(max-width:680px){
+  .hero-cta{flex-direction:column;align-items:stretch;}
+  .hero-cta a{width:100%;justify-content:center;}
+  .pl-cta-banner{padding:18px;}
+  .pl-cta-banner h3{font-size:1.1rem;}
+  .pl-cta-banner > div:last-child{width:100%;flex-direction:column;}
+  .pl-cta-banner .btn-primary,.pl-cta-banner .btn-secondary{width:100%;justify-content:center;}
+  .market-grid{grid-template-columns:1fr;}
+  .market-header-top{flex-direction:column;align-items:flex-start;}
+  .market-balance{align-self:stretch;text-align:center;}
+  .opsmap-overlay{flex-direction:column;align-items:flex-start;gap:8px;}
+  .opsmap-stat-row{flex-wrap:wrap;}
+  .nav-right .notif-btn{padding:0 8px;}
+}
