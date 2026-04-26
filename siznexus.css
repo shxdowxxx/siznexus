@@ -1930,3 +1930,8 @@ body.static-page{background:#0A0E1A;color:var(--color-text);font-family:var(--fo
 
 /* Pending intel pill */
 .intel-pending-pill{display:inline-block;font-family:var(--font-mono);font-size:.55rem;letter-spacing:.18em;padding:2px 7px;background:rgba(168,178,193,.1);border:1px solid rgba(168,178,193,.4);color:#a8b2c1;border-radius:2px;margin-left:6px;vertical-align:middle;}
+
+/* Footer link row — silver, monospace, properly spaced */
+footer .footer-links{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.18em;display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin:10px 0;text-transform:uppercase;}
+footer .footer-links a{color:var(--color-text-muted);text-decoration:none;transition:color .15s ease;border-bottom:1px solid transparent;padding-bottom:1px;}
+footer .footer-links a:hover{color:var(--color-text-light);border-bottom-color:rgba(192,192,192,.5);}
