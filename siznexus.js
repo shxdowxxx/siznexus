@@ -205,11 +205,64 @@ function setNavAvatar(user,data){
   else{ic.className='fas fa-user';}
 }
 async function createUserDoc(user){
-  await db.collection('users').doc(user.uid).set({
-    displayName:user.displayName||user.email.split('@')[0],email:user.email,photoURL:user.photoURL||'',
-    rank:'Member',bio:'',status:'online',friends:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()
-  });
+  // Resolve any pending referral
+  let referredBy=null,referrerName=null;
+  try{
+    const refName=localStorage.getItem('siz_referrer');
+    if(refName){
+      const snap=await db.collection('users').get();
+      const lc=refName.toLowerCase();
+      const r=snap.docs.find(d=>(d.data().displayName||'').toLowerCase()===lc);
+      if(r&&r.id!==user.uid){referredBy=r.id;referrerName=r.data().displayName||refName;}
+      localStorage.removeItem('siz_referrer');
+    }
+  }catch(_){}
+  const docPayload={
+    displayName:user.displayName||user.email.split('@')[0],
+    email:user.email,
+    photoURL:user.photoURL||'',
+    rank:'Member',bio:'',status:'online',friends:[],
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  };
+  if(referredBy){docPayload.referredBy=referredBy;}
+  await db.collection('users').doc(user.uid).set(docPayload);
+  // Append a corp log entry for the recruit (informational; admin can award Net later)
+  if(referredBy){
+    await db.collection('corpLog').add({
+      type:'recruit',
+      uid:user.uid,
+      displayName:docPayload.displayName,
+      rank:'Member',
+      message:`was recruited by ${referrerName}`,
+      extra:{referredBy},
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(()=>{});
+  }
   return(await db.collection('users').doc(user.uid).get()).data();
+}
+/* Capture ?ref=<displayName> from the URL and persist for the next signup. */
+(function captureReferral(){
+  try{
+    const params=new URLSearchParams(location.search);
+    const ref=params.get('ref');
+    if(ref){
+      localStorage.setItem('siz_referrer',ref);
+      // Clean the URL so it doesn't persist on bookmark
+      const url=new URL(location.href);url.searchParams.delete('ref');
+      history.replaceState({},'',url.toString());
+    }
+  }catch(_){}
+})();
+async function shareReferralLink(){
+  if(!currentUser||!currentUserData?.displayName){showToast('Set a display name first.');return;}
+  const url=`${location.origin}/?ref=${encodeURIComponent(currentUserData.displayName)}`;
+  const text=`Enlist with TheSizNexus — use my referral link: ${url}`;
+  try{
+    if(navigator.share){await navigator.share({title:'TheSizNexus invite',text,url});}
+    else{await navigator.clipboard.writeText(url);showToast('Referral link copied: '+url);}
+  }catch(_){
+    try{await navigator.clipboard.writeText(url);showToast('Referral link copied.');}catch(_){showToast('Could not copy link.');}
+  }
 }
 /* ── TOAST ── */
 let _tt=null;
@@ -2437,7 +2490,7 @@ async function loadCorpLog(filter='all'){
       item.dataset.cardId=d.id;
       const time=log.createdAt?fmtDate(log.createdAt)+' '+fmtTime(log.createdAt):'';
       // Icon per type
-      const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn',streak:'fa-fire',motw:'fa-trophy'};
+      const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn',streak:'fa-fire',motw:'fa-trophy',recruit:'fa-user-plus',market:'fa-mask'};
       const icon=typeIcon[log.type]||'fa-circle';
       item.innerHTML=`<div class="log-item-main"><i class="fas ${icon}" style="margin-right:6px;font-size:.65rem;opacity:.6;"></i><strong>${esc(log.displayName||'Unknown')}</strong> ${esc(log.message)}</div>
         <div class="log-item-meta"><span class="${rankClass(log.rank)}">${esc(log.rank||'Member')}</span> &middot; ${time}</div>
@@ -3777,7 +3830,7 @@ async function loadHomeLogPreview(){
     return true;
   });
   if(!visibleDocs.length)return '<div class="hub-empty">No activity yet.</div>';
-  const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn',streak:'fa-fire',motw:'fa-trophy'};
+  const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn',streak:'fa-fire',motw:'fa-trophy',recruit:'fa-user-plus',market:'fa-mask'};
   return visibleDocs.map(d=>{
     const log=d.data();
     const time=log.createdAt?`${fmtDate(log.createdAt)} ${fmtTime(log.createdAt)}`:'Recent';
@@ -5014,3 +5067,4 @@ async function shareMyProfile(){
   }
 }
 document.getElementById('shareMyProfileBtn')?.addEventListener('click',shareMyProfile);
+document.getElementById('shareReferralBtn')?.addEventListener('click',shareReferralLink);
