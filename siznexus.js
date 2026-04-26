@@ -4732,6 +4732,28 @@ function triggerGlitch() {
 }
 
 /* ── OPERATOR ID CARD GENERATOR ── */
+/* Non-reversible deterministic display ID derived from a Firebase uid.
+   Uses a cyrb128-style 64-bit mix with a salt so the printed badge cannot
+   be inverted back to the actual uid (or guessed with a length-1 lookup).
+   Same uid always yields the same badge — stable per operative. */
+function operativeIdFromUid(uid){
+  if(!uid)return '—';
+  const SALT='siznexus-id-v1//ops';
+  const str=uid+SALT;
+  let h1=0xdeadbeef^str.length, h2=0x41c6ce57^(str.length<<2);
+  for(let i=0;i<str.length;i++){
+    const c=str.charCodeAt(i);
+    h1=Math.imul(h1^c, 2654435761);
+    h2=Math.imul(h2^c, 1597334677);
+  }
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);
+  h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+  // Compose two unsigned 32-bit halves into an 11-char base36 string
+  const a=(h1>>>0).toString(36).toUpperCase().padStart(7,'0').slice(-7);
+  const b=(h2>>>0).toString(36).toUpperCase().padStart(7,'0').slice(-7);
+  const combined=(a+b).replace(/[^A-Z0-9]/g,'X');
+  return `${combined.slice(0,4)}-${combined.slice(4,8)}-${combined.slice(8,12)}`;
+}
 function generateOperatorID(user) {
   if(!user){showToast('Sign in first.');return;}
   const W=720, H=440;
@@ -4764,7 +4786,7 @@ function generateOperatorID(user) {
   ctx.strokeStyle='rgba(192,192,192,0.18)'; ctx.lineWidth=1; ctx.strokeRect(28,32,W-56,46);
   ctx.fillStyle='#d4d8e2';
   ctx.font='700 18px "Share Tech Mono", monospace';
-  ctx.fillText('SIZNEXUS // OPERATOR DOSSIER', 42, 62);
+  ctx.fillText('SIZNEXUS // IDENTIFICATION', 42, 62);
   ctx.fillStyle='rgba(192,192,192,0.6)';
   ctx.font='10px "Share Tech Mono", monospace';
   ctx.fillText('CLASSIFIED', W-110, 62);
@@ -4803,11 +4825,11 @@ function generateOperatorID(user) {
   row('OPERATOR TITLE', user.operatorTitle||'—', PY+98);
   row('NET FUNDS', (user.points||0).toLocaleString(), PY+134);
 
-  // Bottom band: status, barcode
-  const BY = H-90;
+  // Bottom band: status, ID, barcode (taller so the issued footer fits cleanly)
+  const BY = H-110;
   ctx.fillStyle='rgba(192,192,192,0.04)';
-  ctx.fillRect(28,BY-4,W-56,68);
-  ctx.strokeStyle='rgba(192,192,192,0.16)'; ctx.lineWidth=1; ctx.strokeRect(28,BY-4,W-56,68);
+  ctx.fillRect(28,BY-4,W-56,90);
+  ctx.strokeStyle='rgba(192,192,192,0.16)'; ctx.lineWidth=1; ctx.strokeRect(28,BY-4,W-56,90);
 
   ctx.fillStyle='rgba(192,192,192,0.55)';
   ctx.font='10px "Share Tech Mono", monospace';
@@ -4816,14 +4838,13 @@ function generateOperatorID(user) {
   ctx.font='700 13px "Share Tech Mono", monospace';
   ctx.fillText(user.status==='online'?'ACTIVE NETWORK':'OFFLINE', 42, BY+30);
 
-  // ID hash
+  // Operative ID — derived from a non-reversible hash of the Firebase uid
   ctx.fillStyle='rgba(192,192,192,0.55)';
   ctx.font='10px "Share Tech Mono", monospace';
-  ctx.fillText('ID HASH', 42, BY+50);
+  ctx.fillText('OPERATIVE ID', 42, BY+52);
   ctx.fillStyle='#d4d8e2';
   ctx.font='12px "Share Tech Mono", monospace';
-  const hash=(currentUser?.uid||'').slice(0,8).toUpperCase()+'-'+(currentUser?.uid||'').slice(-6).toUpperCase();
-  ctx.fillText(hash||'—', 100, BY+50);
+  ctx.fillText(operativeIdFromUid(currentUser?.uid||''), 42, BY+70);
 
   // Barcode on right of bottom band
   ctx.fillStyle='#d4d8e2';
@@ -4835,11 +4856,11 @@ function generateOperatorID(user) {
   ctx.font='9px "Share Tech Mono", monospace';
   ctx.fillText('SCAN AT GATE', W-220, BY+58);
 
-  // Issued line
+  // Issued footer — tucked inside the bottom band so it never collides with the frame border
   ctx.fillStyle='rgba(192,192,192,0.4)';
   ctx.font='9px "Share Tech Mono", monospace';
   const issued=new Date().toISOString().slice(0,10);
-  ctx.fillText(`ISSUED ${issued} · TheSizNexus`, 28, H-18);
+  ctx.fillText(`ISSUED ${issued} · TheSizNexus`, 42, BY+82);
 
   // Now draw photo on top of placeholder if available
   const img=new Image();
