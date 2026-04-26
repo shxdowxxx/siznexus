@@ -10,22 +10,6 @@
   };
   firebase.initializeApp(firebaseConfig);
   firebase.analytics();
-  /* ── APP CHECK (reCAPTCHA Enterprise) ──
-     Site key is public — Firebase docs explicitly say so. The "secret" is
-     the assessment that App Check requests from Google with the token. */
-  try{
-    const RECAPTCHA_ENTERPRISE_SITE_KEY='6LeLUcssAAAAANNMbMeFtTRV5-TYVbAp375cUw7N';
-    // Allow a debug token in localhost dev so App Check doesn't block local testing.
-    if(location.hostname==='localhost'||location.hostname==='127.0.0.1'){
-      self.FIREBASE_APPCHECK_DEBUG_TOKEN=true;
-    }
-    firebase.appCheck().activate(
-      new firebase.appCheck.ReCaptchaEnterpriseProvider(RECAPTCHA_ENTERPRISE_SITE_KEY),
-      true /* auto-refresh tokens */
-    );
-  }catch(err){
-    console.warn('App Check init failed:',err);
-  }
   /* ── DOMAIN LOCK & DEVELOPER KEY SYSTEM ── */
   const ALLOWED_DOMAIN_FALLBACK='siznexus.org';
   let allowedDomain=ALLOWED_DOMAIN_FALLBACK;
