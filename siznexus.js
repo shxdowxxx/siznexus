@@ -2021,7 +2021,85 @@ document.getElementById('logoutBtn').addEventListener('click',async(e)=>{
   }catch(err){showToast('Error signing out: '+err.message);}
 });
 /* ── GUEST CONTENT RESTRICTIONS ── */
+document.getElementById('heroEnlistBtn')?.addEventListener('click',e=>{e.preventDefault();openModal('loginModal');});
+document.getElementById('plEnlistBtn')?.addEventListener('click',()=>openModal('loginModal'));
+async function loadPublicLanding(){
+  // Latest intel headline
+  try{
+    const intelSnap=await db.collection('intelPosts').orderBy('createdAt','desc').limit(1).get();
+    const tEl=document.getElementById('plIntelTitle'),mEl=document.getElementById('plIntelMeta'),bEl=document.getElementById('plIntelBody');
+    if(!intelSnap.empty){
+      const p=intelSnap.docs[0].data();
+      if(tEl)tEl.textContent=p.title||'Untitled';
+      if(mEl)mEl.textContent=`${p.authorName||'Admin'} · ${p.createdAt?fmtDate(p.createdAt):'recent'}`;
+      if(bEl)bEl.textContent=(p.body||'').slice(0,180)+((p.body||'').length>180?'…':'');
+    }else{
+      if(tEl)tEl.textContent='Channel quiet for now.';
+      if(mEl)mEl.textContent='New intel drops appear here as they go live.';
+      if(bEl)bEl.textContent='Members publish operational intel inside the corp hub. Enlist to read it.';
+    }
+  }catch(_){}
+  // Live mission count + lead
+  try{
+    const mSnap=await db.collection('missions').where('active','==',true).get();
+    const cEl=document.getElementById('plMissionCount'),lEl=document.getElementById('plMissionLead');
+    if(cEl)cEl.textContent=mSnap.size;
+    if(lEl){
+      if(mSnap.empty)lEl.textContent='Operations are spinning up. Be the first to claim a KEY.';
+      else{
+        const cats=new Set(mSnap.docs.map(d=>d.data().category).filter(Boolean));
+        lEl.textContent=cats.size?`Categories live: ${[...cats].slice(0,4).join(', ')}.`:'Multiple operations available right now.';
+      }
+    }
+  }catch(_){}
+  // Featured spotlight
+  try{
+    const cur=await db.collection('_configKEY').doc('featured').get().catch(()=>null);
+    let pinUid=cur&&cur.exists?cur.data()?.uid:null;
+    let user=null;
+    if(pinUid){
+      const u=await db.collection('users').doc(pinUid).get().catch(()=>null);
+      if(u&&u.exists)user={...u.data(),id:u.id};
+    }
+    if(!user){
+      // Fall back to top points operative
+      const all=await db.collection('users').get();
+      const list=all.docs.map(d=>({...d.data(),id:d.id})).filter(u=>!u.isAnonymous).sort((a,b)=>(b.points||0)-(a.points||0));
+      user=list[0]||null;
+    }
+    const av=document.getElementById('plSpotlightAv'),nm=document.getElementById('plSpotlightName'),rk=document.getElementById('plSpotlightRank'),nt=document.getElementById('plSpotlightNote');
+    if(user){
+      if(av)av.innerHTML=avHtml(user.photoURL,user.displayName);
+      if(nm)nm.textContent=user.displayName||'Unknown Operative';
+      if(rk)rk.textContent=`${user.rank||'Member'} · ${user.points||0} Net`;
+      if(nt)nt.textContent=user.operatorTitle?`"${user.operatorTitle}"`:'Featured for activity and contribution.';
+    }
+  }catch(_){}
+  // Top operatives
+  try{
+    const snap=await db.collection('users').get();
+    const top=snap.docs.map(d=>({...d.data(),id:d.id})).filter(u=>!u.isAnonymous).sort((a,b)=>(b.points||0)-(a.points||0)).slice(0,5);
+    const lb=document.getElementById('plLeaderboard');
+    if(lb){
+      lb.innerHTML=top.length?top.map((u,i)=>`<li><span class="pl-rank">#${i+1}</span><span class="pl-name">${esc(u.displayName||'Unknown')}</span><span class="pl-net">${u.points||0} Net</span></li>`).join(''):'<li class="pl-empty">No operatives ranked yet.</li>';
+    }
+  }catch(_){}
+  // Top squads
+  try{
+    const [sqSnap,uSnap]=await Promise.all([db.collection('squads').get(),db.collection('users').get()]);
+    const usersById={};uSnap.forEach(d=>{usersById[d.id]=d.data();});
+    const ranked=sqSnap.docs.map(d=>({...d.data(),id:d.id})).map(s=>({...s,_total:(s.members||[]).reduce((a,uid)=>a+((usersById[uid]?.points)||0),0)})).sort((a,b)=>b._total-a._total).slice(0,3);
+    const sq=document.getElementById('plSquadList');
+    if(sq){
+      sq.innerHTML=ranked.length?ranked.map((s,i)=>`<li><span class="pl-rank">#${i+1}</span><span class="pl-name">${s.tag?`[${esc(s.tag)}] `:''}${esc(s.name||'Unnamed')}</span><span class="pl-net">${s._total} Net</span></li>`).join(''):'<li class="pl-empty">No squads formed yet.</li>';
+    }
+  }catch(_){}
+}
 function applyGuestRestrictions(isGuest){
+  // Toggle public landing vs member dashboard sections
+  document.querySelectorAll('.guest-only').forEach(el=>el.style.display=isGuest?'':'none');
+  document.querySelectorAll('.member-only').forEach(el=>el.style.display=isGuest?'none':'');
+  if(isGuest)loadPublicLanding();
   // Hide member-only
   document.querySelectorAll('[data-member-only="true"]').forEach(el=>{
     el.classList.toggle('guest-hidden', isGuest);

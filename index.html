@@ -751,14 +751,62 @@
 <!-- HERO -->
 <div class="hero" id="home">
   <div class="hero-title-glow"></div>
-  <div class="hero-eyebrow">// INTELLIGENCE CORPORATION — RESTRUCTURING</div>
+  <div class="hero-eyebrow">// INTELLIGENCE CORPORATION · NOW RECRUITING</div>
   <h1>TheSizNexus<span class="cursor-blink">_</span></h1>
-  <p class="hero-sub">An elite intelligence corporation. Currently restructuring and migrating to a new platform — follow our Discord for updates and clearance assignments.</p>
+  <p class="hero-sub">A working intelligence corporation. Members run missions, climb clearance ranks, coordinate across squads, and trade <strong>Net</strong> — the corp's internal currency. Pull up a chair.</p>
   <div class="hero-cta">
-    <a href="https://discord.gg/73Mb3syadB" class="btn-primary" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord"></i> Join Discord</a>
-    <a href="#join" class="btn-secondary"><i class="fas fa-chevron-down"></i> How to Join</a>
+    <a href="#" class="btn-primary" id="heroEnlistBtn"><i class="fas fa-user-plus"></i> Enlist Now</a>
+    <a href="https://discord.gg/73Mb3syadB" class="btn-secondary" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord"></i> Discord</a>
+    <a href="#publicLanding" class="btn-secondary"><i class="fas fa-eye"></i> Take a Look</a>
   </div>
 </div>
+
+<!-- PUBLIC LANDING (visible only when logged out) -->
+<section id="publicLanding" class="public-landing guest-only">
+  <div class="pl-grid">
+    <div class="pl-card pl-card-wide">
+      <p class="panel-kicker">// LATEST INTEL</p>
+      <h3 id="plIntelTitle">Loading classified updates…</h3>
+      <p class="pl-meta" id="plIntelMeta">Standby — pulling the latest intel feed.</p>
+      <p class="pl-body" id="plIntelBody">—</p>
+    </div>
+    <div class="pl-card">
+      <p class="panel-kicker">// LIVE OPERATIONS</p>
+      <div class="pl-big-stat" id="plMissionCount">—</div>
+      <div class="pl-stat-label">Active Missions</div>
+      <p class="pl-meta" id="plMissionLead">Operations are running across multiple categories.</p>
+    </div>
+    <div class="pl-card">
+      <p class="panel-kicker">// CURRENT SPOTLIGHT</p>
+      <div class="pl-spotlight">
+        <div class="pl-spotlight-av" id="plSpotlightAv"></div>
+        <div>
+          <div class="pl-spotlight-name" id="plSpotlightName">No spotlight selected</div>
+          <div class="pl-spotlight-rank" id="plSpotlightRank">—</div>
+        </div>
+      </div>
+      <p class="pl-meta" id="plSpotlightNote">Featured operative rotates by activity score.</p>
+    </div>
+  </div>
+  <div class="pl-grid pl-grid-2col">
+    <div class="pl-card">
+      <p class="panel-kicker">// WALL OF FAME · TOP OPERATIVES</p>
+      <ol class="pl-leaderboard" id="plLeaderboard"><li class="pl-empty">Loading roster…</li></ol>
+    </div>
+    <div class="pl-card">
+      <p class="panel-kicker">// ELITE SQUADS</p>
+      <ol class="pl-squad-list" id="plSquadList"><li class="pl-empty">Loading squads…</li></ol>
+    </div>
+  </div>
+  <div class="pl-cta-banner">
+    <div>
+      <p class="panel-kicker">// READY TO ENLIST?</p>
+      <h3>Create a free account in under a minute.</h3>
+      <p class="pl-cta-sub">No spam. Pick a callsign, get clearance, run your first mission.</p>
+    </div>
+    <button type="button" class="btn-primary" id="plEnlistBtn"><i class="fas fa-user-plus"></i> Enlist Now</button>
+  </div>
+</section>
 
 <!-- TICKER -->
 <div class="ticker-wrapper">
@@ -792,7 +840,7 @@
 </div>
 
 <!-- DASHBOARD -->
-<main class="dashboard-shell">
+<main class="dashboard-shell member-only">
   <aside class="dashboard-column dashboard-column-left">
     <section class="bubble panel-compact" id="about">
       <p class="panel-kicker">// NEXUS BRIEF</p>
