@@ -4846,15 +4846,21 @@ function generateOperatorID(user) {
   ctx.font='12px "Share Tech Mono", monospace';
   ctx.fillText(operativeIdFromUid(currentUser?.uid||''), 42, BY+70);
 
-  // Barcode on right of bottom band
+  // Barcode on right of bottom band — right-anchored with safe padding
+  const BAR_BARS=28, BAR_STEP=6, BAR_W=BAR_BARS*BAR_STEP, BAR_RIGHT_PAD=42;
+  const BAR_X=W-BAR_RIGHT_PAD-BAR_W; // anchored to right with 42px padding from card edge
+  const BAR_Y=BY+10, BAR_H=36;
   ctx.fillStyle='#d4d8e2';
-  for(let i=0;i<32;i++){
+  for(let i=0;i<BAR_BARS;i++){
     const w=Math.random()>0.5?2:5;
-    ctx.fillRect(W-220+i*6, BY+8, w, 38);
+    ctx.fillRect(BAR_X+i*BAR_STEP, BAR_Y, w, BAR_H);
   }
+  // SCAN AT GATE caption — centered under the barcode
   ctx.fillStyle='rgba(192,192,192,0.55)';
   ctx.font='9px "Share Tech Mono", monospace';
-  ctx.fillText('SCAN AT GATE', W-220, BY+58);
+  ctx.textAlign='center';
+  ctx.fillText('SCAN AT GATE', BAR_X+BAR_W/2, BAR_Y+BAR_H+14);
+  ctx.textAlign='left';
 
   // Issued footer — tucked inside the bottom band so it never collides with the frame border
   ctx.fillStyle='rgba(192,192,192,0.4)';
