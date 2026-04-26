@@ -245,7 +245,10 @@
     <!-- PREVIEW TAB -->
     <div class="profile-tab-section" id="profileTabPreview">
       <div id="profilePreviewContent"></div>
-      <button class="btn-secondary" id="downloadOperatorIdBtn" style="width:100%; justify-content:center; margin-top:12px; font-size:.7rem;"><i class="fas fa-id-card"></i> Download Operator ID</button>
+      <div style="display:flex;gap:6px;margin-top:12px;">
+        <button class="btn-secondary" id="downloadOperatorIdBtn" style="flex:1;justify-content:center;font-size:.7rem;"><i class="fas fa-id-card"></i> Download ID</button>
+        <button class="btn-secondary" id="shareOperatorIdBtn" style="flex:1;justify-content:center;font-size:.7rem;"><i class="fas fa-share-alt"></i> Share ID</button>
+      </div>
       <button class="btn-secondary" id="shareMyProfileBtn" style="width:100%; justify-content:center; margin-top:6px; font-size:.7rem;"><i class="fas fa-share-alt"></i> Share My Profile</button>
       <button class="btn-secondary" id="shareReferralBtn" style="width:100%; justify-content:center; margin-top:6px; font-size:.7rem;"><i class="fas fa-user-plus"></i> Share Referral Link</button>
     </div>
@@ -806,7 +809,10 @@
       <h3>Create a free account in under a minute.</h3>
       <p class="pl-cta-sub">No spam. Pick a callsign, get clearance, run your first mission.</p>
     </div>
-    <button type="button" class="btn-primary" id="plEnlistBtn"><i class="fas fa-user-plus"></i> Enlist Now</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button type="button" class="btn-secondary" id="plDemoBtn"><i class="fas fa-eye"></i> Try Demo</button>
+      <button type="button" class="btn-primary" id="plEnlistBtn"><i class="fas fa-user-plus"></i> Enlist Now</button>
+    </div>
   </div>
 </section>
 

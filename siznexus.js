@@ -4885,7 +4885,7 @@ function operativeIdFromUid(uid){
   const combined=(a+b).replace(/[^A-Z0-9]/g,'X');
   return `${combined.slice(0,4)}-${combined.slice(4,8)}-${combined.slice(8,12)}`;
 }
-function generateOperatorID(user) {
+function generateOperatorID(user, mode='download') {
   if(!user){showToast('Sign in first.');return;}
   const W=720, H=440;
   const canvas = document.createElement('canvas');
@@ -5007,11 +5007,27 @@ function generateOperatorID(user) {
   if(user.photoURL)img.src=user.photoURL; else finalize();
 
   function finalize(){
-    const a=document.createElement('a');
-    a.download=`SizNexus_ID_${(user.displayName||'Operative').replace(/[^a-z0-9]/gi,'_')}.png`;
-    a.href=canvas.toDataURL('image/png');
-    a.click();
-    showToast('Operator ID downloaded.');
+    const filename=`SizNexus_ID_${(user.displayName||'Operative').replace(/[^a-z0-9]/gi,'_')}.png`;
+    if(mode==='share' && navigator.canShare){
+      canvas.toBlob(async(blob)=>{
+        if(!blob){fallbackDownload();return;}
+        const file=new File([blob],filename,{type:'image/png'});
+        const payload={files:[file],title:'TheSizNexus Operator ID',text:`I just enlisted with TheSizNexus. ${location.origin}/u/${encodeURIComponent(user.displayName||'')}`};
+        if(navigator.canShare(payload)){
+          try{await navigator.share(payload);showToast('Operator ID shared.');}
+          catch(_){fallbackDownload();}
+        }else fallbackDownload();
+      },'image/png');
+    }else{
+      fallbackDownload();
+    }
+    function fallbackDownload(){
+      const a=document.createElement('a');
+      a.download=filename;
+      a.href=canvas.toDataURL('image/png');
+      a.click();
+      showToast(mode==='share'?'Sharing not supported — downloaded instead.':'Operator ID downloaded.');
+    }
   }
 }
 document.getElementById('downloadOperatorIdBtn')?.addEventListener('click',()=>generateOperatorID(currentUserData));
@@ -5068,3 +5084,96 @@ async function shareMyProfile(){
 }
 document.getElementById('shareMyProfileBtn')?.addEventListener('click',shareMyProfile);
 document.getElementById('shareReferralBtn')?.addEventListener('click',shareReferralLink);
+document.getElementById('plDemoBtn')?.addEventListener('click',()=>document.getElementById('anonLogin')?.click());
+document.getElementById('shareOperatorIdBtn')?.addEventListener('click',()=>generateOperatorID(currentUserData,'share'));
+
+/* ── ACHIEVEMENT CARDS ── */
+function generateAchievementCard(title,subtitle,iconName){
+  const W=720,H=380;
+  const c=document.createElement('canvas');c.width=W;c.height=H;
+  const ctx=c.getContext('2d');
+  // BG gradient
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#0c1020');bg.addColorStop(1,'#04060e');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  // Dot matrix
+  ctx.fillStyle='rgba(192,192,192,0.05)';
+  for(let x=0;x<W;x+=14)for(let y=0;y<H;y+=14){ctx.fillRect(x,y,1,1);}
+  // Frame
+  ctx.strokeStyle='rgba(192,192,192,0.45)';ctx.lineWidth=1.5;ctx.strokeRect(12,12,W-24,H-24);
+  ctx.lineWidth=2;ctx.strokeStyle='#d4d8e2';
+  const C=24;
+  function corner(x,y,dx,dy){ctx.beginPath();ctx.moveTo(x,y+dy);ctx.lineTo(x,y);ctx.lineTo(x+dx,y);ctx.stroke();}
+  corner(20,20,C,C);corner(W-20,20,-C,C);corner(20,H-20,C,-C);corner(W-20,H-20,-C,-C);
+  // Header strip
+  const hg=ctx.createLinearGradient(0,30,0,75);
+  hg.addColorStop(0,'rgba(192,192,192,0.12)');hg.addColorStop(1,'rgba(192,192,192,0.02)');
+  ctx.fillStyle=hg;ctx.fillRect(28,32,W-56,46);
+  ctx.strokeStyle='rgba(192,192,192,0.18)';ctx.lineWidth=1;ctx.strokeRect(28,32,W-56,46);
+  ctx.fillStyle='#d4d8e2';ctx.font='700 18px "Share Tech Mono", monospace';
+  ctx.fillText('SIZNEXUS // ACHIEVEMENT UNLOCKED',42,62);
+  // Trophy badge (silver disc with monogram)
+  ctx.beginPath();ctx.arc(W/2,180,60,0,Math.PI*2);
+  const rg=ctx.createRadialGradient(W/2,170,5,W/2,180,60);
+  rg.addColorStop(0,'#fff');rg.addColorStop(1,'rgba(168,178,193,.6)');
+  ctx.fillStyle=rg;ctx.fill();
+  ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='#0a0e1a';ctx.font='700 56px "Orbitron",monospace';ctx.textAlign='center';
+  ctx.fillText((iconName||'★').slice(0,1).toUpperCase(),W/2,200);
+  ctx.textAlign='left';
+  // Title + subtitle
+  ctx.fillStyle='#fff';ctx.font='700 28px "Orbitron", monospace';ctx.textAlign='center';
+  ctx.fillText(String(title||'').slice(0,40),W/2,290);
+  ctx.fillStyle='rgba(192,192,192,0.7)';ctx.font='13px "Share Tech Mono", monospace';
+  ctx.fillText(String(subtitle||'').slice(0,80),W/2,320);
+  ctx.textAlign='left';
+  // Footer
+  ctx.fillStyle='rgba(192,192,192,0.4)';ctx.font='10px "Share Tech Mono", monospace';
+  ctx.fillText(`UNLOCKED ${new Date().toISOString().slice(0,10)} · TheSizNexus`,28,H-22);
+  return c;
+}
+function offerAchievementShare(title,subtitle,iconName){
+  const c=generateAchievementCard(title,subtitle,iconName);
+  const filename=`SizNexus_${title.replace(/[^a-z0-9]/gi,'_')}.png`;
+  if(navigator.canShare){
+    c.toBlob(async(blob)=>{
+      if(!blob){download();return;}
+      const file=new File([blob],filename,{type:'image/png'});
+      const payload={files:[file],title:'TheSizNexus achievement',text:`${title} — ${subtitle} | ${location.origin}`};
+      if(navigator.canShare(payload)){
+        try{await navigator.share(payload);return;}catch(_){download();}
+      }else download();
+    },'image/png');
+  }else download();
+  function download(){const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download=filename;a.click();}
+  showToast(`Achievement: ${title}`);
+}
+// Hook streak milestones
+const _streakMilestones=new Set([7,14,30,60,100,365]);
+const _origDoDailyCheckIn=doDailyCheckIn;
+window.doDailyCheckIn=async function(){
+  const before=currentUserData?.currentStreak||0;
+  await _origDoDailyCheckIn();
+  const after=currentUserData?.currentStreak||0;
+  if(after>before && _streakMilestones.has(after)){
+    setTimeout(()=>offerAchievementShare(`${after}-Day Streak`,'Operational consistency on TheSizNexus','S'),600);
+  }
+};
+
+/* ── BROWSER TAB BADGE ── */
+const _baseTitle=document.title;
+function setTabBadge(n){
+  document.title=(n>0?`(${n}) `:'')+_baseTitle;
+}
+function refreshTabBadge(){
+  if(!currentUser||currentUser.isAnonymous){setTabBadge(0);return;}
+  Promise.all([
+    db.collection('notifications').where('to','==',currentUser.uid).where('read','==',false).get().catch(()=>null),
+    db.collection('friendRequests').where('to','==',currentUser.uid).get().catch(()=>null)
+  ]).then(([nSnap,rSnap])=>{
+    const n=(nSnap?nSnap.size:0)+(rSnap?rSnap.docs.filter(d=>d.data().status==='pending').length:0);
+    setTabBadge(n);
+  });
+}
+auth.onAuthStateChanged(()=>setTimeout(refreshTabBadge,1200));
+setInterval(()=>{if(!document.hidden)refreshTabBadge();},45000);
