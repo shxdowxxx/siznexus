@@ -300,11 +300,21 @@ service cloud.firestore {
     match /intelPosts/{postId} {
       allow read: if isAuthenticated();
 
+      // Staff can publish freely. Regular members can submit a 'pending' intel post
+      // for staff review (status MUST be 'pending', authorUid MUST be self).
       allow create: if isAuthenticated()
-        && (isOwner() || isModOrAbove())
         && request.resource.data.keys().hasAll(['title', 'body'])
         && validString('title', 200)
-        && validString('body', 5000);
+        && validString('body', 5000)
+        && (
+          (isOwner() || isModOrAbove())
+          || (
+            isRegisteredUser()
+            && isNotBanned()
+            && request.resource.data.status == 'pending'
+            && request.resource.data.authorUid == request.auth.uid
+          )
+        );
 
       allow delete: if isAuthenticated()
         && (isOwner() || isModOrAbove());

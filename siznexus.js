@@ -1515,6 +1515,7 @@ auth.onAuthStateChanged(async user=>{
           const n=change.doc.data();
           if(n.type==='message'&&n.fromUid!==currentUser.uid&&currentChatUid!==n.fromUid){
             showMsgToast(n.fromName,n.fromPhoto,n.preview,n.fromUid);
+            maybeNativeNotify(`${n.fromName||'Operative'} sent a message`,n.preview||'',n.fromUid);
           }
         }
       });
@@ -2943,12 +2944,28 @@ async function loadIntelBoard(){
         ? 'Recent intel and alerts. Staff can publish directly from this board.'
         : 'Recent intel, staff updates, and internal notices appear here first.'
     });
+    const isStaff=isMod(currentUserData);
     posts.forEach(d=>{
       const p=d.data();
+      // Hide pending posts from non-staff (except the author).
+      if(p.status==='pending' && !isStaff && p.authorUid!==currentUser.uid)return;
       const item=document.createElement('div');item.className='intel-post';item.dataset.cardId=d.id;
-      item.innerHTML=`<div class="intel-post-title">${p.tag?`<span class="intel-tag">${esc(p.tag)}</span>`:''}${esc(p.title||'Intel')}</div>
+      const pendingBadge=p.status==='pending'?'<span class="intel-pending-pill">PENDING REVIEW</span>':'';
+      const staffActions=isStaff && p.status==='pending'?`<div style="margin-top:8px;display:flex;gap:6px;"><button class="btn-sm intel-approve-btn" data-id="${d.id}" style="font-size:.62rem;"><i class="fas fa-check"></i> Approve</button><button class="btn-sm danger intel-reject-btn" data-id="${d.id}" style="font-size:.62rem;"><i class="fas fa-times"></i> Reject</button></div>`:'';
+      item.innerHTML=`<div class="intel-post-title">${p.tag?`<span class="intel-tag">${esc(p.tag)}</span>`:''}${esc(p.title||'Intel')} ${pendingBadge}</div>
         <div class="intel-post-body">${mdLite(p.body||'')}</div>
-        <div class="intel-post-meta"><span>${esc(p.authorName||'Admin')} &middot; ${esc(p.authorRank||'')}</span><span>${p.createdAt?fmtDate(p.createdAt):''}</span></div>`;
+        <div class="intel-post-meta"><span>${esc(p.authorName||'Admin')} &middot; ${esc(p.authorRank||'')}</span><span>${p.createdAt?fmtDate(p.createdAt):''}</span></div>${staffActions}`;
+      const ap=item.querySelector('.intel-approve-btn');
+      const rj=item.querySelector('.intel-reject-btn');
+      if(ap)ap.addEventListener('click',async()=>{
+        await db.collection('intelPosts').doc(d.id).update({status:'approved'}).catch(e=>showToast(e.message));
+        loadIntelBoard();
+      });
+      if(rj)rj.addEventListener('click',async()=>{
+        if(!confirm('Reject this submission?'))return;
+        await db.collection('intelPosts').doc(d.id).delete().catch(e=>showToast(e.message));
+        loadIntelBoard();
+      });
       list.appendChild(item);
     });
   }catch(err){list.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;}
@@ -5177,3 +5194,134 @@ function refreshTabBadge(){
 }
 auth.onAuthStateChanged(()=>setTimeout(refreshTabBadge,1200));
 setInterval(()=>{if(!document.hidden)refreshTabBadge();},45000);
+
+/* ── BROWSER NATIVE NOTIFICATIONS ──
+   Polite permission ask: only the FIRST time a DM/notif arrives after sign-in.
+   No persistent push (FCM needs Cloud Functions) — these fire only while the tab is open. */
+let _nativeNotifAsked=false;
+function maybeNativeNotify(title,body,uid){
+  if(!('Notification' in window))return;
+  if(!document.hidden)return; // tab visible — toast is enough
+  if(Notification.permission==='granted'){
+    try{const n=new Notification(title,{body,icon:'/favicon/favicon-32x32.png',tag:uid||'siz'});n.onclick=()=>{window.focus();n.close();};}catch(_){}
+    return;
+  }
+  if(Notification.permission==='default' && !_nativeNotifAsked){
+    _nativeNotifAsked=true;
+    Notification.requestPermission();
+  }
+}
+
+/* ── DAILY / WEEKLY LEADERBOARD ──
+   Augments the static leaderboard with a "This Week" view scored by approved
+   mission submissions in the last 7 days × the mission's points. */
+let _lbScope='all';
+function injectLeaderboardScopeBar(){
+  const list=document.getElementById('leaderboardList');
+  if(!list||list.dataset.scopeBar)return;
+  list.dataset.scopeBar='1';
+  const bar=document.createElement('div');
+  bar.className='lb-scope-bar';
+  bar.innerHTML=`<button type="button" class="lb-scope-btn active" data-scope="all">All-Time</button><button type="button" class="lb-scope-btn" data-scope="week">This Week</button><button type="button" class="lb-scope-btn" data-scope="day">Today</button>`;
+  list.parentElement.insertBefore(bar,list);
+  bar.querySelectorAll('.lb-scope-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      bar.querySelectorAll('.lb-scope-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      _lbScope=btn.dataset.scope;
+      loadLeaderboard();
+    });
+  });
+}
+const _origLoadLeaderboard=loadLeaderboard;
+loadLeaderboard=async function(){
+  injectLeaderboardScopeBar();
+  if(_lbScope==='all'){return _origLoadLeaderboard();}
+  const list=document.getElementById('leaderboardList');
+  list.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  const cutoff=Date.now()-(_lbScope==='day'?86400000:7*86400000);
+  try{
+    const subSnap=await db.collection('missionSubmissions').where('status','==','approved').get();
+    const totals={};
+    subSnap.forEach(d=>{
+      const s=d.data();
+      const t=(s.reviewedAt?.toMillis?.()||s.submittedAt?.toMillis?.()||s.createdAt?.toMillis?.()||0);
+      if(t<cutoff)return;
+      totals[s.uid]=(totals[s.uid]||0)+(s.points||0);
+    });
+    const ids=Object.keys(totals);
+    if(!ids.length){
+      list.innerHTML=`<div class="hub-empty">No ${_lbScope==='day'?'24h':'7-day'} activity yet.</div>`;
+      updateHubSectionInfo({label:_lbScope==='day'?"Today's Operatives":'Weekly Operatives',count:0,note:'Nothing to rank in this window.'});
+      return;
+    }
+    const userDocs=await Promise.all(ids.map(uid=>db.collection('users').doc(uid).get().catch(()=>null)));
+    const ranked=userDocs.filter(s=>s&&s.exists).map(s=>({...s.data(),id:s.id,_score:totals[s.id]||0})).sort((a,b)=>b._score-a._score).slice(0,20);
+    updateHubSectionInfo({label:_lbScope==='day'?"Today's Operatives":'Weekly Operatives',count:ranked.length,note:`Ranked by mission Net earned in the last ${_lbScope==='day'?'24 hours':'7 days'}.`});
+    list.innerHTML='';
+    ranked.forEach((u,i)=>{
+      const rankNum=i+1;
+      const rankCls=rankNum===1?'gold':rankNum===2?'silver':rankNum===3?'bronze':'other';
+      const rankIcon=rankNum===1?'🥇':rankNum===2?'🥈':rankNum===3?'🥉':rankNum;
+      const isMe=u.id===currentUser.uid;
+      const row=document.createElement('div');row.className='lb-row';row.dataset.cardId=u.id;
+      row.innerHTML=`<span class="lb-rank ${rankCls}">${rankIcon}</span>
+        <div class="lb-av">${avHtml(u.photoURL,u.displayName)}</div>
+        <span class="lb-name">${nameHtml(u)}${isMe?'<span class="lb-you">[YOU]</span>':''}</span>
+        <span class="lb-pts"><i class="fas fa-star" style="font-size:.6rem;margin-right:3px;"></i>${u._score}</span>`;
+      list.appendChild(row);
+    });
+  }catch(err){list.innerHTML=`<div class="hub-empty" style="color:#f55;">${esc(err.message)}</div>`;}
+};
+
+/* ── MEMBER-SUBMITTED INTEL ──
+   Allows non-admin members to submit intel posts (status='pending'). Admin can
+   review and approve via the intel tab. */
+function injectMemberIntelForm(list){
+  if(list.dataset.memberForm)return;
+  list.dataset.memberForm='1';
+  if(!currentUser||currentUser.isAnonymous)return;
+  if(isMod(currentUserData))return; // mods already get the staff form
+  const wrap=document.createElement('div');
+  wrap.style.cssText='margin-bottom:14px;padding:12px;border:1px dashed rgba(192,192,192,.18);background:rgba(192,192,192,.02);border-radius:3px;';
+  wrap.innerHTML=`<p style="font-family:var(--font-mono);font-size:.62rem;letter-spacing:.18em;color:var(--color-text-muted);margin-bottom:8px;">// SUBMIT INTEL — STAFF REVIEW REQUIRED</p>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <input type="text" id="memberIntelTitle" class="input-field" placeholder="Intel headline..." maxlength="80" style="font-size:.78rem;">
+      <textarea id="memberIntelBody" class="input-field" placeholder="Briefing body..." maxlength="800" style="min-height:60px;font-size:.75rem;"></textarea>
+      <div style="display:flex;gap:6px;">
+        <input type="text" id="memberIntelTag" class="input-field" placeholder="Tag (e.g. Recon)" maxlength="20" style="font-size:.72rem;flex:1;">
+        <button class="btn-primary" id="submitMemberIntelBtn" style="font-size:.7rem;padding:7px 12px;"><i class="fas fa-paper-plane"></i> Submit</button>
+      </div>
+    </div>`;
+  list.appendChild(wrap);
+  document.getElementById('submitMemberIntelBtn').addEventListener('click',async()=>{
+    const t=document.getElementById('memberIntelTitle').value.trim();
+    const b=document.getElementById('memberIntelBody').value.trim();
+    const tag=document.getElementById('memberIntelTag').value.trim();
+    if(!t||!b){showToast('Title and body required.');return;}
+    const btn=document.getElementById('submitMemberIntelBtn');
+    btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+    try{
+      await db.collection('intelPosts').add({
+        title:t,body:b,tag,
+        authorName:currentUserData?.displayName||'Member',
+        authorRank:currentUserData?.rank||'Member',
+        authorUid:currentUser.uid,
+        status:'pending',
+        createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
+      showToast('Intel submitted for staff review.');
+      writeCorpLog('intel',`submitted intel for review: "${t}"`);
+      document.getElementById('memberIntelTitle').value='';
+      document.getElementById('memberIntelBody').value='';
+      document.getElementById('memberIntelTag').value='';
+    }catch(err){showToast('Submit failed: '+err.message);}
+    finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> Submit';}
+  });
+}
+const _origLoadIntelBoard=loadIntelBoard;
+loadIntelBoard=async function(){
+  await _origLoadIntelBoard();
+  const list=document.getElementById('intelList');
+  if(list)injectMemberIntelForm(list);
+};

@@ -1921,3 +1921,12 @@ body.static-page{background:#0A0E1A;color:var(--color-text);font-family:var(--fo
   .opsmap-stat-row{flex-wrap:wrap;}
   .nav-right .notif-btn{padding:0 8px;}
 }
+
+/* Leaderboard scope bar */
+.lb-scope-bar{display:flex;gap:6px;padding-bottom:10px;margin-bottom:10px;border-bottom:var(--border);}
+.lb-scope-btn{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;padding:6px 12px;background:transparent;border:1px solid rgba(192,192,192,.18);color:var(--color-text-muted);border-radius:3px;cursor:pointer;transition:all .15s ease;}
+.lb-scope-btn:hover{color:var(--color-text-light);border-color:rgba(192,192,192,.4);}
+.lb-scope-btn.active{background:rgba(192,192,192,.08);border-color:rgba(192,192,192,.55);color:var(--color-text-light);}
+
+/* Pending intel pill */
+.intel-pending-pill{display:inline-block;font-family:var(--font-mono);font-size:.55rem;letter-spacing:.18em;padding:2px 7px;background:rgba(168,178,193,.1);border:1px solid rgba(168,178,193,.4);color:#a8b2c1;border-radius:2px;margin-left:6px;vertical-align:middle;}
