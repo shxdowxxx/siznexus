@@ -3181,85 +3181,151 @@ async function loadHubTab(tab){
 /* ── GLOBAL OPS MAP ── */
 let opsMapAnimId=null;
 function loadOpsMap() {
-  updateHubSectionInfo({label: 'Global Operations Matrix', count: 'LIVE', note: 'Tracking active network signals across the globe.'});
+  updateHubSectionInfo({label: 'Global Operations Matrix', count: 'LIVE', note: 'Tracking active network signals across the corporate grid.'});
   const canvas = document.getElementById('opsMapCanvas');
   if(!canvas) return;
   const ctx = canvas.getContext('2d');
-  
+
   function resize() {
     const rect = canvas.parentElement.getBoundingClientRect();
-    if(canvas.width !== rect.width || canvas.height !== rect.height) {
-      canvas.width = rect.width;
-      canvas.height = rect.height;
+    const dpr = window.devicePixelRatio || 1;
+    if(Math.round(canvas.width) !== Math.round(rect.width*dpr) || Math.round(canvas.height) !== Math.round(rect.height*dpr)) {
+      canvas.width = rect.width*dpr;
+      canvas.height = rect.height*dpr;
+      ctx.setTransform(dpr,0,0,dpr,0,0);
     }
   }
-  
+
+  // Pseudo-continents: pre-baked normalized hotspots that look roughly like land masses.
+  // Each is {cx, cy, radius, density} in 0-1 normalized space.
+  const continents = [
+    {cx:.18,cy:.32,rx:.12,ry:.10}, // N. America
+    {cx:.28,cy:.62,rx:.07,ry:.12}, // S. America
+    {cx:.48,cy:.30,rx:.08,ry:.08}, // Europe
+    {cx:.55,cy:.58,rx:.09,ry:.13}, // Africa
+    {cx:.70,cy:.34,rx:.16,ry:.12}, // Asia
+    {cx:.82,cy:.68,rx:.06,ry:.05}, // Australia
+  ];
+
+  // Persistent nodes positioned within continents
   const nodes = [];
-  for(let i=0; i<40; i++) {
+  const NODE_COUNT = 28;
+  for(let i=0; i<NODE_COUNT; i++) {
+    const c = continents[Math.floor(Math.random()*continents.length)];
+    const a = Math.random()*Math.PI*2, r = Math.random();
     nodes.push({
-      x: Math.random(),
-      y: Math.random() * 0.8 + 0.1,
-      baseAlpha: Math.random() * 0.5 + 0.1,
-      pulseSpeed: Math.random() * 0.05 + 0.01,
-      t: Math.random() * Math.PI * 2
+      x: c.cx + Math.cos(a)*c.rx*r,
+      y: c.cy + Math.sin(a)*c.ry*r,
+      baseAlpha: Math.random()*0.4 + 0.3,
+      pulseSpeed: Math.random()*0.03 + 0.012,
+      t: Math.random()*Math.PI*2,
+      isHub: Math.random() < 0.18
     });
   }
 
-  function draw() {
-    const w = canvas.width, h = canvas.height;
-    if(w <= 0 || h <= 0) {
-      opsMapAnimId = requestAnimationFrame(draw);
-      return;
+  // Random cross-continent signal arcs (re-rolled occasionally)
+  let arcs = [];
+  function rollArcs(){
+    arcs = [];
+    for(let i=0;i<5;i++){
+      const a=nodes[Math.floor(Math.random()*nodes.length)];
+      const b=nodes[Math.floor(Math.random()*nodes.length)];
+      if(a===b)continue;
+      arcs.push({a,b,t:0,dur:80+Math.random()*120});
     }
-    ctx.fillStyle = '#060913';
-    ctx.fillRect(0, 0, w, h);
-    
-    // Draw basic "world map" dots
-    ctx.fillStyle = 'rgba(192,192,192,0.1)';
-    for(let x=0; x<w; x+=10) {
-      for(let y=0; y<h; y+=10) {
-        if(Math.sin(x*0.01)*Math.cos(y*0.02) > 0.2) {
+  }
+  rollArcs();
+  setInterval(rollArcs, 4500);
+
+  // Update the badge in HUD
+  const nodeBadge=document.getElementById('opsmapNodes');
+  if(nodeBadge)nodeBadge.textContent=String(NODE_COUNT);
+
+  function draw() {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if(w <= 0 || h <= 0) { opsMapAnimId = requestAnimationFrame(draw); return; }
+
+    // Background gradient
+    const g = ctx.createLinearGradient(0,0,0,h);
+    g.addColorStop(0,'#080c18'); g.addColorStop(1,'#03060e');
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,w,h);
+
+    // Latitude/longitude grid
+    ctx.strokeStyle = 'rgba(192,192,192,0.06)';
+    ctx.lineWidth = 1;
+    for(let lat=0; lat<=10; lat++){const y=lat*h/10;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+    for(let lon=0; lon<=14; lon++){const x=lon*w/14;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+
+    // Continent dot-matrix
+    ctx.fillStyle = 'rgba(192,192,192,0.18)';
+    const step = 6;
+    for(let x=0; x<w; x+=step) {
+      for(let y=0; y<h; y+=step) {
+        const nx=x/w, ny=y/h;
+        let inside=false;
+        for(const c of continents){
+          const dx=(nx-c.cx)/c.rx, dy=(ny-c.cy)/c.ry;
+          if(dx*dx+dy*dy < 1){inside=true;break;}
+        }
+        if(inside){
           ctx.beginPath();
-          ctx.arc(x, y, 1, 0, Math.PI*2);
+          ctx.arc(x,y,1,0,Math.PI*2);
           ctx.fill();
         }
       }
     }
-    
-    // Draw pulsing active nodes
+
+    // Signal arcs (animated bezier with traveling dot)
+    arcs.forEach(arc=>{
+      arc.t += 1;
+      const ax=arc.a.x*w, ay=arc.a.y*h, bx=arc.b.x*w, by=arc.b.y*h;
+      const mx=(ax+bx)/2, my=Math.min(ay,by)-Math.abs(bx-ax)*0.25;
+      ctx.strokeStyle='rgba(192,192,192,0.18)';
+      ctx.lineWidth=1;
+      ctx.beginPath();
+      ctx.moveTo(ax,ay);
+      ctx.quadraticCurveTo(mx,my,bx,by);
+      ctx.stroke();
+      // Traveling pulse
+      const p = Math.min(1, arc.t/arc.dur);
+      const px = (1-p)*(1-p)*ax + 2*(1-p)*p*mx + p*p*bx;
+      const py = (1-p)*(1-p)*ay + 2*(1-p)*p*my + p*p*by;
+      ctx.shadowBlur=8; ctx.shadowColor='#fff';
+      ctx.fillStyle='rgba(255,255,255,0.85)';
+      ctx.beginPath(); ctx.arc(px,py,1.8,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0;
+    });
+
+    // Nodes
     nodes.forEach(n => {
       n.t += n.pulseSpeed;
-      const px = n.x * w;
-      const py = n.y * h;
-      const alpha = n.baseAlpha + Math.sin(n.t) * 0.3;
-      
-      ctx.beginPath();
-      ctx.arc(px, py, 2, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(192,192,192,${alpha})`;
-      ctx.shadowBlur = 10;
+      const px = n.x*w, py = n.y*h;
+      const alpha = n.baseAlpha + Math.sin(n.t)*0.28;
+      ctx.shadowBlur = n.isHub ? 14 : 6;
       ctx.shadowColor = '#FFFFFF';
-      ctx.fill();
-      
-      // Radar rings
-      if(Math.sin(n.t) > 0.8) {
-        ctx.beginPath();
-        ctx.arc(px, py, (Math.sin(n.t)-0.8)*50, 0, Math.PI*2);
-        ctx.strokeStyle = `rgba(192,192,192,${1-Math.sin(n.t)})`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
+      ctx.fillStyle = `rgba(220,224,232,${alpha})`;
+      ctx.beginPath(); ctx.arc(px,py, n.isHub?2.6:1.7, 0, Math.PI*2); ctx.fill();
       ctx.shadowBlur = 0;
+      // Pulse rings on hub nodes
+      if(n.isHub && Math.sin(n.t) > 0.7){
+        const r = (Math.sin(n.t)-0.7)*60;
+        ctx.strokeStyle = `rgba(192,192,192,${(1-Math.sin(n.t))*1.4})`;
+        ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2); ctx.stroke();
+      }
     });
 
     opsMapAnimId = requestAnimationFrame(draw);
   }
-  
+
   if(opsMapAnimId) cancelAnimationFrame(opsMapAnimId);
   resize();
   draw();
-  
-  const observer = new ResizeObserver(resize);
-  observer.observe(canvas.parentElement);
+  if(!loadOpsMap._observer){
+    loadOpsMap._observer = new ResizeObserver(resize);
+    loadOpsMap._observer.observe(canvas.parentElement);
+  }
 }
 
 /* ── BLACK MARKET ── */
@@ -3283,39 +3349,36 @@ async function loadBlackMarket() {
     const owned = d.purchasedItems || [];
     const balance = d.points || 0;
 
-    updateHubSectionInfo({label: 'The Black Market', count: MARKET_ITEMS.length, note: `Current Balance: ${balance} Net. All purchases are bound to your neural link.`});
-    list.innerHTML = '<div class="market-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px;"></div>';
+    updateHubSectionInfo({label: 'The Black Market', count: MARKET_ITEMS.length, note: `${MARKET_ITEMS.length} items in stock. Spend with care — purchases are final.`});
+    const balEl=document.getElementById('marketBalance');
+    if(balEl)balEl.textContent=`${balance.toLocaleString()} Net`;
+    list.innerHTML = '<div class="market-grid"></div>';
     const grid = list.querySelector('.market-grid');
 
     MARKET_ITEMS.forEach(item => {
       const isOwned = owned.includes(item.id);
       const canAfford = balance >= item.cost;
       const card = document.createElement('div');
-      card.className = 'market-card';
-      card.style.cssText = 'background:rgba(192,192,192,0.02); border:var(--border); border-radius:6px; padding:16px; display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s ease;';
-      
+      card.className = 'market-card'+(isOwned?' owned':'')+(canAfford||isOwned?'':' locked');
+      const iconClass=item.type === 'terminal' ? 'fa-terminal' : (item.type === 'badge' ? 'fa-medal' : 'fa-id-card');
+      const tagText=item.type === 'terminal' ? 'CONSOLE OVERRIDE' : (item.type === 'badge' ? 'BADGE' : 'TITLE');
       card.innerHTML = `
-        <div>
-          <div style="font-family:var(--font-headings); font-size:1rem; color:var(--color-text-light); margin-bottom:6px; display:flex; align-items:center; gap:8px;">
-            <i class="fas ${item.type === 'terminal' ? 'fa-terminal' : (item.type === 'badge' ? 'fa-medal' : 'fa-id-card')}"></i>
-            ${item.name}
-          </div>
-          <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--color-text-muted); line-height:1.4; margin-bottom:14px;">${item.desc}</div>
+        <div class="market-card-top">
+          <div class="market-card-tag">${tagText}</div>
+          ${isOwned?'<div class="market-card-status"><i class="fas fa-check-circle"></i> INSTALLED</div>':''}
         </div>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--color-text-light); font-weight:700;">
-            <i class="fas fa-coins" style="font-size:0.6rem; opacity:0.6;"></i> ${item.cost} Net
-          </div>
-          <button class="btn-primary buy-btn" ${isOwned ? 'disabled' : (canAfford ? '' : 'disabled')} data-id="${item.id}" style="font-size:0.65rem; padding:6px 12px;">
-            ${isOwned ? 'INSTALLED' : (canAfford ? 'PURCHASE' : 'LOW FUNDS')}
+        <div class="market-card-icon"><i class="fas ${iconClass}"></i></div>
+        <div class="market-card-name">${esc(item.name)}</div>
+        <div class="market-card-desc">${esc(item.desc)}</div>
+        <div class="market-card-foot">
+          <div class="market-card-cost"><span class="cost-num">${item.cost.toLocaleString()}</span> <span class="cost-unit">Net</span></div>
+          <button class="market-buy-btn buy-btn" ${isOwned||!canAfford ? 'disabled' : ''} data-id="${item.id}">
+            ${isOwned ? 'OWNED' : (canAfford ? 'PURCHASE' : 'INSUFFICIENT')}
           </button>
-        </div>
-      `;
-      
+        </div>`;
       if(!isOwned && canAfford) {
         card.querySelector('.buy-btn').addEventListener('click', () => buyMarketItem(item));
       }
-      
       grid.appendChild(card);
     });
   } catch(err) {
@@ -4670,65 +4733,125 @@ function triggerGlitch() {
 
 /* ── OPERATOR ID CARD GENERATOR ── */
 function generateOperatorID(user) {
+  if(!user){showToast('Sign in first.');return;}
+  const W=720, H=440;
   const canvas = document.createElement('canvas');
-  canvas.width = 600;
-  canvas.height = 360;
+  canvas.width=W; canvas.height=H;
   const ctx = canvas.getContext('2d');
 
-  // Background
-  ctx.fillStyle = '#0a0e1a';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Background gradient
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#0c1020'); bg.addColorStop(1,'#04060e');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
 
-  // Border & Grid
-  ctx.strokeStyle = '#c0c0c0';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
-  
-  ctx.strokeStyle = 'rgba(192,192,192,0.1)';
-  for(let x=0; x<canvas.width; x+=20) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
-  for(let y=0; y<canvas.height; y+=20) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
+  // Subtle dot matrix grid
+  ctx.fillStyle='rgba(192,192,192,0.05)';
+  for(let x=0;x<W;x+=14)for(let y=0;y<H;y+=14){ctx.fillRect(x,y,1,1);}
 
-  // Header
-  ctx.fillStyle = '#d4d8e2';
-  ctx.font = 'bold 24px monospace';
-  ctx.fillText('SIZNEXUS // OPERATOR ID', 30, 50);
-  
-  // Details
-  ctx.font = '20px monospace';
-  ctx.fillText(`OPERATIVE : ${(user.displayName||'UNKNOWN').toUpperCase()}`, 180, 120);
-  ctx.fillText(`CLEARANCE : ${(user.rank||'MEMBER').toUpperCase()}`, 180, 160);
-  ctx.fillText(`TITLE     : ${(user.operatorTitle||'NONE').toUpperCase()}`, 180, 200);
-  ctx.fillText(`NET FUNDS : ${user.points||0}`, 180, 240);
-  ctx.fillText(`STATUS    : ${user.status==='online'?'ACTIVE':'OFFLINE'}`, 180, 280);
+  // Outer frame
+  ctx.strokeStyle='rgba(192,192,192,0.45)';
+  ctx.lineWidth=1.5; ctx.strokeRect(12,12,W-24,H-24);
+  // Corner brackets (silver L-marks)
+  ctx.lineWidth=2; ctx.strokeStyle='#d4d8e2';
+  const C=24;
+  function corner(x,y,dx,dy){ctx.beginPath();ctx.moveTo(x,y+dy);ctx.lineTo(x,y);ctx.lineTo(x+dx,y);ctx.stroke();}
+  corner(20,20,C,C);corner(W-20,20,-C,C);corner(20,H-20,C,-C);corner(W-20,H-20,-C,-C);
 
-  // Barcode (decorative)
-  ctx.fillStyle = '#c0c0c0';
-  for(let i=0; i<30; i++) {
-    ctx.fillRect(180 + i*12, 300, Math.random() > 0.5 ? 4 : 8, 30);
+  // Top header strip
+  const hg=ctx.createLinearGradient(0,30,0,75);
+  hg.addColorStop(0,'rgba(192,192,192,0.12)');hg.addColorStop(1,'rgba(192,192,192,0.02)');
+  ctx.fillStyle=hg; ctx.fillRect(28,32,W-56,46);
+  ctx.strokeStyle='rgba(192,192,192,0.18)'; ctx.lineWidth=1; ctx.strokeRect(28,32,W-56,46);
+  ctx.fillStyle='#d4d8e2';
+  ctx.font='700 18px "Share Tech Mono", monospace';
+  ctx.fillText('SIZNEXUS // OPERATOR DOSSIER', 42, 62);
+  ctx.fillStyle='rgba(192,192,192,0.6)';
+  ctx.font='10px "Share Tech Mono", monospace';
+  ctx.fillText('CLASSIFIED', W-110, 62);
+
+  // Photo placeholder (drawn first; img replaces it)
+  const PX=42, PY=98, PW=160, PH=160;
+  function drawPlaceholder(){
+    ctx.fillStyle='#0a0e1a'; ctx.fillRect(PX,PY,PW,PH);
+    ctx.strokeStyle='rgba(192,192,192,0.4)'; ctx.lineWidth=1; ctx.strokeRect(PX,PY,PW,PH);
+    ctx.fillStyle='#a8b2c1';
+    ctx.font='700 64px "Share Tech Mono", monospace';
+    ctx.textAlign='center';
+    ctx.fillText((user.displayName||'?')[0].toUpperCase(), PX+PW/2, PY+PH/2+22);
+    ctx.textAlign='left';
   }
+  drawPlaceholder();
 
-  // Draw Photo
-  const img = new Image();
-  img.crossOrigin = "Anonymous"; // Try to avoid CORS issues
-  img.onload = () => {
-    ctx.drawImage(img, 30, 90, 120, 120);
-    finalizeDownload();
-  };
-  img.onerror = () => {
-    ctx.fillStyle = '#111827';
-    ctx.fillRect(30, 90, 120, 120);
-    ctx.fillStyle = '#c0c0c0';
-    ctx.font = 'bold 48px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText((user.displayName||'?')[0].toUpperCase(), 90, 170);
-    finalizeDownload();
-  };
-  img.src = user.photoURL || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+  // Right column: details
+  const COL=PX+PW+30;
+  ctx.font='10px "Share Tech Mono", monospace';
+  ctx.fillStyle='rgba(192,192,192,0.55)';
+  ctx.fillText('OPERATIVE NAME', COL, PY+8);
+  ctx.fillStyle='#fff';
+  ctx.font='700 22px "Share Tech Mono", monospace';
+  ctx.fillText((user.displayName||'UNKNOWN').toUpperCase(), COL, PY+34);
 
-  function finalizeDownload() {
-    const a = document.createElement('a');
-    a.download = `SizNexus_ID_${user.displayName||'Operative'}.png`;
-    a.href = canvas.toDataURL('image/png');
+  function row(label, val, y){
+    ctx.fillStyle='rgba(192,192,192,0.55)';
+    ctx.font='10px "Share Tech Mono", monospace';
+    ctx.fillText(label, COL, y);
+    ctx.fillStyle='#d4d8e2';
+    ctx.font='700 14px "Share Tech Mono", monospace';
+    ctx.fillText(String(val).toUpperCase(), COL, y+18);
+  }
+  row('CLEARANCE',user.rank||'MEMBER', PY+62);
+  row('OPERATOR TITLE', user.operatorTitle||'—', PY+98);
+  row('NET FUNDS', (user.points||0).toLocaleString(), PY+134);
+
+  // Bottom band: status, barcode
+  const BY = H-90;
+  ctx.fillStyle='rgba(192,192,192,0.04)';
+  ctx.fillRect(28,BY-4,W-56,68);
+  ctx.strokeStyle='rgba(192,192,192,0.16)'; ctx.lineWidth=1; ctx.strokeRect(28,BY-4,W-56,68);
+
+  ctx.fillStyle='rgba(192,192,192,0.55)';
+  ctx.font='10px "Share Tech Mono", monospace';
+  ctx.fillText('STATUS', 42, BY+12);
+  ctx.fillStyle = user.status==='online' ? '#9be39b' : '#999';
+  ctx.font='700 13px "Share Tech Mono", monospace';
+  ctx.fillText(user.status==='online'?'ACTIVE NETWORK':'OFFLINE', 42, BY+30);
+
+  // ID hash
+  ctx.fillStyle='rgba(192,192,192,0.55)';
+  ctx.font='10px "Share Tech Mono", monospace';
+  ctx.fillText('ID HASH', 42, BY+50);
+  ctx.fillStyle='#d4d8e2';
+  ctx.font='12px "Share Tech Mono", monospace';
+  const hash=(currentUser?.uid||'').slice(0,8).toUpperCase()+'-'+(currentUser?.uid||'').slice(-6).toUpperCase();
+  ctx.fillText(hash||'—', 100, BY+50);
+
+  // Barcode on right of bottom band
+  ctx.fillStyle='#d4d8e2';
+  for(let i=0;i<32;i++){
+    const w=Math.random()>0.5?2:5;
+    ctx.fillRect(W-220+i*6, BY+8, w, 38);
+  }
+  ctx.fillStyle='rgba(192,192,192,0.55)';
+  ctx.font='9px "Share Tech Mono", monospace';
+  ctx.fillText('SCAN AT GATE', W-220, BY+58);
+
+  // Issued line
+  ctx.fillStyle='rgba(192,192,192,0.4)';
+  ctx.font='9px "Share Tech Mono", monospace';
+  const issued=new Date().toISOString().slice(0,10);
+  ctx.fillText(`ISSUED ${issued} · TheSizNexus`, 28, H-18);
+
+  // Now draw photo on top of placeholder if available
+  const img=new Image();
+  img.crossOrigin='Anonymous';
+  img.onload=()=>{ctx.drawImage(img,PX,PY,PW,PH);ctx.strokeStyle='rgba(192,192,192,0.6)';ctx.strokeRect(PX,PY,PW,PH);finalize();};
+  img.onerror=finalize;
+  if(user.photoURL)img.src=user.photoURL; else finalize();
+
+  function finalize(){
+    const a=document.createElement('a');
+    a.download=`SizNexus_ID_${(user.displayName||'Operative').replace(/[^a-z0-9]/gi,'_')}.png`;
+    a.href=canvas.toDataURL('image/png');
     a.click();
     showToast('Operator ID downloaded.');
   }
