@@ -104,16 +104,46 @@
   }
 /* ── SECURITY ── */
 document.addEventListener('dragstart', e => { if (e.target && e.target.tagName === 'IMG') e.preventDefault(); });
-/* ── SPLASH ── */
+/* ── SPLASH (Terminal Boot Sequence) ── */
 (function(){
-  const bar=document.getElementById('splashBar'),txt=document.getElementById('splashText');
-  const msgs=['INITIALIZING NEXUS...','LOADING CORPORATION DATA...','ESTABLISHING CONNECTION...','ACCESS GRANTED'];
-  let pct=0,mi=0;
-  const iv=setInterval(()=>{
-    pct+=Math.random()*8+2;if(pct>100)pct=100;bar.style.width=pct+'%';
-    const ni=Math.floor(pct/25);if(ni!==mi&&ni<msgs.length){mi=ni;txt.textContent=msgs[ni];}
-    if(pct>=100){clearInterval(iv);txt.textContent='ACCESS GRANTED';setTimeout(()=>document.getElementById('splash').classList.add('hidden'),600);}
-  },60);
+  const splash=document.getElementById('splash');
+  if(!splash)return;
+  // Overwrite splash HTML for the terminal boot sequence
+  splash.innerHTML = '<div id="bootTerminal" style="font-family:var(--font-mono); font-size:0.75rem; color:var(--color-primary); padding:20px; text-align:left; width:100%; max-width:600px; margin:0 auto; white-space:pre-wrap;"></div>';
+  const bootTerm = document.getElementById('bootTerminal');
+  const lines = [
+    'INITIATING KERNEL...',
+    'ESTABLISHING NEURAL LINK...',
+    'BYPASSING FIREWALL...',
+    'DECRYPTING HANDSHAKE... OK',
+    'ACCESSING SIZNEXUS MAINFRAME...',
+    'SYSTEM ONLINE.'
+  ];
+  let lineIdx=0;
+  
+  function typeLine() {
+    if(lineIdx >= lines.length) {
+      setTimeout(()=>splash.classList.add('hidden'), 400);
+      return;
+    }
+    const p = document.createElement('div');
+    bootTerm.appendChild(p);
+    
+    let charIdx=0;
+    const text = lines[lineIdx];
+    const typeInt = setInterval(() => {
+      p.textContent += text.charAt(charIdx);
+      charIdx++;
+      if(charIdx >= text.length) {
+        clearInterval(typeInt);
+        lineIdx++;
+        setTimeout(typeLine, 100);
+      }
+    }, 15);
+  }
+  
+  // Start boot
+  setTimeout(typeLine, 200);
 })();
 /* ── PARTICLES ── */
 particlesJS('particles-js',{particles:{number:{value:window.innerWidth<768?30:60,density:{enable:true,value_area:window.innerWidth<768?400:800}},color:{value:'#A8B2C1'},shape:{type:'circle'},opacity:{value:.15,random:true},size:{value:window.innerWidth<768?.8:1.2,random:true},line_linked:{enable:true,distance:150,color:'#A8B2C1',opacity:.05,width:1},move:{enable:true,speed:window.innerWidth<768?.3:.5,direction:'none',random:true}},interactivity:{events:{onhover:{enable:window.innerWidth>=768,mode:'repulse'}}}});
@@ -273,6 +303,7 @@ function searchMembers(){
   if(!q){loadAllUsers();return;}
   db.collection('users').get().then(snap=>{const users=[];snap.forEach(d=>{const u=d.data();u.id=d.id;if((u.displayName||'').toLowerCase().includes(q)||(u.bio||'').toLowerCase().includes(q))users.push(u);});displayMembers(users);}).catch(console.error);
 }
+
 /* ── VIEW PROFILE ── */
 async function openViewProfile(u){
   // Fetch user data
@@ -330,7 +361,7 @@ async function openViewProfile(u){
       <div class="profile-hero-top">
         <div class="profile-hero-av">${photo?`<img src="${esc(photo)}" alt="${esc(name)}" loading="lazy">`:`${initials(name)}`}</div>
         <div class="profile-hero-info">
-          <div class="profile-hero-name">${nameHtml(u,name)}</div>
+          <div class="profile-hero-name cipher-text" style="color:var(--color-text-light);" data-cipher="${esc(name)}">${esc(name)}</div>
           ${titleHtml(u)}
           <div class="profile-hero-rank"><span class="${rankClass(u.rank)}">${esc(u.rank||'Member')}</span></div>
           ${levelHtml(u)}
@@ -347,7 +378,7 @@ async function openViewProfile(u){
     </div>
     <div class="profile-bio-section">
       <div class="profile-section-label"><i class="fas fa-align-left" style="margin-right:4px;"></i>About</div>
-      <div class="profile-bio-text">${esc(u.bio||'No bio set yet.')}</div>
+      <div class="profile-bio-text cipher-text" data-cipher="${esc(u.bio||'No bio set yet.')}">${esc(u.bio||'No bio set yet.')}</div>
     </div>
     ${(u.badges||[]).length?`<div class="profile-bio-section"><div class="profile-section-label"><i class="fas fa-medal" style="margin-right:4px;"></i>Badges</div>${renderBadges(u.badges)}</div>`:''}
     <div class="profile-bio-section">
@@ -367,6 +398,7 @@ async function openViewProfile(u){
   openModal('profileModal');
   loadOpHistory(u.id,'vpOpHistory');
   loadActivityHeatmap(u.id,'vpHeatmap');
+  runCipherEffect(document.getElementById('profileModal'));
   if(isLoggedIn&&currentUser.uid!==u.id){
     document.getElementById('vpGuestPrompt')?.addEventListener('click',()=>{closeModal('profileModal');promptGuestRegister('Create a free account to connect with operatives and send messages.');});
     document.getElementById('vpSendReq')?.addEventListener('click',()=>sendFriendRequest(u.id,name));
@@ -447,7 +479,7 @@ async function acceptFriendRequest(fromUid,fromName){
     showToast(`You are now connected with ${fromName}!`);
     updateNotifBadge();
     writeCorpLog('connection',`connected with ${fromName}`);
-    // Award points
+    // Award Net
     db.collection('users').doc(currentUser.uid).update({points:firebase.firestore.FieldValue.increment(10)}).catch(()=>{});
   }catch(err){
     console.error('acceptFriendRequest error:',err);
@@ -960,12 +992,8 @@ async function openMyProfile(){
     const titleEl=document.getElementById('editTitle');
     if(titleEl)titleEl.value=d.operatorTitle||'';
     const picker=document.getElementById('accentPicker');
-    if(picker){
-      const cur=d.accentColor||'';
-      picker.querySelectorAll('.accent-swatch').forEach(s=>{
-        s.classList.toggle('selected',(s.dataset.accent||'')===cur);
-      });
-    }
+    if(picker) picker.style.display = 'none';
+
     // Reset pending uploads
     _pendingAvatarDataURL=null;_pendingBannerDataURL=null;
     // Show existing banner if any
@@ -1086,10 +1114,16 @@ function renderProfilePreview(d){
   const statusLabel=STATUS_LABELS[d.status]||d.status||'offline';
   const joinDate=d.createdAt?.toDate?.();
   const joinStr=joinDate?joinDate.toLocaleDateString([],{month:'long',year:'numeric'}):'Unknown';
+  
+  // Use pending images if they exist
+  const displayAvatar = _pendingAvatarDataURL || d.photoURL;
+  const displayBanner = _pendingBannerDataURL === '__CLEAR__' ? '' : (_pendingBannerDataURL || d.bannerURL);
+
   el.innerHTML=`<p style="font-family:var(--font-mono);font-size:.65rem;color:rgba(192,192,192,.3);margin-bottom:10px;letter-spacing:.1em;">// HOW OTHERS SEE YOUR PROFILE</p>
-    <div class="profile-modal-hero">
+    <div class="profile-modal-hero${displayBanner?' has-banner':''}" ${displayBanner?`style="--banner:url('${esc(displayBanner)}');"`:''}>
+      ${displayBanner?'<div class="profile-banner-overlay"></div>':''}
       <div class="profile-hero-top">
-        <div class="profile-hero-av">${d.photoURL?`<img src="${esc(d.photoURL)}" alt="">`:`${initials(d.displayName||'?')}`}</div>
+        <div class="profile-hero-av">${displayAvatar?`<img src="${esc(displayAvatar)}" alt="">`:`${initials(d.displayName||'?')}`}</div>
         <div class="profile-hero-info">
           <div class="profile-hero-name">${nameHtml(d)}</div>${titleHtml(d)}${levelHtml(d)}
           <div class="profile-hero-rank"><span class="${rankClass(d.rank)}">${esc(d.rank||'Member')}</span></div>
@@ -1244,16 +1278,16 @@ async function loadOpHistory(uid,targetId){
     el.innerHTML=`<div class="op-history-list">${items.slice(0,20).map(s=>{
       const t=s.reviewedAt||s.submittedAt;
       const when=t?fmtDate(t):'—';
-      return `<div class="op-history-item"><div class="op-dot"></div><div class="op-body"><strong>${esc(s.missionTitle||'Mission')}</strong><span class="op-meta">+${s.points||0} pts • ${when}</span></div></div>`;
+      return `<div class="op-history-item"><div class="op-dot"></div><div class="op-body"><strong>${esc(s.missionTitle||'Mission')}</strong><span class="op-meta">+${s.points||0} Net • ${when}</span></div></div>`;
     }).join('')}</div>`;
   }catch(err){
     el.innerHTML=`<p style="font-family:var(--font-mono);font-size:.7rem;color:#f55;">${esc(err.message)}</p>`;
   }
 }
 /* ── XP / LEVEL SYSTEM ── */
-const LEVEL_XP=100; // points per level
-function computeLevel(points){
-  const p=Math.max(0,points||0);
+const LEVEL_XP=100; // Net per level
+function computeLevel(Net){
+  const p=Math.max(0,Net||0);
   const level=Math.floor(p/LEVEL_XP)+1;
   const intoLevel=p%LEVEL_XP;
   return {level,intoLevel,toNext:LEVEL_XP-intoLevel,total:LEVEL_XP};
@@ -1269,8 +1303,7 @@ function levelHtml(u,opts={}){
 }
 function nameHtml(u,fallback='Unknown'){
   const name=esc(u?.displayName||fallback);
-  const c=u?.accentColor;
-  return c?`<span style="color:${esc(c)};">${name}</span>`:name;
+  return `<span style="color:var(--color-text-light);">${name}</span>`;
 }
 function titleHtml(u){
   const t=u?.operatorTitle;
@@ -1284,9 +1317,8 @@ document.getElementById('saveProfileBtn').addEventListener('click',async()=>{
     const newName=document.getElementById('editDisplayName').value.trim();
     const newBio=document.getElementById('editBio').value.trim();
     const newActivity=document.getElementById('editActivityStatus')?.value.trim()||'';
-    const newAccent=document.querySelector('#accentPicker .accent-swatch.selected')?.dataset.accent||'';
     const newTitle=document.getElementById('editTitle')?.value.trim()||'';
-    const updates={bio:newBio,activityStatus:newActivity,accentColor:newAccent,operatorTitle:newTitle};
+    const updates={bio:newBio,activityStatus:newActivity,operatorTitle:newTitle};
     if(newName)updates.displayName=newName;
     if(_pendingAvatarDataURL){updates.photoURL=_pendingAvatarDataURL;}
     if(_pendingBannerDataURL==='__CLEAR__'){updates.bannerURL='';}
@@ -1605,7 +1637,11 @@ async function openAdminPanel(){
   openModal('adminModal');
   // Show viewer's rank in header
   const rBadge=document.getElementById('adminViewerRank');
-  if(rBadge){rBadge.textContent=currentUserData?.rank||'';rBadge.className='';rBadge.style.cssText='font-family:var(--font-mono);font-size:.62rem;padding:3px 10px;border-radius:3px;background:rgba(192,192,192,.05);border:1px solid rgba(192,192,192,.15);';rBadge.classList.add(rankClass(currentUserData?.rank));}
+  if(rBadge){
+    rBadge.textContent=currentUserData?.rank||'Member';
+    rBadge.className='';
+    rBadge.style.cssText='font-family:var(--font-mono);font-size:.62rem;padding:4px 10px;border-radius:3px;background:rgba(192,192,192,.08);border:1px solid rgba(192,192,192,.25);color:#D4D8E2 !important;display:inline-block;width:100%;text-align:center;font-weight:700;text-transform:uppercase;letter-spacing:.05em;';
+  }
   // Tab access
   const rank=currentUserData?.rank||'';
   const isModerator=['Moderator'].includes(rank);
@@ -1706,14 +1742,14 @@ async function loadAdminKeys(){
       </div>
       <div style="font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);">Submitted: <strong>${esc(sub.keySubmitted||'')}</strong> &nbsp;|&nbsp; Expected: <strong style="color:${keyMatch?'#4CAF50':'#f44336'};">${esc(correctKey)}</strong></div>
       <div style="display:flex;gap:6px;">
-        <button class="admin-save-rank" style="border-color:rgba(76,175,80,.4);color:#4CAF50;" data-sid="${sid}" data-uid="${sub.uid}" data-pts="${sub.points||50}" data-action="approve"><i class="fas fa-check"></i> Approve +${sub.points||50}pts</button>
+        <button class="admin-save-rank" style="border-color:rgba(76,175,80,.4);color:#4CAF50;" data-sid="${sid}" data-uid="${sub.uid}" data-pts="${sub.points||50}" data-action="approve"><i class="fas fa-check"></i> Approve +${sub.points||50}Net</button>
         <button class="admin-save-rank" style="border-color:rgba(255,68,68,.4);color:#f55;" data-sid="${sid}" data-action="reject"><i class="fas fa-times"></i> Reject</button>
       </div>`;
       row.querySelector('[data-action="approve"]').addEventListener('click',async function(){
         this.disabled=true;this.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
         const batch=db.batch();
         batch.update(db.collection('missionSubmissions').doc(this.dataset.sid),{status:'approved'});
-        batch.update(db.collection('users').doc(this.dataset.uid),{points:firebase.firestore.FieldValue.increment(parseInt(this.dataset.pts)||50)});
+        batch.update(db.collection('users').doc(this.dataset.uid),{points:firebase.firestore.FieldValue.increment(parseInt(this.dataset.points)||50)});
         try{await safeExec(batch.commit()); await safeExec(awardBadge(this.dataset.uid,'mission'),'Approved! Points awarded.');}catch(_){ }
         loadAdminKeys();
       });
@@ -1738,6 +1774,60 @@ async function loadAdminTab(tab){
   else if(tab==='reports')await loadAdminReports();
   else if(tab==='bans')await loadAdminBans();
   else if(tab==='spotlight')await loadAdminSpotlight();
+  else if(tab==='threat')await loadAdminThreat();
+}
+/* ── THREAT LEVEL PROTOCOL ── */
+let _currentThreat = 'green';
+function startThreatListener() {
+  db.collection('_configKEY').doc('app').onSnapshot(doc => {
+    if(!doc.exists) return;
+    const data = doc.data();
+    const threat = data.threatLevel || 'green';
+    
+    // Trigger glitch if escalating to red
+    if(threat === 'red' && _currentThreat !== 'red' && typeof triggerGlitch === 'function') triggerGlitch();
+    
+    _currentThreat = threat;
+    
+    // Update Body Class
+    document.body.classList.remove('threat-green', 'threat-yellow', 'threat-red');
+    document.body.classList.add(`threat-${threat}`);
+    
+    // Update Banner
+    const banner = document.getElementById('threatBanner');
+    const msg = document.getElementById('threatMsg');
+    if(threat === 'red') {
+      banner.style.display = 'flex';
+      banner.style.background = 'linear-gradient(90deg, rgba(180,50,50,.88), rgba(120,35,35,.88))';
+      msg.textContent = '// CRITICAL NETWORK THREAT — CODE RED IN EFFECT';
+    } else if(threat === 'yellow') {
+      banner.style.display = 'flex';
+      banner.style.background = 'linear-gradient(90deg, rgba(180,140,60,.88), rgba(140,100,40,.88))';
+      msg.textContent = '// ELEVATED NETWORK RISK — CODE YELLOW ACTIVE';
+    } else {
+      banner.style.display = 'none';
+    }
+  });
+}
+startThreatListener();
+
+async function loadAdminThreat() {
+  const label = document.getElementById('currentThreatLabel');
+  label.textContent = _currentThreat.toUpperCase();
+  
+  document.querySelectorAll('.threat-opt').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.threat === _currentThreat);
+    btn.onclick = async () => {
+      if(!confirm(`Confirm GLOBAL override to CODE ${btn.dataset.threat.toUpperCase()}?`)) return;
+      try {
+        await db.collection('_configKEY').doc('app').update({ threatLevel: btn.dataset.threat });
+        showToast(`Threat level updated to ${btn.dataset.threat.toUpperCase()}`);
+        loadAdminThreat();
+      } catch(err) {
+        showToast(`Override failed: ${err.message}`);
+      }
+    };
+  });
 }
 async function loadAdminBadges(){
   const list=document.getElementById('adminBadgesList');
@@ -2064,14 +2154,14 @@ function featuredScore(user){
 function buildFeaturedDescription(user,position){
   if(!user)return'No operative has been featured yet.';
   if(position===0&&(user.points||0)>0){
-    return `${user.displayName||'This operative'} is currently setting the pace with ${user.points||0} pts and ${user.rank||'Member'} clearance.`;
+    return `${user.displayName||'This operative'} is currently setting the pace with ${user.points||0} Net and ${user.rank||'Member'} clearance.`;
   }
   if(user.activityStatus){
     return `Current activity: "${user.activityStatus}". ${(user.bio&&user.bio.trim())?user.bio.trim():`${user.rank||'Member'} operative active in the Nexus network.`}`;
   }
   if(user.bio&&user.bio.trim())return truncateText(user.bio.trim(),150);
   if((user.points||0)>0){
-    return `${user.displayName||'This operative'} has accumulated ${user.points||0} pts through missions, activity, and member engagement.`;
+    return `${user.displayName||'This operative'} has accumulated ${user.points||0} Net through missions, activity, and member engagement.`;
   }
   return `${user.rank||'Member'} operative active in the Nexus network.`;
 }
@@ -2080,7 +2170,7 @@ function buildFeaturedTags(user,position){
   const tags=[];
   if(position===0&&(user.points||0)>0)tags.push('Top Operative');
   if(user.rank)tags.push(user.rank);
-  if((user.points||0)>0)tags.push(`${user.points||0} pts`);
+  if((user.points||0)>0)tags.push(`${user.points||0} Net`);
   if((user.friends||[]).length>0)tags.push(`${(user.friends||[]).length} connections`);
   (user.badges||[]).forEach(b=>{
     if(tags.length<5&&BADGE_DEFS[b]?.label)tags.push(BADGE_DEFS[b].label);
@@ -2102,7 +2192,7 @@ function setFeaturedMember(user,position=0){
     card.classList.remove('is-interactive');
     return;
   }
-  nameEl.innerHTML=nameHtml(user,'Unknown Operative')+titleHtml(user)+levelHtml(user,{compact:true});
+  nameEl.innerHTML=nameHtml(user,'Unknown Operative')+titleHtml(user);
   descEl.textContent=user._curatedNote||buildFeaturedDescription(user,position);
   const tags=user._curatedNote?['Editorial Pick',user.rank||'Member']:buildFeaturedTags(user,position);
   badgesEl.innerHTML=tags.length
@@ -2302,9 +2392,15 @@ let _missionCategoryFilter='all';
 let _briefingMission=null;
 function openMissionBriefing(mission,mySub){
   _briefingMission=mission;
+  document.getElementById('briefingTitle').className='cipher-text';
+  document.getElementById('briefingTitle').dataset.cipher=mission.title||'Mission';
   document.getElementById('briefingTitle').textContent=mission.title||'Mission';
+  
+  document.getElementById('briefingDesc').className='briefing-desc cipher-text';
+  document.getElementById('briefingDesc').dataset.cipher=mission.description||'No additional details.';
   document.getElementById('briefingDesc').textContent=mission.description||'No additional details.';
-  document.getElementById('briefingPts').textContent=`${mission.points||0} pts`;
+  
+  document.getElementById('briefingPts').textContent=`${mission.points||0} Net`;
   const cat=document.getElementById('briefingCat');
   if(mission.category){cat.textContent=mission.category.toUpperCase();cat.style.display='';cat.className='briefing-cat mission-cat-'+esc(mission.category);}
   else{cat.style.display='none';}
@@ -2322,7 +2418,7 @@ function openMissionBriefing(mission,mySub){
     keySection.style.display='none';
   }else if(mySub?.status==='approved'){
     statusEl.textContent='COMPLETED';statusEl.className='briefing-status briefing-status-done';
-    myStatus.textContent=`Completed +${mission.points||0} pts`;
+    myStatus.textContent=`Completed +${mission.points||0} Net`;
     keySection.style.display='none';
   }else if(mySub?.status==='rejected'){
     statusEl.textContent='REJECTED';statusEl.className='briefing-status briefing-status-rejected';
@@ -2334,6 +2430,7 @@ function openMissionBriefing(mission,mySub){
     keySection.style.display='';
   }
   openModal('briefingModal');
+  runCipherEffect(document.getElementById('briefingModal'));
   setTimeout(()=>document.getElementById('briefingKeyInput').focus(),60);
 }
 document.getElementById('closeBriefing')?.addEventListener('click',()=>closeModal('briefingModal'));
@@ -2343,27 +2440,105 @@ async function submitMissionBriefing(){
   const keyVal=document.getElementById('briefingKeyInput').value.trim().toUpperCase();
   const fb=document.getElementById('briefingFeedback');
   if(!keyVal){fb.textContent='Enter a KEY first.';fb.className='briefing-feedback err';return;}
-  const btn=document.getElementById('briefingSubmitBtn');
-  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Transmitting...';
-  try{
-    await db.collection('missionSubmissions').add({
-      uid:currentUser.uid,
-      displayName:currentUserData?.displayName||'Unknown',
-      missionId:m.id,
-      missionTitle:m.title||'Mission',
-      keySubmitted:keyVal,
-      points:m.points||50,
-      status:'pending',
-      submittedAt:firebase.firestore.FieldValue.serverTimestamp(),
-      createdAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
-    writeCorpLog('mission',`submitted a KEY for mission: ${m.title}`);
-    fb.textContent='KEY transmitted. Awaiting admin verification.';fb.className='briefing-feedback ok';
-    setTimeout(()=>{closeModal('briefingModal');loadMissions();},1400);
-  }catch(err){
-    fb.textContent='Error: '+err.message;fb.className='briefing-feedback err';
-    btn.disabled=false;btn.innerHTML='<i class="fas fa-key"></i> Submit';
+  
+  // Start the hacking minigame before submission
+  initiateHackingMinigame(async () => {
+    const btn=document.getElementById('briefingSubmitBtn');
+    btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Transmitting...';
+    try{
+      await db.collection('missionSubmissions').add({
+        uid:currentUser.uid,
+        displayName:currentUserData?.displayName||'Unknown',
+        missionId:m.id,
+        missionTitle:m.title||'Mission',
+        keySubmitted:keyVal,
+        points:m.points||50,
+        status:'pending',
+        submittedAt:firebase.firestore.FieldValue.serverTimestamp(),
+        createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
+      writeCorpLog('mission',`submitted a KEY for mission: ${m.title}`);
+      fb.textContent='SIGNAL DECRYPTED. KEY transmitted.';fb.className='briefing-feedback ok';
+      setTimeout(()=>{closeModal('briefingModal');loadMissions();},1400);
+    }catch(err){
+      fb.textContent='Transmission failed: '+err.message;fb.className='briefing-feedback err';
+      btn.disabled=false;btn.innerHTML='<i class="fas fa-key"></i> Submit';
+    }
+  });
+}
+
+function initiateHackingMinigame(onSuccess) {
+  const container = document.querySelector('#briefingModal .modal-container');
+  if(!container) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'hacking-overlay';
+  overlay.innerHTML = `
+    <div class="hacking-terminal" id="hackingTerminal"></div>
+    <div style="display:flex; flex-direction:column; align-items:center;">
+      <h3 style="color:var(--color-primary); font-size:1.1rem; margin-bottom:4px; letter-spacing:0.1em;">FIREWALL BYPASS REQUIRED</h3>
+      <p style="font-size:0.65rem; color:var(--color-text-muted); margin-bottom:12px; font-family:var(--font-mono);">MATCH THE SIGNAL PULSES TO DECRYPT THE NODE.</p>
+      <div class="hacking-target-grid" id="hackingTargetGrid"></div>
+      <div class="hacking-progress-bar"><div class="hacking-progress-fill" id="hackingProgress"></div></div>
+    </div>
+  `;
+  container.appendChild(overlay);
+
+  // Terminal scroll animation
+  const term = document.getElementById('hackingTerminal');
+  const codes = ['[SIGNAL: 0x99]', 'LINKING NEURAL UPLINK...', 'BYPASSING KERNEL...', 'ROOT_ACCESS: ATTEMPTING', 'ENCRYPTING PACKETS...', 'SIGNAL STRENGTH: 92%', 'NODE_ID: NEXUS_ALPHA', 'BUFFER_OVERFLOW: SUPPRESSED', 'SSL_HANDSHAKE: OK'];
+  let codeInt = setInterval(() => {
+    const line = document.createElement('div');
+    line.className = 'hacking-code-line';
+    line.textContent = codes[Math.floor(Math.random() * codes.length)] + ' ' + Math.random().toString(16).slice(2, 10).toUpperCase();
+    term.appendChild(line);
+    if(term.children.length > 10) term.removeChild(term.firstChild);
+    term.scrollTop = term.scrollHeight;
+  }, 150);
+
+  // Game Logic
+  const grid = document.getElementById('hackingTargetGrid');
+  const progress = document.getElementById('hackingProgress');
+  let currentStep = 0;
+  const totalSteps = 4;
+  
+  function nextRound() {
+    grid.innerHTML = '';
+    const activeIdx = Math.floor(Math.random() * 16);
+    
+    for(let i=0; i<16; i++) {
+      const btn = document.createElement('div');
+      btn.className = 'hacking-target';
+      btn.textContent = Math.random().toString(16).slice(2, 4).toUpperCase();
+      if(i === activeIdx) {
+        btn.classList.add('active');
+        btn.onclick = () => {
+          btn.classList.add('success');
+          currentStep++;
+          progress.style.width = (currentStep / totalSteps * 100) + '%';
+          if(currentStep === totalSteps) {
+            clearInterval(codeInt);
+            setTimeout(() => {
+              overlay.remove();
+              onSuccess();
+            }, 800);
+          } else {
+            setTimeout(nextRound, 200);
+          }
+        };
+      } else {
+        btn.onclick = () => {
+          btn.classList.add('fail');
+          currentStep = Math.max(0, currentStep - 1);
+          progress.style.width = (currentStep / totalSteps * 100) + '%';
+          setTimeout(() => btn.classList.remove('fail'), 300);
+        };
+      }
+      grid.appendChild(btn);
+    }
   }
+
+  nextRound();
 }
 document.getElementById('briefingSubmitBtn')?.addEventListener('click',submitMissionBriefing);
 document.getElementById('briefingKeyInput')?.addEventListener('keydown',e=>{if(e.key==='Enter')submitMissionBriefing();});
@@ -2415,7 +2590,7 @@ async function loadMissions(){
           actionHtml='<p style="font-family:var(--font-mono);font-size:.7rem;color:var(--color-text-muted);margin-top:8px;"><i class="fas fa-clock"></i> Your KEY has been submitted and is awaiting admin review.</p>';
         }else if(mySub.status==='approved'){
           statusHtml='<span class="mission-status completed">Completed</span>';
-          actionHtml='<p style="font-family:var(--font-mono);font-size:.7rem;color:#4CAF50;margin-top:8px;"><i class="fas fa-check-circle"></i> Mission complete! +${m.points||50} pts awarded.</p>';
+          actionHtml='<p style="font-family:var(--font-mono);font-size:.7rem;color:#4CAF50;margin-top:8px;"><i class="fas fa-check-circle"></i> Mission complete! +${m.points||50} Net awarded.</p>';
         }else if(mySub.status==='rejected'){
           statusHtml='<span class="mission-status rejected">Rejected</span>';
           actionHtml=`<p style="font-family:var(--font-mono);font-size:.7rem;color:#f44336;margin-top:8px;"><i class="fas fa-times-circle"></i> Key rejected. ${esc(mySub.rejectReason||'Try again or contact an admin.')}</p>`;
@@ -2433,7 +2608,7 @@ async function loadMissions(){
             <div class="mission-desc">${esc(m.description||'')}</div>
           </div>
         </div>
-        <div class="mission-footer"><span class="mission-pts"><i class="fas fa-star"></i> ${m.points||50} pts</span>${statusHtml}</div>
+        <div class="mission-footer"><span class="mission-pts"><i class="fas fa-star"></i> ${m.points||50} Net</span>${statusHtml}</div>
         ${actionHtml}`;
       // Wire briefing open button
       const briefingBtn=card.querySelector('.briefing-open');
@@ -2738,12 +2913,14 @@ async function loadPolls(){
 /* ═══════════════════════════════════════════════════════
    GROUP CHAT
 ═══════════════════════════════════════════════════════ */
-let corpChatUnsub=null, corpChatOpen=false, corpChatLastSeen=0;
+let corpChatUnsub=null, corpChatOpen=false, corpChatLastSeen=parseInt(localStorage.getItem('siz_corpChatLastSeen')||'0');
 function openCorpChat(){
   corpChatOpen=true;
-  corpChatLastSeen=Date.now();
   document.getElementById('corpChatPanel').classList.add('open');
-  document.getElementById('chatUnreadBadge').classList.remove('show');
+  const badge=document.getElementById('chatUnreadBadge');
+  if(badge){badge.classList.remove('show');badge.textContent='0';}
+  const body=document.getElementById('corpChatBody');
+  if(body)body.scrollTop=body.scrollHeight;
   if(!corpChatUnsub)startCorpChatListener();
 }
 function closeCorpChat(){
@@ -2754,10 +2931,14 @@ function startCorpChatListener(){
   if(corpChatUnsub){corpChatUnsub();corpChatUnsub=null;}
   corpChatUnsub=db.collection('corpChat').orderBy('createdAt','asc').limitToLast(60).onSnapshot(snap=>{
     const body=document.getElementById('corpChatBody');
+    if(!body)return;
     body.innerHTML='';
-    let lastDate='',lastUid='';
+    let lastDate='',lastUid='',latestTs=0,unreadCount=0;
     snap.forEach(d=>{
       const m=d.data(),isMine=m.uid===currentUser.uid;
+      const ts=m.createdAt?.toMillis?.()||0;
+      if(ts>latestTs)latestTs=ts;
+      if(!isMine && ts>corpChatLastSeen) unreadCount++;
       const ds=m.createdAt?fmtDate(m.createdAt):'';
       if(ds&&ds!==lastDate){
         lastDate=ds;
@@ -2785,12 +2966,19 @@ function startCorpChatListener(){
       body.appendChild(wrap);
     });
     body.scrollTop=body.scrollHeight;
-    // Show unread badge if panel is closed
-    if(!corpChatOpen){
+    // Initial load scroll fix
+    setTimeout(()=>{body.scrollTop=body.scrollHeight;},50);
+    // Unread logic
+    if(corpChatOpen){
+      corpChatLastSeen=latestTs;
+      localStorage.setItem('siz_corpChatLastSeen',latestTs);
+    }else if(unreadCount>0){
       const badge=document.getElementById('chatUnreadBadge');
-      badge.classList.add('show');
+      if(badge){
+        badge.textContent=unreadCount>9?'9+':unreadCount;
+        badge.classList.add('show');
+      }
     }
-    // Update online count
     document.getElementById('corpChatOnline').textContent='';
   },err=>console.error('Corp chat error:',err));
 }
@@ -2828,12 +3016,12 @@ const HUB_SUMMARY_CONFIG={
     title:'Mission Board',
     meta:'Review active objectives, submit mission keys, and track approval state from a single board.',
     label:'Active Missions',
-    note:'Mission cards show live status, points, and your current submission state.'
+    note:'Mission cards show live status, Net, and your current submission state.'
   },
   leaderboard:{
     eyebrow:'Top Performers',
     title:'Leaderboard',
-    meta:'See who is leading the network by points, activity, and overall operational momentum.',
+    meta:'See who is leading the network by Net, activity, and overall operational momentum.',
     label:'Ranked Operatives',
     note:'The board reflects live point totals across visible members.'
   },
@@ -2986,6 +3174,196 @@ async function loadHubTab(tab){
   else if(tab==='intel')loadIntelBoard();
   else if(tab==='polls')loadPolls();
   else if(tab==='squads')loadSquads();
+  else if(tab==='opsmap')loadOpsMap();
+  else if(tab==='market')loadBlackMarket();
+}
+
+/* ── GLOBAL OPS MAP ── */
+let opsMapAnimId=null;
+function loadOpsMap() {
+  updateHubSectionInfo({label: 'Global Operations Matrix', count: 'LIVE', note: 'Tracking active network signals across the globe.'});
+  const canvas = document.getElementById('opsMapCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    if(canvas.width !== rect.width || canvas.height !== rect.height) {
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+  }
+  
+  const nodes = [];
+  for(let i=0; i<40; i++) {
+    nodes.push({
+      x: Math.random(),
+      y: Math.random() * 0.8 + 0.1,
+      baseAlpha: Math.random() * 0.5 + 0.1,
+      pulseSpeed: Math.random() * 0.05 + 0.01,
+      t: Math.random() * Math.PI * 2
+    });
+  }
+
+  function draw() {
+    const w = canvas.width, h = canvas.height;
+    if(w <= 0 || h <= 0) {
+      opsMapAnimId = requestAnimationFrame(draw);
+      return;
+    }
+    ctx.fillStyle = '#060913';
+    ctx.fillRect(0, 0, w, h);
+    
+    // Draw basic "world map" dots
+    ctx.fillStyle = 'rgba(192,192,192,0.1)';
+    for(let x=0; x<w; x+=10) {
+      for(let y=0; y<h; y+=10) {
+        if(Math.sin(x*0.01)*Math.cos(y*0.02) > 0.2) {
+          ctx.beginPath();
+          ctx.arc(x, y, 1, 0, Math.PI*2);
+          ctx.fill();
+        }
+      }
+    }
+    
+    // Draw pulsing active nodes
+    nodes.forEach(n => {
+      n.t += n.pulseSpeed;
+      const px = n.x * w;
+      const py = n.y * h;
+      const alpha = n.baseAlpha + Math.sin(n.t) * 0.3;
+      
+      ctx.beginPath();
+      ctx.arc(px, py, 2, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(192,192,192,${alpha})`;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#FFFFFF';
+      ctx.fill();
+      
+      // Radar rings
+      if(Math.sin(n.t) > 0.8) {
+        ctx.beginPath();
+        ctx.arc(px, py, (Math.sin(n.t)-0.8)*50, 0, Math.PI*2);
+        ctx.strokeStyle = `rgba(192,192,192,${1-Math.sin(n.t)})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      ctx.shadowBlur = 0;
+    });
+
+    opsMapAnimId = requestAnimationFrame(draw);
+  }
+  
+  if(opsMapAnimId) cancelAnimationFrame(opsMapAnimId);
+  resize();
+  draw();
+  
+  const observer = new ResizeObserver(resize);
+  observer.observe(canvas.parentElement);
+}
+
+/* ── BLACK MARKET ── */
+const MARKET_ITEMS = [
+  { id: 'skin_crimson', name: 'Terminal: Crimson', type: 'terminal', desc: 'Override console with a red tactical theme.', cost: 500, class: 'term-skin-crimson' },
+  { id: 'skin_emerald', name: 'Terminal: Emerald', type: 'terminal', desc: 'Classic matrix-green console override.', cost: 500, class: 'term-skin-emerald' },
+  { id: 'skin_gold', name: 'Terminal: Gold', type: 'terminal', desc: 'A premium gold-tinted console for high-tier operatives.', cost: 1500, class: 'term-skin-gold' },
+  { id: 'badge_shadow', name: 'Shadow Op Badge', type: 'badge', desc: 'Exclusive silver badge for the elite.', cost: 2000, badgeId: 'shadow_op' },
+  { id: 'title_nexus_ghost', name: 'Title: Nexus Ghost', type: 'title', desc: 'Set your operator title to "Nexus Ghost".', cost: 1000, title: 'Nexus Ghost' }
+];
+
+async function loadBlackMarket() {
+  const list = document.getElementById('marketList');
+  if(!list) return;
+  
+  list.innerHTML = '<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
+  updateHubSectionInfo({label: 'The Quartermaster', count: '—', note: 'Secure encrypted transaction terminal.'});
+
+  try {
+    const d = currentUserData || {};
+    const owned = d.purchasedItems || [];
+    const balance = d.points || 0;
+
+    updateHubSectionInfo({label: 'The Black Market', count: MARKET_ITEMS.length, note: `Current Balance: ${balance} Net. All purchases are bound to your neural link.`});
+    list.innerHTML = '<div class="market-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px;"></div>';
+    const grid = list.querySelector('.market-grid');
+
+    MARKET_ITEMS.forEach(item => {
+      const isOwned = owned.includes(item.id);
+      const canAfford = balance >= item.cost;
+      const card = document.createElement('div');
+      card.className = 'market-card';
+      card.style.cssText = 'background:rgba(192,192,192,0.02); border:var(--border); border-radius:6px; padding:16px; display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s ease;';
+      
+      card.innerHTML = `
+        <div>
+          <div style="font-family:var(--font-headings); font-size:1rem; color:var(--color-text-light); margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+            <i class="fas ${item.type === 'terminal' ? 'fa-terminal' : (item.type === 'badge' ? 'fa-medal' : 'fa-id-card')}"></i>
+            ${item.name}
+          </div>
+          <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--color-text-muted); line-height:1.4; margin-bottom:14px;">${item.desc}</div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--color-text-light); font-weight:700;">
+            <i class="fas fa-coins" style="font-size:0.6rem; opacity:0.6;"></i> ${item.cost} Net
+          </div>
+          <button class="btn-primary buy-btn" ${isOwned ? 'disabled' : (canAfford ? '' : 'disabled')} data-id="${item.id}" style="font-size:0.65rem; padding:6px 12px;">
+            ${isOwned ? 'INSTALLED' : (canAfford ? 'PURCHASE' : 'LOW FUNDS')}
+          </button>
+        </div>
+      `;
+      
+      if(!isOwned && canAfford) {
+        card.querySelector('.buy-btn').addEventListener('click', () => buyMarketItem(item));
+      }
+      
+      grid.appendChild(card);
+    });
+  } catch(err) {
+    list.innerHTML = `<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;
+  }
+}
+
+async function buyMarketItem(item) {
+  if(!currentUser || !currentUserData) return;
+  if(!confirm(`Authorize transaction for ${item.name} (${item.cost} Net)?`)) return;
+
+  const ref = db.collection('users').doc(currentUser.uid);
+  try {
+    await db.runTransaction(async (transaction) => {
+      const snap = await transaction.get(ref);
+      if (!snap.exists) throw "User not found";
+      const data = snap.data();
+      if ((data.points || 0) < item.cost) throw "Insufficient funds";
+      
+      const updates = {
+        points: firebase.firestore.FieldValue.increment(-item.cost),
+        purchasedItems: firebase.firestore.FieldValue.arrayUnion(item.id)
+      };
+
+      // Auto-apply certain types
+      if(item.type === 'title') updates.operatorTitle = item.title;
+      if(item.type === 'badge') updates.badges = firebase.firestore.FieldValue.arrayUnion(item.badgeId);
+
+      transaction.update(ref, updates);
+    });
+
+    showToast(`Transaction complete: ${item.name} acquired.`);
+    currentUserData = (await ref.get()).data();
+    loadBlackMarket();
+    if(item.type === 'terminal' || item.type === 'badge') triggerGlitch();
+    if(item.type === 'terminal') applyTerminalSkin(item.class);
+    writeCorpLog('market', `acquired ${item.name} from the Black Market`, {itemId: item.id, cost: item.cost});
+  } catch(err) {
+    showToast(`Transaction failed: ${err}`);
+  }
+}
+
+function applyTerminalSkin(skinClass) {
+  const term = document.getElementById('operatorTerminal');
+  if(!term) return;
+  // Remove other skins
+  MARKET_ITEMS.filter(i => i.type === 'terminal').forEach(i => term.classList.remove(i.class));
+  if(skinClass) term.classList.add(skinClass);
 }
 /* ── SQUADS ── */
 const SQUAD_MAX_MEMBERS=5;
@@ -3011,7 +3389,7 @@ async function loadSquads(){
       controls.innerHTML=`<button class="btn-primary" id="createSquadBtn" style="font-size:.75rem;padding:8px 12px;"><i class="fas fa-plus"></i> Create Squad</button>`;
       document.getElementById('createSquadBtn').addEventListener('click',createSquadPrompt);
     }
-    // Sort by total points desc
+    // Sort by total Net desc
     const withTotals=squads.map(s=>{
       const total=(s.members||[]).reduce((sum,uid)=>sum+(usersById[uid]?.points||0),0);
       return {...s,_total:total};
@@ -3021,7 +3399,7 @@ async function loadSquads(){
       updateHubSectionInfo({label:'Squads',count:0,note:'No squads exist yet.'});
       return;
     }
-    updateHubSectionInfo({label:'Squads',count:withTotals.length,note:'Members combine their points into a shared squad total. Max 5 per squad.'});
+    updateHubSectionInfo({label:'Squads',count:withTotals.length,note:'Members combine their Net into a shared squad total. Max 5 per squad.'});
     list.innerHTML='';
     withTotals.forEach(s=>{
       const isLeader=s.leaderUid===currentUser.uid;
@@ -3032,17 +3410,19 @@ async function loadSquads(){
         return `<div class="squad-member-av" title="${esc(u.displayName||uid)}">${avHtml(u.photoURL,u.displayName)}</div>`;
       }).join('');
       const tag=s.tag?`<span class="squad-tag">[${esc(s.tag)}]</span>`:'';
+      const emblemHtml = s.emblemURL ? `<img src="${esc(s.emblemURL)}" style="width:32px; height:32px; border-radius:4px; margin-right:8px; border:var(--border);">` : '';
       card.innerHTML=`
-        <div class="squad-header">
-          <div class="squad-info">
+        <div class="squad-header" style="display:flex; align-items:center;">
+          ${emblemHtml}
+          <div class="squad-info" style="flex:1;">
             <div class="squad-name">${tag} ${esc(s.name||'Unnamed')}</div>
             <div class="squad-leader">Led by ${esc(usersById[s.leaderUid]?.displayName||'—')}</div>
           </div>
-          <div class="squad-total"><strong>${s._total}</strong><span>pts</span></div>
+          <div class="squad-total"><strong style="color:var(--color-text-light);">${s._total}</strong><span style="font-size:.55rem; color:var(--color-text-muted); margin-left:3px;">Net</span></div>
         </div>
-        <div class="squad-members">${memberAvs}</div>
-        <div class="squad-meta">${(s.members||[]).length} / ${SQUAD_MAX_MEMBERS} operatives</div>
-        <div class="squad-actions">
+        <div class="squad-members" style="display:flex; gap:4px; margin-top:10px;">${memberAvs}</div>
+        <div class="squad-meta" style="font-family:var(--font-mono); font-size:.6rem; color:var(--color-text-muted); margin-top:8px;">${(s.members||[]).length} / ${SQUAD_MAX_MEMBERS} operatives</div>
+        <div class="squad-actions" style="margin-top:12px; display:flex; gap:8px;">
           ${isLeader?`<button class="btn-sm" data-act="manage" data-sid="${s.id}"><i class="fas fa-users-cog"></i> Manage</button><button class="btn-sm danger" data-act="disband" data-sid="${s.id}"><i class="fas fa-trash"></i> Disband</button>`:''}
           ${isMember&&!isLeader?`<button class="btn-sm danger" data-act="leave" data-sid="${s.id}"><i class="fas fa-sign-out-alt"></i> Leave</button>`:''}
         </div>`;
@@ -3079,7 +3459,7 @@ async function createSquadPrompt(){
 }
 async function manageSquad(squad,usersById){
   const members=squad.members||[];
-  const action=prompt(`Squad "${squad.name}"\nMembers: ${members.length}/${SQUAD_MAX_MEMBERS}\n\nType:\n  add <uid|name> — recruit a member\n  remove <uid|name> — remove a member\n  rename <new name> — rename squad\n\nCurrent members:\n${members.map(uid=>'  '+(usersById[uid]?.displayName||uid)).join('\n')}`);
+  const action=prompt(`Squad "${squad.name}"\nMembers: ${members.length}/${SQUAD_MAX_MEMBERS}\n\nType:\n  add <uid|name> — recruit\n  remove <uid|name> — kick\n  rename <new name> — rename\n  emblem — upload 64x64 logo`);
   if(!action)return;
   const [cmd,...rest]=action.trim().split(/\s+/);
   const arg=rest.join(' ').trim();
@@ -3089,22 +3469,33 @@ async function manageSquad(squad,usersById){
       const target=Object.values(usersById).find(u=>u.id===arg||(u.displayName||'').toLowerCase()===arg.toLowerCase());
       if(!target){showToast('No matching user.');return;}
       if(members.includes(target.id)){showToast('Already in squad.');return;}
-      // Make sure they're not in another squad
       const others=await db.collection('squads').where('members','array-contains',target.id).get();
       if(!others.empty){showToast(`${target.displayName} is already in a squad.`);return;}
       await db.collection('squads').doc(squad.id).update({members:firebase.firestore.FieldValue.arrayUnion(target.id)});
-      writeCorpLog('squad',`recruited ${target.displayName||'an operative'} into ${squad.name}`,{squadId:squad.id});
       showToast(`Added ${target.displayName}.`);
     }else if(cmd==='remove'){
       const target=Object.values(usersById).find(u=>u.id===arg||(u.displayName||'').toLowerCase()===arg.toLowerCase());
       if(!target){showToast('No matching user.');return;}
-      if(target.id===squad.leaderUid){showToast('Leader cannot be removed. Disband or transfer.');return;}
+      if(target.id===squad.leaderUid){showToast('Leader cannot be removed.');return;}
       await db.collection('squads').doc(squad.id).update({members:firebase.firestore.FieldValue.arrayRemove(target.id)});
       showToast(`Removed ${target.displayName}.`);
     }else if(cmd==='rename'){
-      if(!arg){showToast('Provide a new name.');return;}
+      if(!arg){showToast('Provide a name.');return;}
       await db.collection('squads').doc(squad.id).update({name:arg.slice(0,30)});
       showToast('Renamed.');
+    }else if(cmd==='emblem'){
+      const input = document.createElement('input');
+      input.type = 'file'; input.accept = 'image/*';
+      input.onchange = async () => {
+        const file = input.files[0]; if(!file) return;
+        try {
+          const dataURL = await resizeImageToDataURL(file, 64, 64, 0.8);
+          await db.collection('squads').doc(squad.id).update({emblemURL: dataURL});
+          showToast('Squad emblem updated.');
+          loadSquads();
+        } catch(e) { showToast('Upload failed: ' + e.message); }
+      };
+      input.click();
     }else{
       showToast('Unknown command.');return;
     }
@@ -3280,7 +3671,7 @@ async function loadHomeMissionPreview(){
       icon:'fa-crosshairs',
       title:esc(m.title||'Mission'),
       text:esc(truncateText(m.description||'Mission briefing unavailable.',110)),
-      meta:`${m.points||50} pts`,
+      meta:`${m.points||50} Net`,
       badge,
       targetId:d.id
     });
@@ -3298,7 +3689,7 @@ async function loadHomeLeaderboardPreview(){
     icon:index===0?'fa-trophy':'fa-chevron-up',
     title:`#${index+1} ${esc(u.displayName||'Unknown')}`,
     text:`Current rank: ${esc(u.rank||'Member')}${u.id===currentUser.uid?' • You are on the board.':''}`,
-    meta:`${u.points||0} pts`,
+    meta:`${u.points||0} Net`,
     badge:u.id===currentUser.uid?'You':'Top',
     targetId:u.id
   })).join('');
@@ -3374,7 +3765,7 @@ async function loadNetworkSnapshot(){
     eventEl.textContent=upcomingEvents;
     intelEl.textContent=intelSnap.size;
     missionLeadEl.textContent=sortedMissions.length
-      ? `${sortedMissions[0].data().title||'Mission'} • ${sortedMissions[0].data().points||50} pts`
+      ? `${sortedMissions[0].data().title||'Mission'} • ${sortedMissions[0].data().points||50} Net`
       : 'No active missions right now.';
     if(sortedEvents.length){
       const nextEvent=sortedEvents[0].data();
@@ -3901,7 +4292,7 @@ async function updateMotwStatus(){
       btn.disabled=true;btn.style.opacity='.5';
       btn.innerHTML='<i class="fas fa-check"></i> Posted This Week';
     }else{
-      status.innerHTML=`Week <strong>${esc(week)}</strong> has not been posted yet. Auto-pin will select the top operative by points and announce them.`;
+      status.innerHTML=`Week <strong>${esc(week)}</strong> has not been posted yet. Auto-pin will select the top operative by Net and announce them.`;
       btn.disabled=false;btn.style.opacity='1';
       btn.innerHTML='<i class="fas fa-magic"></i> Auto-Pin Top Operative as MOTW';
     }
@@ -3910,7 +4301,7 @@ async function updateMotwStatus(){
   }
 }
 async function runMotwAutoPin(){
-  if(!confirm('Pick the top operative by points and pin them as Member of the Week?'))return;
+  if(!confirm('Pick the top operative by Net and pin them as Member of the Week?'))return;
   const btn=document.getElementById('motwAutoBtn');
   btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Working...';
   try{
@@ -3921,7 +4312,7 @@ async function runMotwAutoPin(){
     users.sort((a,b)=>(b.points||0)-(a.points||0));
     const top=users[0];
     const week=isoWeekKey();
-    const note=`Member of the Week ${week} — top operative with ${top.points||0} points.`;
+    const note=`Member of the Week ${week} — top operative with ${top.points||0} Net.`;
     await db.collection('_configKEY').doc('featured').set({
       uid:top.id,
       note,
@@ -3949,7 +4340,7 @@ function renderSpotlightUserList(users){
     const row=document.createElement('div');
     row.className='admin-user-row';
     row.style.cursor='pointer';
-    row.innerHTML=`<div class="active-member-av">${avHtml(u.photoURL,u.displayName)}</div><div style="flex:1;"><strong style="font-size:.78rem;">${esc(u.displayName||'Unknown')}</strong><br><span style="font-size:.65rem;color:var(--color-text-muted);font-family:var(--font-mono);">${esc(u.rank||'Member')} · ${u.points||0} pts</span></div>`;
+    row.innerHTML=`<div class="active-member-av">${avHtml(u.photoURL,u.displayName)}</div><div style="flex:1;"><strong style="font-size:.78rem;">${esc(u.displayName||'Unknown')}</strong><br><span style="font-size:.65rem;color:var(--color-text-muted);font-family:var(--font-mono);">${esc(u.rank||'Member')} · ${u.points||0} Net</span></div>`;
     row.onclick=()=>{
       _spotlightSelectedUid=u.id;
       saveBtn.disabled=false;
@@ -4066,8 +4457,8 @@ function updateDirStats(users){
             '  <span class="t-cmd">/help</span>            this list',
             '  <span class="t-cmd">/whois &lt;name|uid&gt;</span> look up an operative',
             '  <span class="t-cmd">/missions</span>        list active missions',
-            '  <span class="t-cmd">/leaderboard</span>     top 5 operatives by points',
-            '  <span class="t-cmd">/rank</span>            your rank, points, streak',
+            '  <span class="t-cmd">/leaderboard</span>     top 5 operatives by Net',
+            '  <span class="t-cmd">/rank</span>            your rank, Net, streak',
             '  <span class="t-cmd">/squad</span>           your current squad',
             '  <span class="t-cmd">/online</span>          count of online operatives',
             '  <span class="t-cmd">/spotlight</span>       current featured member',
@@ -4098,7 +4489,7 @@ function updateDirStats(users){
         case 'missions':{
           const snap=await db.collection('missions').where('active','==',true).get();
           if(snap.empty){termPrint('<span class="t-dim">No active missions.</span>');break;}
-          const lines=snap.docs.slice(0,8).map(d=>{const m=d.data();return `  • <strong>${esc(m.title||'Mission')}</strong> <span class="t-dim">(${m.points||0} pts)${m.category?` [${esc(m.category)}]`:''}</span>`;});
+          const lines=snap.docs.slice(0,8).map(d=>{const m=d.data();return `  • <strong>${esc(m.title||'Mission')}</strong> <span class="t-dim">(${m.points||0} Net)${m.category?` [${esc(m.category)}]`:''}</span>`;});
           termPrint(`<span class="t-info">${snap.size} active mission${snap.size===1?'':'s'}:</span><br>${lines.join('<br>')}`);
           break;
         }
@@ -4106,7 +4497,7 @@ function updateDirStats(users){
           const snap=await db.collection('users').get();
           const users=snap.docs.map(d=>({...d.data(),id:d.id})).filter(u=>!u.isAnonymous).sort((a,b)=>(b.points||0)-(a.points||0)).slice(0,5);
           if(!users.length){termPrint('<span class="t-dim">No operatives ranked yet.</span>');break;}
-          termPrint(`<span class="t-info">Top 5 operatives:</span><br>${users.map((u,i)=>`  <span class="t-key">${i+1}.</span> ${esc(u.displayName||'Unknown')} <span class="t-dim">— ${u.points||0} pts</span>`).join('<br>')}`);
+          termPrint(`<span class="t-info">Top 5 operatives:</span><br>${users.map((u,i)=>`  <span class="t-key">${i+1}.</span> ${esc(u.displayName||'Unknown')} <span class="t-dim">— ${u.points||0} Net</span>`).join('<br>')}`);
           break;
         }
         case 'online':{
@@ -4149,27 +4540,6 @@ function updateDirStats(users){
       termPrint(`<span class="t-err">error:</span> ${esc(err.message)}`);
     }
   }
-})();
-
-/* ── LIVE NEWS TICKER ── */
-(function initNewsTicker(){
-  const track=document.getElementById('newsTickerTrack');
-  if(!track)return;
-  const TYPE_ICONS={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn',streak:'fa-fire',motw:'fa-trophy',squad:'fa-users-rectangle'};
-  function render(docs){
-    if(!docs.length){track.innerHTML='<span class="news-ticker-item">Standing by — no recent activity yet.</span>';return;}
-    const items=docs.map(d=>{
-      const log=d.data();
-      const icon=TYPE_ICONS[log.type]||'fa-circle';
-      return `<span class="news-ticker-item"><i class="fas ${icon}"></i> <strong>${esc(log.displayName||'Unknown')}</strong> ${esc(log.message||'')}</span>`;
-    });
-    // Duplicate items so the marquee loop is seamless.
-    track.innerHTML=items.join('<span class="news-ticker-sep">◆</span>')+'<span class="news-ticker-sep">◆</span>'+items.join('<span class="news-ticker-sep">◆</span>');
-  }
-  db.collection('corpLog').orderBy('createdAt','desc').limit(12).onSnapshot(snap=>{
-    const filtered=snap.docs.filter(d=>!['status','profile'].includes(d.data().type));
-    render(filtered);
-  },()=>{});
 })();
 
 /* ── Mini Markdown (bold, italic, code, links, line breaks) ── */
@@ -4253,3 +4623,115 @@ function mdLite(text){
     setTimeout(open,1400);
   });
 })();
+
+/* ── CIPHER EFFECT (ENCRYPTED TEXT REVEAL) ── */
+function runCipherEffect(container) {
+  if(!container) return;
+  const elements = container.querySelectorAll('.cipher-text');
+  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%^&*()';
+  elements.forEach(el => {
+    const finalStr = el.dataset.cipher || el.textContent.trim();
+    if(!el.dataset.cipher) el.dataset.cipher = finalStr;
+    const len = finalStr.length;
+    let iteration = 0;
+    const maxIter = 10;
+    
+    playSFX('cipher');
+
+    const intId = setInterval(() => {
+      let temp = '';
+      for(let i=0; i<len; i++) {
+        if(i < (iteration/maxIter)*len) {
+          temp += finalStr[i];
+        } else {
+          temp += chars[Math.floor(Math.random() * chars.length)];
+        }
+      }
+      el.textContent = temp;
+      iteration++;
+      if(iteration > maxIter) {
+        clearInterval(intId);
+        el.textContent = finalStr;
+      }
+    }, 40);
+  });
+}
+
+/* ── TACTICAL UI SOUND EFFECTS ── (removed: replace with no-op stubs) */
+function initSFX(){}
+function playSFX(){}
+
+/* ── HIGH-CLEARANCE GLITCH EFFECT ── */
+function triggerGlitch() {
+  document.body.classList.add('glitching');
+  playSFX('cipher');
+  setTimeout(() => document.body.classList.remove('glitching'), 400);
+}
+
+/* ── OPERATOR ID CARD GENERATOR ── */
+function generateOperatorID(user) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 600;
+  canvas.height = 360;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#0a0e1a';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Border & Grid
+  ctx.strokeStyle = '#c0c0c0';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+  
+  ctx.strokeStyle = 'rgba(192,192,192,0.1)';
+  for(let x=0; x<canvas.width; x+=20) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+  for(let y=0; y<canvas.height; y+=20) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
+
+  // Header
+  ctx.fillStyle = '#d4d8e2';
+  ctx.font = 'bold 24px monospace';
+  ctx.fillText('SIZNEXUS // OPERATOR ID', 30, 50);
+  
+  // Details
+  ctx.font = '20px monospace';
+  ctx.fillText(`OPERATIVE : ${(user.displayName||'UNKNOWN').toUpperCase()}`, 180, 120);
+  ctx.fillText(`CLEARANCE : ${(user.rank||'MEMBER').toUpperCase()}`, 180, 160);
+  ctx.fillText(`TITLE     : ${(user.operatorTitle||'NONE').toUpperCase()}`, 180, 200);
+  ctx.fillText(`NET FUNDS : ${user.points||0}`, 180, 240);
+  ctx.fillText(`STATUS    : ${user.status==='online'?'ACTIVE':'OFFLINE'}`, 180, 280);
+
+  // Barcode (decorative)
+  ctx.fillStyle = '#c0c0c0';
+  for(let i=0; i<30; i++) {
+    ctx.fillRect(180 + i*12, 300, Math.random() > 0.5 ? 4 : 8, 30);
+  }
+
+  // Draw Photo
+  const img = new Image();
+  img.crossOrigin = "Anonymous"; // Try to avoid CORS issues
+  img.onload = () => {
+    ctx.drawImage(img, 30, 90, 120, 120);
+    finalizeDownload();
+  };
+  img.onerror = () => {
+    ctx.fillStyle = '#111827';
+    ctx.fillRect(30, 90, 120, 120);
+    ctx.fillStyle = '#c0c0c0';
+    ctx.font = 'bold 48px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText((user.displayName||'?')[0].toUpperCase(), 90, 170);
+    finalizeDownload();
+  };
+  img.src = user.photoURL || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+  function finalizeDownload() {
+    const a = document.createElement('a');
+    a.download = `SizNexus_ID_${user.displayName||'Operative'}.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+    showToast('Operator ID downloaded.');
+  }
+}
+document.getElementById('downloadOperatorIdBtn')?.addEventListener('click',()=>generateOperatorID(currentUserData));
+

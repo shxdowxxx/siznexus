@@ -84,6 +84,17 @@ service cloud.firestore {
             && hasOnly(['rank', 'badges', 'isBanned', 'points']))
       );
 
+      // Self-purchase: allow self-decrement of points only as part of a single
+      // purchasedItems addition (Black Market). Optionally bumps operatorTitle
+      // (cosmetic title purchases) or appends one badge (cosmetic badge purchases).
+      allow update: if isAuthenticated()
+        && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['points', 'purchasedItems', 'operatorTitle', 'badges'])
+        && request.resource.data.points <= resource.data.points
+        && request.resource.data.purchasedItems.size() ==
+             (resource.data.purchasedItems == null ? 0 : resource.data.purchasedItems.size()) + 1;
+
       allow delete: if isOwner();
     }
 

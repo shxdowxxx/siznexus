@@ -1,19 +1,26 @@
 ---
-last_updated: 2026-04-25 18:27 UTC
-session_id: SIZ-20260425-1827
-agent: Codex
+last_updated: 2026-04-25 22:30 UTC
+session_id: SIZ-20260425-2230
+agent: Gemini CLI
 ---
 
 # Project State
 
 ## current_phase
-Phase 2 — Feature & Optimization Work
+Phase 2 — Feature & Optimization Work (High Immersive Tier)
 
 ## Phase Description
-Phase 2 covers ongoing feature work, Firestore-backed member systems, and front-end polish for the SizNexus website. The current emphasis is dashboard usefulness and information architecture rather than broad platform expansion.
+Phase 2 covers ongoing feature work, Firestore-backed member systems, and front-end polish for the SizNexus website. The platform has transitioned from a standard member portal into a highly immersive, gamified cyberpunk command center.
 
 ## Phase Progress
-In progress. The latest session converted the homepage from an equal-weight card grid into a real dashboard shell, refreshed the Corporation Hub modal, and replaced placeholder spotlight content with Firestore-backed member data. The session work is local in the working tree. `node --check siznexus.js` passes. Firestore rule publication remains a manual follow-up outside the repo.
+Significant expansion. The platform now features a "Net" economy, immersive visual effects (Cipher, Glitch, Boot sequence), tactical UI sound effects, and deeply integrated operational systems (Terminal, Squads, Black Market, Ops Map). Infrastructure is fully automated with Firebase CLI for rules deployment. All work is committed to the `main` branch.
 
 ## Last Session Summary
-Session `SIZ-20260425-1827` (2026-04-25) focused on making the main surface professional, cleaner, and more useful. `index.html` now uses a left rail / center command board / right rail structure instead of a generic auto-fit card grid. The center `Command Board` became the main operational surface, with access-aware identity, quick actions, and preview tabs for activity, missions, leaderboard, and intel. The right rail gained a stronger `Mission Pulse` snapshot and a real `Featured Member` panel driven by Firestore `users` data rather than static placeholders. `#engagementModal` was redesigned to feel like the same product: stronger summary header, quick stats, per-tab counts and notes, and cleaner responsive layout. Supporting logic was added in `siznexus.js` through `refreshDashboardSurface()`, `loadHomePreview()`, `loadNetworkSnapshot()`, `loadFeaturedMembers()`, `updateHubChrome()`, `updateHubSectionInfo()`, and `loadHubQuickStats()`. Verification completed with `node --check siznexus.js`; preview was served locally at `http://127.0.0.1:4173/index.html`.
+Session `SIZ-20260425-2230` (2026-04-25) completely transformed the user experience and feature set:
+- **Economy & Branding:** Rebranded "points" to **Net**, styled in silver. Purged the yellow/gold accent color system in favor of unified **Nexus Silver**.
+- **Immersive UI:** Replaced the splash screen with a **Terminal Boot Sequence**. Added a sleek, floating **Terminal button**. Implemented **Encrypted Text Reveal (Cipher Effect)** on mission briefings and profiles. Added **Tactical UI Sound Effects (SFX)** for hover, click, and success states.
+- **Operations & Systems:** Built an **Operator Terminal** (slide-down console) for power users. Created an **Operations Briefing** modal for missions with a **Hacking Minigame** requirement for submission. Added a real-time **Global Operations Map** (Canvas).
+- **Member Systems:** Implemented an **XP/Level system** with progress bars. Added **Activity Heatmaps**, **Op History timelines**, and **Operator ID Card Generation** (Canvas) to profiles. Enabled **file-based upload** for profile pictures and banners (removing URL-based inputs).
+- **Social & Admin:** Expanded the **Squad system** with emblem uploads and a Net-based leaderboard. Redesigned the **Admin Panel** with a sidebar layout and added a **Strategic Defense Protocol** (Threat Levels) that triggers corporate-wide visual shifts (e.g., Code Red glitch effects). Added **DM typing indicators** and an **unread notification filter**.
+- **Infrastructure:** Configured **Firebase CLI** for automated rules deployment. Served via Firebase Hosting emulator at `localhost:5000` for testing.
+- **Cleanup:** Purged the speculative Network Map (radial graph) and manual accent color systems to maintain a professional, high-density dashboard.

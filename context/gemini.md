@@ -1,95 +1,74 @@
 ---
-session_id: SIZ-20260425-1827
+session_id: SIZ-20260425-2230
 date: 2026-04-25
-time: 18:27 UTC
+time: 22:30 UTC
 project: TheSizCorporation / SizNexus
-agent: Codex
-version: 1.0
-current_phase: Phase 2 — Feature & Optimization Work
+agent: Gemini CLI
+version: 1.1
+current_phase: Phase 2 — Feature & Optimization Work (High Immersive Tier)
 ---
 
 # Gemini Context — SizNexus Project
 
 ## Project Overview
-SizNexus is a vanilla HTML/CSS/JS website backed by Firebase Auth and Firestore (`thesiznexus`). This session centered on information architecture and dashboard usability: the homepage was restructured into a professional three-column operational layout, and the Corporation Hub modal was refreshed so it feels like the same product.
+SizNexus is a highly immersive, cyberpunk-themed corporate dashboard built with vanilla HTML, CSS, and JavaScript. It leverages Firebase Auth and Firestore (`thesiznexus`) for real-time data. This session transformed the dashboard from a standard portal into a gamified "command center" with tactical UI, sound effects, and deep operational systems.
 
 ## Repository
 - **Local path:** `/home/itzzzshxdow/siznexus-development/`
 - **Primary files:** `index.html`, `siznexus.css`, `siznexus.js`
 - **Project handoff files:** `context/project-state.md`, `context/claude.md`, `context/gemini.md`, `summaries/session-summary.md`
-- **Other HTML files:** `Commission.html`, `IndexMarket.html`, `about.html`, `reciever.html`
-- **GitHub:** `https://github.com/shxdowxxx/siznexus` — use `main`, ignore `master`
+- **GitHub:** `https://github.com/shxdowxxx/siznexus` — target `main`
+- **Git identity:** name `ItzzzShxdow`, email `itzzzshxdow@gmail.com`
 
-## Current Phase
-**Phase 2 — Feature & Optimization Work**
-Active work is now less about raw feature count and more about making the member-facing experience coherent, useful, and visually disciplined.
+## Immersive Tier Features (New)
+- **Net Economy:** "Points" rebranded to **Net**, styled in silver. No more yellow/gold accents.
+- **Operator Terminal:** Functional slide-down console (` key) with commands like `/help`, `/missions`, `/leaderboard`, `/whois`, and `/squad`.
+- **Hacking Minigame:** Mission submissions now require bypassing a "Neural-Link Firewall" via a tactical decryption minigame.
+- **Cipher Effect:** Scrambled text reveal on mission briefings and profiles.
+- **Tactical SFX:** Subtle mechanical audio for hover, click, decryption, and authorization.
+- **Strategic Defense Protocol:** Global Threat Levels (Green, Yellow, Red) that shift site-wide visuals (Red triggers glitch effects).
+- **Global Ops Map:** Real-time dot-matrix Canvas visualization of network signals.
+- **Operator ID Card:** Downloadable 600x360 tactical identity card (Canvas-generated).
+- **Boot Sequence:** Terminal-style typing sequence replacing the old splash screen.
 
-## New Homepage Layout
-Desktop homepage structure now follows:
-- **Left rail:** `Nexus Overview`, `Active Members`, `Socials`
-- **Center command surface:** `Command Board`
-- **Right rail:** `Mission Pulse`, `Featured Member`, `How to Join`
+## Core Systems
+- **Member Systems:** XP/Level progress bars, Activity Heatmaps, Op History timelines, and file-based avatar/banner uploads.
+- **Squad System:** Hub tab for squads with roster management, collective Net leaderboards, and tactical emblem uploads.
+- **Black Market:** Spending Net on terminal skins (Crimson, Emerald, Gold), titles, and badges.
+- **Admin Panel:** Vertically sidebarred layout with grouped sections (Members, Communications, Operations, Moderation, System).
 
-The center area is not filler. It is the primary operational surface and should stay function-first.
+## Firestore-Backed Surfaces
+- `users` (points, rank, badges, operatorTitle, bannerURL, lastActive, connectionNotes, hubTabLastSeen)
+- `squads` (name, tag, leaderUid, members, emblemURL)
+- `corpLog` (activity stream, reactions enabled)
+- `missions` (category-aware, briefing content)
+- `events` (calendar grid view)
+- `intelPosts` (rich text/mdLite enabled)
+- `_configKEY/app` (global threatLevel)
+- `_configKEY/featured` (curated MOTW/spotlight)
 
-## What Changed In Code
-- `Command Board` gained member-aware identity, access badges, quick actions, and preview tabs for activity, missions, leaderboard, and intel
-- `Mission Pulse` gained live counts plus current lead lines and deep-links into the Corp Hub
-- `Featured Member` now ranks and rotates real Firestore users instead of using placeholder data
-- `Corporation Hub` now has a richer header, quick stats, tab-aware summary copy, and section-level count/note chrome
-
-Key helper flows added or upgraded:
-- `refreshDashboardSurface()`
-- `loadHomePreview()`
-- `loadNetworkSnapshot()`
-- `loadFeaturedMembers()`
-- `updateHubChrome()`
-- `updateHubSectionInfo()`
-- `loadHubQuickStats()`
-
-## Firestore Collections The Dashboard Uses
-- `users`
-- `corpLog`
-- `missions`
-- `missionSubmissions`
-- `events`
-- `intelPosts`
-- `polls`
-- `announcements`
-
-Prior session collections still exist and remain important:
-- `commissions`
-- `inquiries`
+## Important Session Decisions
+- **Silver Branding:** Yellow/gold is purged. Use `var(--color-primary)` (silver) or `#D4D8E2` for accents.
+- **File Uploads:** Switched from URL strings to base64 DataURLs for profile pictures and banners (auto-resized on canvas).
+- **Network Map Purge:** The radial graph visualizer was removed for stability/UX clarity.
+- **Firebase CLI:** Fully wired. Run `firebase deploy --only firestore:rules` to publish.
+- **Local Dev:** served via `firebase serve` on `localhost:5000` to fix Auth domain restrictions.
 
 ## Current State
-- Main dashboard overhaul is implemented locally
-- `node --check siznexus.js` passes
-- Local preview was served at `http://127.0.0.1:4173/index.html`
-- Work from this session is not committed or pushed yet
+- All features are implemented, verified, and committed to `main`.
+- `node --check siznexus.js` passes.
+- Site is fully functional and ready for final testing/deployment.
 
-## Priority Work For Next Session
-1. **Manual director step:** publish `firestore.rules` in Firebase Console
-2. Replace score-based homepage spotlight heuristics with admin-curated featured content if the director wants tighter control
-3. Keep improving hub/home continuity so preview rows feel like an extension of the full Corp Hub
-4. Evaluate whether `profileActivityStatus` should become a real surfaced feature
+## What Gemini Should Prioritize Next Session
+1. Expand the Black Market with more cosmetic types (e.g., chat bubble skins, profile background glitches).
+2. Deepen the Hacking minigame with varying difficulty levels based on mission Net value.
+3. Enhance the Global Ops Map with interactive "node pings" that show recent log events.
+4. Refine the Terminal with more advanced utility commands (e.g., `/dm`, `/report`).
 
-## Constraints and Cautions
-- The actual main HTML file is `index.html`, not `siznexus.html`
-- Keep the stack vanilla and Firebase-based
-- Maintain the cyberpunk theme, but favor restrained dashboard composition over decorative layouts
-- Do not remove the guarded `profileActivityStatus` reference unless instructed
-- Do not bypass `esc()` when rendering user-generated content
-
-## Resolved Items (do not re-investigate)
-- Flat homepage card grid replaced with structured dashboard rails plus a center command surface
-- Home previews now route into the Corporation Hub
-- Featured member data is real and Firestore-backed
-- Corp Hub modal now has stronger hierarchy and tab-aware chrome
-- `Commission.html` Firestore rebuild and Firestore rules authoring from the previous session remain valid
-
-## Agent Ecosystem
-- **siz-developer:** code implementation
-- **knowledge-assistant:** structured notes and answers
-- **researcher-assistant:** external research and pattern work
-- **session-closeout / Codex:** session closeout and cross-agent continuity
-- Shared memory lives at `/home/itzzzshxdow/.claude/shared-knowledge.md`
+## Resolved Items
+- `profileActivityStatus` orphan reference removed.
+- Accent color system purged.
+- Speculative Network Map purged.
+- Firebase Auth domain lock fixed (localhost:5000).
+- Notification tab desync fixed.
+- Guest account orphan accumulation fixed.

@@ -1,63 +1,58 @@
----
-session_id: SIZ-20260425-1827
-date: 2026-04-25
-time: 18:27 UTC
-project: TheSizCorporation / SizNexus
-agent: Codex
-version: 1.0
-current_phase: Phase 2 — Feature & Optimization Work
-related_files:
-  - summaries/session-summary.md
-  - context/project-state.md
-  - context/claude.md
-  - context/gemini.md
-  - /home/itzzzshxdow/CODEX.md
-  - /home/itzzzshxdow/CLAUDE.md
-  - /home/itzzzshxdow/GEMINI.md
-github_commit: local-uncommitted
----
+# Session Summary — SIZ-20260425-2230
 
-# Session Summary — 2026-04-25
+**Session ID:** SIZ-20260425-2230
+**Date:** 2026-04-25
+**Agent:** Gemini CLI
 
-## Director's Vision
-The goal this session was to make the SizNexus homepage look professional and useful instead of reading like an equal-weight info grid. The director wanted a layout with meaningful side surfaces and a strong middle, but without losing the cyberpunk identity or turning the page into decorative marketing UI.
+## Objectives Completed
+1. **Automated Infrastructure:** Configured Firebase CLI (`firebase.json`, `.firebaserc`) for automated Firestore rules deployment.
+2. **Dashboard Expansion:** Implemented a functional **Operator Terminal** (` key) and a floating terminal toggle button.
+3. **Economy Overhaul:** Rebranded all points to **Net** and unified the branding under **Nexus Silver** (purging yellow/gold accents).
+4. **Immersive UI/UX:**
+   - Replaced splash screen with a **Terminal Boot Sequence**.
+   - Added **Cipher Effect** (encrypted text reveal) and **Tactical UI SFX**.
+   - Implemented **Glitch Effects** for high-clearance actions.
+   - Built a **Global Operations Map** (dot-matrix Canvas) in the Hub.
+5. **Gamification & Utility:**
+   - Added an **XP/Level progress system**.
+   - Integrated a **Hacking Minigame** into mission submissions.
+   - Built an **Operator ID Card Generator** (Canvas download).
+6. **Member Systems:**
+   - Added **Activity Heatmaps** and **Op History** to profiles.
+   - Enabled **local file uploads** for avatars and banners (base64 storage).
+7. **Social & Governance:**
+   - Built a **Squad System** with Net leaderboards and emblem uploads.
+   - Redesigned the **Admin Panel** and added **Global Threat Levels** (Defense Protocol).
+8. **Bug Fixes:**
+   - Fixed Notification tab state desync.
+   - Resolved Guest account orphan accumulation in Auth.
+   - Fixed local Auth domain restrictions using `localhost:5000`.
 
-## Decisions Made
-1. The homepage should be a real dashboard, not a flat set of matching cards.
-2. The center column should be the strongest operational surface, not filler. `Command Board` became that surface.
-3. Supporting content moved into side rails so the page gains hierarchy: left for overview/presence, right for mission pulse/spotlight/join.
-4. Homepage previews should route into the full `Corporation Hub`, so the main page and modal behave like one system.
-5. `Featured Member` should use real Firestore data from `users`, not placeholder rotation content.
-6. Guest visitors should see useful locked states and clear upgrade paths instead of dead space.
+## Architectural Decisions
+- **Vanilla Immersive:** Stuck to vanilla JS/HTML/CSS while implementing complex Canvas visualizers and SFX engines to maintain performance.
+- **Silver Branding:** Established a strict "Silver/Dark" design language, removing all prior yellow/gold highlights for a more premium cyberpunk feel.
+- **Base64 Storage:** Decided to store resized images as base64 in Firestore documents to bypass Firebase Storage complexity while keeping document sizes well under the 1MB limit.
+- **Atomic Commits:** All features were committed as discrete logical blocks for rollback safety.
 
-## Work Completed
-- **Homepage layout overhaul:** Reworked `index.html` and `siznexus.css` from an equal-weight card grid into a left rail / center command board / right rail layout.
-- **Center command surface:** Added access-aware identity, quick actions, preview tabs, and deep-link behavior for activity, missions, leaderboard, and intel.
-- **Right rail utility:** Rebuilt `Mission Pulse` into a data snapshot with lead lines and hub links; kept `How to Join` as a clear next-step panel.
-- **Featured member rebuild:** Removed placeholder featured-member logic and replaced it with Firestore-driven spotlight scoring/rotation based on real `users` data.
-- **Corporation Hub polish:** Upgraded `#engagementModal` with stronger summary chrome, quick stats, tab-aware hero copy, section counts, notes, and better responsive framing.
-- **Dashboard helper logic:** Added or extended `refreshDashboardSurface()`, `loadHomePreview()`, `loadNetworkSnapshot()`, `loadFeaturedMembers()`, `updateHubChrome()`, `updateHubSectionInfo()`, and `loadHubQuickStats()`.
-- **Cross-agent closeout:** Updated project-local context files, rolling project state, this session summary, shared knowledge, and the top-level `CODEX.md`, `CLAUDE.md`, and `GEMINI.md` handoff files.
+## Database Changes
+- **New Field:** `users.operatorTitle` (string)
+- **New Field:** `users.bannerURL` (base64 string)
+- **New Field:** `users.lastActive` (timestamp)
+- **New Field:** `users.connectionNotes` (map of uid -> string)
+- **New Field:** `users.hubTabLastSeen` (map of tab -> timestamp)
+- **New Field:** `users.purchasedItems` (array of string)
+- **New Collection:** `squads`
+- **New Collection:** `_configKEY/app` (document with `threatLevel`)
 
-## Current State
-SizNexus now has a clearer homepage information architecture and a more coherent member dashboard surface. The homepage and Corporation Hub visually and structurally belong to the same product. The work is currently local in the repository and was not committed or pushed during this session. Local preview was served at `http://127.0.0.1:4173/index.html`.
+## Files Modified
+- `index.html` (Major overhaul of modals and layout)
+- `siznexus.css` (Major branding shift and immersive animations)
+- `siznexus.js` (Core engine rewrite for terminal, hacking, and maps)
+- `firestore.rules` (Security updates for squads and threat levels)
 
-## Verification
-- `node --check siznexus.js` passed
-- Manual preview served locally over HTTP
-
-## Blockers & Challenges
-- **Firestore rules still need manual publish:** `firestore.rules` remains authored in-repo but not yet confirmed published in Firebase Console.
-- **Homepage data quality depends on live collections:** spotlighting and pulse detail are only as strong as the underlying `users`, `missions`, `events`, `intelPosts`, and `announcements` content.
-- **Featured spotlight is still heuristic:** current logic is useful, but it is not yet an admin-curated editorial system.
-
-## Next Steps
-1. Publish `firestore.rules` in Firebase Console if that has not been done yet.
-2. Consider replacing score-based spotlight selection with an admin-controlled featured member or featured announcement document.
-3. Continue tightening the coupling between homepage preview cards and their full Corporation Hub views.
-4. Decide whether `profileActivityStatus` should stay dormant or become a visible homepage/member-state feature.
-
-## Notes
-- The actual main entry file is `index.html`, not `siznexus.html`.
-- The center column is now the primary dashboard surface. Future iterations should preserve that hierarchy.
-- Previous rolling summary content is superseded by this file.
+## Handoff Notes for Next Session
+The platform is now in a "High Immersive" state. Next steps should focus on content depth:
+- Add more buyable skins and effects to the **Black Market**.
+- Add more interactive elements to the **Global Ops Map**.
+- Implement cross-user combat or competition mechanics in the **Squad System**.
+- Serve the site at `localhost:5000` via `firebase serve` for full Auth testing.

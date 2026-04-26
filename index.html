@@ -214,18 +214,6 @@
         <input type="text" id="editActivityStatus" class="input-field" maxlength="60" placeholder="e.g. Grinding missions, On patrol..." autocomplete="off">
       </div>
       <div class="field-group">
-        <label class="field-label">Accent Color <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(tints your name across the corp)</span></label>
-        <div class="accent-picker" id="accentPicker">
-          <button type="button" class="accent-swatch" data-accent="" title="Default Silver" style="background:#C0C0C0;"></button>
-          <button type="button" class="accent-swatch" data-accent="#FF3B5C" title="Crimson" style="background:#FF3B5C;"></button>
-          <button type="button" class="accent-swatch" data-accent="#3FCFFF" title="Cyan" style="background:#3FCFFF;"></button>
-          <button type="button" class="accent-swatch" data-accent="#FFD700" title="Gold" style="background:#FFD700;"></button>
-          <button type="button" class="accent-swatch" data-accent="#9B5CFF" title="Violet" style="background:#9B5CFF;"></button>
-          <button type="button" class="accent-swatch" data-accent="#3FE08C" title="Emerald" style="background:#3FE08C;"></button>
-          <button type="button" class="accent-swatch" data-accent="#FF8C28" title="Ember" style="background:#FF8C28;"></button>
-        </div>
-      </div>
-      <div class="field-group">
         <label class="field-label" for="editTitle">Operator Title <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(one-line codename, optional)</span></label>
         <input type="text" id="editTitle" class="input-field" maxlength="40" placeholder="e.g. Signal Analyst, Overwatch..." autocomplete="off">
       </div>
@@ -257,6 +245,7 @@
     <!-- PREVIEW TAB -->
     <div class="profile-tab-section" id="profileTabPreview">
       <div id="profilePreviewContent"></div>
+      <button class="btn-secondary" id="downloadOperatorIdBtn" style="width:100%; justify-content:center; margin-top:12px; font-size:.7rem;"><i class="fas fa-id-card"></i> Download Operator ID</button>
     </div>
     <!-- CONNECTIONS TAB -->
     <div class="profile-tab-section" id="profileTabConnections">
@@ -318,6 +307,8 @@
       <button class="hub-tab" data-hub="intel"><i class="fas fa-satellite-dish"></i> Intel Board<span class="hub-tab-badge" id="hubBadgeIntel"></span></button>
       <button class="hub-tab" data-hub="polls"><i class="fas fa-poll"></i> Polls<span class="hub-tab-badge" id="hubBadgePolls"></span></button>
       <button class="hub-tab" data-hub="squads"><i class="fas fa-users-rectangle"></i> Squads</button>
+      <button class="hub-tab" data-hub="opsmap"><i class="fas fa-globe"></i> Ops Map</button>
+      <button class="hub-tab" data-hub="market"><i class="fas fa-user-secret"></i> Black Market</button>
     </div>
     <div class="hub-section-bar">
       <div>
@@ -372,6 +363,19 @@
       <div id="squadsControls" style="margin-bottom:12px;"></div>
       <div class="hub-scroll" id="squadsList"></div>
     </div>
+    <!-- GLOBAL OPS MAP -->
+    <div class="hub-section" id="hubOpsmap" style="position:relative; width:100%; height:400px; background:rgba(0,0,0,0.5); border:var(--border); border-radius:6px; overflow:hidden;">
+      <canvas id="opsMapCanvas" style="width:100%; height:100%;"></canvas>
+      <div style="position:absolute; top:10px; left:10px; color:var(--color-primary); font-family:var(--font-mono); font-size:.65rem; pointer-events:none;">GLOBAL OPERATIONS MATRIX</div>
+    </div>
+    <!-- BLACK MARKET -->
+    <div class="hub-section" id="hubMarket">
+      <div class="market-header" style="padding:16px; background:rgba(192,192,192,0.03); border:var(--border); border-radius:6px; margin-bottom:16px;">
+        <h3 style="color:var(--color-text-light); margin-bottom:4px;"><i class="fas fa-mask"></i> The Quartermaster</h3>
+        <p style="font-family:var(--font-mono); font-size:.65rem; color:var(--color-text-muted);">Spend your Net here on exclusive cosmetics and terminal overrides. All transactions are final.</p>
+      </div>
+      <div class="hub-scroll" id="marketList"></div>
+    </div>
   </div>
 </div>
 
@@ -401,12 +405,15 @@
 <div class="modal" id="adminModal">
   <div class="modal-container">
     <button class="close-btn" id="closeAdmin">&#x2715;</button>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px;">
       <h2 style="margin:0;"><i class="fas fa-shield-alt" style="margin-right:8px;font-size:.85rem;color:#C0C0C0;filter:drop-shadow(0 0 6px rgba(192,192,192,.4));"></i>Admin Panel</h2>
-      <span id="adminViewerRank" style="font-family:var(--font-mono);font-size:.62rem;padding:3px 10px;border-radius:3px;background:rgba(192,192,192,.05);border:1px solid rgba(192,192,192,.15);"></span>
     </div>
     <div class="admin-shell">
       <nav class="admin-sidebar">
+        <div style="padding:0 8px 12px;border-bottom:1px solid rgba(192,192,192,.1);margin-bottom:12px;">
+          <p style="font-family:var(--font-mono);font-size:.55rem;color:var(--color-text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.12em;">Current Clearance</p>
+          <span id="adminViewerRank" style="font-family:var(--font-mono);font-size:.62rem;padding:3px 10px;border-radius:3px;background:rgba(192,192,192,.05);border:1px solid rgba(192,192,192,.15);display:inline-block;width:100%;text-align:center;color:var(--color-text-light);"></span>
+        </div>
         <div class="admin-sidebar-group">
           <p class="admin-sidebar-label">Members</p>
           <button class="admin-tab active" data-tab="roles"><i class="fas fa-id-badge"></i> <span>Roles</span></button>
@@ -426,6 +433,10 @@
           <p class="admin-sidebar-label">Moderation</p>
           <button class="admin-tab" data-tab="reports"><i class="fas fa-flag" style="color:#ff9800;"></i> <span>Reports</span></button>
           <button class="admin-tab" data-tab="bans"><i class="fas fa-gavel" style="color:#f44336;"></i> <span>Bans</span></button>
+        </div>
+        <div class="admin-sidebar-group">
+          <p class="admin-sidebar-label">System</p>
+          <button class="admin-tab" data-tab="threat"><i class="fas fa-radiation"></i> <span>Threat Level</span></button>
         </div>
       </nav>
       <div class="admin-content">
@@ -494,8 +505,35 @@
       </div>
       <div class="success-msg" id="spotlightSavedMsg">Spotlight updated!</div>
     </div>
-      </div><!-- /.admin-content -->
-    </div><!-- /.admin-shell -->
+    <!-- THREAT LEVEL TAB -->
+    <div class="admin-panel-section" id="adminTabThreat">
+      <p class="admin-section-title"><i class="fas fa-radiation" style="margin-right:5px; color:var(--color-primary);"></i> Strategic Defense Protocol</p>
+      <p style="font-family:var(--font-mono); font-size:.7rem; color:var(--color-text-muted); line-height:1.6; margin-bottom:12px;">Override the global network threat level. Shifting to Code Red will trigger a corporate-wide emergency visual protocol.</p>
+      
+      <div class="threat-selector-grid" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
+        <button class="threat-opt green" data-threat="green" style="padding:20px; border:var(--border); background:rgba(76,175,80,0.05); border-radius:4px; cursor:pointer;">
+          <div style="font-size:1.2rem; color:#4CAF50; margin-bottom:4px;"><i class="fas fa-check-circle"></i></div>
+          <div style="font-family:var(--font-mono); font-size:.65rem; color:#4CAF50; font-weight:700;">CODE GREEN</div>
+          <div style="font-size:.55rem; color:var(--color-text-muted); margin-top:4px;">Normal Ops</div>
+        </button>
+        <button class="threat-opt yellow" data-threat="yellow" style="padding:20px; border:var(--border); background:rgba(255,152,0,0.05); border-radius:4px; cursor:pointer;">
+          <div style="font-size:1.2rem; color:#FF9800; margin-bottom:4px;"><i class="fas fa-exclamation-circle"></i></div>
+          <div style="font-family:var(--font-mono); font-size:.65rem; color:#FF9800; font-weight:700;">CODE YELLOW</div>
+          <div style="font-size:.55rem; color:var(--color-text-muted); margin-top:4px;">Elevated Risk</div>
+        </button>
+        <button class="threat-opt red" data-threat="red" style="padding:20px; border:var(--border); background:rgba(244,67,54,0.05); border-radius:4px; cursor:pointer;">
+          <div style="font-size:1.2rem; color:#F44336; margin-bottom:4px;"><i class="fas fa-radiation"></i></div>
+          <div style="font-family:var(--font-mono); font-size:.65rem; color:#F44336; font-weight:700;">CODE RED</div>
+          <div style="font-size:.55rem; color:var(--color-text-muted); margin-top:4px;">Critical State</div>
+        </button>
+      </div>
+
+      <div id="threatStatus" style="font-family:var(--font-mono); font-size:.7rem; color:var(--color-text-muted); padding:10px; background:rgba(0,0,0,0.2); border-radius:4px; border:var(--border);">
+        Status: <span id="currentThreatLabel">Loading...</span>
+      </div>
+    </div>
+  </div><!-- /.admin-content -->
+</div><!-- /.admin-shell -->
   </div>
 </div>
 
@@ -513,7 +551,7 @@
       <span class="briefing-cat" id="briefingCat"></span>
     </div>
     <div class="briefing-grid">
-      <div class="briefing-stat"><span>Reward</span><strong id="briefingPts">0 pts</strong></div>
+      <div class="briefing-stat"><span>Reward</span><strong id="briefingPts">0 Net</strong></div>
       <div class="briefing-stat"><span>Status</span><strong id="briefingMyStatus">Available</strong></div>
       <div class="briefing-stat"><span>Created</span><strong id="briefingDate">—</strong></div>
     </div>
@@ -639,11 +677,11 @@
       <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
-      <button class="notif-btn search-btn" id="searchBtn" aria-label="Global search" title="Search corp" style="margin-right:6px;">
-        <i class="fas fa-search"></i>
-      </button>
       <button class="notif-btn" id="terminalLauncher" aria-label="Operator console" title="Operator Console (press \`)" style="margin-right:6px;">
         <i class="fas fa-terminal"></i>
+      </button>
+      <button class="notif-btn search-btn" id="searchBtn" aria-label="Global search" title="Search corp" style="margin-right:6px;">
+        <i class="fas fa-search"></i>
       </button>
       <button class="notif-btn" id="notifBtn" aria-label="Notifications">
         <i class="fas fa-bell"></i>
@@ -679,11 +717,11 @@
   </div>
 </nav>
 
-<!-- LIVE NEWS TICKER -->
-<div class="news-ticker" id="newsTicker">
-  <div class="news-ticker-label"><i class="fas fa-broadcast-tower"></i> LIVE</div>
-  <div class="news-ticker-track" id="newsTickerTrack">
-    <span class="news-ticker-item">Connecting to corp signal stream…</span>
+<!-- GLOBAL THREAT LEVEL BANNER -->
+<div id="threatBanner" class="threat-banner" style="display:none;">
+  <div class="threat-inner">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span id="threatMsg">CRITICAL NETWORK THREAT DETECTED — CODE RED IN EFFECT</span>
   </div>
 </div>
 

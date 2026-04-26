@@ -1020,7 +1020,7 @@ footer .contact a:hover{text-decoration:underline;}
 .mission-title{font-size:.82rem;font-weight:700;color:var(--color-text-light);letter-spacing:.05em;margin-bottom:3px;}
 .mission-desc{font-family:var(--font-mono);font-size:.72rem;color:var(--color-text-muted);line-height:1.5;}
 .mission-footer{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
-.mission-pts{font-family:var(--font-mono);font-size:.65rem;color:#ffd700;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);padding:2px 8px;border-radius:2px;}
+.mission-pts{font-family:var(--font-mono);font-size:.65rem;color:var(--color-text-light);background:rgba(192,192,192,.06);border:1px solid rgba(192,192,192,.18);padding:2px 8px;border-radius:2px;}
 .mission-status{font-family:var(--font-mono);font-size:.65rem;padding:2px 8px;border-radius:2px;}
 .mission-status.pending{background:rgba(255,152,0,.1);color:#ff9800;border:1px solid rgba(255,152,0,.2);}
 .mission-status.completed{background:rgba(76,175,80,.1);color:#4CAF50;border:1px solid rgba(76,175,80,.2);}
@@ -1044,7 +1044,7 @@ footer .contact a:hover{text-decoration:underline;}
 .lb-av{width:28px;height:28px;border-radius:50%;background:rgba(192,192,192,.08);border:1px solid rgba(192,192,192,.18);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:var(--color-primary);overflow:hidden;flex-shrink:0;}
 .lb-av img{width:100%;height:100%;object-fit:cover;}
 .lb-name{font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-light);flex:1;}
-.lb-pts{font-family:var(--font-mono);font-size:.7rem;color:#ffd700;font-weight:700;}
+.lb-pts{font-family:var(--font-mono);font-size:.7rem;color:var(--color-text-light);font-weight:700;}
 .lb-you{font-family:var(--font-mono);font-size:.6rem;color:rgba(192,192,192,.38);margin-left:4px;}
 
 /* ─── CALENDAR ───────────────────────────────────────── */
@@ -1720,3 +1720,68 @@ footer .contact a:hover{text-decoration:underline;}
 .banner-upload-cta small{font-size:.55rem;letter-spacing:.12em;opacity:.6;}
 .banner-clear{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:1px solid rgba(255,110,110,.4);color:#ff8888;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:1rem;line-height:1;padding:0;}
 .banner-clear:hover{background:rgba(255,110,110,.2);color:#fff;}
+.net-currency { color: var(--color-text-light) !important; font-weight: 700; }
+
+/* ── TERMINAL SKINS (Black Market) ── */
+#operatorTerminal.term-skin-crimson { --color-primary: #ff3131; border-color: rgba(255, 49, 49, 0.4); }
+#operatorTerminal.term-skin-crimson .terminal-prompt-tag { color: #ff3131; }
+#operatorTerminal.term-skin-crimson .terminal-input-row input { color: #ff3131; }
+
+#operatorTerminal.term-skin-emerald { --color-primary: #3fe08c; border-color: rgba(63, 224, 140, 0.4); }
+#operatorTerminal.term-skin-emerald .terminal-prompt-tag { color: #3fe08c; }
+#operatorTerminal.term-skin-emerald .terminal-input-row input { color: #3fe08c; }
+
+#operatorTerminal.term-skin-gold { --color-primary: #ffd700; border-color: rgba(255, 215, 0, 0.4); }
+#operatorTerminal.term-skin-gold .terminal-prompt-tag { color: #ffd700; }
+#operatorTerminal.term-skin-gold .terminal-input-row input { color: #ffd700; }
+
+/* ── HACKING MINIGAME ── */
+.hacking-overlay { position: absolute; inset: 0; background: rgba(8, 12, 22, 0.98); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; font-family: var(--font-mono); border-radius: 6px; }
+.hacking-terminal { width: 100%; max-width: 440px; height: 160px; background: rgba(0, 0, 0, 0.7); border: 1px solid var(--color-primary); border-radius: 4px; padding: 12px; overflow: hidden; margin-bottom: 20px; position: relative; text-align: left; }
+.hacking-code-line { font-size: 0.65rem; color: var(--color-primary); opacity: 0.8; white-space: nowrap; margin-bottom: 2px; }
+.hacking-target-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; width: 200px; }
+.hacking-target { width: 42px; height: 42px; border: 1px solid rgba(192, 192, 192, 0.2); background: rgba(192, 192, 192, 0.03); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.1s ease; color: var(--color-text-muted); font-weight: 700; font-size: 1rem; }
+.hacking-target:hover { background: rgba(192, 192, 192, 0.08); border-color: rgba(192, 192, 192, 0.4); }
+.hacking-target.active { border-color: var(--color-primary); color: var(--color-primary); box-shadow: 0 0 12px var(--color-primary); transform: scale(1.05); }
+.hacking-target.success { background: var(--color-primary); color: #000; border-color: var(--color-primary); box-shadow: 0 0 15px var(--color-primary); }
+.hacking-target.fail { border-color: #ff3131; color: #ff3131; animation: shake 0.3s ease; }
+.hacking-progress-bar { width: 200px; height: 4px; background: rgba(192, 192, 192, 0.1); border-radius: 2px; margin-top: 10px; position: relative; overflow: hidden; }
+.hacking-progress-fill { position: absolute; top: 0; left: 0; height: 100%; background: var(--color-primary); width: 0%; transition: width 0.3s ease; }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+/* ── THREAT LEVELS ── */
+.threat-banner { position: fixed; top: 60px; left: 0; right: 0; height: 30px; background: linear-gradient(90deg, rgba(180,50,50,.88), rgba(120,35,35,.88)); color: #fff; z-index: 900; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.2em; border-bottom: 1px solid rgba(255,255,255,.12); box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+.threat-inner { display: flex; align-items: center; gap: 10px; }
+
+
+
+body.threat-red .btn-primary { border-color: rgba(180,50,50,.4); }
+
+body.threat-red .bubble { border-color: rgba(180, 50, 50, 0.18); }
+body.threat-red .news-ticker-label { background: linear-gradient(135deg, rgba(180,50,50,.95), rgba(120,35,35,.95)); }
+
+.threat-opt.active { border-color: var(--color-primary); box-shadow: 0 0 15px var(--color-primary); }
+
+/* ── TERMINAL FLOATING BUTTON ── */
+/* ── HIGH-CLEARANCE GLITCH EFFECT ── */
+@keyframes glitch-anim {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 2px) }
+  40% { transform: translate(-2px, -2px) }
+  60% { transform: translate(2px, 2px) }
+  80% { transform: translate(2px, -2px) }
+  100% { transform: translate(0) }
+}
+body.glitching {
+  animation: glitch-anim 0.2s cubic-bezier(.25, .46, .45, .94) both infinite;
+}
+body.glitching::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(244,67,54,0.1);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
