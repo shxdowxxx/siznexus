@@ -13,6 +13,13 @@
       "context/**",
       "summaries/**"
     ],
-    "cleanUrls": true
+    "cleanUrls": true,
+    "rewrites": [
+      { "source": "/u/**", "destination": "/index.html" },
+      { "source": "/squad/**", "destination": "/index.html" },
+      { "source": "/about", "destination": "/about.html" },
+      { "source": "/privacy", "destination": "/privacy.html" },
+      { "source": "/terms", "destination": "/terms.html" }
+    ]
   }
 }

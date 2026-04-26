@@ -4963,3 +4963,54 @@ function generateOperatorID(user) {
 }
 document.getElementById('downloadOperatorIdBtn')?.addEventListener('click',()=>generateOperatorID(currentUserData));
 
+
+/* ── PUBLIC PROFILE ROUTING ── */
+async function handleRoute(){
+  const path=location.pathname;
+  // /u/<displayName>
+  const uMatch=path.match(/^\/u\/(.+?)\/?$/i);
+  if(uMatch){
+    const slug=decodeURIComponent(uMatch[1]).trim();
+    try{
+      const snap=await db.collection('users').where('displayName','==',slug).limit(1).get();
+      if(snap.empty){
+        const altSnap=await db.collection('users').get();
+        const lc=slug.toLowerCase();
+        const found=altSnap.docs.find(d=>(d.data().displayName||'').toLowerCase()===lc);
+        if(found){openViewProfile({...found.data(),id:found.id});return;}
+        showToast(`Operative "${esc(slug)}" not found.`);return;
+      }
+      const d=snap.docs[0];
+      openViewProfile({...d.data(),id:d.id});
+    }catch(err){console.error('Route error:',err);}
+    return;
+  }
+  // /squad/<name>  (basic placeholder — opens the hub Squads tab)
+  if(/^\/squad\//i.test(path)){
+    if(currentUser&&!currentUser.isAnonymous)setTimeout(()=>openEngagementHub('squads'),700);
+    else showToast('Sign in to view squad pages.');
+  }
+}
+// Run after auth & DB are ready
+auth.onAuthStateChanged(()=>setTimeout(handleRoute,400));
+
+/* ── SHARE PROFILE ── */
+function buildPublicProfileUrl(name){
+  const base=location.origin;
+  return `${base}/u/${encodeURIComponent(name||'')}`;
+}
+async function shareMyProfile(){
+  if(!currentUser||!currentUserData?.displayName){showToast('Set a display name first.');return;}
+  const url=buildPublicProfileUrl(currentUserData.displayName);
+  try{
+    if(navigator.share){
+      await navigator.share({title:`${currentUserData.displayName} on TheSizNexus`,url});
+    }else{
+      await navigator.clipboard.writeText(url);
+      showToast('Profile link copied: '+url);
+    }
+  }catch(_){
+    try{await navigator.clipboard.writeText(url);showToast('Profile link copied.');}catch(_){showToast('Could not copy link.');}
+  }
+}
+document.getElementById('shareMyProfileBtn')?.addEventListener('click',shareMyProfile);
