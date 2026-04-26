@@ -1,26 +1,25 @@
 ---
-last_updated: 2026-04-25 22:30 UTC
-session_id: SIZ-20260425-2230
-agent: Gemini CLI
+last_updated: 2026-04-26 15:30 UTC
+session_id: SIZ-20260426-1530
+agent: Gemini CLI (via SessionCloseout)
 ---
 
 # Project State
 
 ## current_phase
-Phase 2 — Feature & Optimization Work (High Immersive Tier)
+Phase 3 — Public Launch Prep
 
 ## Phase Description
-Phase 2 covers ongoing feature work, Firestore-backed member systems, and front-end polish for the SizNexus website. The platform has transitioned from a standard member portal into a highly immersive, gamified cyberpunk command center.
+Phase 3 focuses on transforming the internal dashboard into a public-ready platform. This includes building a conversion funnel for new visitors, enabling public sharing of profiles and achievements, hardening security to prevent data leaks (like operative emails), and polishing the immersive "command center" aesthetic for a professional first impression.
 
 ## Phase Progress
-Significant expansion. The platform now features a "Net" economy, immersive visual effects (Cipher, Glitch, Boot sequence), tactical UI sound effects, and deeply integrated operational systems (Terminal, Squads, Black Market, Ops Map). Infrastructure is fully automated with Firebase CLI for rules deployment. All work is committed to the `main` branch.
+Feature-complete for public launch. All Tier 1-5 growth and retention features are implemented and verified. Security pass completed. Site is served via Firebase Hosting with SEO-friendly rewrites for public profiles.
 
 ## Last Session Summary
-Session `SIZ-20260425-2230` (2026-04-25) completely transformed the user experience and feature set:
-- **Economy & Branding:** Rebranded "points" to **Net**, styled in silver. Purged the yellow/gold accent color system in favor of unified **Nexus Silver**.
-- **Immersive UI:** Replaced the splash screen with a **Terminal Boot Sequence**. Added a sleek, floating **Terminal button**. Implemented **Encrypted Text Reveal (Cipher Effect)** on mission briefings and profiles. Added **Tactical UI Sound Effects (SFX)** for hover, click, and success states.
-- **Operations & Systems:** Built an **Operator Terminal** (slide-down console) for power users. Created an **Operations Briefing** modal for missions with a **Hacking Minigame** requirement for submission. Added a real-time **Global Operations Map** (Canvas).
-- **Member Systems:** Implemented an **XP/Level system** with progress bars. Added **Activity Heatmaps**, **Op History timelines**, and **Operator ID Card Generation** (Canvas) to profiles. Enabled **file-based upload** for profile pictures and banners (removing URL-based inputs).
-- **Social & Admin:** Expanded the **Squad system** with emblem uploads and a Net-based leaderboard. Redesigned the **Admin Panel** with a sidebar layout and added a **Strategic Defense Protocol** (Threat Levels) that triggers corporate-wide visual shifts (e.g., Code Red glitch effects). Added **DM typing indicators** and an **unread notification filter**.
-- **Infrastructure:** Configured **Firebase CLI** for automated rules deployment. Served via Firebase Hosting emulator at `localhost:5000` for testing.
-- **Cleanup:** Purged the speculative Network Map (radial graph) and manual accent color systems to maintain a professional, high-density dashboard.
+Session `SIZ-20260426-1530` (2026-04-26) took the platform from "private/internal" to "public-ready". Key achievements:
+- **Conversion Funnel:** Built a high-quality **Public Landing Page** for logged-out visitors, featuring live stats, latest intel, and a "Try Demo" shortcut.
+- **Viral Growth:** Implemented **Public Profile Pages** at `/u/<displayName>` and a **Referral System** (`?ref=name`) to drive new enlistments.
+- **Security & Privacy:** Surgically removed `email` fields from public user documents and hardened Firestore rules to prevent unauthorized field modification or enumeration. Implemented a strict **Content Security Policy (CSP)**.
+- **Immersive Polish:** Upgraded the **Ops Map** with continent silhouettes and signal arcs; overhauled the **Operator ID Card** with non-reversible salted hashing for security; and unified all visual accents to **Nexus Silver**.
+- **User Retention:** Added **Achievement Cards**, browser tab badges, native notifications, and daily/weekly leaderboards.
+- **Static Infrastructure:** Added professionally styled **Privacy**, **Terms**, and **Roadmap** pages.
