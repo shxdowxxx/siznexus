@@ -1137,14 +1137,27 @@ footer{background:transparent;padding:32px 20px 24px;text-align:center;color:var
 }
 .hub-hero-zone{
   display:flex;
-  align-items:flex-start;
-  gap:18px;
-  padding:18px 0 20px;
+  flex-direction:column;
+  gap:0;
+  padding:12px 0 14px;
   border-top:1px solid rgba(192,192,192,.08);
   border-bottom:1px solid rgba(192,192,192,.08);
-  margin-bottom:18px;
+  margin-bottom:14px;
 }
-.hub-hero{flex:1 1 0;min-width:0;}
+/* Mobile-first: stats always visible, text hidden until wide enough */
+.hub-hero{display:none;}
+.hub-quick-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:7px;
+  width:100%;
+}
+/* Desktop: side-by-side — text on left, 2×2 stat grid on right */
+@media(min-width:600px){
+  .hub-hero-zone{flex-direction:row;align-items:flex-start;gap:18px;padding:18px 0 20px;margin-bottom:18px;}
+  .hub-hero{display:block;flex:1 1 0;min-width:0;}
+  .hub-quick-grid{flex:0 0 220px;width:220px;grid-template-columns:repeat(2,minmax(0,1fr));}
+}
 .hub-hero-kicker{
   margin:0 0 8px;
   font-family:var(--font-mono);
@@ -1166,12 +1179,6 @@ footer{background:transparent;padding:32px 20px 24px;text-align:center;color:var
   font-size:.78rem;
   line-height:1.75;
   color:var(--color-text-muted);
-}
-.hub-quick-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:10px;
-  flex:0 0 220px;
 }
 .hub-quick-stat{
   padding:12px 14px;
@@ -1425,7 +1432,6 @@ footer{background:transparent;padding:32px 20px 24px;text-align:center;color:var
   .preview-row-button{padding:12px 0;}
   .preview-row-icon{width:28px;height:28px;font-size:.72rem;}
   .snapshot-metric{align-items:flex-start;flex-direction:column;gap:6px;}
-  .hub-quick-grid{grid-template-columns:1fr;}
   .hub-section-count{min-width:0;width:100%;}
   .modal-container{padding:18px 14px;}
   .notif-tabs{gap:4px;}
@@ -1445,21 +1451,8 @@ footer{background:transparent;padding:32px 20px 24px;text-align:center;color:var
   }
   .hub-viewer-rank{font-size:.6rem;padding:3px 8px;}
 
-  /* Hide descriptive text; keep stat grid */
-  .hub-hero{display:none;}
-  .hub-hero-zone{
-    flex-direction:column;gap:0;
-    padding:10px 0 12px;margin-bottom:12px;
-  }
-  /* 4-column stat strip */
-  .hub-quick-grid{
-    flex:none;width:100%;
-    grid-template-columns:repeat(4,1fr);
-    gap:6px;
-  }
-  .hub-quick-stat{
-    padding:9px 6px;text-align:center;border-radius:6px;
-  }
+  /* Stat strip tighter on mobile */
+  .hub-quick-stat{padding:9px 6px;text-align:center;border-radius:6px;}
   .hub-quick-label{font-size:.52rem;letter-spacing:.08em;margin-bottom:4px;}
   .hub-quick-value{font-size:.85rem;}
 
