@@ -1532,9 +1532,9 @@ auth.onAuthStateChanged(async user=>{
 window.addEventListener('beforeunload',()=>{
   if(!currentUser)return;
   if(currentUser.isAnonymous){
-    // Best-effort guest cleanup so anonymous docs don't pile up.
-    try{db.collection('users').doc(currentUser.uid).delete();}catch(_){}
-    try{currentUser.delete();}catch(_){}
+    db.collection('users').doc(currentUser.uid).delete().catch(()=>{});
+    currentUser.delete().catch(()=>{});
+    sessionStorage.removeItem('_anonUid');
   }else{
     db.collection('users').doc(currentUser.uid).update({status:'offline'}).catch(()=>{});
   }
@@ -1584,7 +1584,7 @@ document.getElementById('anonLogin').addEventListener('click',async()=>{
   btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
   try{
     const r=await auth.signInAnonymously();
-    // Create guest doc
+    sessionStorage.setItem('_anonUid',r.user.uid);
     const guestNum=Math.floor(Math.random()*9000)+1000;
     await db.collection('users').doc(r.user.uid).set({
       displayName:`Guest#${guestNum}`,email:'',photoURL:'',
@@ -2067,12 +2067,23 @@ document.getElementById('logoutBtn').addEventListener('click',async(e)=>{
       try{await db.collection('users').doc(currentUser.uid).delete();}catch(_){}
       try{await currentUser.delete();}catch(_){}
     }
+    sessionStorage.removeItem('_anonUid');
     await auth.signOut();
     showToast('Signed out successfully.');
   }catch(err){showToast('Error signing out: '+err.message);}
 });
+
+// Clean up any orphaned guest doc from a previous tab-close session
+(async()=>{
+  const staleUid=sessionStorage.getItem('_anonUid');
+  if(!staleUid)return;
+  sessionStorage.removeItem('_anonUid');
+  try{await db.collection('users').doc(staleUid).delete();}catch(_){}
+})();
 /* ── GUEST CONTENT RESTRICTIONS ── */
 document.getElementById('heroEnlistBtn')?.addEventListener('click',e=>{e.preventDefault();openModal('loginModal');});
+document.getElementById('plEnlistBtn')?.addEventListener('click',()=>openModal('loginModal'));
+document.getElementById('plDemoBtn')?.addEventListener('click',()=>document.getElementById('anonLogin')?.click());
 function applyGuestRestrictions(isGuest){
   document.querySelectorAll('.guest-only').forEach(el=>el.style.display=isGuest?'':'none');
   document.querySelectorAll('.member-only').forEach(el=>el.style.display=isGuest?'none':'');
@@ -4922,7 +4933,6 @@ async function shareMyProfile(){
 }
 document.getElementById('shareMyProfileBtn')?.addEventListener('click',shareMyProfile);
 document.getElementById('shareReferralBtn')?.addEventListener('click',shareReferralLink);
-document.getElementById('plDemoBtn')?.addEventListener('click',()=>document.getElementById('anonLogin')?.click());
 document.getElementById('shareOperatorIdBtn')?.addEventListener('click',()=>generateOperatorID(currentUserData,'share'));
 
 /* ── ACHIEVEMENT CARDS ── */
