@@ -11,7 +11,7 @@ related_files:
   - context/claude.md
   - context/gemini.md
   - context/project-state.md
-github_commit: a6839f9
+github_commit: f394465
 ---
 
 # Session Summary — 2026-04-26 (Mobile Fix + Security Hardening / Early Access)
