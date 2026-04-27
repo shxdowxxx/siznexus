@@ -116,6 +116,14 @@ nav a:hover{color:var(--color-text-light);}nav a:hover::after{width:100%;}
 .stat-label{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.15em;color:var(--color-text-muted);margin-top:10px;text-transform:uppercase;}
 .stat-note{font-family:var(--font-mono);font-size:.72rem;line-height:1.6;color:rgba(192,192,192,.5);margin-top:10px;}
 
+/* GUEST CTA */
+.guest-cta-section{padding:40px 20px 48px;max-width:1360px;margin:0 auto;width:100%;box-sizing:border-box;}
+.guest-cta-inner{border:1px solid rgba(192,192,192,.14);border-top:1px solid rgba(212,216,226,.28);border-radius:8px;padding:40px 36px;background:linear-gradient(180deg,rgba(13,19,39,.95) 0%,rgba(10,15,26,.95) 100%);text-align:center;}
+.guest-cta-inner .panel-kicker{margin-bottom:12px;}
+.guest-cta-inner h2{font-family:var(--font-headings);font-size:clamp(1.2rem,3vw,1.6rem);color:var(--color-text-light);margin:0 0 10px;letter-spacing:.04em;}
+.guest-cta-sub{font-family:var(--font-mono);font-size:.78rem;color:var(--color-text-muted);margin:0 0 28px;line-height:1.6;}
+.guest-cta-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
 /* DASHBOARD */
 .dashboard-shell{
   display:grid;

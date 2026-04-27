@@ -781,9 +781,23 @@
   </div>
 </div>
 
+<!-- GUEST CTA (visible only when logged out) -->
+<section class="guest-cta-section guest-only">
+  <div class="guest-cta-inner">
+    <p class="panel-kicker">// READY TO ENLIST?</p>
+    <h2>Create a free account in under a minute.</h2>
+    <p class="guest-cta-sub">No spam. Pick a callsign, get clearance, run your first mission.</p>
+    <div class="guest-cta-actions">
+      <button type="button" class="btn-primary" id="plEnlistBtn"><i class="fas fa-user-plus"></i> Enlist Now</button>
+      <button type="button" class="btn-secondary" id="plDemoBtn"><i class="fas fa-eye"></i> Try Demo</button>
+      <a href="https://discord.gg/73Mb3syadB" class="btn-secondary" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord"></i> Discord</a>
+    </div>
+  </div>
+</section>
+
 <!-- DASHBOARD -->
-<main class="dashboard-shell">
-  <aside class="dashboard-column dashboard-column-left member-only">
+<main class="dashboard-shell member-only">
+  <aside class="dashboard-column dashboard-column-left">
     <section class="bubble panel-compact" id="about">
       <p class="panel-kicker">// NEXUS BRIEF</p>
       <h2><span class="section-icon"><i class="fas fa-info"></i></span> Nexus Overview</h2>
@@ -913,7 +927,7 @@
     </section>
   </section>
 
-  <aside class="dashboard-column dashboard-column-right member-only">
+  <aside class="dashboard-column dashboard-column-right">
     <section class="bubble panel-compact" id="network-snapshot">
       <p class="panel-kicker">// NETWORK SNAPSHOT</p>
       <h2><span class="section-icon"><i class="fas fa-chart-line"></i></span> Mission Pulse</h2>
