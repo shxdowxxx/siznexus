@@ -1,33 +1,3 @@
-# Firestore Security Rules — TheSizNexus
-> **To paste into Firebase Console:** open `firestore.rules` — it contains the raw rules only, no markdown.
-> This `.md` file is for AI agent reference (schema docs + annotated rules). Last updated: 2026-04-18
-
-## Collections
-
-| Collection | Purpose |
-|---|---|
-| `users` | User profiles, ranks, bans |
-| `friendRequests` | Friend request state |
-| `chats` | DM chat metadata |
-| `chats/{id}/messages` | DM messages subcollection |
-| `notifications` | In-app notifications |
-| `announcements` | Public announcements |
-| `corpLog` | Corp activity log (immutable) |
-| `corpChat` | Global group chat |
-| `missions` | Mission definitions |
-| `missionSubmissions` | Member mission submissions |
-| `events` | Corp events with RSVP |
-| `intelPosts` | Intel/news posts |
-| `polls` | Polls and voting |
-| `reports` | Member abuse reports |
-| `bans` | Ban records |
-| `_configKEY` | App config (owner-only write) |
-| `commissions` | Member commission listings |
-| `inquiries` | Commission contact messages |
-
-## Rules
-
-```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -95,24 +65,49 @@ service cloud.firestore {
     //  Users
     // ──────────────────────────────────────────────
     match /users/{userId} {
+      // Public read is required for /u/<displayName> profile pages and the
+      // public landing wall-of-fame. KEEP user docs free of sensitive data
+      // (e.g. email — the client never writes it; Firebase Auth holds it).
       allow read: if true;
 
+      // Create: only seed innocuous fields. Block staff-controlled fields and email.
       allow create: if isAuthenticated()
         && request.auth.uid == userId
         && request.resource.data.keys().hasAll(['displayName'])
         && validString('displayName', 32)
-        && (!('bio' in request.resource.data) || validString('bio', 300));
+        && (!('bio' in request.resource.data) || validString('bio', 600))
+        && !request.resource.data.keys()
+             .hasAny(['isBanned', 'isOwner', 'email'])
+        && (
+          !('rank' in request.resource.data)
+          || request.resource.data.rank == 'Member'
+          || request.resource.data.rank == 'Unaffiliated'
+        )
+        && (!('points' in request.resource.data) || request.resource.data.points == 0)
+        // Block self-referral: if referredBy is set, must be a string and != self.
+        && (
+          !('referredBy' in request.resource.data)
+          || (request.resource.data.referredBy is string
+              && request.resource.data.referredBy != userId)
+        );
 
+      // General self-update: anything except the staff-controlled fields and email.
       allow update: if isAuthenticated()
         && request.auth.uid == userId
         && !request.resource.data.diff(resource.data).affectedKeys()
-            .hasAny(['rank', 'isBanned', 'points', 'badges', 'isOwner']);
+            .hasAny(['rank', 'isBanned', 'points', 'badges', 'isOwner', 'email', 'referredBy'])
+        && (!('bio' in request.resource.data) || validString('bio', 600))
+        && (!('operatorTitle' in request.resource.data) || validString('operatorTitle', 60))
+        && (!('displayName' in request.resource.data) || validString('displayName', 32));
 
       allow update: if isAuthenticated() && (
         isOwner()
         || (isDevOrAbove()
             && hasOnly(['rank', 'badges', 'isBanned', 'points']))
       );
+
+      // (Black Market self-purchase rule removed 2026-04-26 — feature deleted
+      //  and the rule allowed cost-free cosmetic grants without server validation.)
 
       allow delete: if isOwner();
     }
@@ -133,11 +128,16 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll(['from', 'to', 'status'])
         && request.resource.data.status == 'pending';
 
-      allow update: if isAuthenticated() && (
-        resource.data.from == request.auth.uid
-        || resource.data.to == request.auth.uid
-        || isModOrAbove()
-      );
+      // Either party (or staff) can update — but only the `status` field.
+      // Prevents sender/recipient spoofing or other field tampering.
+      allow update: if isAuthenticated()
+        && (
+          isModOrAbove()
+          || (
+            (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+          )
+        );
 
       allow delete: if isAuthenticated() && (
         resource.data.from == request.auth.uid
@@ -211,8 +211,14 @@ service cloud.firestore {
         && validString('title', 120)
         && validString('body', 2000);
 
-      allow update, delete: if isAuthenticated()
+      allow delete: if isAuthenticated()
         && (isOwner() || isDevOrAbove());
+      allow update: if isAuthenticated()
+        && (
+          (isOwner() || isDevOrAbove())
+          // Allow any auth member to toggle reactions only — no other field changes.
+          || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])
+        );
     }
 
     // ──────────────────────────────────────────────
@@ -226,7 +232,10 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll(['type', 'message'])
         && validString('message', 500);
 
-      allow update, delete: if isOwner();
+      allow delete: if isOwner();
+      allow update: if isOwner()
+        || (isAuthenticated()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']));
     }
 
     // ──────────────────────────────────────────────
@@ -310,14 +319,29 @@ service cloud.firestore {
     match /intelPosts/{postId} {
       allow read: if isAuthenticated();
 
+      // Staff can publish freely. Regular members can submit a 'pending' intel post
+      // for staff review (status MUST be 'pending', authorUid MUST be self).
       allow create: if isAuthenticated()
-        && (isOwner() || isModOrAbove())
         && request.resource.data.keys().hasAll(['title', 'body'])
         && validString('title', 200)
-        && validString('body', 5000);
+        && validString('body', 5000)
+        && (
+          (isOwner() || isModOrAbove())
+          || (
+            isRegisteredUser()
+            && isNotBanned()
+            && request.resource.data.status == 'pending'
+            && request.resource.data.authorUid == request.auth.uid
+          )
+        );
 
-      allow update, delete: if isAuthenticated()
+      allow delete: if isAuthenticated()
         && (isOwner() || isModOrAbove());
+      allow update: if isAuthenticated()
+        && (
+          (isOwner() || isModOrAbove())
+          || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])
+        );
     }
 
     // ──────────────────────────────────────────────
@@ -330,8 +354,17 @@ service cloud.firestore {
         && (isOwner() || isDevOrAbove())
         && request.resource.data.keys().hasAll(['question', 'options']);
 
-      allow update: if isRegisteredUser()
-        && isNotBanned();
+      // Voting only: can only mutate the `votes` field. Question, options,
+      // createdAt, etc. stay locked. Staff can edit anything.
+      allow update: if isAuthenticated()
+        && (
+          (isOwner() || isDevOrAbove())
+          || (
+            isRegisteredUser()
+            && isNotBanned()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes'])
+          )
+        );
 
       allow delete: if isAuthenticated()
         && (isOwner() || isDevOrAbove());
@@ -371,20 +404,43 @@ service cloud.firestore {
     // ──────────────────────────────────────────────
     //  App Configuration
     // ──────────────────────────────────────────────
+    // ──────────────────────────────────────────────
+    //  Squads
+    // ──────────────────────────────────────────────
+    match /squads/{squadId} {
+      allow read: if true;
+      allow create: if isRegisteredUser()
+                    && isNotBanned()
+                    && request.resource.data.leaderUid == request.auth.uid
+                    && request.auth.uid in request.resource.data.members
+                    && request.resource.data.members.size() <= 5;
+      // Leader can fully manage; any current member can remove themselves.
+      // Member cap of 5 enforced on every update path.
+      allow update: if isAuthenticated()
+        && request.resource.data.members.size() <= 5
+        && (
+          resource.data.leaderUid == request.auth.uid
+          || (request.auth.uid in resource.data.members
+              && request.resource.data.leaderUid == resource.data.leaderUid
+              && !(request.auth.uid in request.resource.data.members))
+        );
+      allow delete: if isAuthenticated()
+                    && (resource.data.leaderUid == request.auth.uid || isOwner());
+    }
+
     match /_configKEY/{docId} {
-      allow read: if docId == 'app' || docId == 'devKeyHash';
-      allow write: if isOwner();
+      allow read: if docId == 'app' || docId == 'devKeyHash' || docId == 'featured';
+      allow write: if isOwner()
+                   || (docId == 'featured' && isCoAdminOrAbove());
     }
 
     // ──────────────────────────────────────────────
     //  Commissions
     // ──────────────────────────────────────────────
     match /commissions/{id} {
-      // Public can read active listings; owner can read their own regardless of status
       allow read: if resource.data.status == 'active'
                   || (isAuthenticated() && request.auth.uid == resource.data.uid);
 
-      // Registered, non-banned members can post listings
       allow create: if isRegisteredUser()
         && isNotBanned()
         && request.resource.data.uid == request.auth.uid
@@ -393,12 +449,10 @@ service cloud.firestore {
         && validString('description', 2000)
         && request.resource.data.status == 'active';
 
-      // Owner can update their own listing; uid is immutable
       allow update: if isAuthenticated()
         && request.auth.uid == resource.data.uid
         && request.resource.data.uid == resource.data.uid;
 
-      // Owner or senior staff can soft-delete (set status: 'removed') or hard delete
       allow delete: if isAuthenticated()
         && (request.auth.uid == resource.data.uid
             || isCoAdminOrAbove()
@@ -409,21 +463,18 @@ service cloud.firestore {
     //  Inquiries
     // ──────────────────────────────────────────────
     match /inquiries/{id} {
-      // Registered, non-banned members can send inquiries
       allow create: if isRegisteredUser()
         && isNotBanned()
         && request.resource.data.fromUid == request.auth.uid
         && request.resource.data.keys().hasAll(['commissionId', 'artistUid', 'fromUid', 'message'])
         && validString('message', 1000);
 
-      // Only the sender, the commission owner, or staff can read
       allow read: if isAuthenticated() && (
         request.auth.uid == resource.data.fromUid
         || request.auth.uid == resource.data.artistUid
         || isModOrAbove()
       );
 
-      // Commission owner can update status field only (mark read/replied)
       allow update: if isAuthenticated()
         && request.auth.uid == resource.data.artistUid
         && hasOnly(['status']);
@@ -439,4 +490,3 @@ service cloud.firestore {
     }
   }
 }
-```
