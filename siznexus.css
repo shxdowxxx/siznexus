@@ -1456,10 +1456,13 @@ footer{background:transparent;padding:32px 20px 24px;text-align:center;color:var
   .hub-quick-label{font-size:.52rem;letter-spacing:.08em;margin-bottom:4px;}
   .hub-quick-value{font-size:.85rem;}
 
-  /* Tabs — horizontal scroll strip */
+  /* Hero zone bottom spacing — prevent stats hugging the tabs */
+  .hub-hero-zone{margin-bottom:18px;padding-bottom:16px;}
+
+  /* Tabs — horizontal scroll strip with breathing room */
   .hub-tabs{
     flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
-    gap:5px;padding-bottom:6px;margin-bottom:10px;
+    gap:5px;padding-bottom:6px;margin-bottom:14px;
     mask-image:linear-gradient(to right,black 85%,transparent 100%);
     -webkit-mask-image:linear-gradient(to right,black 85%,transparent 100%);
     scrollbar-width:none;
@@ -1479,6 +1482,22 @@ footer{background:transparent;padding:32px 20px 24px;text-align:center;color:var
   .hub-section-label{font-size:.72rem;}
   .hub-section-note{font-size:.62rem;line-height:1.45;}
   .hub-section-count{font-size:.9rem;min-width:28px;}
+
+  /* SCROLL FIX: kill inner scroll containers so the outer hub-modal-body
+     handles all vertical scrolling. Nested scroll areas break touch on iOS/Android. */
+  .hub-scroll,
+  .corp-log-feed{
+    max-height:none !important;
+    overflow:visible !important;
+    padding-right:0;
+  }
+  /* Make the modal body the single scroll surface */
+  .hub-modal-body{
+    flex:1 1 auto;min-height:0;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+    padding-bottom:32px;
+  }
 }
 
 @media(max-width:480px){
