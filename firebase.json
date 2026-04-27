@@ -1,6 +1,7 @@
 {
   "firestore": {
-    "rules": "firestore.rules"
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   },
   "hosting": {
     "public": ".",
@@ -8,6 +9,7 @@
       "firebase.json",
       ".firebaserc",
       "firestore.rules",
+      "firestore.indexes.json",
       "firebaserules.md",
       "**/.*",
       "context/**",

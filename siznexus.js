@@ -1290,14 +1290,14 @@ async function loadActivityHeatmap(uid,targetId){
   if(!el)return;
   el.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:10px 0;"></div>';
   try{
-    // Pull last 12 weeks of corpLog for this user
+    // Pull last 12 weeks of corpLog for this user (composite index: uid+createdAt desc)
+    const snap=await db.collection('corpLog').where('uid','==',uid).orderBy('createdAt','desc').limit(300).get().catch(()=>null);
     const cutoff=new Date();cutoff.setUTCDate(cutoff.getUTCDate()-83);
-    const snap=await db.collection('corpLog').where('uid','==',uid).where('createdAt','>=',firebase.firestore.Timestamp.fromDate(cutoff)).get().catch(()=>null);
     const counts={};
     if(snap){
       snap.forEach(d=>{
         const t=d.data().createdAt?.toDate?.();
-        if(!t)return;
+        if(!t||t<cutoff)return;
         const k=ymdUTC(t);
         counts[k]=(counts[k]||0)+1;
       });
@@ -1316,7 +1316,7 @@ async function loadActivityHeatmap(uid,targetId){
       if(c>=10)lvl=4;
       cells.push(`<div class="hm-cell hm-l${lvl}" title="${k}: ${c} action${c===1?'':'s'}"></div>`);
     }
-    el.innerHTML=`<div class="heatmap-grid">${cells.join('')}</div><div class="heatmap-legend"><span>Less</span><div class="hm-cell hm-l0"></div><div class="hm-cell hm-l1"></div><div class="hm-cell hm-l2"></div><div class="hm-cell hm-l3"></div><div class="hm-cell hm-l4"></div><span>More</span></div>`;
+    el.innerHTML=`<div class="heatmap-wrap"><div class="heatmap-grid">${cells.join('')}</div></div><div class="heatmap-legend"><span>Less</span><div class="hm-cell hm-l0"></div><div class="hm-cell hm-l1"></div><div class="hm-cell hm-l2"></div><div class="hm-cell hm-l3"></div><div class="hm-cell hm-l4"></div><span>More</span></div>`;
   }catch(err){
     el.innerHTML=`<p style="font-family:var(--font-mono);font-size:.7rem;color:#f55;">${esc(err.message)}</p>`;
   }
@@ -1502,6 +1502,7 @@ auth.onAuthStateChanged(async user=>{
           lastLoginDate:today,
           points:firebase.firestore.FieldValue.increment(5)
         }).catch(()=>{});
+        writeCorpLog('login','was active');
       }
     }
     if(notifUnsubscribe)notifUnsubscribe();
@@ -2353,7 +2354,7 @@ async function checkAndAwardBadges(uid,userData){
 /* ═══════════════════════════════════════════════════════
    CORPORATION LOG
 ═══════════════════════════════════════════════════════ */
-const PRIVATE_LOG_TYPES=['status','profile'];
+const PRIVATE_LOG_TYPES=['status','profile','login'];
 const DEV_RANKS=['Founder','Administrator','Co-Administrator','Developer'];
 function isDev(data){return data&&DEV_RANKS.includes(data.rank);}
 const MOD_RANKS=['Founder','Administrator','Co-Administrator','Moderator'];
