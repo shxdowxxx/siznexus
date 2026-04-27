@@ -1,62 +1,71 @@
 ---
-session_id: SIZ-20260426-2330
+session_id: SIZ-20260426-2359
 date: 2026-04-26
-time: 23:30 UTC
+time: 23:59 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 1.3
-current_phase: Phase 3 — Public Launch Prep (Stabilization)
+version: 1.4
+current_phase: Phase 3 — Public Launch Prep (Early Access Ready)
 ---
 
 # Gemini Context — SizNexus Project
 
 ## Project Overview
-SizNexus is a cyberpunk-themed intelligence-corp member platform built with vanilla HTML/CSS/JS on Firebase Auth + Firestore (project `thesiznexus`). The platform is live and public-facing. The current focus is stabilization, mobile polish, and deferred features (Cloud Functions for Net rewards, App Check).
+SizNexus is a cyberpunk-themed intelligence-corp member platform built with vanilla HTML/CSS/JS on Firebase Auth + Firestore (project `thesiznexus`). The platform is live, public-facing, and open for public early access. The current focus is early-access monitoring, deferred features (Cloud Functions for Net rewards, App Check), and a hosting architecture migration.
 
 ## Repository
 - **Local path:** `/home/itzzzshxdow/siznexus-development/`
 - **Primary files:** `index.html`, `siznexus.css`, `siznexus.js`
 - **Static pages:** `about.html`, `privacy.html`, `terms.html`, `roadmap.html`
+- **Active feature page:** `Commission.html` (direct URL access; do not delete)
 - **GitHub:** `https://github.com/shxdowxxx/siznexus` — target `main`
 - **Git identity:** name `ItzzzShxdow`, email `itzzzshxdow@gmail.com`
-- **Firebase Hosting indexes config:** `firestore.indexes.json` (deployed; do not delete)
+- **Firebase config:** `firestore.indexes.json` (deployed; do not delete), `firestore.rules` (canonical source of truth)
 
-## Current Phase — Stabilization
-Major Phase 3 features (public landing guest CTA, profile pages, referrals, leaderboards, intel posts, achievement cards, Ops Map, Operator ID) are all live. This phase is about:
-- Fixing production breakage (auth errors, routing conflicts, broken queries)
-- Removing features the director has decided are too burdensome right now (Black Market, Operator Title)
-- Polishing mobile layout
-- Deferring Net reward automation to Cloud Functions
+## Hosting Architecture — CRITICAL
+- **`siznexus.org` is served by GitHub Pages**, NOT Firebase Hosting. Porkbun DNS resolves to GitHub Pages IPs (`185.199.108-111.153`).
+- **Frontend changes require `git push`** to take effect at `siznexus.org`. `firebase deploy --only hosting` only updates `thesiznexus.web.app`.
+- **`CNAME` file must remain in the repo** until DNS is migrated to Firebase Hosting IPs. Do NOT delete it.
+- **Prior guidance to delete `CNAME` is OUTDATED.** That assumed Firebase Hosting was the active host — it is not.
+- **Long-term plan:** Update Porkbun DNS to Firebase Hosting IPs, then disable GitHub Pages. Requires director Porkbun access. Deferred.
+- **`firebaserules.md`** is the doc copy of Firestore rules. `firestore.rules` is the canonical deploy source. Keep both in sync.
+
+## Current Phase — Early Access Open
+All major Phase 3 features are live and security-hardened. The platform is open for public early access. Priorities: early-access monitoring, director mobile testing confirmation, and deferred backlog items.
 
 ## Phase 3 Surfaces (All Live)
-- **Guest CTA section** — shown for logged-out visitors (Enlist Now / Try Demo / Discord). Replaced the prior public landing with intel/leaderboard preview — that approach was removed this session.
+- **Guest CTA section** — shown for logged-out visitors (Enlist Now / Try Demo / Discord).
 - **Public profile pages** — `/u/<displayName>` via Hosting rewrite. `users` readable publicly; email NOT written to new docs.
 - **Referrals** — `?ref=<displayName>` capture in localStorage. Net rewards NOT auto-issued (rules block self-increment).
-- **Privacy / Terms / Roadmap / About** — static HTML files, all using the same nav + footer + static-page CSS style.
+- **Privacy / Terms / Roadmap / About** — static HTML files with matching nav + footer + static-page CSS.
 - **Browser tab badge, native notifications, daily/weekly leaderboards, member intel posts, achievement cards** — all live.
 - **Activity heatmap** — counts daily activity from `corpLog` entries. `login` type written on first daily login. Composite index deployed.
 
 ## Removed Features (Do Not Re-add Without Director Approval)
-- **Black Market** — removed this session. All HTML, JS, CSS gone. Firestore data preserved. May return later.
-- **Operator Title** — removed this session. `titleHtml()` returns empty string.
+- **Black Market** — removed (stabilization session). All HTML, JS, CSS gone. Firestore data preserved. May return later.
+- **Operator Title** — removed (stabilization session). `titleHtml()` returns empty string.
 - **Public Landing (intel/leaderboard preview)** — replaced with simple Guest CTA.
 - **SFX engine** — permanently removed. Do not re-add under any circumstances.
 - **Floating terminal launcher** — moved to nav; no floating bottom button.
+- **IndexMarket.html** — deleted (repo cleanup). 2023 orphan, hardcoded to wrong Firebase project.
+- **reciever.html** — deleted (repo cleanup). Typo'd dead auth page.
 
-## Firestore Rules — Critical Quirks
-- `users`: read public, email intentionally absent from new docs. Self-update blocks rank/isBanned/points/badges/isOwner/email/referredBy.
-- `users`: scoped self-update allows points DECREMENT only when purchasedItems grows by exactly one (Black Market rule — now dead code but harmless).
+## Firestore Rules — Current State (post security-hardening)
+- `users`: read public. Email absent from new docs. Self-update blocks rank/isBanned/points/badges/isOwner/email/referredBy.
+- `users`: `referredBy` now rejects self-uid on create.
+- `users`: Black Market self-purchase dead-code rule deleted.
+- `polls`: update restricted to `votes` field only (HIGH fix).
+- `squads`: 5-member cap enforced on both create AND update (MEDIUM fix).
+- `friendRequests`: update restricted to `status` field only (MEDIUM fix).
 - `_configKEY/featured`: Co-Admin+ write, public read.
 - `_configKEY/app`: owner write only.
 - `intelPosts`: members create with `status:'pending'`; staff approve.
 - `missions`/`events`/`intelPosts` reads require auth — guest queries fail silently.
 - `corpLog`: composite index `uid ASC + createdAt DESC` deployed. Do not remove from `firestore.indexes.json`.
+- `devKeyHash` publicly readable — deferred (LOW, internal tooling only).
 
-## Infrastructure Notes
-- **`CNAME` file must NOT exist in the repo.** It caused GitHub Pages to claim `siznexus.org` and break Firebase Hosting rewrites. Custom domain managed solely in the Firebase Hosting console.
-- **`siznexus.org` custom domain** must stay active in Firebase Hosting console — was dropped once and required manual re-entry. Monitor.
-- **CSP is patched** — `apis.google.com` and `www.googletagmanager.com` added to `script-src`, `connect-src`, `frame-src`. Google sign-in is unblocked.
-- Local dev: `firebase serve` at `localhost:5000`.
+## CSS Conventions — Lesson from This Session
+When base styles appear AFTER media queries in a CSS file, the base always wins the cascade. Mobile-first (default rules hide/collapse, min-width media queries expand for desktop) is safer than max-width overrides when declaration order matters. Do not write mobile-specific overrides in max-width blocks if the corresponding base style is declared later in the file.
 
 ## Visual Conventions
 - **Silver-only chrome.** Yellow/gold purged. Exceptions: founding-member badge, gold #1 leaderboard medal, gold terminal skin (user purchase).
@@ -64,21 +73,22 @@ Major Phase 3 features (public landing guest CTA, profile pages, referrals, lead
 - Streak flame is silver, not orange.
 
 ## Authentication Gotchas
+- **CSP is patched** — `apis.google.com` and `www.googletagmanager.com` added to `script-src`, `connect-src`, `frame-src`. Google sign-in is unblocked.
 - **API key restrictions are the correct defense.** Firebase Web API keys are PUBLIC identifiers per Firebase docs.
 - **App Check is OFF.** reCAPTCHA Enterprise rejected (requires GCP billing). Free reCAPTCHA v3 is the future path.
-- **Domain restriction not verified** in Google Cloud Console.
 
 ## Currency
-- "Net" is canon (was "points"). Watch for identifier-mangling regressions from prior global replace (`attemNet`, `oNet`, `mission-Net`, `lb-Net`, `data-Net`) — restore word boundaries if found.
+- "Net" is canon (was "points"). Watch for identifier-mangling regressions (`attemNet`, `oNet`, `mission-Net`, `lb-Net`, `data-Net`) — restore word boundaries if found.
 
 ## Open Issues
-- Mobile Corp Hub modal and admin panel overhauled — not yet confirmed by director on a real device.
-- `siznexus.org` custom domain dropped once today; monitor Firebase Hosting console.
-- Net auto-rewards (streaks, referrals) need Cloud Functions. Currently tracking-only.
-- Activity heatmap only populates from this session forward; past sessions not retroactively tracked.
-- Existing user docs still have legacy `email` field; new docs don't. Cleanup migration deferred.
-- Public landing guest 403s are silent but noisy in console; strategy not yet decided.
+- Director has not confirmed mobile fixes on a real device — Corp Hub modal and hero text layout untested on physical hardware.
+- Cloud Functions for Net auto-rewards (streaks, referrals) — deferred; rules block client-side self-increment.
+- Activity heatmap only populates from the stabilization session forward; past sessions not retroactively tracked.
+- Existing user docs carry legacy `email` field; new docs don't. Cleanup migration deferred.
+- Public landing guest 403s are silent but noisy in console; strategy not decided.
 - App Check not enabled.
+- `devKeyHash` publicly readable — deferred (LOW, internal tooling only).
+- Hosting migration (Porkbun DNS → Firebase IPs) — deferred; requires director Porkbun access.
 
 ## Director Preferences
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased or semantic (threat banner).
@@ -86,4 +96,4 @@ Major Phase 3 features (public landing guest CTA, profile pages, referrals, lead
 - Terminal launcher belongs in the nav next to the search icon, NOT a floating bottom button.
 - Director catches security issues fast — be proactive about non-reversible hashing for any user-facing identifier.
 - Director wants ideas in tiers with a "my pick if you do nothing else" recommendation.
-- Do NOT commit a `CNAME` file to the repo.
+- Do NOT delete the `CNAME` file from the repo. GitHub Pages depends on it for `siznexus.org`.

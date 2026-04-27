@@ -1,83 +1,68 @@
 ---
-session_id: SIZ-20260426-2330
+session_id: SIZ-20260426-2359
 date: 2026-04-26
-time: 23:30 UTC
+time: 23:59 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
 version: 1.0
-current_phase: Phase 3 — Public Launch Prep (Stabilization)
+current_phase: Phase 3 — Public Launch Prep (Early Access Ready)
 related_files:
   - summaries/session-summary.md
   - context/claude.md
   - context/gemini.md
   - context/project-state.md
-github_commit: ee1e892
+github_commit: a6839f9
 ---
 
-# Session Summary — 2026-04-26 (Evening / Stabilization)
+# Session Summary — 2026-04-26 (Mobile Fix + Security Hardening / Early Access)
 
 ## Director's Vision
-Stabilize the platform after the prior public-launch session. Priority was: resolve a live `auth/internal-error` blocking sign-in, eliminate a CNAME conflict that was breaking profile URLs, remove features adding maintenance burden, clean up the guest experience, rewrite the About page to match the rest of the site, and overhaul mobile layout so the platform is genuinely usable on small screens.
+Pre-launch hardening pass ahead of public early access. Goals: (1) fix the Corporation Hub mobile layout where description text was overlapping stat tiles and the modal could not scroll on mobile; (2) clean up orphaned/dead files from the repo; (3) run a security review of Firestore rules before real users can write to the database; (4) apply the approved security fixes; (5) close out.
 
 ## Decisions Made
-1. **CSP patched** to include `apis.google.com` and `www.googletagmanager.com` in `script-src`, `connect-src`, and `frame-src` — required by the Firebase Auth SDK for Google sign-in.
-2. **CNAME file deleted from the repo** — it was causing GitHub Pages to claim `siznexus.org` and intercept `/u/<name>` profile URLs, breaking Firebase Hosting rewrites. Firebase Hosting is the canonical host; GitHub Pages must not hold the domain.
-3. **Black Market removed entirely** — director decision ("too much to take care of right now"). All tab button HTML, hub section HTML, JS functions (`loadBlackMarket`, `buyMarketItem`, `applyTerminalSkin`, `MARKET_ITEMS`), and CSS purged. Firestore data untouched. Feature may return in a later phase.
-4. **Operator Title removed** — director request. HTML field and JS save logic removed; `titleHtml()` returns empty string. Existing Firestore data preserved but no longer shown or editable.
-5. **Public Landing replaced with Guest CTA section** — the `#publicLanding` section (leaderboard/intel preview for logged-out visitors) replaced with a minimal `guest-cta-section` (Enlist Now / Try Demo / Discord buttons). Director approved the simpler approach.
-6. **SFX engine reverted** — Gemini had re-added it locally without committing, creating a local/repo divergence. Reverted per the director's standing decision to remove all site sounds.
-7. **Intel Feed nav link is now member-only** — hidden for guests on both desktop and mobile nav.
-8. **Firestore composite index deployed** for `corpLog` (`uid ASC + createdAt DESC`) via `firebase deploy --only firestore:indexes`. Previous activity heatmap query was failing silently because this index did not exist.
-9. **Daily login corpLog entry added** — on first daily login, a `login` type entry is written. `login` is in `PRIVATE_LOG_TYPES` so it never appears in the activity feed but counts on the heatmap.
-10. **Mobile layout overhauled** — hub tabs, Corp Hub modal, admin panel, corp chat, and guest CTA all reworked for small screens.
+1. **Mobile-first CSS rewrite for hub-hero.** Root cause was a cascade-order bug: `.hub-hero{display:none}` inside a `@media(max-width:768px)` block at line 826 was overridden by a base `.hub-hero{display:grid}` at line 1144 (base came AFTER the media query, so cascade always won). Fixed by making `display:none` the default base rule and flipping to `display:block` with a `@media(min-width:600px)` min-width query. No more cascade fight.
+2. **Mobile scroll fix.** `.hub-scroll` and `.corp-log-feed` had `max-height:440px; overflow-y:auto`, creating nested scroll containers that hijacked touch swipes from the outer modal body. Overridden to `max-height:none; overflow:visible` on mobile so `.hub-modal-body` handles all scrolling with `overscroll-behavior:contain`.
+3. **Repo cleanup.** Deleted `IndexMarket.html` (2023 orphan, hardcoded to wrong Firebase project `siznexus` instead of active `thesiznexus`) and `reciever.html` (typo'd dead auth page). Kept `Commission.html` (active feature accessed by direct URL) and `CNAME` (DNS depends on it — see hosting note below).
+4. **Hosting discovery.** `siznexus.org` is served by **GitHub Pages**, NOT Firebase Hosting. DNS at Porkbun resolves to GitHub Pages IPs (`185.199.108-111.153`). The `CNAME` file was deleted in a prior session but was re-added in commit `130cd7c`. Frontend changes require `git push` to take effect at the `.org` domain. `firebase deploy --only hosting` only updates `thesiznexus.web.app`, which no users reach via the custom domain. Memory note created to track this.
+5. **Security review — 6 findings, 5 approved for immediate fix:**
+   - (HIGH) `polls` update rule restricted to `votes` field only; previously any authenticated user could rewrite question/options/vote counts.
+   - (MEDIUM) `squads` 5-member cap now enforced on update as well as create.
+   - (MEDIUM) `friendRequests` update restricted to `status` field only; previously either party could rewrite any field including `from`.
+   - (MEDIUM) `users` Black Market self-purchase rule (dead code granting cost-free `purchasedItems` + `badges`) deleted entirely.
+   - (LOW) `users` `referredBy` self-referral now rejected on create (uid comparison).
+   - (LOW/DEFERRED) `devKeyHash` publicly readable — deferred; only impacts internal tooling, not user-facing security.
+6. **Security fixes deployed** to Firebase project `thesiznexus` via `firebase deploy --only firestore:rules`. Rules compiled successfully. Both `firestore.rules` (canonical) and `firebaserules.md` (doc copy) updated and synced.
 
 ## Work Completed
-- Patched CSP (`script-src`, `connect-src`, `frame-src`) to unblock Firebase Auth Google sign-in — resolved the live `auth/internal-error`.
-- Deleted `CNAME` file; re-entered custom domain in Firebase Hosting console after it was dropped.
-- Removed Black Market feature (all HTML, JS, CSS) in its entirety.
-- Removed Operator Title from profile editor (HTML + JS; Firestore data left intact).
-- Replaced `#publicLanding` with a minimal `guest-cta-section` with three CTA buttons.
-- Restored `plEnlistBtn` and `plDemoBtn` event listeners that were accidentally lost during the public landing removal.
-- Added three-layer guest account cleanup: explicit logout (Firestore doc delete + Auth account delete), `beforeunload` best-effort, and orphaned-UID cleanup via `sessionStorage._anonUid` on next page load.
-- Rewrote `about.html` from scratch to match `privacy.html` / `terms.html` style (uses `siznexus.css` static-page classes, same nav and footer).
-- Simplified footer: removed Discord contact line, transparent background, lighter border, clean link row + copyright.
-- Created `firestore.indexes.json` with `corpLog` composite index; updated `firebase.json` to reference it; deployed.
-- Wrapped heatmap HTML in `heatmap-wrap` div for mobile horizontal overflow scroll.
-- Mobile CSS overhaul:
-  - Hub tabs + command-tabs: `flex-wrap:nowrap; overflow-x:auto` (horizontal scroll, no wrapping).
-  - Corp Hub modal: added `hub-modal-body` wrapper so only body scrolls — header, title, tabs stay fixed. Hub-hero hidden on mobile. Log/mission filter rows scroll horizontally. Hub section count scaled down.
-  - Admin panel: sidebar converts to horizontal scrollable tab strip on mobile (group labels and clearance box hidden, bottom-border active indicator).
-  - Corp Chat: full-width bottom sheet on mobile.
-  - Guest CTA: stacks to full-width buttons.
-  - Various padding and font-size improvements at 480px breakpoint.
-- All commits pushed to `github.com/shxdowxxx/siznexus` (main branch); site deployed to Firebase Hosting.
+- Rewrote `.hub-hero` CSS as mobile-first to eliminate cascade-order bug (commit `a0a68f4`).
+- Removed nested scroll containers blocking mobile touch scroll in Corp Hub modal (commit `b6214b7`).
+- Fixed modal scroll and added breathing room between stats and tabs (commit `d5990f8`).
+- Deleted `IndexMarket.html` and `reciever.html` (commit `7de8c84`). Repo now has 14 source files + favicon + AI context directories.
+- Applied 5 Firestore rule fixes; deployed to `thesiznexus`; synced both rule files (commit `a6839f9`).
+- All commits pushed to `github.com/shxdowxxx/siznexus` (main). Local and `origin/main` are in sync.
 
 ## Current State
-- Site is live at `siznexus.org` / `thesiznexus.web.app` on Firebase Hosting.
-- Google sign-in is unblocked; CSP is patched.
-- CNAME conflict resolved; `/u/<name>` profile URLs route correctly via Firebase Hosting rewrites.
-- Black Market and Operator Title are gone from the UI; Firestore data preserved.
-- Activity heatmap has a deployed Firestore composite index and will populate from the next login onward. Past sessions are not retroactively tracked.
-- Mobile layout significantly improved across hub tabs, Corp Hub modal, admin panel, corp chat, and guest CTA.
-- Local and `origin/main` are in sync; HEAD = `ee1e892`.
+- Site is live at `siznexus.org` (GitHub Pages) and `thesiznexus.web.app` (Firebase Hosting).
+- Mobile layout for Corporation Hub modal is fixed — text no longer overlaps stat tiles, modal can scroll.
+- Repo is clean of orphaned files.
+- Firestore rules tightened across 5 attack surfaces ahead of public early access.
+- HEAD = `a6839f9`. Local and `origin/main` are in sync. Working tree is clean.
+- Platform is ready for public early-access users.
 
 ## Blockers & Challenges
-- The `CNAME` file had been committed to the repo by GitHub Pages setup and silently intercepted the custom domain — non-obvious to diagnose.
-- The activity heatmap was failing silently; Firestore required a composite index that had never been created and the error did not surface in the UI.
-- Gemini had re-added the SFX engine locally without committing, causing a local/repo divergence that had to be detected and reverted.
-- Firebase Hosting dropped the `siznexus.org` custom domain configuration after the CNAME conflict was resolved, requiring manual re-entry in the console.
+- **Hosting architecture mismatch.** `siznexus.org` routes through GitHub Pages, not Firebase Hosting. This is a known-and-deferred cleanup item (requires director access to Porkbun DNS to re-point to Firebase Hosting IPs). For now, `git push` is the effective deploy for the `.org` domain.
+- **CNAME must stay in repo** until DNS is migrated. Prior session notes said to keep `CNAME` out of the repo, but that was before the discovery that GitHub Pages is the active host. The `CNAME` must remain for `siznexus.org` to resolve correctly via GitHub Pages. This is a correction to prior guidance.
 
 ## Next Steps
-1. Director to test mobile layout on a real device — Corp Hub modal and admin panel overhauls have not yet been confirmed by director testing.
-2. Monitor `siznexus.org` custom domain in Firebase Hosting console — it was dropped once today; confirm it remains stable.
-3. Cloud Functions for Net auto-rewards (referral milestones, streak milestones) — deferred; rules block self-increment so rewards cannot be issued client-side.
-4. Evaluate enabling Firebase App Check via free reCAPTCHA v3 when director is ready (reCAPTCHA Enterprise rejected due to GCP billing).
-5. Decide strategy for public landing guest 403s — loosen Firestore rules for selected collections or gate queries on `currentUser !== null`.
-6. One-time cleanup migration to remove the legacy `email` field from existing user docs (not a live leak; new docs don't write it).
+1. Director to verify mobile fixes on a real phone after early-access opens — Corp Hub modal scroll and hero text layout not yet confirmed on physical device.
+2. Monitor early-access feedback for any issues that need hotfixing.
+3. Cloud Functions for Net auto-rewards (referrals, streaks) — deferred; rules block client-side self-increment.
+4. Firebase App Check (reCAPTCHA v3) — deferred; not blocking for early access.
+5. Vuln 6: `devKeyHash` publicly readable — deferred per director decision.
+6. Long-term hosting cleanup: update Porkbun DNS A records to Firebase Hosting IPs, then disable GitHub Pages. Requires director access to Porkbun.
 
 ## Notes
-- Black Market may return in a future phase; director's framing was "too much to take care of right now," not a permanent removal.
-- Referral links are tracking-only for now; Net rewards for referrals need Cloud Functions.
-- Activity heatmap will only show data from this session forward — past sessions lack `login` corpLog entries, so historical heatmap data will not appear retroactively.
-- Firestore rules still contain the scoped self-decrement clause for Black Market (allows points decrease when purchasedItems grows by exactly one). This is now dead code since the Black Market UI is gone, but it is harmless and was left in place to avoid unnecessary rule churn.
-- The `siznexus.org` custom domain must stay configured in the Firebase Hosting console directly — do not add a CNAME to the repo.
+- The CSS cascade lesson from this session: when base styles are declared AFTER media queries in the same file, the base always wins regardless of specificity. Mobile-first (min-width media queries, hiding as default) is safer than max-width overrides when the file is long and declaration order matters.
+- The Black Market self-purchase Firestore rule that was deleted this session was dead code since the Black Market UI was removed in the prior stabilization session. Removing dead rules reduces attack surface even when they appear benign.
+- The CNAME situation is documented in agent memory at `/home/itzzzshxdow/.claude/agent-memory/session-closeout/feedback_cname_warning.md` — update that file to reflect the corrected understanding.
+- 14 source files in repo after cleanup: `index.html`, `siznexus.css`, `siznexus.js`, `about.html`, `privacy.html`, `terms.html`, `roadmap.html`, `Commission.html`, `CNAME`, `favicon.ico`, `firebase.json`, `.firebaserc`, `firestore.rules`, `firestore.indexes.json`.
