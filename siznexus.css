@@ -820,13 +820,7 @@ footer{background:transparent;padding:32px 20px 24px;text-align:center;color:var
   /* Misc panels */
   .signal-row{flex-direction:column;gap:6px;}
   .signal-value{text-align:left;}
-  /* Corp Hub modal — fixed header, scrollable body */
-  .hub-modal-top{flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px;}
-  .hub-section-bar{flex-direction:column;align-items:flex-start;gap:4px;}
-  .hub-hero{display:none;}
-  .hub-tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;gap:6px;mask-image:linear-gradient(to right,black 80%,transparent 100%);-webkit-mask-image:linear-gradient(to right,black 80%,transparent 100%);}
-  .hub-tab{flex-shrink:0;width:auto;}
-  .hub-section-count{font-size:1rem !important;min-width:32px;}
+  /* Corp Hub modal — fixed header, scrollable body (overrides moved after base styles) */
   .log-filter-row,.mission-cat-filter{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;}
   .log-filter-btn,.mission-cat-btn{flex-shrink:0;}
   #engagementModal{align-items:flex-end;}
@@ -1141,15 +1135,16 @@ footer{background:transparent;padding:32px 20px 24px;text-align:center;color:var
   letter-spacing:.12em;
   text-transform:uppercase;
 }
-.hub-hero{
-  display:grid;
-  grid-template-columns:minmax(0,1.4fr) minmax(280px,.9fr);
+.hub-hero-zone{
+  display:flex;
+  align-items:flex-start;
   gap:18px;
   padding:18px 0 20px;
   border-top:1px solid rgba(192,192,192,.08);
   border-bottom:1px solid rgba(192,192,192,.08);
   margin-bottom:18px;
 }
+.hub-hero{flex:1 1 0;min-width:0;}
 .hub-hero-kicker{
   margin:0 0 8px;
   font-family:var(--font-mono);
@@ -1176,6 +1171,7 @@ footer{background:transparent;padding:32px 20px 24px;text-align:center;color:var
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
   gap:10px;
+  flex:0 0 220px;
 }
 .hub-quick-stat{
   padding:12px 14px;
@@ -1435,6 +1431,71 @@ footer{background:transparent;padding:32px 20px 24px;text-align:center;color:var
   .notif-tabs{gap:4px;}
   .notif-tab{font-size:.58rem;padding:7px 8px;}
   .corp-chat-btn{right:16px;bottom:16px;}
+}
+
+/* =====================================================
+   CORPORATION HUB — MOBILE OVERRIDES
+   Must live after base hub styles to win the cascade.
+   ===================================================== */
+@media(max-width:768px){
+  /* Bottom-sheet modal */
+  .hub-modal-top{
+    flex-direction:row;align-items:center;flex-wrap:wrap;
+    gap:6px;margin-bottom:10px;
+  }
+  .hub-viewer-rank{font-size:.6rem;padding:3px 8px;}
+
+  /* Hide descriptive text; keep stat grid */
+  .hub-hero{display:none;}
+  .hub-hero-zone{
+    flex-direction:column;gap:0;
+    padding:10px 0 12px;margin-bottom:12px;
+  }
+  /* 4-column stat strip */
+  .hub-quick-grid{
+    flex:none;width:100%;
+    grid-template-columns:repeat(4,1fr);
+    gap:6px;
+  }
+  .hub-quick-stat{
+    padding:9px 6px;text-align:center;border-radius:6px;
+  }
+  .hub-quick-label{font-size:.52rem;letter-spacing:.08em;margin-bottom:4px;}
+  .hub-quick-value{font-size:.85rem;}
+
+  /* Tabs — horizontal scroll strip */
+  .hub-tabs{
+    flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    gap:5px;padding-bottom:6px;margin-bottom:10px;
+    mask-image:linear-gradient(to right,black 85%,transparent 100%);
+    -webkit-mask-image:linear-gradient(to right,black 85%,transparent 100%);
+    scrollbar-width:none;
+  }
+  .hub-tabs::-webkit-scrollbar{display:none;}
+  .hub-tab{
+    flex-shrink:0;padding:7px 11px;font-size:.58rem;
+    gap:4px;
+  }
+  .hub-tab i{font-size:.6rem;}
+
+  /* Section bar */
+  .hub-section-bar{
+    flex-direction:column;align-items:flex-start;gap:3px;
+    margin-bottom:10px;
+  }
+  .hub-section-label{font-size:.72rem;}
+  .hub-section-note{font-size:.62rem;line-height:1.45;}
+  .hub-section-count{font-size:.9rem;min-width:28px;}
+}
+
+@media(max-width:480px){
+  /* Tabs: icon + abbreviated label */
+  .hub-tab .hub-tab-text{display:none;}
+  .hub-tab{padding:8px 10px;gap:0;}
+  .hub-tab i{font-size:.72rem;opacity:.85;}
+  .hub-tab.active i{opacity:1;}
+  /* Wider modal padding room */
+  #engagementModal .modal-container{padding:14px 12px 0;}
 }
 
 /* Deep-link flash highlight when a homepage preview row deep-links into the Corp Hub */
