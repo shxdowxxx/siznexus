@@ -1045,8 +1045,6 @@ async function openMyProfile(){
     document.getElementById('editBio').value=d.bio||'';
     const actEl=document.getElementById('editActivityStatus');
     if(actEl)actEl.value=d.activityStatus||'';
-    const titleEl=document.getElementById('editTitle');
-    if(titleEl)titleEl.value=d.operatorTitle||'';
     const picker=document.getElementById('accentPicker');
     if(picker) picker.style.display = 'none';
 
@@ -1070,7 +1068,7 @@ async function openMyProfile(){
     });
     // Guest lock
     const saveBtn=document.getElementById('saveProfileBtn');
-    const editFields=['editDisplayName','editBio','editActivityStatus','editTitle'];
+    const editFields=['editDisplayName','editBio','editActivityStatus'];
     if(isGuest){
       saveBtn.disabled=true;saveBtn.title='Guest accounts cannot edit their profile.';
       editFields.forEach(id=>{const el=document.getElementById(id);if(el){el.disabled=true;el.classList.add('input-locked');}});
@@ -1361,10 +1359,7 @@ function nameHtml(u,fallback='Unknown'){
   const name=esc(u?.displayName||fallback);
   return `<span style="color:var(--color-text-light);">${name}</span>`;
 }
-function titleHtml(u){
-  const t=u?.operatorTitle;
-  return t?`<div class="operator-title">${esc(t)}</div>`:'';
-}
+function titleHtml(){return '';}
 document.getElementById('saveProfileBtn').addEventListener('click',async()=>{
   if(!currentUser)return;
   const btn=document.getElementById('saveProfileBtn');
@@ -1373,8 +1368,7 @@ document.getElementById('saveProfileBtn').addEventListener('click',async()=>{
     const newName=document.getElementById('editDisplayName').value.trim();
     const newBio=document.getElementById('editBio').value.trim();
     const newActivity=document.getElementById('editActivityStatus')?.value.trim()||'';
-    const newTitle=document.getElementById('editTitle')?.value.trim()||'';
-    const updates={bio:newBio,activityStatus:newActivity,operatorTitle:newTitle};
+    const updates={bio:newBio,activityStatus:newActivity};
     if(newName)updates.displayName=newName;
     if(_pendingAvatarDataURL){updates.photoURL=_pendingAvatarDataURL;}
     if(_pendingBannerDataURL==='__CLEAR__'){updates.bannerURL='';}
@@ -2079,84 +2073,9 @@ document.getElementById('logoutBtn').addEventListener('click',async(e)=>{
 });
 /* ── GUEST CONTENT RESTRICTIONS ── */
 document.getElementById('heroEnlistBtn')?.addEventListener('click',e=>{e.preventDefault();openModal('loginModal');});
-document.getElementById('plEnlistBtn')?.addEventListener('click',()=>openModal('loginModal'));
-async function loadPublicLanding(){
-  // Latest intel headline
-  try{
-    const intelSnap=await db.collection('intelPosts').orderBy('createdAt','desc').limit(1).get();
-    const tEl=document.getElementById('plIntelTitle'),mEl=document.getElementById('plIntelMeta'),bEl=document.getElementById('plIntelBody');
-    if(!intelSnap.empty){
-      const p=intelSnap.docs[0].data();
-      if(tEl)tEl.textContent=p.title||'Untitled';
-      if(mEl)mEl.textContent=`${p.authorName||'Admin'} · ${p.createdAt?fmtDate(p.createdAt):'recent'}`;
-      if(bEl)bEl.textContent=(p.body||'').slice(0,180)+((p.body||'').length>180?'…':'');
-    }else{
-      if(tEl)tEl.textContent='Channel quiet for now.';
-      if(mEl)mEl.textContent='New intel drops appear here as they go live.';
-      if(bEl)bEl.textContent='Members publish operational intel inside the corp hub. Enlist to read it.';
-    }
-  }catch(_){}
-  // Live mission count + lead
-  try{
-    const mSnap=await db.collection('missions').where('active','==',true).get();
-    const cEl=document.getElementById('plMissionCount'),lEl=document.getElementById('plMissionLead');
-    if(cEl)cEl.textContent=mSnap.size;
-    if(lEl){
-      if(mSnap.empty)lEl.textContent='Operations are spinning up. Be the first to claim a KEY.';
-      else{
-        const cats=new Set(mSnap.docs.map(d=>d.data().category).filter(Boolean));
-        lEl.textContent=cats.size?`Categories live: ${[...cats].slice(0,4).join(', ')}.`:'Multiple operations available right now.';
-      }
-    }
-  }catch(_){}
-  // Featured spotlight
-  try{
-    const cur=await db.collection('_configKEY').doc('featured').get().catch(()=>null);
-    let pinUid=cur&&cur.exists?cur.data()?.uid:null;
-    let user=null;
-    if(pinUid){
-      const u=await db.collection('users').doc(pinUid).get().catch(()=>null);
-      if(u&&u.exists)user={...u.data(),id:u.id};
-    }
-    if(!user){
-      // Fall back to top points operative
-      const all=await db.collection('users').get();
-      const list=all.docs.map(d=>({...d.data(),id:d.id})).filter(u=>!u.isAnonymous).sort((a,b)=>(b.points||0)-(a.points||0));
-      user=list[0]||null;
-    }
-    const av=document.getElementById('plSpotlightAv'),nm=document.getElementById('plSpotlightName'),rk=document.getElementById('plSpotlightRank'),nt=document.getElementById('plSpotlightNote');
-    if(user){
-      if(av)av.innerHTML=avHtml(user.photoURL,user.displayName);
-      if(nm)nm.textContent=user.displayName||'Unknown Operative';
-      if(rk)rk.textContent=`${user.rank||'Member'} · ${user.points||0} Net`;
-      if(nt)nt.textContent=user.operatorTitle?`"${user.operatorTitle}"`:'Featured for activity and contribution.';
-    }
-  }catch(_){}
-  // Top operatives
-  try{
-    const snap=await db.collection('users').get();
-    const top=snap.docs.map(d=>({...d.data(),id:d.id})).filter(u=>!u.isAnonymous).sort((a,b)=>(b.points||0)-(a.points||0)).slice(0,5);
-    const lb=document.getElementById('plLeaderboard');
-    if(lb){
-      lb.innerHTML=top.length?top.map((u,i)=>`<li><span class="pl-rank">#${i+1}</span><span class="pl-name">${esc(u.displayName||'Unknown')}</span><span class="pl-net">${u.points||0} Net</span></li>`).join(''):'<li class="pl-empty">No operatives ranked yet.</li>';
-    }
-  }catch(_){}
-  // Top squads
-  try{
-    const [sqSnap,uSnap]=await Promise.all([db.collection('squads').get(),db.collection('users').get()]);
-    const usersById={};uSnap.forEach(d=>{usersById[d.id]=d.data();});
-    const ranked=sqSnap.docs.map(d=>({...d.data(),id:d.id})).map(s=>({...s,_total:(s.members||[]).reduce((a,uid)=>a+((usersById[uid]?.points)||0),0)})).sort((a,b)=>b._total-a._total).slice(0,3);
-    const sq=document.getElementById('plSquadList');
-    if(sq){
-      sq.innerHTML=ranked.length?ranked.map((s,i)=>`<li><span class="pl-rank">#${i+1}</span><span class="pl-name">${s.tag?`[${esc(s.tag)}] `:''}${esc(s.name||'Unnamed')}</span><span class="pl-net">${s._total} Net</span></li>`).join(''):'<li class="pl-empty">No squads formed yet.</li>';
-    }
-  }catch(_){}
-}
 function applyGuestRestrictions(isGuest){
-  // Toggle public landing vs member dashboard sections
   document.querySelectorAll('.guest-only').forEach(el=>el.style.display=isGuest?'':'none');
   document.querySelectorAll('.member-only').forEach(el=>el.style.display=isGuest?'none':'');
-  if(isGuest)loadPublicLanding();
   // Hide member-only
   document.querySelectorAll('[data-member-only="true"]').forEach(el=>{
     el.classList.toggle('guest-hidden', isGuest);
@@ -2494,7 +2413,7 @@ async function loadCorpLog(filter='all'){
       item.dataset.cardId=d.id;
       const time=log.createdAt?fmtDate(log.createdAt)+' '+fmtTime(log.createdAt):'';
       // Icon per type
-      const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn',streak:'fa-fire',motw:'fa-trophy',recruit:'fa-user-plus',market:'fa-mask'};
+      const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn',streak:'fa-fire',motw:'fa-trophy',recruit:'fa-user-plus'};
       const icon=typeIcon[log.type]||'fa-circle';
       item.innerHTML=`<div class="log-item-main"><i class="fas ${icon}" style="margin-right:6px;font-size:.65rem;opacity:.6;"></i><strong>${esc(log.displayName||'Unknown')}</strong> ${esc(log.message)}</div>
         <div class="log-item-meta"><span class="${rankClass(log.rank)}">${esc(log.rank||'Member')}</span> &middot; ${time}</div>
@@ -3326,7 +3245,6 @@ async function loadHubTab(tab){
   else if(tab==='polls')loadPolls();
   else if(tab==='squads')loadSquads();
   else if(tab==='opsmap')loadOpsMap();
-  else if(tab==='market')loadBlackMarket();
 }
 
 /* ── GLOBAL OPS MAP ── */
@@ -3479,106 +3397,6 @@ function loadOpsMap() {
   }
 }
 
-/* ── BLACK MARKET ── */
-const MARKET_ITEMS = [
-  { id: 'skin_crimson', name: 'Terminal: Crimson', type: 'terminal', desc: 'Override console with a red tactical theme.', cost: 500, class: 'term-skin-crimson' },
-  { id: 'skin_emerald', name: 'Terminal: Emerald', type: 'terminal', desc: 'Classic matrix-green console override.', cost: 500, class: 'term-skin-emerald' },
-  { id: 'skin_gold', name: 'Terminal: Gold', type: 'terminal', desc: 'A premium gold-tinted console for high-tier operatives.', cost: 1500, class: 'term-skin-gold' },
-  { id: 'badge_shadow', name: 'Shadow Op Badge', type: 'badge', desc: 'Exclusive silver badge for the elite.', cost: 2000, badgeId: 'shadow_op' },
-  { id: 'title_nexus_ghost', name: 'Title: Nexus Ghost', type: 'title', desc: 'Set your operator title to "Nexus Ghost".', cost: 1000, title: 'Nexus Ghost' }
-];
-
-async function loadBlackMarket() {
-  const list = document.getElementById('marketList');
-  if(!list) return;
-  
-  list.innerHTML = '<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
-  updateHubSectionInfo({label: 'The Quartermaster', count: '—', note: 'Secure encrypted transaction terminal.'});
-
-  try {
-    const d = currentUserData || {};
-    const owned = d.purchasedItems || [];
-    const balance = d.points || 0;
-
-    updateHubSectionInfo({label: 'The Black Market', count: MARKET_ITEMS.length, note: `${MARKET_ITEMS.length} items in stock. Spend with care — purchases are final.`});
-    const balEl=document.getElementById('marketBalance');
-    if(balEl)balEl.textContent=`${balance.toLocaleString()} Net`;
-    list.innerHTML = '<div class="market-grid"></div>';
-    const grid = list.querySelector('.market-grid');
-
-    MARKET_ITEMS.forEach(item => {
-      const isOwned = owned.includes(item.id);
-      const canAfford = balance >= item.cost;
-      const card = document.createElement('div');
-      card.className = 'market-card'+(isOwned?' owned':'')+(canAfford||isOwned?'':' locked');
-      const iconClass=item.type === 'terminal' ? 'fa-terminal' : (item.type === 'badge' ? 'fa-medal' : 'fa-id-card');
-      const tagText=item.type === 'terminal' ? 'CONSOLE OVERRIDE' : (item.type === 'badge' ? 'BADGE' : 'TITLE');
-      card.innerHTML = `
-        <div class="market-card-top">
-          <div class="market-card-tag">${tagText}</div>
-          ${isOwned?'<div class="market-card-status"><i class="fas fa-check-circle"></i> INSTALLED</div>':''}
-        </div>
-        <div class="market-card-icon"><i class="fas ${iconClass}"></i></div>
-        <div class="market-card-name">${esc(item.name)}</div>
-        <div class="market-card-desc">${esc(item.desc)}</div>
-        <div class="market-card-foot">
-          <div class="market-card-cost"><span class="cost-num">${item.cost.toLocaleString()}</span> <span class="cost-unit">Net</span></div>
-          <button class="market-buy-btn buy-btn" ${isOwned||!canAfford ? 'disabled' : ''} data-id="${item.id}">
-            ${isOwned ? 'OWNED' : (canAfford ? 'PURCHASE' : 'INSUFFICIENT')}
-          </button>
-        </div>`;
-      if(!isOwned && canAfford) {
-        card.querySelector('.buy-btn').addEventListener('click', () => buyMarketItem(item));
-      }
-      grid.appendChild(card);
-    });
-  } catch(err) {
-    list.innerHTML = `<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;
-  }
-}
-
-async function buyMarketItem(item) {
-  if(!currentUser || !currentUserData) return;
-  if(!confirm(`Authorize transaction for ${item.name} (${item.cost} Net)?`)) return;
-
-  const ref = db.collection('users').doc(currentUser.uid);
-  try {
-    await db.runTransaction(async (transaction) => {
-      const snap = await transaction.get(ref);
-      if (!snap.exists) throw "User not found";
-      const data = snap.data();
-      if ((data.points || 0) < item.cost) throw "Insufficient funds";
-      
-      const updates = {
-        points: firebase.firestore.FieldValue.increment(-item.cost),
-        purchasedItems: firebase.firestore.FieldValue.arrayUnion(item.id)
-      };
-
-      // Auto-apply certain types
-      if(item.type === 'title') updates.operatorTitle = item.title;
-      if(item.type === 'badge') updates.badges = firebase.firestore.FieldValue.arrayUnion(item.badgeId);
-
-      transaction.update(ref, updates);
-    });
-
-    showToast(`Transaction complete: ${item.name} acquired.`);
-    currentUserData = (await ref.get()).data();
-    loadBlackMarket();
-    if(item.type === 'terminal' || item.type === 'badge') triggerGlitch();
-    if(item.type === 'terminal') applyTerminalSkin(item.class);
-    writeCorpLog('market', `acquired ${item.name} from the Black Market`, {itemId: item.id, cost: item.cost});
-  } catch(err) {
-    showToast(`Transaction failed: ${err}`);
-  }
-}
-
-function applyTerminalSkin(skinClass) {
-  const term = document.getElementById('operatorTerminal');
-  if(!term) return;
-  // Remove other skins
-  MARKET_ITEMS.filter(i => i.type === 'terminal').forEach(i => term.classList.remove(i.class));
-  if(skinClass) term.classList.add(skinClass);
-}
 /* ── SQUADS ── */
 const SQUAD_MAX_MEMBERS=5;
 async function loadSquads(){
@@ -3850,7 +3668,7 @@ async function loadHomeLogPreview(){
     return true;
   });
   if(!visibleDocs.length)return '<div class="hub-empty">No activity yet.</div>';
-  const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn',streak:'fa-fire',motw:'fa-trophy',recruit:'fa-user-plus',market:'fa-mask'};
+  const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn',streak:'fa-fire',motw:'fa-trophy',recruit:'fa-user-plus'};
   return visibleDocs.map(d=>{
     const log=d.data();
     const time=log.createdAt?`${fmtDate(log.createdAt)} ${fmtTime(log.createdAt)}`:'Recent';

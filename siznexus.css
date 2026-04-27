@@ -753,11 +753,8 @@ input.input-field::placeholder,textarea.input-field::placeholder{color:rgba(176,
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* FOOTER */
-footer{background:rgba(10,14,26,.95);padding:24px 20px;text-align:center;color:var(--color-text-muted);border-top:var(--border);backdrop-filter:blur(8px);position:relative;z-index:1;font-family:var(--font-mono);font-size:.75rem;letter-spacing:.08em;}
-footer .contact{margin-bottom:8px;}
-footer .contact a{color:var(--color-text-light);text-decoration:none;}
-footer .contact a:hover{text-decoration:underline;}
-.footer-divider{width:60px;height:1px;background:rgba(192,192,192,.15);background:var(--silver-gradient);margin:12px auto;}
+footer{background:transparent;padding:32px 20px 24px;text-align:center;color:var(--color-text-muted);border-top:1px solid rgba(192,192,192,.08);position:relative;z-index:1;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.08em;}
+.footer-copy{margin-top:10px;opacity:.5;font-size:.65rem;letter-spacing:.12em;}
 
 /* TOAST */
 #nexusToast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(10,15,26,.98);border:1px solid rgba(192,192,192,.35);color:var(--color-text-light);padding:10px 22px;border-radius:4px;font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;z-index:9000;box-shadow:0 0 20px rgba(192,192,192,.15),0 8px 24px rgba(0,0,0,.5);transition:opacity .3s ease,transform .3s ease;pointer-events:none;opacity:0;white-space:nowrap;}
@@ -1787,34 +1784,6 @@ body.glitching::before {
 
 
 /* ── Black Market ── */
-.market-header{padding:18px 20px;background:linear-gradient(135deg, rgba(192,192,192,.04), rgba(192,192,192,.01));border:var(--border);border-radius:6px;margin-bottom:18px;position:relative;overflow:hidden;}
-.market-header::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(192,192,192,.4),transparent);}
-.market-header-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;}
-.market-kicker{font-family:var(--font-mono);font-size:.55rem;letter-spacing:.28em;color:var(--color-text-muted);margin-bottom:6px;opacity:.7;}
-.market-header h3{font-family:var(--font-headings);font-size:1.4rem;color:var(--color-text-light);letter-spacing:.05em;margin:0 0 4px;}
-.market-sub{font-family:var(--font-mono);font-size:.7rem;color:var(--color-text-muted);line-height:1.55;margin:0;max-width:520px;}
-.market-balance{font-family:var(--font-mono);font-size:.95rem;color:var(--color-text-light);font-weight:700;letter-spacing:.1em;background:rgba(0,0,0,.4);border:1px solid rgba(192,192,192,.2);padding:8px 14px;border-radius:3px;align-self:flex-start;}
-
-.market-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
-.market-card{position:relative;background:linear-gradient(180deg,rgba(15,18,30,.85),rgba(8,11,20,.85));border:1px solid rgba(192,192,192,.12);border-radius:5px;padding:18px 16px;display:flex;flex-direction:column;gap:8px;transition:all .2s ease;overflow:hidden;}
-.market-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(192,192,192,.3),transparent);opacity:0;transition:opacity .25s ease;}
-.market-card:hover{border-color:rgba(192,192,192,.32);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.4);}
-.market-card:hover::before{opacity:1;}
-.market-card.owned{opacity:.7;border-color:rgba(192,192,192,.22);}
-.market-card.locked{opacity:.55;}
-.market-card-top{display:flex;justify-content:space-between;align-items:center;}
-.market-card-tag{font-family:var(--font-mono);font-size:.5rem;letter-spacing:.22em;color:var(--color-text-muted);background:rgba(192,192,192,.05);border:1px solid rgba(192,192,192,.12);padding:3px 8px;border-radius:2px;}
-.market-card-status{font-family:var(--font-mono);font-size:.55rem;letter-spacing:.16em;color:#9be39b;display:flex;align-items:center;gap:4px;}
-.market-card-icon{font-size:1.6rem;color:var(--color-primary);text-align:center;padding:14px 0 8px;text-shadow:0 0 10px rgba(192,192,192,.3);}
-.market-card-name{font-family:var(--font-headings);font-size:.95rem;color:var(--color-text-light);letter-spacing:.05em;text-align:center;}
-.market-card-desc{font-family:var(--font-mono);font-size:.65rem;color:var(--color-text-muted);line-height:1.5;text-align:center;flex:1;}
-.market-card-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed rgba(192,192,192,.1);padding-top:10px;margin-top:6px;}
-.market-card-cost{font-family:var(--font-mono);}
-.market-card-cost .cost-num{font-size:.95rem;color:var(--color-text-light);font-weight:700;}
-.market-card-cost .cost-unit{font-size:.6rem;color:var(--color-text-muted);letter-spacing:.18em;text-transform:uppercase;}
-.market-buy-btn{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.16em;padding:7px 12px;background:transparent;border:1px solid var(--color-primary);color:var(--color-primary);border-radius:3px;cursor:pointer;transition:all .15s ease;font-weight:700;}
-.market-buy-btn:hover:not(:disabled){background:var(--color-primary);color:#0A0E1A;box-shadow:0 0 14px rgba(192,192,192,.35);}
-.market-buy-btn:disabled{border-color:rgba(192,192,192,.2);color:var(--color-text-muted);cursor:not-allowed;}
 
 /* ── Ops Map Frame ── */
 #hubOpsmap{padding:0;}
@@ -1914,9 +1883,6 @@ body.static-page{background:#0A0E1A;color:var(--color-text);font-family:var(--fo
   .pl-cta-banner h3{font-size:1.1rem;}
   .pl-cta-banner > div:last-child{width:100%;flex-direction:column;}
   .pl-cta-banner .btn-primary,.pl-cta-banner .btn-secondary{width:100%;justify-content:center;}
-  .market-grid{grid-template-columns:1fr;}
-  .market-header-top{flex-direction:column;align-items:flex-start;}
-  .market-balance{align-self:stretch;text-align:center;}
   .opsmap-overlay{flex-direction:column;align-items:flex-start;gap:8px;}
   .opsmap-stat-row{flex-wrap:wrap;}
   .nav-right .notif-btn{padding:0 8px;}

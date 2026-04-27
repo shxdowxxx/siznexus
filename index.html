@@ -217,10 +217,6 @@
         <input type="text" id="editActivityStatus" class="input-field" maxlength="60" placeholder="e.g. Grinding missions, On patrol..." autocomplete="off">
       </div>
       <div class="field-group">
-        <label class="field-label" for="editTitle">Operator Title <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(one-line codename, optional)</span></label>
-        <input type="text" id="editTitle" class="input-field" maxlength="40" placeholder="e.g. Signal Analyst, Overwatch..." autocomplete="off">
-      </div>
-      <div class="field-group">
         <label class="field-label">Presence Status</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="rsvp-btn yes" id="profileStatusOnline" data-pstatus="online" style="font-family:var(--font-mono);font-size:.65rem;"><span class="status-dot online" style="width:7px;height:7px;margin-right:4px;vertical-align:middle;"></span>Online</button>
@@ -316,7 +312,6 @@
       <button class="hub-tab" data-hub="polls"><i class="fas fa-poll"></i> Polls<span class="hub-tab-badge" id="hubBadgePolls"></span></button>
       <button class="hub-tab" data-hub="squads"><i class="fas fa-users-rectangle"></i> Squads</button>
       <button class="hub-tab" data-hub="opsmap"><i class="fas fa-globe"></i> Ops Map</button>
-      <button class="hub-tab" data-hub="market"><i class="fas fa-user-secret"></i> Black Market</button>
     </div>
     <div class="hub-section-bar">
       <div>
@@ -388,20 +383,6 @@
         <div class="opsmap-corner bl"></div>
         <div class="opsmap-corner br"></div>
       </div>
-    </div>
-    <!-- BLACK MARKET -->
-    <div class="hub-section" id="hubMarket">
-      <div class="market-header">
-        <div class="market-header-top">
-          <div>
-            <p class="market-kicker">// QUARTERMASTER · SECURE NODE</p>
-            <h3>The Black Market</h3>
-            <p class="market-sub">Spend Net on exclusive cosmetics and terminal overrides. All transactions are final.</p>
-          </div>
-          <div class="market-balance" id="marketBalance">— Net</div>
-        </div>
-      </div>
-      <div class="hub-scroll" id="marketList"></div>
     </div>
   </div>
 </div>
@@ -696,7 +677,7 @@
     <div class="nav-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">TheSizNexus</div>
     <div class="nav-links">
       <a href="#home">Home</a>
-      <a href="#" id="intelFeedNav">Intel Feed</a>
+      <a href="#" id="intelFeedNav" class="member-only">Intel Feed</a>
       <a href="#projects">Projects</a>
       <a href="#join">Join</a>
     </div>
@@ -753,7 +734,7 @@
 </div>
 
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#home">Home</a><a href="#" id="intelFeedMobile">Intel Feed</a><a href="#projects">Projects</a><a href="#join">Join</a>
+  <a href="#home">Home</a><a href="#" id="intelFeedMobile" class="member-only">Intel Feed</a><a href="#projects">Projects</a><a href="#join">Join</a>
 </div>
 
 <!-- HERO -->
@@ -765,59 +746,9 @@
   <div class="hero-cta">
     <a href="#" class="btn-primary guest-only" id="heroEnlistBtn"><i class="fas fa-user-plus"></i> Enlist Now</a>
     <a href="https://discord.gg/73Mb3syadB" class="btn-secondary" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord"></i> Discord</a>
-    <a href="#publicLanding" class="btn-secondary guest-only"><i class="fas fa-eye"></i> Take a Look</a>
   </div>
 </div>
 
-<!-- PUBLIC LANDING (visible only when logged out) -->
-<section id="publicLanding" class="public-landing guest-only">
-  <div class="pl-grid">
-    <div class="pl-card pl-card-wide">
-      <p class="panel-kicker">// LATEST INTEL</p>
-      <h3 id="plIntelTitle">Loading classified updates…</h3>
-      <p class="pl-meta" id="plIntelMeta">Standby — pulling the latest intel feed.</p>
-      <p class="pl-body" id="plIntelBody">—</p>
-    </div>
-    <div class="pl-card">
-      <p class="panel-kicker">// LIVE OPERATIONS</p>
-      <div class="pl-big-stat" id="plMissionCount">—</div>
-      <div class="pl-stat-label">Active Missions</div>
-      <p class="pl-meta" id="plMissionLead">Operations are running across multiple categories.</p>
-    </div>
-    <div class="pl-card">
-      <p class="panel-kicker">// CURRENT SPOTLIGHT</p>
-      <div class="pl-spotlight">
-        <div class="pl-spotlight-av" id="plSpotlightAv"></div>
-        <div>
-          <div class="pl-spotlight-name" id="plSpotlightName">No spotlight selected</div>
-          <div class="pl-spotlight-rank" id="plSpotlightRank">—</div>
-        </div>
-      </div>
-      <p class="pl-meta" id="plSpotlightNote">Featured operative rotates by activity score.</p>
-    </div>
-  </div>
-  <div class="pl-grid pl-grid-2col">
-    <div class="pl-card">
-      <p class="panel-kicker">// WALL OF FAME · TOP OPERATIVES</p>
-      <ol class="pl-leaderboard" id="plLeaderboard"><li class="pl-empty">Loading roster…</li></ol>
-    </div>
-    <div class="pl-card">
-      <p class="panel-kicker">// ELITE SQUADS</p>
-      <ol class="pl-squad-list" id="plSquadList"><li class="pl-empty">Loading squads…</li></ol>
-    </div>
-  </div>
-  <div class="pl-cta-banner">
-    <div>
-      <p class="panel-kicker">// READY TO ENLIST?</p>
-      <h3>Create a free account in under a minute.</h3>
-      <p class="pl-cta-sub">No spam. Pick a callsign, get clearance, run your first mission.</p>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <button type="button" class="btn-secondary" id="plDemoBtn"><i class="fas fa-eye"></i> Try Demo</button>
-      <button type="button" class="btn-primary" id="plEnlistBtn"><i class="fas fa-user-plus"></i> Enlist Now</button>
-    </div>
-  </div>
-</section>
 
 <!-- TICKER -->
 <div class="ticker-wrapper">
@@ -851,8 +782,8 @@
 </div>
 
 <!-- DASHBOARD -->
-<main class="dashboard-shell member-only">
-  <aside class="dashboard-column dashboard-column-left">
+<main class="dashboard-shell">
+  <aside class="dashboard-column dashboard-column-left member-only">
     <section class="bubble panel-compact" id="about">
       <p class="panel-kicker">// NEXUS BRIEF</p>
       <h2><span class="section-icon"><i class="fas fa-info"></i></span> Nexus Overview</h2>
@@ -982,7 +913,7 @@
     </section>
   </section>
 
-  <aside class="dashboard-column dashboard-column-right">
+  <aside class="dashboard-column dashboard-column-right member-only">
     <section class="bubble panel-compact" id="network-snapshot">
       <p class="panel-kicker">// NETWORK SNAPSHOT</p>
       <h2><span class="section-icon"><i class="fas fa-chart-line"></i></span> Mission Pulse</h2>
@@ -1041,12 +972,10 @@
 </main>
 
 <footer>
-  <div class="contact">Discord: <a href="https://discord.gg/73Mb3syadB" target="_blank" rel="noopener noreferrer">discord.gg/73Mb3syadB</a></div>
-  <div class="footer-divider"></div>
   <div class="footer-links">
     <a href="/about">About</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/roadmap.html">Roadmap</a>
   </div>
-  <div>© 2023–2026 $iz — All rights reserved</div>
+  <div class="footer-copy">© 2023–2026 $iz — All rights reserved</div>
 </footer>
 
 <script src="siznexus.js"></script>
