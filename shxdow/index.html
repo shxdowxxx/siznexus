@@ -788,6 +788,9 @@ footer a:hover { color: var(--silver2); }
     </div>
   </div>
 
+  <!-- hidden audio engine -->
+  <audio id="mu-audio" preload="none"></audio>
+
   <!-- MUSIC PLAYER -->
   <div class="card music-card">
     <div class="lbl">Music</div>
@@ -865,85 +868,223 @@ footer a:hover { color: var(--silver2); }
 </footer>
 
 <script>
-// ── Config ───────────────────────────────────────────────────────────────────
-const PRESENCE_API  = 'https://sentry-production-60e4.up.railway.app/api/presence';
-const POLL_MS       = 15000;
+// ── Config ────────────────────────────────────────────────
+const PRESENCE_API = 'https://sentry-production-60e4.up.railway.app/api/presence';
+const POLL_MS      = 15000;
+const SONGS_BASE   = 'https://raw.githubusercontent.com/shxdowxxx/siznexus/main/shxdow/Songs/';
 
-// ── Playlist data ─────────────────────────────────────────────────────────────
-// Placeholder songs — send your list + covers and I'll update these
+// ── Playlist ──────────────────────────────────────────────
+// Add more songs here — just title, artist, album, filename
 const PLAYLIST = [
   {
-    title:  'Placeholder Track 1',
-    artist: 'Artist Name',
-    album:  'Album Name',
-    cover:  'https://placehold.co/80x80/111/555?text=1',
-    duration: 213,
-  },
-  {
-    title:  'Placeholder Track 2',
-    artist: 'Artist Name',
-    album:  'Album Name',
-    cover:  'https://placehold.co/80x80/111/555?text=2',
-    duration: 187,
-  },
-  {
-    title:  'Placeholder Track 3',
-    artist: 'Artist Name',
-    album:  'Album Name',
-    cover:  'https://placehold.co/80x80/111/555?text=3',
-    duration: 234,
+    title:    'Al Compás De Mi Caballo',
+    artist:   "Los Imperial's",
+    album:    '',
+    file:     'Al%20Comp%C3%A1s%20De%20Mi%20Caballo.mp3',
+    cover:    null, // fetched from iTunes automatically
   },
 ];
 
-// ── Presence refs ────────────────────────────────────────────────────────────
+// ── DOM refs ──────────────────────────────────────────────
+const $audio     = document.getElementById('mu-audio');
 const $avatar    = document.getElementById('js-avatar');
 const $fallback  = document.getElementById('js-fallback');
 const $dot       = document.getElementById('js-dot');
 const $actRow    = document.getElementById('js-act-row');
-const $actEmpty  = document.getElementById('js-act-empty');
 const $pill      = document.getElementById('js-pill');
 const $pillLabel = document.getElementById('js-pill-label');
+const $art       = document.getElementById('mu-art');
+const $title     = document.getElementById('mu-title');
+const $artist    = document.getElementById('mu-artist');
+const $album     = document.getElementById('mu-album');
+const $elapsed   = document.getElementById('mu-elapsed');
+const $duration  = document.getElementById('mu-duration');
+const $fill      = document.getElementById('mu-fill');
+const $track     = document.getElementById('mu-track');
+const $playBtn   = document.getElementById('mu-play');
+const $playIcon  = document.getElementById('mu-play-icon');
+const $prev      = document.getElementById('mu-prev');
+const $next      = document.getElementById('mu-next');
+const $shuffle   = document.getElementById('mu-shuffle');
+const $repeat    = document.getElementById('mu-repeat');
+const $mute      = document.getElementById('mu-mute');
+const $vol       = document.getElementById('mu-vol');
+const $plToggle  = document.getElementById('mu-pl-toggle');
+const $plIcon    = document.getElementById('mu-pl-icon');
+const $playlist  = document.getElementById('mu-playlist');
 
-// ── Music refs ───────────────────────────────────────────────────────────────
-const $art      = document.getElementById('mu-art');
-const $title    = document.getElementById('mu-title');
-const $artist   = document.getElementById('mu-artist');
-const $album    = document.getElementById('mu-album');
-const $elapsed  = document.getElementById('mu-elapsed');
-const $duration = document.getElementById('mu-duration');
-const $fill     = document.getElementById('mu-fill');
-const $track    = document.getElementById('mu-track');
-const $playBtn  = document.getElementById('mu-play');
-const $playIcon = document.getElementById('mu-play-icon');
-const $prev     = document.getElementById('mu-prev');
-const $next     = document.getElementById('mu-next');
-const $shuffle  = document.getElementById('mu-shuffle');
-const $repeat   = document.getElementById('mu-repeat');
-const $mute     = document.getElementById('mu-mute');
-const $vol      = document.getElementById('mu-vol');
-const $plToggle = document.getElementById('mu-pl-toggle');
-const $plIcon   = document.getElementById('mu-pl-icon');
-const $playlist = document.getElementById('mu-playlist');
+// ── State ─────────────────────────────────────────────────
+let curIdx    = 0;
+let shuffleOn = false;
+let repeatOn  = false;
+let elapsedInt = null;
 
-// ── Music state ───────────────────────────────────────────────────────────────
-let curIdx     = 0;
-let playing    = false;
-let shuffleOn  = false;
-let repeatOn   = false;
-let muted      = false;
-let progress   = 0; // seconds
-let progTimer  = null;
-let elapsedInt = null; // activity elapsed
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────
 function fmt(s) {
   s = Math.max(0, Math.floor(s));
-  const m = Math.floor(s / 60);
-  return `${m}:${String(s % 60).padStart(2, '0')}`;
+  return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 }
 function fmtMs(ms) { return fmt(ms / 1000); }
 
-// ── Presence ─────────────────────────────────────────────────────────────────
+// ── iTunes cover art ──────────────────────────────────────
+async function fetchCover(title, artist) {
+  try {
+    const q   = encodeURIComponent(`${title} ${artist}`);
+    const res = await fetch(`https://itunes.apple.com/search?term=${q}&media=music&entity=song&limit=5`);
+    const j   = await res.json();
+    const hit = j.results?.[0];
+    return hit?.artworkUrl100?.replace('100x100', '300x300') ?? null;
+  } catch { return null; }
+}
+
+// ── Load track ────────────────────────────────────────────
+async function loadTrack(idx, autoplay = false) {
+  const t = PLAYLIST[idx];
+  if (!t) return;
+
+  $audio.src = SONGS_BASE + t.file;
+  $audio.load();
+
+  $title.textContent  = t.title;
+  $artist.textContent = t.artist;
+  $album.textContent  = t.album || '';
+  $elapsed.textContent  = '0:00';
+  $duration.textContent = '0:00';
+  $fill.style.width = '0%';
+
+  // Cover: use cached, fetch from iTunes, or fallback
+  if (t.cover) {
+    $art.src = t.cover;
+  } else {
+    $art.src = 'https://placehold.co/80x80/111/333?text=♪';
+    fetchCover(t.title, t.artist).then(url => {
+      if (url) { t.cover = url; $art.src = url; renderPlaylist(); }
+    });
+  }
+
+  renderPlaylist();
+  if (autoplay) $audio.play().catch(() => {});
+}
+
+// ── Render playlist ───────────────────────────────────────
+function renderPlaylist() {
+  $playlist.innerHTML = PLAYLIST.map((t, i) => `
+    <div class="playlist-item${i === curIdx ? ' active' : ''}" data-idx="${i}">
+      <span class="pl-num">${i + 1}</span>
+      <i class="fa-solid fa-volume-high pl-play-icon"></i>
+      <img class="pl-art" src="${t.cover || 'https://placehold.co/34x34/111/333?text=♪'}" alt="">
+      <div class="pl-info">
+        <div class="pl-title">${t.title}</div>
+        <div class="pl-artist">${t.artist}</div>
+      </div>
+      <span class="pl-dur" id="pl-dur-${i}">—</span>
+    </div>`).join('');
+
+  $playlist.querySelectorAll('.playlist-item').forEach(el => {
+    el.addEventListener('click', () => {
+      curIdx = parseInt(el.dataset.idx);
+      loadTrack(curIdx, true);
+    });
+  });
+}
+
+// ── Audio events ──────────────────────────────────────────
+$audio.addEventListener('loadedmetadata', () => {
+  $duration.textContent = fmt($audio.duration);
+  const dur = document.getElementById(`pl-dur-${curIdx}`);
+  if (dur) dur.textContent = fmt($audio.duration);
+});
+
+$audio.addEventListener('timeupdate', () => {
+  if (!$audio.duration) return;
+  const pct = ($audio.currentTime / $audio.duration) * 100;
+  $fill.style.width = pct + '%';
+  $elapsed.textContent = fmt($audio.currentTime);
+});
+
+$audio.addEventListener('play',  () => { $playIcon.className = 'fa-solid fa-pause'; });
+$audio.addEventListener('pause', () => { $playIcon.className = 'fa-solid fa-play'; });
+
+$audio.addEventListener('ended', () => {
+  if (repeatOn) {
+    $audio.currentTime = 0;
+    $audio.play().catch(() => {});
+  } else {
+    nextTrack(true);
+  }
+});
+
+// ── Controls ──────────────────────────────────────────────
+$playBtn.addEventListener('click', () => {
+  if ($audio.paused) $audio.play().catch(() => {});
+  else               $audio.pause();
+});
+
+function nextTrack(auto = false) {
+  if (shuffleOn) {
+    let r;
+    do { r = Math.floor(Math.random() * PLAYLIST.length); } while (r === curIdx && PLAYLIST.length > 1);
+    curIdx = r;
+  } else {
+    curIdx = (curIdx + 1) % PLAYLIST.length;
+  }
+  loadTrack(curIdx, auto || !$audio.paused);
+}
+
+function prevTrack() {
+  if ($audio.currentTime > 3) { $audio.currentTime = 0; return; }
+  curIdx = (curIdx - 1 + PLAYLIST.length) % PLAYLIST.length;
+  loadTrack(curIdx, !$audio.paused);
+}
+
+$next.addEventListener('click', () => nextTrack());
+$prev.addEventListener('click', prevTrack);
+
+$shuffle.addEventListener('click', () => {
+  shuffleOn = !shuffleOn;
+  $shuffle.classList.toggle('active', shuffleOn);
+});
+
+$repeat.addEventListener('click', () => {
+  repeatOn = !repeatOn;
+  $repeat.classList.toggle('active', repeatOn);
+});
+
+$mute.addEventListener('click', () => {
+  $audio.muted = !$audio.muted;
+  $mute.innerHTML = $audio.muted
+    ? '<i class="fa-solid fa-volume-xmark"></i>'
+    : '<i class="fa-solid fa-volume-high"></i>';
+});
+
+$vol.addEventListener('input', () => {
+  $audio.volume = $vol.value / 100;
+  $audio.muted  = $vol.value == 0;
+  $mute.innerHTML = $vol.value == 0
+    ? '<i class="fa-solid fa-volume-xmark"></i>'
+    : '<i class="fa-solid fa-volume-high"></i>';
+});
+
+// Seek by clicking the bar
+$track.addEventListener('click', e => {
+  if (!$audio.duration) return;
+  const rect = $track.getBoundingClientRect();
+  $audio.currentTime = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * $audio.duration;
+});
+
+// Playlist toggle
+$plToggle.addEventListener('click', () => {
+  const open = $playlist.classList.toggle('open');
+  $plIcon.classList.toggle('open', open);
+});
+
+// Set initial volume
+$audio.volume = $vol.value / 100;
+
+// ── Init music ────────────────────────────────────────────
+loadTrack(curIdx);
+
+// ── Presence ─────────────────────────────────────────────
 function setStatus(s) {
   const labels = { online:'ONLINE', idle:'IDLE', dnd:'DO NOT DISTURB', offline:'OFFLINE' };
   ['online','idle','dnd','offline'].forEach(c => {
@@ -955,28 +1096,20 @@ function setStatus(s) {
 
 function renderActivity(acts) {
   if (elapsedInt) { clearInterval(elapsedInt); elapsedInt = null; }
-
   const act = (acts || []).find(a => a.type !== 4);
-  if (!act) {
-    $actRow.innerHTML = '<div class="act-empty">No activity right now.</div>';
-    return;
-  }
+  if (!act) { $actRow.innerHTML = '<div class="act-empty">No activity right now.</div>'; return; }
 
-  const appId = act.application_id;
-  const li    = act.assets?.large_image;
-  const si    = act.assets?.small_image;
-
+  const li = act.assets?.large_image;
+  const si = act.assets?.small_image;
   let imgHtml = '';
   if (li) {
-    imgHtml = `
-      <div class="act-imgs show" id="ai-wrap">
-        <img class="act-large" src="${li}" alt="" onerror="document.getElementById('ai-wrap').classList.remove('show')">
-        ${si ? `<img class="act-small" src="${si}" alt="">` : ''}
-      </div>`;
+    imgHtml = `<div class="act-imgs show" id="ai-wrap">
+      <img class="act-large" src="${li}" alt="" onerror="document.getElementById('ai-wrap').classList.remove('show')">
+      ${si ? `<img class="act-small" src="${si}" alt="">` : ''}
+    </div>`;
   }
 
-  $actRow.innerHTML = `
-    ${imgHtml}
+  $actRow.innerHTML = `${imgHtml}
     <div class="act-info">
       <div class="act-name">${act.name || ''}</div>
       ${act.details ? `<div class="act-detail">${act.details}</div>` : ''}
@@ -996,11 +1129,9 @@ function renderActivity(acts) {
 }
 
 function updatePresence(d) {
-  // Avatar
   if (d.discord_user?.avatar) {
     $avatar.src = `https://cdn.discordapp.com/avatars/${d.discord_user.id}/${d.discord_user.avatar}.webp?size=256`;
     $avatar.onload  = () => { $avatar.classList.add('loaded'); $fallback.classList.add('hide'); };
-    $avatar.onerror = () => {};
   }
   setStatus(d.discord_status || 'offline');
   renderActivity(d.activities);
@@ -1012,145 +1143,12 @@ async function fetchPresence() {
     if (!r.ok) throw new Error(r.status);
     const j = await r.json();
     if (j.ok && j.data) updatePresence(j.data);
-    else if ($actEmpty) $actEmpty.textContent = 'No activity right now.';
-  } catch {
-    const el = document.getElementById('ai-elapsed') || $actRow.querySelector('.act-empty');
-    // keep last known state visible, fail silently
-  }
+    else $actRow.innerHTML = '<div class="act-empty">No activity right now.</div>';
+  } catch { /* keep last known state */ }
 }
 
 fetchPresence();
 setInterval(fetchPresence, POLL_MS);
-
-// ── Music Player ──────────────────────────────────────────────────────────────
-function loadTrack(idx) {
-  const t = PLAYLIST[idx];
-  if (!t) return;
-  $art.src         = t.cover;
-  $title.textContent  = t.title;
-  $artist.textContent = t.artist;
-  $album.textContent  = t.album;
-  $duration.textContent = fmt(t.duration);
-  progress = 0;
-  $fill.style.width = '0%';
-  $elapsed.textContent = '0:00';
-  renderPlaylist();
-}
-
-function renderPlaylist() {
-  $playlist.innerHTML = PLAYLIST.map((t, i) => `
-    <div class="playlist-item${i === curIdx ? ' active' : ''}" data-idx="${i}">
-      <span class="pl-num">${i + 1}</span>
-      <i class="fa-solid fa-volume-high pl-play-icon"></i>
-      <img class="pl-art" src="${t.cover}" alt="">
-      <div class="pl-info">
-        <div class="pl-title">${t.title}</div>
-        <div class="pl-artist">${t.artist}</div>
-      </div>
-      <span class="pl-dur">${fmt(t.duration)}</span>
-    </div>`).join('');
-
-  $playlist.querySelectorAll('.playlist-item').forEach(el => {
-    el.addEventListener('click', () => {
-      curIdx = parseInt(el.dataset.idx);
-      loadTrack(curIdx);
-      if (!playing) togglePlay();
-    });
-  });
-}
-
-function startProgress() {
-  if (progTimer) clearInterval(progTimer);
-  progTimer = setInterval(() => {
-    const dur = PLAYLIST[curIdx]?.duration || 1;
-    progress = Math.min(progress + 1, dur);
-    $elapsed.textContent = fmt(progress);
-    $fill.style.width = (progress / dur * 100) + '%';
-    if (progress >= dur) {
-      if (repeatOn) { progress = 0; }
-      else { nextTrack(); }
-    }
-  }, 1000);
-}
-
-function stopProgress() {
-  if (progTimer) { clearInterval(progTimer); progTimer = null; }
-}
-
-function togglePlay() {
-  playing = !playing;
-  $playIcon.className = playing ? 'fa-solid fa-pause' : 'fa-solid fa-play';
-  if (playing) startProgress(); else stopProgress();
-}
-
-function nextTrack() {
-  if (shuffleOn) {
-    let r;
-    do { r = Math.floor(Math.random() * PLAYLIST.length); } while (r === curIdx && PLAYLIST.length > 1);
-    curIdx = r;
-  } else {
-    curIdx = (curIdx + 1) % PLAYLIST.length;
-  }
-  progress = 0;
-  loadTrack(curIdx);
-  if (playing) startProgress();
-}
-
-function prevTrack() {
-  if (progress > 3) { progress = 0; $fill.style.width = '0%'; $elapsed.textContent = '0:00'; return; }
-  curIdx = (curIdx - 1 + PLAYLIST.length) % PLAYLIST.length;
-  progress = 0;
-  loadTrack(curIdx);
-  if (playing) startProgress();
-}
-
-// Click on progress bar to seek
-$track.addEventListener('click', e => {
-  const rect = $track.getBoundingClientRect();
-  const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-  progress = Math.floor(pct * (PLAYLIST[curIdx]?.duration || 1));
-  $fill.style.width = (pct * 100) + '%';
-  $elapsed.textContent = fmt(progress);
-});
-
-$playBtn.addEventListener('click', togglePlay);
-$next.addEventListener('click', nextTrack);
-$prev.addEventListener('click', prevTrack);
-
-$shuffle.addEventListener('click', () => {
-  shuffleOn = !shuffleOn;
-  $shuffle.classList.toggle('active', shuffleOn);
-});
-
-$repeat.addEventListener('click', () => {
-  repeatOn = !repeatOn;
-  $repeat.classList.toggle('active', repeatOn);
-});
-
-$mute.addEventListener('click', () => {
-  muted = !muted;
-  $mute.innerHTML = muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
-  $mute.style.color = muted ? 'var(--muted)' : '';
-});
-
-$vol.addEventListener('input', () => {
-  if ($vol.value == 0) {
-    muted = true;
-    $mute.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
-  } else {
-    muted = false;
-    $mute.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
-  }
-});
-
-// Playlist toggle
-$plToggle.addEventListener('click', () => {
-  const open = $playlist.classList.toggle('open');
-  $plIcon.classList.toggle('open', open);
-});
-
-// Init music
-loadTrack(curIdx);
 </script>
 </body>
 </html>
