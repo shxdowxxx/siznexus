@@ -5,338 +5,289 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>shxdow — SizNexus</title>
 <meta name="description" content="shxdow · founder of TheSizCorporation · developer · creator">
-<meta property="og:title" content="shxdow — SizNexus">
-<meta property="og:description" content="founder of TheSizCorporation · developer · creator">
-<meta property="og:url" content="https://siznexus.org/shxdow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
+/* ── Variables ──────────────────────────────────────────── */
 :root {
-  --bg: #0A0E1A;
-  --card: #0D1327;
-  --card-hover: #111829;
-  --primary: #C0C0C0;
-  --secondary: #A8B2C1;
-  --accent: #D4D8E2;
-  --muted: #B0BAC9;
-  --border: rgba(192,192,192,.15);
-  --border-hover: rgba(192,192,192,.35);
-  --glow-sm: 0 0 8px rgba(192,192,192,.18);
-  --glow-md: 0 0 20px rgba(192,192,192,.22);
-  --silver: linear-gradient(135deg,#D4D8E2 0%,#A8B2C1 40%,#C0C0C0 60%,#D4D8E2 100%);
-  --font-main: 'Orbitron', sans-serif;
-  --font-mono: 'Share Tech Mono', monospace;
-  --spotify: #1DB954;
-  --online: #23a55a;
-  --idle: #f0b132;
-  --dnd: #f23f43;
-  --offline: #80848e;
-  --transition: all 0.25s ease;
+  --bg:       #090909;
+  --bg2:      #0f0f0f;
+  --card:     #111111;
+  --card2:    #161616;
+  --border:   rgba(255,255,255,.07);
+  --border-h: rgba(255,255,255,.18);
+  --white:    #ffffff;
+  --silver:   #C0C0C0;
+  --silver2:  #A0A0A0;
+  --muted:    #555555;
+  --muted2:   #777777;
+  --glow:     0 0 20px rgba(255,255,255,.05);
+  --glow-h:   0 0 30px rgba(255,255,255,.1);
+  --silver-grad: linear-gradient(135deg,#fff 0%,#C0C0C0 40%,#888 70%,#C0C0C0 100%);
+  --font:     'Orbitron', sans-serif;
+  --mono:     'Share Tech Mono', monospace;
+  --radius:   10px;
+  --transition: all .22s ease;
+  --online:   #3ba55d;
+  --idle:     #faa61a;
+  --dnd:      #ed4245;
+  --offline:  #4f545c;
+  --spotify:  #1DB954;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: var(--font-main);
+  font-family: var(--font);
   background: var(--bg);
-  color: var(--primary);
+  color: var(--white);
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* Grid background */
+/* Grid overlay */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(192,192,192,.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(192,192,192,.025) 1px, transparent 1px);
-  background-size: 60px 60px;
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 48px 48px;
   pointer-events: none;
   z-index: 0;
 }
 
-/* Scanline */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(192,192,192,.006) 2px,
-    rgba(192,192,192,.006) 4px
-  );
-  pointer-events: none;
-  z-index: 0;
-  animation: scanMove 10s linear infinite;
-}
-
-@keyframes scanMove {
-  0% { background-position: 0 0; }
-  100% { background-position: 0 100px; }
-}
-
-/* NAV */
+/* ── Nav ─────────────────────────────────────────────────── */
 nav {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(10,14,26,.92);
-  backdrop-filter: blur(14px);
+  height: 50px;
+  background: rgba(9,9,9,.94);
+  backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
-  padding: 0 24px;
-  height: 52px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0 24px;
 }
 
 .nav-logo {
   font-weight: 900;
-  font-size: .95rem;
-  letter-spacing: .18em;
-  background: var(--silver);
+  font-size: .9rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  background: var(--silver-grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-decoration: none;
-  filter: drop-shadow(0 0 6px rgba(192,192,192,.2));
   transition: var(--transition);
+  filter: drop-shadow(0 0 8px rgba(255,255,255,.12));
 }
-.nav-logo:hover { filter: drop-shadow(0 0 12px rgba(192,192,192,.45)); }
+.nav-logo:hover { filter: drop-shadow(0 0 16px rgba(255,255,255,.3)); }
 
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
+.nav-links { display: flex; gap: 18px; }
 .nav-links a {
-  font-family: var(--font-mono);
-  font-size: .72rem;
+  font-family: var(--mono);
+  font-size: .7rem;
   letter-spacing: .1em;
-  color: var(--muted);
+  color: var(--muted2);
   text-decoration: none;
   transition: var(--transition);
-  padding: 4px 0;
-  position: relative;
 }
-.nav-links a::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background: var(--silver);
-  transition: var(--transition);
-}
-.nav-links a:hover { color: var(--accent); }
-.nav-links a:hover::after { width: 100%; }
+.nav-links a:hover { color: var(--silver); }
 
-/* MAIN LAYOUT */
+/* ── Layout ─────────────────────────────────────────────── */
 main {
   position: relative;
   z-index: 1;
-  min-height: calc(100vh - 52px);
+  min-height: calc(100vh - 50px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 48px 20px 80px;
+  padding: 40px 16px 80px;
 }
 
-/* CARD WRAPPER */
-.card-wrap {
+.stack {
   width: 100%;
   max-width: 460px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  animation: fadeUp .6s ease both;
+  gap: 10px;
+  animation: fadeUp .5s ease both;
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(18px); }
+  from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* BASE CARD */
+/* ── Base card ──────────────────────────────────────────── */
 .card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
-  transition: var(--transition);
+  border-radius: var(--radius);
+  padding: 18px;
   position: relative;
   overflow: hidden;
+  transition: var(--transition);
 }
-.card::before {
+.card:hover { border-color: var(--border-h); box-shadow: var(--glow); }
+.card::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(192,192,192,.03) 0%, transparent 60%);
+  background: linear-gradient(135deg, rgba(255,255,255,.02) 0%, transparent 50%);
   pointer-events: none;
 }
-.card:hover {
-  border-color: var(--border-hover);
-  background: var(--card-hover);
-  box-shadow: var(--glow-sm);
-}
 
-/* PROFILE CARD */
+/* ── Profile card ───────────────────────────────────────── */
 .profile-card {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 32px 24px 24px;
-  gap: 0;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 20px;
 }
 
 .avatar-wrap {
   position: relative;
-  width: 96px;
-  height: 96px;
-  margin-bottom: 16px;
+  flex-shrink: 0;
 }
 
 .avatar-img {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
+  width: 86px;
+  height: 86px;
+  border-radius: var(--radius);
   object-fit: cover;
-  border: 2px solid var(--border);
-  display: block;
+  border: 1px solid var(--border-h);
+  display: none;
+  background: var(--card2);
   transition: var(--transition);
-  background: var(--bg);
 }
-.avatar-img:hover { border-color: var(--border-hover); box-shadow: var(--glow-md); }
+.avatar-img.loaded { display: block; }
+.avatar-img:hover  { box-shadow: 0 0 20px rgba(255,255,255,.1); }
 
 .avatar-fallback {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  background: var(--card);
-  border: 2px solid var(--border);
+  width: 86px;
+  height: 86px;
+  border-radius: var(--radius);
+  background: var(--card2);
+  border: 1px solid var(--border-h);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-main);
   font-weight: 900;
-  font-size: 1.6rem;
-  background: var(--silver);
+  font-size: 1.4rem;
+  letter-spacing: .05em;
+  background: var(--silver-grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+.avatar-fallback.hide { display: none; }
 
 .status-dot {
   position: absolute;
-  bottom: 4px;
-  right: 4px;
-  width: 18px;
-  height: 18px;
+  bottom: -3px;
+  right: -3px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  border: 3px solid var(--card);
+  border: 2px solid var(--card);
   background: var(--offline);
   transition: background .4s ease;
 }
 .status-dot.online  { background: var(--online); }
 .status-dot.idle    { background: var(--idle); }
 .status-dot.dnd     { background: var(--dnd); }
-.status-dot.offline { background: var(--offline); }
+
+.profile-right { flex: 1; min-width: 0; padding-top: 2px; }
 
 .profile-name {
   font-weight: 900;
-  font-size: 1.6rem;
-  letter-spacing: .08em;
-  background: var(--silver);
+  font-size: 1.45rem;
+  letter-spacing: .06em;
+  line-height: 1;
+  margin-bottom: 4px;
+  background: var(--silver-grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  line-height: 1;
-  margin-bottom: 6px;
 }
 
 .profile-handle {
-  font-family: var(--font-mono);
-  font-size: .8rem;
-  color: var(--muted);
-  letter-spacing: .05em;
+  font-family: var(--mono);
+  font-size: .75rem;
+  color: var(--muted2);
+  letter-spacing: .04em;
   margin-bottom: 10px;
 }
 
 .profile-bio {
-  font-family: var(--font-mono);
-  font-size: .78rem;
-  color: var(--secondary);
-  letter-spacing: .04em;
-  line-height: 1.6;
-  margin-bottom: 14px;
+  font-family: var(--mono);
+  font-size: .72rem;
+  color: var(--silver2);
+  line-height: 1.65;
+  margin-bottom: 12px;
 }
 
 .profile-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border: 1px solid rgba(192,192,192,.3);
-  border-radius: 99px;
-  font-family: var(--font-mono);
-  font-size: .65rem;
-  letter-spacing: .15em;
-  color: var(--accent);
-  background: rgba(192,192,192,.04);
-}
-.profile-badge i { font-size: .6rem; }
-
-/* SOCIALS */
-.socials-card {
-  padding: 16px 20px;
+  gap: 5px;
+  padding: 3px 10px;
+  border: 1px solid rgba(192,192,192,.25);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: .6rem;
+  letter-spacing: .14em;
+  color: var(--silver2);
+  background: rgba(255,255,255,.03);
+  text-transform: uppercase;
 }
 
-.socials-row {
+/* ── Socials ─────────────────────────────────────────────── */
+.socials-card { padding: 14px 18px; }
+.socials-row  {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 7px;
   flex-wrap: wrap;
 }
 
 .social-btn {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 8px;
-  background: rgba(192,192,192,.04);
+  background: rgba(255,255,255,.03);
   border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--muted);
-  font-size: .95rem;
+  color: var(--muted2);
+  font-size: .9rem;
   text-decoration: none;
   transition: var(--transition);
 }
 .social-btn:hover {
-  border-color: var(--border-hover);
-  color: var(--accent);
-  background: rgba(192,192,192,.08);
-  box-shadow: var(--glow-sm);
+  border-color: var(--border-h);
+  color: var(--white);
+  background: rgba(255,255,255,.07);
   transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0,0,0,.4);
 }
 
-/* SECTION LABEL */
-.section-label {
-  font-family: var(--font-mono);
-  font-size: .65rem;
-  letter-spacing: .2em;
+/* ── Section label ───────────────────────────────────────── */
+.lbl {
+  font-family: var(--mono);
+  font-size: .6rem;
+  letter-spacing: .22em;
   color: var(--muted);
   text-transform: uppercase;
   margin-bottom: 14px;
@@ -344,95 +295,72 @@ main {
   align-items: center;
   gap: 8px;
 }
-.section-label::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
+.lbl::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-/* DISCORD ACTIVITY */
-.discord-card { padding: 18px 20px; }
-
-.activity-content {
+/* ── Discord Activity ────────────────────────────────────── */
+.activity-row {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   align-items: flex-start;
-  min-height: 52px;
+  min-height: 48px;
 }
 
-.activity-img-wrap {
-  position: relative;
-  flex-shrink: 0;
-  width: 56px;
-  height: 56px;
-  display: none;
-}
-.activity-img-wrap.show { display: block; }
-
-.activity-large-img {
-  width: 56px;
-  height: 56px;
+.act-imgs { position: relative; flex-shrink: 0; width: 52px; height: 52px; display: none; }
+.act-imgs.show { display: block; }
+.act-large {
+  width: 52px;
+  height: 52px;
   border-radius: 8px;
   object-fit: cover;
-  background: var(--bg);
   border: 1px solid var(--border);
+  background: var(--card2);
 }
-
-.activity-small-img {
+.act-small {
   position: absolute;
   bottom: -4px;
   right: -4px;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   border: 2px solid var(--card);
   object-fit: cover;
-  background: var(--bg);
+  background: var(--card2);
 }
 
-.activity-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.activity-name {
-  font-size: .85rem;
+.act-info { flex: 1; min-width: 0; }
+.act-name {
+  font-size: .82rem;
   font-weight: 700;
-  color: var(--accent);
-  letter-spacing: .04em;
+  letter-spacing: .03em;
+  color: var(--white);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
 }
-
-.activity-detail,
-.activity-state {
-  font-family: var(--font-mono);
-  font-size: .73rem;
-  color: var(--muted);
-  line-height: 1.5;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.activity-elapsed {
-  font-family: var(--font-mono);
+.act-detail, .act-state {
+  font-family: var(--mono);
   font-size: .7rem;
-  color: rgba(192,192,192,.4);
+  color: var(--muted2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.6;
+}
+.act-elapsed {
+  font-family: var(--mono);
+  font-size: .67rem;
+  color: var(--muted);
   margin-top: 4px;
 }
-
-.activity-none {
-  font-family: var(--font-mono);
-  font-size: .78rem;
-  color: rgba(192,192,192,.3);
+.act-empty {
+  font-family: var(--mono);
+  font-size: .75rem;
+  color: var(--muted);
   letter-spacing: .05em;
 }
 
-.activity-meta {
+.activity-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -442,214 +370,357 @@ main {
 .status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-family: var(--font-mono);
-  font-size: .6rem;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: .58rem;
   letter-spacing: .12em;
   padding: 3px 8px;
-  border-radius: 99px;
+  border-radius: 4px;
   border: 1px solid;
 }
-.status-pill.online  { color: var(--online);  border-color: rgba(35,165,90,.3);  background: rgba(35,165,90,.06); }
-.status-pill.idle    { color: var(--idle);    border-color: rgba(240,177,50,.3); background: rgba(240,177,50,.06); }
-.status-pill.dnd     { color: var(--dnd);     border-color: rgba(242,63,67,.3);  background: rgba(242,63,67,.06); }
-.status-pill.offline { color: var(--offline); border-color: rgba(128,132,142,.3);background: rgba(128,132,142,.06); }
+.status-pill.online  { color: var(--online); border-color: rgba(59,165,93,.25); background: rgba(59,165,93,.06); }
+.status-pill.idle    { color: var(--idle);   border-color: rgba(250,166,26,.25); background: rgba(250,166,26,.06); }
+.status-pill.dnd     { color: var(--dnd);    border-color: rgba(237,66,69,.25); background: rgba(237,66,69,.06); }
+.status-pill.offline { color: var(--muted2); border-color: rgba(79,84,92,.25); background: rgba(79,84,92,.06); }
 .status-pill i { font-size: .5rem; }
 
-.lanyard-notice {
-  font-family: var(--font-mono);
-  font-size: .6rem;
-  color: rgba(192,192,192,.25);
+.powered {
+  font-family: var(--mono);
+  font-size: .58rem;
+  color: var(--muted);
   letter-spacing: .06em;
-  margin-top: 10px;
-  text-align: right;
 }
-.lanyard-notice a { color: rgba(192,192,192,.35); text-decoration: none; }
-.lanyard-notice a:hover { color: var(--muted); }
 
-/* SPOTIFY */
-.spotify-card {
-  display: none;
-  padding: 18px 20px;
-}
-.spotify-card.show { display: block; }
+/* ── Music Player ────────────────────────────────────────── */
+.music-card { padding: 18px; }
 
-.spotify-inner {
+.music-main {
   display: flex;
   gap: 14px;
   align-items: center;
+  margin-bottom: 14px;
 }
 
-.spotify-art {
-  width: 60px;
-  height: 60px;
-  border-radius: 6px;
+.music-art {
+  width: 62px;
+  height: 62px;
+  border-radius: 8px;
   object-fit: cover;
-  flex-shrink: 0;
   border: 1px solid var(--border);
-  background: var(--bg);
+  flex-shrink: 0;
+  background: var(--card2);
+  transition: var(--transition);
 }
+.music-art.spinning {
+  animation: spin 10s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-.spotify-info { flex: 1; min-width: 0; }
-
-.spotify-song {
+.music-info { flex: 1; min-width: 0; }
+.music-title {
   font-size: .88rem;
   font-weight: 700;
-  color: var(--accent);
+  letter-spacing: .03em;
+  color: var(--white);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 3px;
-  letter-spacing: .03em;
 }
-
-.spotify-artist,
-.spotify-album {
-  font-family: var(--font-mono);
+.music-artist {
+  font-family: var(--mono);
   font-size: .72rem;
+  color: var(--muted2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.music-album {
+  font-family: var(--mono);
+  font-size: .65rem;
   color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.5;
 }
 
-.spotify-progress-wrap {
-  margin-top: 10px;
+/* Progress */
+.music-progress {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 14px;
 }
-
-.spotify-bar-track {
+.progress-track {
   flex: 1;
   height: 3px;
-  background: rgba(255,255,255,.08);
+  background: rgba(255,255,255,.07);
   border-radius: 2px;
   overflow: hidden;
+  cursor: pointer;
+  position: relative;
 }
-
-.spotify-bar-fill {
+.progress-track:hover { height: 5px; transition: height .15s ease; }
+.progress-fill {
   height: 100%;
-  background: var(--spotify);
+  background: var(--silver-grad);
   border-radius: 2px;
-  transition: width .5s linear;
-  box-shadow: 0 0 6px rgba(29,185,84,.4);
+  width: 0%;
+  transition: width .3s linear;
 }
-
-.spotify-time {
-  font-family: var(--font-mono);
+.progress-time {
+  font-family: var(--mono);
   font-size: .62rem;
-  color: var(--muted);
+  color: var(--muted2);
   white-space: nowrap;
+  min-width: 30px;
 }
+.progress-time.right { text-align: right; }
 
-.spotify-badge {
+/* Controls */
+.music-controls {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-family: var(--font-mono);
-  font-size: .6rem;
-  letter-spacing: .1em;
-  color: var(--spotify);
-  margin-top: 10px;
+  justify-content: space-between;
 }
-
-/* PROJECTS */
-.projects-card { padding: 18px 20px; }
-
-.projects-grid {
+.ctrl-center {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 10px;
 }
+.ctrl-side {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ctrl-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  color: var(--muted2);
+  font-size: .85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.ctrl-btn:hover { color: var(--white); transform: scale(1.1); }
+.ctrl-btn.active { color: var(--silver); }
+
+.ctrl-play {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--white);
+  border: none;
+  color: var(--bg);
+  font-size: .9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+.ctrl-play:hover { transform: scale(1.08); box-shadow: 0 0 18px rgba(255,255,255,.2); }
+
+.vol-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.vol-btn {
+  background: none;
+  border: none;
+  color: var(--muted2);
+  font-size: .75rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.vol-btn:hover { color: var(--white); }
+.vol-slider {
+  -webkit-appearance: none;
+  width: 56px;
+  height: 3px;
+  background: rgba(255,255,255,.1);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--silver);
+  cursor: pointer;
+}
+
+/* Playlist */
+.playlist-section { margin-top: 14px; }
+.playlist-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 6px 0;
+  user-select: none;
+}
+.playlist-toggle-label {
+  font-family: var(--mono);
+  font-size: .62rem;
+  letter-spacing: .15em;
+  color: var(--muted2);
+  text-transform: uppercase;
+}
+.playlist-toggle-icon {
+  font-size: .65rem;
+  color: var(--muted);
+  transition: transform .2s ease;
+}
+.playlist-toggle-icon.open { transform: rotate(180deg); }
+
+.playlist {
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+}
+.playlist.open { display: flex; }
+
+.playlist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 1px solid transparent;
+}
+.playlist-item:hover { background: rgba(255,255,255,.04); border-color: var(--border); }
+.playlist-item.active { background: rgba(255,255,255,.06); border-color: var(--border-h); }
+
+.pl-num {
+  font-family: var(--mono);
+  font-size: .62rem;
+  color: var(--muted);
+  width: 14px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.playlist-item.active .pl-num { display: none; }
+.pl-play-icon { display: none; font-size: .6rem; color: var(--silver); width: 14px; text-align: center; flex-shrink: 0; }
+.playlist-item.active .pl-play-icon { display: block; }
+
+.pl-art {
+  width: 34px;
+  height: 34px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--card2);
+}
+
+.pl-info { flex: 1; min-width: 0; }
+.pl-title {
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: var(--white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.playlist-item.active .pl-title { color: var(--silver); }
+.pl-artist {
+  font-family: var(--mono);
+  font-size: .64rem;
+  color: var(--muted2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pl-dur {
+  font-family: var(--mono);
+  font-size: .62rem;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+/* ── Projects ────────────────────────────────────────────── */
+.projects-card { padding: 18px; }
+.project-list { display: flex; flex-direction: column; gap: 8px; }
 
 .project-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
+  gap: 12px;
+  padding: 12px;
   border-radius: 8px;
   border: 1px solid var(--border);
-  background: rgba(192,192,192,.02);
+  background: rgba(255,255,255,.02);
   text-decoration: none;
   color: inherit;
   transition: var(--transition);
 }
 .project-item:hover {
-  border-color: var(--border-hover);
-  background: rgba(192,192,192,.05);
-  box-shadow: var(--glow-sm);
-  transform: translateX(4px);
-}
-
-.project-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 8px;
-  background: rgba(192,192,192,.06);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: .9rem;
-  color: var(--secondary);
-  flex-shrink: 0;
-  transition: var(--transition);
-}
-.project-item:hover .project-icon {
-  border-color: var(--border-hover);
-  color: var(--accent);
-}
-
-.project-info { flex: 1; min-width: 0; }
-
-.project-name {
-  font-size: .82rem;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: .05em;
-  margin-bottom: 3px;
-}
-
-.project-desc {
-  font-family: var(--font-mono);
-  font-size: .7rem;
-  color: var(--muted);
-  line-height: 1.4;
-}
-
-.project-arrow {
-  color: rgba(192,192,192,.25);
-  font-size: .75rem;
-  transition: var(--transition);
-}
-.project-item:hover .project-arrow {
-  color: var(--secondary);
+  border-color: var(--border-h);
+  background: rgba(255,255,255,.05);
   transform: translateX(3px);
 }
 
-/* FOOTER */
+.proj-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--silver2);
+  font-size: .85rem;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+.project-item:hover .proj-icon { color: var(--white); border-color: var(--border-h); }
+
+.proj-info { flex: 1; min-width: 0; }
+.proj-name { font-size: .8rem; font-weight: 700; letter-spacing: .04em; color: var(--white); margin-bottom: 2px; }
+.proj-desc { font-family: var(--mono); font-size: .68rem; color: var(--muted2); }
+
+.proj-arrow { color: var(--muted); font-size: .7rem; transition: var(--transition); }
+.project-item:hover .proj-arrow { color: var(--silver); transform: translateX(2px); }
+
+/* ── Footer ──────────────────────────────────────────────── */
 footer {
   position: relative;
   z-index: 1;
+  padding: 0 16px 28px;
   text-align: center;
-  padding: 0 20px 32px;
-  font-family: var(--font-mono);
-  font-size: .65rem;
-  color: rgba(192,192,192,.2);
+  font-family: var(--mono);
+  font-size: .6rem;
   letter-spacing: .12em;
+  color: var(--muted);
 }
-footer a { color: rgba(192,192,192,.3); text-decoration: none; }
-footer a:hover { color: var(--muted); }
+footer a { color: var(--muted2); text-decoration: none; transition: var(--transition); }
+footer a:hover { color: var(--silver2); }
 
-/* RESPONSIVE */
-@media (max-width: 500px) {
-  main { padding: 32px 14px 60px; }
-  .card-wrap { gap: 12px; }
-  .profile-card { padding: 24px 16px 20px; }
-  .profile-name { font-size: 1.35rem; }
-  .avatar-img, .avatar-wrap { width: 80px; height: 80px; }
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .stack { gap: 8px; }
+  .profile-card { padding: 16px; gap: 14px; }
+  .avatar-img, .avatar-fallback { width: 72px; height: 72px; }
+  .profile-name { font-size: 1.2rem; }
+  .vol-wrap { display: none; }
 }
 </style>
 </head>
@@ -659,115 +730,134 @@ footer a:hover { color: var(--muted); }
   <a class="nav-logo" href="https://siznexus.org">SIZNEXUS</a>
   <div class="nav-links">
     <a href="https://siznexus.org">Home</a>
-    <a href="https://github.com/ItzzzShxdow" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://github.com/shxdowxxx" target="_blank" rel="noopener">GitHub</a>
   </div>
 </nav>
 
 <main>
-  <div class="card-wrap">
+<div class="stack">
 
-    <!-- PROFILE -->
-    <div class="card profile-card">
-      <div class="avatar-wrap">
-        <img class="avatar-img" id="avatar" src="" alt="shxdow avatar">
-        <div class="status-dot offline" id="status-dot"></div>
-      </div>
+  <!-- PROFILE -->
+  <div class="card profile-card">
+    <div class="avatar-wrap">
+      <img class="avatar-img" id="js-avatar" src="" alt="shxdow">
+      <div class="avatar-fallback" id="js-fallback">SH</div>
+      <div class="status-dot offline" id="js-dot"></div>
+    </div>
+    <div class="profile-right">
       <div class="profile-name">shxdow</div>
       <div class="profile-handle">@ItzzzShxdow</div>
-      <div class="profile-bio">founder of TheSizCorporation · developer · creator</div>
-      <div class="profile-badge">
-        <i class="fa-solid fa-star"></i>
-        SIZNEXUS FOUNDER
+      <div class="profile-bio">founder of TheSizCorporation<br>developer · creator</div>
+      <div class="profile-badge">SIZNEXUS FOUNDER</div>
+    </div>
+  </div>
+
+  <!-- SOCIALS -->
+  <div class="card socials-card">
+    <div class="socials-row">
+      <a class="social-btn" href="https://github.com/shxdowxxx" target="_blank" rel="noopener" title="GitHub">
+        <i class="fa-brands fa-github"></i>
+      </a>
+      <a class="social-btn" href="https://discord.com/users/1173035520708845666" target="_blank" rel="noopener" title="Discord — itzzzshadow">
+        <i class="fa-brands fa-discord"></i>
+      </a>
+      <a class="social-btn" href="#" title="TikTok">
+        <i class="fa-brands fa-tiktok"></i>
+      </a>
+      <a class="social-btn" href="#" title="X / Twitter">
+        <i class="fa-brands fa-x-twitter"></i>
+      </a>
+      <a class="social-btn" href="#" title="YouTube">
+        <i class="fa-brands fa-youtube"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- DISCORD ACTIVITY -->
+  <div class="card">
+    <div class="lbl">Discord Activity</div>
+    <div class="activity-row" id="js-act-row">
+      <div class="act-empty" id="js-act-empty">Loading...</div>
+    </div>
+    <div class="activity-footer">
+      <div class="status-pill offline" id="js-pill">
+        <i class="fa-solid fa-circle"></i>
+        <span id="js-pill-label">OFFLINE</span>
+      </div>
+      <div class="powered">Powered by Sentry</div>
+    </div>
+  </div>
+
+  <!-- MUSIC PLAYER -->
+  <div class="card music-card">
+    <div class="lbl">Music</div>
+
+    <div class="music-main">
+      <img class="music-art" id="mu-art" src="" alt="album art">
+      <div class="music-info">
+        <div class="music-title"  id="mu-title">—</div>
+        <div class="music-artist" id="mu-artist">—</div>
+        <div class="music-album"  id="mu-album">—</div>
       </div>
     </div>
 
-    <!-- SOCIALS -->
-    <div class="card socials-card">
-      <div class="socials-row">
-        <a class="social-btn" href="https://github.com/ItzzzShxdow" target="_blank" rel="noopener" title="GitHub">
-          <i class="fa-brands fa-github"></i>
-        </a>
-        <a class="social-btn" href="#" title="Discord">
-          <i class="fa-brands fa-discord"></i>
-        </a>
-        <a class="social-btn" href="#" title="TikTok">
-          <i class="fa-brands fa-tiktok"></i>
-        </a>
-        <a class="social-btn" href="#" title="X / Twitter">
-          <i class="fa-brands fa-x-twitter"></i>
-        </a>
-        <a class="social-btn" href="#" title="YouTube">
-          <i class="fa-brands fa-youtube"></i>
-        </a>
+    <div class="music-progress">
+      <span class="progress-time" id="mu-elapsed">0:00</span>
+      <div class="progress-track" id="mu-track">
+        <div class="progress-fill" id="mu-fill"></div>
+      </div>
+      <span class="progress-time right" id="mu-duration">0:00</span>
+    </div>
+
+    <div class="music-controls">
+      <div class="ctrl-side">
+        <button class="ctrl-btn" id="mu-shuffle" title="Shuffle"><i class="fa-solid fa-shuffle"></i></button>
+        <button class="ctrl-btn" id="mu-repeat"  title="Repeat"><i class="fa-solid fa-repeat"></i></button>
+      </div>
+      <div class="ctrl-center">
+        <button class="ctrl-btn" id="mu-prev" title="Previous"><i class="fa-solid fa-backward-step"></i></button>
+        <button class="ctrl-play" id="mu-play"><i class="fa-solid fa-play" id="mu-play-icon"></i></button>
+        <button class="ctrl-btn" id="mu-next" title="Next"><i class="fa-solid fa-forward-step"></i></button>
+      </div>
+      <div class="ctrl-side vol-wrap">
+        <button class="vol-btn" id="mu-mute"><i class="fa-solid fa-volume-high"></i></button>
+        <input class="vol-slider" type="range" id="mu-vol" min="0" max="100" value="80">
       </div>
     </div>
 
-    <!-- DISCORD ACTIVITY -->
-    <div class="card discord-card">
-      <div class="section-label">Discord Activity</div>
-
-      <div class="activity-content" id="activity-content">
-        <div class="activity-none" id="activity-none">Connecting to Lanyard...</div>
+    <div class="playlist-section">
+      <div class="playlist-toggle" id="mu-pl-toggle">
+        <span class="playlist-toggle-label">Playlist</span>
+        <i class="fa-solid fa-chevron-down playlist-toggle-icon" id="mu-pl-icon"></i>
       </div>
+      <div class="playlist" id="mu-playlist"></div>
+    </div>
+  </div>
 
-      <div class="activity-meta">
-        <div class="status-pill offline" id="status-pill">
-          <i class="fa-solid fa-circle"></i>
-          <span id="status-label">OFFLINE</span>
+  <!-- PROJECTS -->
+  <div class="card projects-card">
+    <div class="lbl">Projects</div>
+    <div class="project-list">
+      <a class="project-item" href="https://siznexus.org" target="_blank" rel="noopener">
+        <div class="proj-icon"><i class="fa-solid fa-globe"></i></div>
+        <div class="proj-info">
+          <div class="proj-name">SizNexus</div>
+          <div class="proj-desc">Corporation dashboard — community hub & command center</div>
         </div>
-      </div>
-
-      <div class="lanyard-notice">Powered by Sentry</div>
-    </div>
-
-    <!-- SPOTIFY (shown only when active) -->
-    <div class="card spotify-card" id="spotify-card">
-      <div class="section-label">Now Playing</div>
-      <div class="spotify-inner">
-        <img class="spotify-art" id="spotify-art" src="" alt="album art">
-        <div class="spotify-info">
-          <div class="spotify-song" id="spotify-song">—</div>
-          <div class="spotify-artist" id="spotify-artist">—</div>
-          <div class="spotify-album" id="spotify-album">—</div>
+        <i class="fa-solid fa-arrow-right proj-arrow"></i>
+      </a>
+      <a class="project-item" href="#" target="_blank" rel="noopener">
+        <div class="proj-icon"><i class="fa-brands fa-discord"></i></div>
+        <div class="proj-info">
+          <div class="proj-name">Sentry</div>
+          <div class="proj-desc">Full-featured moderation & community bot for Discord</div>
         </div>
-      </div>
-      <div class="spotify-progress-wrap">
-        <span class="spotify-time" id="spotify-elapsed">0:00</span>
-        <div class="spotify-bar-track">
-          <div class="spotify-bar-fill" id="spotify-bar" style="width:0%"></div>
-        </div>
-        <span class="spotify-time" id="spotify-duration">0:00</span>
-      </div>
-      <div class="spotify-badge">
-        <i class="fa-brands fa-spotify"></i>
-        SPOTIFY
-      </div>
+        <i class="fa-solid fa-arrow-right proj-arrow"></i>
+      </a>
     </div>
+  </div>
 
-    <!-- PROJECTS -->
-    <div class="card projects-card">
-      <div class="section-label">Projects</div>
-      <div class="projects-grid">
-        <a class="project-item" href="https://siznexus.org" target="_blank" rel="noopener">
-          <div class="project-icon"><i class="fa-solid fa-globe"></i></div>
-          <div class="project-info">
-            <div class="project-name">SizNexus</div>
-            <div class="project-desc">The corporation dashboard — community hub & command center</div>
-          </div>
-          <i class="fa-solid fa-arrow-right project-arrow"></i>
-        </a>
-        <a class="project-item" href="#" target="_blank" rel="noopener">
-          <div class="project-icon"><i class="fa-brands fa-discord"></i></div>
-          <div class="project-info">
-            <div class="project-name">Discord Bot</div>
-            <div class="project-desc">Full-featured moderation & community bot for Discord servers</div>
-          </div>
-          <i class="fa-solid fa-arrow-right project-arrow"></i>
-        </a>
-      </div>
-    </div>
-
-  </div><!-- /card-wrap -->
+</div>
 </main>
 
 <footer>
@@ -775,173 +865,292 @@ footer a:hover { color: var(--muted); }
 </footer>
 
 <script>
-// Sentry bot presence endpoint — replace with your Railway dashboard URL
-const PRESENCE_API = 'https://sentry-production-60e4.up.railway.app/api/presence';
-const POLL_INTERVAL = 15000; // refresh every 15 seconds
+// ── Config ───────────────────────────────────────────────────────────────────
+const PRESENCE_API  = 'https://sentry-production-60e4.up.railway.app/api/presence';
+const POLL_MS       = 15000;
 
-// ── DOM refs ──────────────────────────────────────────────
-const $avatar       = document.getElementById('avatar');
-const $statusDot    = document.getElementById('status-dot');
-const $statusPill   = document.getElementById('status-pill');
-const $statusLabel  = document.getElementById('status-label');
-const $actContent   = document.getElementById('activity-content');
-const $actNone      = document.getElementById('activity-none');
-const $spotifyCard  = document.getElementById('spotify-card');
-const $spotifyArt   = document.getElementById('spotify-art');
-const $spotifySong  = document.getElementById('spotify-song');
-const $spotifyArtist= document.getElementById('spotify-artist');
-const $spotifyAlbum = document.getElementById('spotify-album');
-const $spotifyBar   = document.getElementById('spotify-bar');
-const $spotifyElapsed  = document.getElementById('spotify-elapsed');
-const $spotifyDuration = document.getElementById('spotify-duration');
+// ── Playlist data ─────────────────────────────────────────────────────────────
+// Placeholder songs — send your list + covers and I'll update these
+const PLAYLIST = [
+  {
+    title:  'Placeholder Track 1',
+    artist: 'Artist Name',
+    album:  'Album Name',
+    cover:  'https://placehold.co/80x80/111/555?text=1',
+    duration: 213,
+  },
+  {
+    title:  'Placeholder Track 2',
+    artist: 'Artist Name',
+    album:  'Album Name',
+    cover:  'https://placehold.co/80x80/111/555?text=2',
+    duration: 187,
+  },
+  {
+    title:  'Placeholder Track 3',
+    artist: 'Artist Name',
+    album:  'Album Name',
+    cover:  'https://placehold.co/80x80/111/555?text=3',
+    duration: 234,
+  },
+];
 
-let spotifyInterval = null;
-let elapsedInterval = null;
-let currentActivity = null;
-let activityStart   = null;
+// ── Presence refs ────────────────────────────────────────────────────────────
+const $avatar    = document.getElementById('js-avatar');
+const $fallback  = document.getElementById('js-fallback');
+const $dot       = document.getElementById('js-dot');
+const $actRow    = document.getElementById('js-act-row');
+const $actEmpty  = document.getElementById('js-act-empty');
+const $pill      = document.getElementById('js-pill');
+const $pillLabel = document.getElementById('js-pill-label');
 
-// ── Helpers ───────────────────────────────────────────────
-function fmt(ms) {
-  const s = Math.floor(ms / 1000);
+// ── Music refs ───────────────────────────────────────────────────────────────
+const $art      = document.getElementById('mu-art');
+const $title    = document.getElementById('mu-title');
+const $artist   = document.getElementById('mu-artist');
+const $album    = document.getElementById('mu-album');
+const $elapsed  = document.getElementById('mu-elapsed');
+const $duration = document.getElementById('mu-duration');
+const $fill     = document.getElementById('mu-fill');
+const $track    = document.getElementById('mu-track');
+const $playBtn  = document.getElementById('mu-play');
+const $playIcon = document.getElementById('mu-play-icon');
+const $prev     = document.getElementById('mu-prev');
+const $next     = document.getElementById('mu-next');
+const $shuffle  = document.getElementById('mu-shuffle');
+const $repeat   = document.getElementById('mu-repeat');
+const $mute     = document.getElementById('mu-mute');
+const $vol      = document.getElementById('mu-vol');
+const $plToggle = document.getElementById('mu-pl-toggle');
+const $plIcon   = document.getElementById('mu-pl-icon');
+const $playlist = document.getElementById('mu-playlist');
+
+// ── Music state ───────────────────────────────────────────────────────────────
+let curIdx     = 0;
+let playing    = false;
+let shuffleOn  = false;
+let repeatOn   = false;
+let muted      = false;
+let progress   = 0; // seconds
+let progTimer  = null;
+let elapsedInt = null; // activity elapsed
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function fmt(s) {
+  s = Math.max(0, Math.floor(s));
   const m = Math.floor(s / 60);
-  const h = Math.floor(m / 60);
-  if (h > 0) return `${h}:${String(m % 60).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
-  return `${m}:${String(s % 60).padStart(2,'0')}`;
+  return `${m}:${String(s % 60).padStart(2, '0')}`;
 }
+function fmtMs(ms) { return fmt(ms / 1000); }
 
-function assetUrl(appId, assetId) {
-  if (!assetId) return '';
-  if (assetId.startsWith('mp:external/')) {
-    // external image
-    const parts = assetId.replace('mp:external/', '');
-    return `https://media.discordapp.net/external/${parts}`;
-  }
-  return `https://cdn.discordapp.com/app-assets/${appId}/${assetId}.webp`;
-}
-
-// ── Status update ─────────────────────────────────────────
+// ── Presence ─────────────────────────────────────────────────────────────────
 function setStatus(s) {
-  const map = { online:'ONLINE', idle:'IDLE', dnd:'DO NOT DISTURB', offline:'OFFLINE' };
+  const labels = { online:'ONLINE', idle:'IDLE', dnd:'DO NOT DISTURB', offline:'OFFLINE' };
   ['online','idle','dnd','offline'].forEach(c => {
-    $statusDot.classList.toggle(c, s === c);
-    $statusPill.classList.toggle(c, s === c);
+    $dot.classList.toggle(c, s === c);
+    $pill.classList.toggle(c, s === c);
   });
-  $statusLabel.textContent = map[s] || 'OFFLINE';
+  $pillLabel.textContent = labels[s] || 'OFFLINE';
 }
 
-// ── Activity render ───────────────────────────────────────
-function renderActivity(activities) {
-  // Filter out custom status (type 4) — prefer gaming/listening/watching
-  const act = (activities || []).find(a => a.type !== 4);
-  currentActivity = act || null;
-  activityStart = act?.timestamps?.start ? act.timestamps.start : null;
+function renderActivity(acts) {
+  if (elapsedInt) { clearInterval(elapsedInt); elapsedInt = null; }
 
-  if (elapsedInterval) { clearInterval(elapsedInterval); elapsedInterval = null; }
-
+  const act = (acts || []).find(a => a.type !== 4);
   if (!act) {
-    $actContent.innerHTML = '<div class="activity-none">No activity detected.</div>';
+    $actRow.innerHTML = '<div class="act-empty">No activity right now.</div>';
     return;
   }
 
   const appId = act.application_id;
-  const largeImg  = act.assets?.large_image  ? assetUrl(appId, act.assets.large_image)  : '';
-  const smallImg  = act.assets?.small_image  ? assetUrl(appId, act.assets.small_image)  : '';
-  const name      = act.name || '';
-  const details   = act.details || '';
-  const state     = act.state || '';
+  const li    = act.assets?.large_image;
+  const si    = act.assets?.small_image;
 
   let imgHtml = '';
-  if (largeImg) {
+  if (li) {
     imgHtml = `
-      <div class="activity-img-wrap show" id="act-img-wrap">
-        <img class="activity-large-img" src="${largeImg}" alt="" onerror="this.parentElement.classList.remove('show')">
-        ${smallImg ? `<img class="activity-small-img" src="${smallImg}" alt="">` : ''}
+      <div class="act-imgs show" id="ai-wrap">
+        <img class="act-large" src="${li}" alt="" onerror="document.getElementById('ai-wrap').classList.remove('show')">
+        ${si ? `<img class="act-small" src="${si}" alt="">` : ''}
       </div>`;
   }
 
-  $actContent.innerHTML = `
+  $actRow.innerHTML = `
     ${imgHtml}
-    <div class="activity-info">
-      <div class="activity-name">${name}</div>
-      ${details ? `<div class="activity-detail">${details}</div>` : ''}
-      ${state   ? `<div class="activity-state">${state}</div>` : ''}
-      <div class="activity-elapsed" id="act-elapsed"></div>
+    <div class="act-info">
+      <div class="act-name">${act.name || ''}</div>
+      ${act.details ? `<div class="act-detail">${act.details}</div>` : ''}
+      ${act.state   ? `<div class="act-state">${act.state}</div>`   : ''}
+      <div class="act-elapsed" id="ai-elapsed"></div>
     </div>`;
 
-  if (activityStart) {
-    const $el = document.getElementById('act-elapsed');
+  if (act.timestamps?.start) {
+    const start = act.timestamps.start;
     const tick = () => {
-      if ($el) $el.textContent = fmt(Date.now() - activityStart) + ' elapsed';
+      const el = document.getElementById('ai-elapsed');
+      if (el) el.textContent = fmtMs(Date.now() - start) + ' elapsed';
     };
     tick();
-    elapsedInterval = setInterval(tick, 1000);
+    elapsedInt = setInterval(tick, 1000);
   }
 }
 
-// ── Spotify render ────────────────────────────────────────
-function renderSpotify(data, spotify) {
-  if (spotifyInterval) { clearInterval(spotifyInterval); spotifyInterval = null; }
-
-  if (!data.listening_to_spotify || !spotify) {
-    $spotifyCard.classList.remove('show');
-    return;
-  }
-
-  $spotifyCard.classList.add('show');
-  $spotifyArt.src    = spotify.album_art_url || '';
-  $spotifySong.textContent   = spotify.song   || '—';
-  $spotifyArtist.textContent = spotify.artist || '—';
-  $spotifyAlbum.textContent  = spotify.album  || '—';
-
-  const start = spotify.timestamps?.start;
-  const end   = spotify.timestamps?.end;
-
-  if (start && end) {
-    const total = end - start;
-    const tick = () => {
-      const now     = Date.now();
-      const elapsed = Math.max(0, now - start);
-      const pct     = Math.min(100, (elapsed / total) * 100);
-      $spotifyBar.style.width = pct + '%';
-      $spotifyElapsed.textContent  = fmt(elapsed);
-      $spotifyDuration.textContent = fmt(total);
-    };
-    tick();
-    spotifyInterval = setInterval(tick, 500);
-  }
-}
-
-// ── Avatar ────────────────────────────────────────────────
-function setAvatar(user) {
-  if (user?.avatar) {
-    $avatar.src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=256`;
-    $avatar.style.display = 'block';
-    $avatar.onerror = () => { $avatar.style.display = 'none'; };
-  }
-}
-
-// ── Main presence update ──────────────────────────────────
 function updatePresence(d) {
-  setAvatar(d.discord_user);
+  // Avatar
+  if (d.discord_user?.avatar) {
+    $avatar.src = `https://cdn.discordapp.com/avatars/${d.discord_user.id}/${d.discord_user.avatar}.webp?size=256`;
+    $avatar.onload  = () => { $avatar.classList.add('loaded'); $fallback.classList.add('hide'); };
+    $avatar.onerror = () => {};
+  }
   setStatus(d.discord_status || 'offline');
   renderActivity(d.activities);
-  renderSpotify(d, d.spotify);
 }
 
-// ── Presence polling ──────────────────────────────────────
 async function fetchPresence() {
   try {
     const r = await fetch(PRESENCE_API);
     if (!r.ok) throw new Error(r.status);
     const j = await r.json();
     if (j.ok && j.data) updatePresence(j.data);
+    else if ($actEmpty) $actEmpty.textContent = 'No activity right now.';
   } catch {
-    // silently keep showing the last known state
+    const el = document.getElementById('ai-elapsed') || $actRow.querySelector('.act-empty');
+    // keep last known state visible, fail silently
   }
 }
 
 fetchPresence();
-setInterval(fetchPresence, POLL_INTERVAL);
+setInterval(fetchPresence, POLL_MS);
+
+// ── Music Player ──────────────────────────────────────────────────────────────
+function loadTrack(idx) {
+  const t = PLAYLIST[idx];
+  if (!t) return;
+  $art.src         = t.cover;
+  $title.textContent  = t.title;
+  $artist.textContent = t.artist;
+  $album.textContent  = t.album;
+  $duration.textContent = fmt(t.duration);
+  progress = 0;
+  $fill.style.width = '0%';
+  $elapsed.textContent = '0:00';
+  renderPlaylist();
+}
+
+function renderPlaylist() {
+  $playlist.innerHTML = PLAYLIST.map((t, i) => `
+    <div class="playlist-item${i === curIdx ? ' active' : ''}" data-idx="${i}">
+      <span class="pl-num">${i + 1}</span>
+      <i class="fa-solid fa-volume-high pl-play-icon"></i>
+      <img class="pl-art" src="${t.cover}" alt="">
+      <div class="pl-info">
+        <div class="pl-title">${t.title}</div>
+        <div class="pl-artist">${t.artist}</div>
+      </div>
+      <span class="pl-dur">${fmt(t.duration)}</span>
+    </div>`).join('');
+
+  $playlist.querySelectorAll('.playlist-item').forEach(el => {
+    el.addEventListener('click', () => {
+      curIdx = parseInt(el.dataset.idx);
+      loadTrack(curIdx);
+      if (!playing) togglePlay();
+    });
+  });
+}
+
+function startProgress() {
+  if (progTimer) clearInterval(progTimer);
+  progTimer = setInterval(() => {
+    const dur = PLAYLIST[curIdx]?.duration || 1;
+    progress = Math.min(progress + 1, dur);
+    $elapsed.textContent = fmt(progress);
+    $fill.style.width = (progress / dur * 100) + '%';
+    if (progress >= dur) {
+      if (repeatOn) { progress = 0; }
+      else { nextTrack(); }
+    }
+  }, 1000);
+}
+
+function stopProgress() {
+  if (progTimer) { clearInterval(progTimer); progTimer = null; }
+}
+
+function togglePlay() {
+  playing = !playing;
+  $playIcon.className = playing ? 'fa-solid fa-pause' : 'fa-solid fa-play';
+  if (playing) startProgress(); else stopProgress();
+}
+
+function nextTrack() {
+  if (shuffleOn) {
+    let r;
+    do { r = Math.floor(Math.random() * PLAYLIST.length); } while (r === curIdx && PLAYLIST.length > 1);
+    curIdx = r;
+  } else {
+    curIdx = (curIdx + 1) % PLAYLIST.length;
+  }
+  progress = 0;
+  loadTrack(curIdx);
+  if (playing) startProgress();
+}
+
+function prevTrack() {
+  if (progress > 3) { progress = 0; $fill.style.width = '0%'; $elapsed.textContent = '0:00'; return; }
+  curIdx = (curIdx - 1 + PLAYLIST.length) % PLAYLIST.length;
+  progress = 0;
+  loadTrack(curIdx);
+  if (playing) startProgress();
+}
+
+// Click on progress bar to seek
+$track.addEventListener('click', e => {
+  const rect = $track.getBoundingClientRect();
+  const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  progress = Math.floor(pct * (PLAYLIST[curIdx]?.duration || 1));
+  $fill.style.width = (pct * 100) + '%';
+  $elapsed.textContent = fmt(progress);
+});
+
+$playBtn.addEventListener('click', togglePlay);
+$next.addEventListener('click', nextTrack);
+$prev.addEventListener('click', prevTrack);
+
+$shuffle.addEventListener('click', () => {
+  shuffleOn = !shuffleOn;
+  $shuffle.classList.toggle('active', shuffleOn);
+});
+
+$repeat.addEventListener('click', () => {
+  repeatOn = !repeatOn;
+  $repeat.classList.toggle('active', repeatOn);
+});
+
+$mute.addEventListener('click', () => {
+  muted = !muted;
+  $mute.innerHTML = muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+  $mute.style.color = muted ? 'var(--muted)' : '';
+});
+
+$vol.addEventListener('input', () => {
+  if ($vol.value == 0) {
+    muted = true;
+    $mute.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+  } else {
+    muted = false;
+    $mute.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+  }
+});
+
+// Playlist toggle
+$plToggle.addEventListener('click', () => {
+  const open = $playlist.classList.toggle('open');
+  $plIcon.classList.toggle('open', open);
+});
+
+// Init music
+loadTrack(curIdx);
 </script>
 </body>
 </html>
