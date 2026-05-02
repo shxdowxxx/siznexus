@@ -717,9 +717,7 @@ footer a:hover { color: var(--muted); }
         </div>
       </div>
 
-      <div class="lanyard-notice">
-        Live via <a href="https://discord.gg/lanyard" target="_blank" rel="noopener">discord.gg/lanyard</a>
-      </div>
+      <div class="lanyard-notice">Powered by Sentry</div>
     </div>
 
     <!-- SPOTIFY (shown only when active) -->
@@ -777,9 +775,9 @@ footer a:hover { color: var(--muted); }
 </footer>
 
 <script>
-const USER_ID = '1173035520708845666';
-const LANYARD_REST = `https://api.lanyard.rest/v1/users/${USER_ID}`;
-const LANYARD_WS   = 'wss://api.lanyard.rest/socket';
+// Sentry bot presence endpoint — replace with your Railway dashboard URL
+const PRESENCE_API = 'https://YOUR-DASHBOARD.up.railway.app/api/presence';
+const POLL_INTERVAL = 15000; // refresh every 15 seconds
 
 // ── DOM refs ──────────────────────────────────────────────
 const $avatar       = document.getElementById('avatar');
@@ -930,54 +928,20 @@ function updatePresence(d) {
   renderSpotify(d, d.spotify);
 }
 
-// ── REST bootstrap ────────────────────────────────────────
-fetch(LANYARD_REST)
-  .then(r => r.json())
-  .then(j => { if (j.data) updatePresence(j.data); })
-  .catch(() => {
-    if ($actNone) $actNone.textContent = 'Could not reach Lanyard.';
-  });
-
-// ── WebSocket ─────────────────────────────────────────────
-(function connectWS() {
-  let ws;
-  let hbTimer;
-
-  function connect() {
-    ws = new WebSocket(LANYARD_WS);
-
-    ws.onopen = () => {};
-
-    ws.onmessage = (e) => {
-      const msg = JSON.parse(e.data);
-
-      if (msg.op === 1) {
-        // Hello
-        const interval = msg.d.heartbeat_interval;
-        hbTimer = setInterval(() => {
-          if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ op: 3 }));
-        }, interval);
-        // Identify / subscribe
-        ws.send(JSON.stringify({ op: 2, d: { subscribe_to_id: USER_ID } }));
-      }
-
-      if (msg.op === 0) {
-        // Event (INIT_STATE or PRESENCE_UPDATE)
-        updatePresence(msg.d);
-      }
-    };
-
-    ws.onclose = () => {
-      clearInterval(hbTimer);
-      // Reconnect after 5s
-      setTimeout(connect, 5000);
-    };
-
-    ws.onerror = () => ws.close();
+// ── Presence polling ──────────────────────────────────────
+async function fetchPresence() {
+  try {
+    const r = await fetch(PRESENCE_API);
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    if (j.ok && j.data) updatePresence(j.data);
+  } catch {
+    // silently keep showing the last known state
   }
+}
 
-  connect();
-})();
+fetchPresence();
+setInterval(fetchPresence, POLL_INTERVAL);
 </script>
 </body>
 </html>
