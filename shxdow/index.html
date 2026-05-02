@@ -115,10 +115,10 @@ main {
 
 .stack {
   width: 100%;
-  max-width: 460px;
+  max-width: 620px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   animation: fadeUp .5s ease both;
 }
 
@@ -132,7 +132,7 @@ main {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 18px;
+  padding: 24px;
   position: relative;
   overflow: hidden;
   transition: var(--transition);
@@ -149,9 +149,9 @@ main {
 /* ── Profile card ───────────────────────────────────────── */
 .profile-card {
   display: flex;
-  gap: 18px;
+  gap: 22px;
   align-items: flex-start;
-  padding: 20px;
+  padding: 24px;
 }
 
 .avatar-wrap {
@@ -160,21 +160,20 @@ main {
 }
 
 .avatar-img {
-  width: 86px;
-  height: 86px;
+  width: 110px;
+  height: 110px;
   border-radius: var(--radius);
   object-fit: cover;
   border: 1px solid var(--border-h);
-  display: none;
+  display: block;
   background: var(--card2);
   transition: var(--transition);
 }
-.avatar-img.loaded { display: block; }
-.avatar-img:hover  { box-shadow: 0 0 20px rgba(255,255,255,.1); }
+.avatar-img:hover { box-shadow: 0 0 24px rgba(255,255,255,.12); }
 
 .avatar-fallback {
-  width: 86px;
-  height: 86px;
+  width: 110px;
+  height: 110px;
   border-radius: var(--radius);
   background: var(--card2);
   border: 1px solid var(--border-h);
@@ -182,7 +181,7 @@ main {
   align-items: center;
   justify-content: center;
   font-weight: 900;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   letter-spacing: .05em;
   background: var(--silver-grad);
   -webkit-background-clip: text;
@@ -210,10 +209,10 @@ main {
 
 .profile-name {
   font-weight: 900;
-  font-size: 1.45rem;
+  font-size: 1.75rem;
   letter-spacing: .06em;
   line-height: 1;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   background: var(--silver-grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -262,8 +261,8 @@ main {
 }
 
 .social-btn {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 8px;
   background: rgba(255,255,255,.03);
   border: 1px solid var(--border);
@@ -740,8 +739,8 @@ footer a:hover { color: var(--silver2); }
   <!-- PROFILE -->
   <div class="card profile-card">
     <div class="avatar-wrap">
-      <img class="avatar-img" id="js-avatar" src="" alt="shxdow">
-      <div class="avatar-fallback" id="js-fallback">SH</div>
+      <img class="avatar-img" id="js-avatar" src="ShxdowKu.jpg" alt="shxdow" onerror="this.style.display='none';document.getElementById('js-fallback').classList.remove('hide')">
+      <div class="avatar-fallback hide" id="js-fallback">SH</div>
       <div class="status-dot offline" id="js-dot"></div>
     </div>
     <div class="profile-right">
@@ -874,14 +873,14 @@ const POLL_MS      = 15000;
 const SONGS_BASE   = 'https://raw.githubusercontent.com/shxdowxxx/siznexus/main/shxdow/Songs/';
 
 // ── Playlist ──────────────────────────────────────────────
-// Add more songs here — just title, artist, album, filename
+// Add more songs here — just title, artist, album, filename (exact name as uploaded)
 const PLAYLIST = [
   {
-    title:    'Al Compás De Mi Caballo',
-    artist:   "Los Imperial's",
-    album:    '',
-    file:     'Al%20Comp%C3%A1s%20De%20Mi%20Caballo.mp3',
-    cover:    null, // fetched from iTunes automatically
+    title:  'Al Compás De Mi Caballo',
+    artist: "Los Imperial's",
+    album:  '',
+    file:   'Al Compás De Mi Caballo.mp3',
+    cover:  null,
   },
 ];
 
@@ -942,7 +941,7 @@ async function loadTrack(idx, autoplay = false) {
   const t = PLAYLIST[idx];
   if (!t) return;
 
-  $audio.src = SONGS_BASE + t.file;
+  $audio.src = SONGS_BASE + encodeURIComponent(t.file);
   $audio.load();
 
   $title.textContent  = t.title;
@@ -1129,10 +1128,6 @@ function renderActivity(acts) {
 }
 
 function updatePresence(d) {
-  if (d.discord_user?.avatar) {
-    $avatar.src = `https://cdn.discordapp.com/avatars/${d.discord_user.id}/${d.discord_user.avatar}.webp?size=256`;
-    $avatar.onload  = () => { $avatar.classList.add('loaded'); $fallback.classList.add('hide'); };
-  }
   setStatus(d.discord_status || 'offline');
   renderActivity(d.activities);
 }
