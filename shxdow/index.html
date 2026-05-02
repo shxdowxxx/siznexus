@@ -444,6 +444,17 @@ main {
   text-overflow: ellipsis;
 }
 
+.music-note {
+  min-height: 18px;
+  margin: 10px 0 12px;
+  font-family: var(--mono);
+  font-size: .62rem;
+  letter-spacing: .04em;
+  color: var(--muted2);
+}
+
+.music-note.error { color: #d2a7a7; }
+
 /* Progress */
 .music-progress {
   display: flex;
@@ -802,6 +813,8 @@ footer a:hover { color: var(--silver2); }
       </div>
     </div>
 
+    <div class="music-note" id="mu-note"></div>
+
     <div class="music-progress">
       <span class="progress-time" id="mu-elapsed">0:00</span>
       <div class="progress-track" id="mu-track">
@@ -895,6 +908,7 @@ const $art       = document.getElementById('mu-art');
 const $title     = document.getElementById('mu-title');
 const $artist    = document.getElementById('mu-artist');
 const $album     = document.getElementById('mu-album');
+const $note      = document.getElementById('mu-note');
 const $elapsed   = document.getElementById('mu-elapsed');
 const $duration  = document.getElementById('mu-duration');
 const $fill      = document.getElementById('mu-fill');
@@ -916,6 +930,7 @@ let curIdx    = 0;
 let shuffleOn = false;
 let repeatOn  = false;
 let elapsedInt = null;
+let trackBroken = false;
 
 // ── Helpers ───────────────────────────────────────────────
 function fmt(s) {
@@ -923,6 +938,10 @@ function fmt(s) {
   return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 }
 function fmtMs(ms) { return fmt(ms / 1000); }
+function setMusicNote(text = '', kind = '') {
+  $note.textContent = text;
+  $note.classList.toggle('error', kind === 'error');
+}
 
 // ── iTunes cover art ──────────────────────────────────────
 async function fetchCover(title, artist) {
@@ -940,6 +959,8 @@ async function loadTrack(idx, autoplay = false) {
   const t = PLAYLIST[idx];
   if (!t) return;
 
+  trackBroken = false;
+  setMusicNote('');
   $audio.src = SONGS_BASE + encodeURIComponent(t.file);
   $audio.load();
 
@@ -988,6 +1009,8 @@ function renderPlaylist() {
 
 // ── Audio events ──────────────────────────────────────────
 $audio.addEventListener('loadedmetadata', () => {
+  trackBroken = false;
+  setMusicNote('');
   $duration.textContent = fmt($audio.duration);
   const dur = document.getElementById(`pl-dur-${curIdx}`);
   if (dur) dur.textContent = fmt($audio.duration);
@@ -1002,6 +1025,11 @@ $audio.addEventListener('timeupdate', () => {
 
 $audio.addEventListener('play',  () => { $playIcon.className = 'fa-solid fa-pause'; });
 $audio.addEventListener('pause', () => { $playIcon.className = 'fa-solid fa-play'; });
+$audio.addEventListener('error', () => {
+  trackBroken = true;
+  $playIcon.className = 'fa-solid fa-play';
+  setMusicNote('Track file is unavailable. Re-upload the MP3 to /songs.', 'error');
+});
 
 $audio.addEventListener('ended', () => {
   if (repeatOn) {
@@ -1014,6 +1042,7 @@ $audio.addEventListener('ended', () => {
 
 // ── Controls ──────────────────────────────────────────────
 $playBtn.addEventListener('click', () => {
+  if (trackBroken) return;
   if ($audio.paused) $audio.play().catch(() => {});
   else               $audio.pause();
 });
@@ -1131,13 +1160,18 @@ function updatePresence(d) {
   renderActivity(d.activities);
 }
 
+function renderPresencePending(message) {
+  setStatus('offline');
+  $actRow.innerHTML = `<div class="act-empty">${message}</div>`;
+}
+
 async function fetchPresence() {
   try {
     const r = await fetch(PRESENCE_API);
     if (!r.ok) throw new Error(r.status);
     const j = await r.json();
     if (j.ok && j.data) updatePresence(j.data);
-    else $actRow.innerHTML = '<div class="act-empty">No activity right now.</div>';
+    else renderPresencePending('Presence tracking is live, but no presence data has been received yet.');
   } catch { /* keep last known state */ }
 }
 
