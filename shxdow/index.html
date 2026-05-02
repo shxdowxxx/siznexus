@@ -883,6 +883,7 @@ footer a:hover { color: var(--silver2); }
 const PRESENCE_API = 'https://sentry-production-60e4.up.railway.app/api/presence';
 const POLL_MS      = 15000;
 const SONGS_BASE   = 'https://siznexus.org/songs/';
+const SONGS_VER    = '75f6ec4';
 
 // ── Playlist ──────────────────────────────────────────────
 // Add more songs here — just title, artist, album, filename (exact name as uploaded)
@@ -961,7 +962,7 @@ async function loadTrack(idx, autoplay = false) {
 
   trackBroken = false;
   setMusicNote('');
-  $audio.src = SONGS_BASE + encodeURIComponent(t.file);
+  $audio.src = SONGS_BASE + encodeURIComponent(t.file) + `?v=${SONGS_VER}`;
   $audio.load();
 
   $title.textContent  = t.title;
