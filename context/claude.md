@@ -1,11 +1,11 @@
 ---
-session_id: SIZ-20260426-2359
-date: 2026-04-26
-time: 23:59 UTC
+session_id: SIZ-20260502-1200
+date: 2026-05-02
+time: 12:00 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 1.4
-current_phase: Phase 3 — Public Launch Prep (Early Access Ready)
+version: 1.5
+current_phase: Phase 3 — Public Launch Prep (Early Access Open) + Portfolio Sub-project
 ---
 
 # Claude Context — SizNexus Project
@@ -100,11 +100,26 @@ When base styles appear AFTER media queries in a CSS file, the base always wins 
 - `devKeyHash` publicly readable — deferred (LOW, internal tooling only).
 - Hosting migration: Porkbun DNS currently points to GitHub Pages. Long-term goal is Firebase Hosting IPs. Requires director Porkbun access.
 
+## shxdow Portfolio Page — `siznexus.org/shxdow`
+
+A personal portfolio page for the director, added as a sub-project inside this repo.
+
+- **File:** `shxdow/index.html` (single file)
+- **Avatar:** `shxdow/ShxdowKu.jpg`
+- **Songs:** `songs/` folder at repo root (NOT inside `shxdow/`). URL: `https://siznexus.org/songs/{encodeURIComponent(filename)}.mp3`
+- **Design:** Pure black (`#090909`), silver/white accents, Orbitron + Share Tech Mono, 620px max-width
+- **Discord Activity:** Polls `https://sentry-production-60e4.up.railway.app/api/presence` every 15s. Public endpoint, no auth. Requires Presence Intent enabled in Discord Developer Portal (NOT YET DONE as of 2026-05-02).
+- **Music player:** Real `<audio>` element. iTunes API for cover art (`https://itunes.apple.com/search?term={artist}+{track}&entity=song&limit=1`). First song: "Al Compás De Mi Caballo" by Los Imperial's.
+- **Open issues:** (1) Presence Intent not enabled — activity card shows "Offline" until director enables it in Dev Portal; (2) audio playback unconfirmed after final path fix `c18f004`; (3) more songs needed from director.
+- **Song upload rule:** Remove any Windows ` (1)` suffix from filename before uploading to `songs/` folder.
+
 ## What Claude Should Prioritize Next Session
-1. Collect and triage any early-access user bug reports or feedback.
-2. Confirm director's mobile testing results — fix any Corp Hub modal or admin panel issues found on a real device.
-3. Cloud Functions planning for Net auto-rewards if director is ready to tackle it.
-4. Hosting migration planning: walkthrough for updating Porkbun DNS when director has access.
+1. Confirm: did audio play after `c18f004`? If not, debug — check `songs/` folder filename on GitHub and URL encoding.
+2. Director: enable Presence Intent in Discord Developer Portal to activate the activity card.
+3. Add songs to playlist as director provides them (upload `.mp3` to `songs/` at repo root; add playlist entries in `shxdow/index.html`).
+4. Collect and triage any early-access user bug reports on the main SizNexus platform.
+5. Cloud Functions planning for Net auto-rewards if director is ready.
+6. Hosting migration planning: Porkbun DNS walkthrough when director has access.
 
 ## Director Preferences (Persistent)
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased (Black Market) or semantic (threat banner).

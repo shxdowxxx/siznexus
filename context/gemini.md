@@ -1,11 +1,11 @@
 ---
-session_id: SIZ-20260426-2359
-date: 2026-04-26
-time: 23:59 UTC
+session_id: SIZ-20260502-1200
+date: 2026-05-02
+time: 12:00 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 1.4
-current_phase: Phase 3 — Public Launch Prep (Early Access Ready)
+version: 1.5
+current_phase: Phase 3 — Public Launch Prep (Early Access Open) + Portfolio Sub-project
 ---
 
 # Gemini Context — SizNexus Project
@@ -89,6 +89,18 @@ When base styles appear AFTER media queries in a CSS file, the base always wins 
 - App Check not enabled.
 - `devKeyHash` publicly readable — deferred (LOW, internal tooling only).
 - Hosting migration (Porkbun DNS → Firebase IPs) — deferred; requires director Porkbun access.
+
+## shxdow Portfolio Page — `siznexus.org/shxdow`
+
+Personal portfolio added as a sub-project inside this repo (same GitHub Pages host).
+
+- **File:** `shxdow/index.html` (single file). Avatar: `shxdow/ShxdowKu.jpg`.
+- **Songs:** Root-level `songs/` folder (NOT inside `shxdow/`). URL: `https://siznexus.org/songs/{encodeURIComponent(filename)}.mp3`.
+- **Design:** Pure black `#090909`, silver/white, Orbitron + Share Tech Mono, 620px max-width.
+- **Discord Activity:** Polls Sentry bot `/api/presence` (Railway: `https://sentry-production-60e4.up.railway.app`) every 15s. Public endpoint. Requires Presence Intent enabled in Discord Developer Portal — **not done as of 2026-05-02**.
+- **Music player:** Real `<audio>` element, iTunes API for cover art. First song: "Al Compás De Mi Caballo" by Los Imperial's.
+- **Open issues:** Presence Intent not enabled (activity shows "Offline"); audio playback unconfirmed after `c18f004`; more songs pending.
+- **Song upload rule:** Strip any Windows ` (1)` suffix from filename before committing to `songs/`.
 
 ## Director Preferences
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased or semantic (threat banner).
