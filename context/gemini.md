@@ -1,11 +1,11 @@
 ---
-session_id: SIZ-20260503-1900
+session_id: SIZ-20260503-2100
 date: 2026-05-03
-time: 19:00 UTC
+time: 21:00 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 1.9
-current_phase: Tooling — siz-ai Command Hub
+version: 2.0
+current_phase: SizNexus — Security Hardening (Anti-DevTools)
 ---
 
 # Gemini Context — SizNexus Project
@@ -124,6 +124,20 @@ A parallel project built 2026-05-03. Lives outside the `siznexus-development` re
 - **Site access:** Must be "On all sites" (not "On click") in `chrome://extensions` for automatic injection.
 - **Distribution plan:** (1) Chrome Web Store — $5 developer account at https://chrome.google.com/webstore/devconsole; (2) Bookmarklet on Cloudflare Pages (NOT siznexus.org — blocked on district networks). Bookmarklet not yet built.
 - **Next actions:** Pay $5 fee, upload zip, create 1280x800 screenshots, write store description, build bookmarklet.
+
+## Anti-DevTools Detection (added 2026-05-03)
+
+Client-side developer tools detection added to `siznexus.js`. Runs two methods in parallel via `setInterval` at 500ms:
+
+1. **Window size delta** — triggers if `outerWidth - innerWidth > 160px` OR `outerHeight - innerHeight > 160px`. Catches docked DevTools panels.
+2. **Debugger timing trick** — times a `new Function('debugger')` call; triggers if execution exceeds 150ms. Catches undocked/popped-out DevTools windows.
+
+When either method fires, a full-screen overlay appears matching the existing domain-lock style: dark background, silver border, shield icon, message "Developer tools are not permitted on this site." Both intervals clear immediately after triggering.
+
+- **Commit:** `fb1ae5b` — "feat: add anti-DevTools detection overlay"
+- **Live at:** `siznexus.org`
+- **Limitation:** Client-side only. Determined attackers can bypass. Deters casual inspection.
+- **Tuning:** 160px (size delta) and 150ms (timing) thresholds are adjustable if false positives occur.
 
 ## siz-ai Command Hub (added 2026-05-03)
 

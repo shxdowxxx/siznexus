@@ -1,23 +1,23 @@
 ---
-last_updated: 2026-05-03 19:00 UTC
-session_id: SIZ-20260503-1900
+last_updated: 2026-05-03 21:00 UTC
+session_id: SIZ-20260503-2100
 agent: SessionCloseoutAgent
 ---
 
 # Project State
 
 ## current_phase
-Tooling — siz-ai Command Hub
+SizNexus — Security Hardening (Anti-DevTools)
 
 ## Phase Description
-A standalone tooling session. Four bash scripts built and deployed to `~/.local/bin/`: the `siz-ai` BIOS-style hub launcher, and wrapper scripts `siz-claude`, `siz-codex`, `siz-gemini`. The command hub launches all three AI assistants in separate Windows Terminal tabs and provides a live control panel for process monitoring, stats, and utility actions. SizNexus main platform and Chrome Extension are unchanged.
+The main SizNexus platform is live and in public early access. This session added a client-side anti-DevTools detection layer. The phase is incremental security work on top of the already-live Phase 3 feature set — not a new major phase. Future sessions will monitor early-access feedback, pursue deferred features (Cloud Functions, App Check, hosting migration), and address ongoing sub-projects (Chrome Extension, shxdow portfolio).
 
 ## Phase Progress
-- siz-ai command hub: 100% complete and functional. All four scripts live in `~/.local/bin/`.
-- Scripts not yet version-controlled (no dotfiles repo backup).
+- Anti-DevTools detection: 100% complete and live at `siznexus.org` (commit `fb1ae5b`).
 - Chrome Extension (`siz-extension/`): Feature complete, packaged (22.1 KB zip). Blocked on $5 Web Store fee. Bookmarklet unbuilt. Unchanged from previous session.
-- SizNexus main platform: Unchanged. Phase 3 Early Access open, no modifications.
+- SizNexus main platform (Phase 3): All features live. In early-access monitoring mode.
 - shxdow portfolio: Unchanged. Social links (TikTok, X, YouTube) still placeholder.
+- siz-ai command hub: Unchanged. Not yet version-controlled.
 
 ## Last Session Summary
-Session `SIZ-20260503-1900` (2026-05-03) built the `siz-ai` AI Command Hub — a BIOS-aesthetic shell-based control panel that launches Claude, Codex, and Gemini in separate Windows Terminal tabs simultaneously. The hub tab shows live RUNNING/STOPPED status per AI (via pgrep), ACTIVE/IDLE CPU activity (via ps), uptime counters tracked through `/tmp/siz-ai-*-start` epoch files, real Claude stats from `~/.claude/history.jsonl`, and utility key bindings (close individual AIs, close all, session closeout, relaunch all, refresh, quit). Visual identity is ultramarine blue truecolor matching a MR BIOS reference image. All four scripts are in `~/.local/bin/` and callable as `siz-ai`. Not yet committed to any version-controlled repository.
+Session `SIZ-20260503-2100` (2026-05-03) added anti-DevTools detection to `siznexus.js`. Two detection methods run in parallel at 500ms intervals: (1) window size delta check (outer vs inner dimensions, 160px threshold) catches docked DevTools; (2) debugger timing trick (new Function('debugger') timed against 150ms threshold) catches undocked DevTools. When either method triggers, a full-screen overlay matching the existing domain-lock style appears with message "Developer tools are not permitted on this site." Both intervals clear once triggered. Committed as `fb1ae5b` and pushed live. The session also briefly explored reverse-engineering a tazztv.net live stream source via Playwright but the director decided they did not need it — no code written.

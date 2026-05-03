@@ -1,11 +1,11 @@
 ---
-session_id: SIZ-20260503-1900
+session_id: SIZ-20260503-2100
 date: 2026-05-03
-time: 19:00 UTC
+time: 21:00 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 1.9
-current_phase: Tooling — siz-ai Command Hub
+version: 2.0
+current_phase: SizNexus — Security Hardening (Anti-DevTools)
 ---
 
 # Claude Context — SizNexus Project
@@ -146,6 +146,20 @@ A parallel project built 2026-05-03. NOT inside the `siznexus-development` repo.
 - **Store listing still needed:** 1280x800 screenshots of sidebar open on a real `https://` page, and a written description (132 char short + full body).
 - **Disposable cleanup:** `stealth-robbery/convert-icons.js` was a one-shot SVG-to-PNG render script. Can be deleted.
 
+## Anti-DevTools Detection (added 2026-05-03)
+
+Client-side developer tools detection added to `siznexus.js`. Runs two methods in parallel via `setInterval` at 500ms:
+
+1. **Window size delta** — triggers if `outerWidth - innerWidth > 160px` OR `outerHeight - innerHeight > 160px`. Catches docked DevTools panels.
+2. **Debugger timing trick** — times a `new Function('debugger')` call; triggers if execution exceeds 150ms. Catches undocked/popped-out DevTools windows.
+
+When either method fires, a full-screen overlay appears matching the existing domain-lock style: dark background, silver border, shield icon (`fas fa-shield-alt`), message "Developer tools are not permitted on this site." Both intervals are cleared immediately after triggering to stop polling.
+
+- **Commit:** `fb1ae5b` — "feat: add anti-DevTools detection overlay"
+- **Live at:** `siznexus.org`
+- **Limitation:** Client-side only. Determined attackers can bypass (pause execution before timing check, use narrow DevTools panel). This deters casual inspection, not expert analysis.
+- **Tuning:** 160px threshold (size check) and 150ms threshold (timing check) can be adjusted if false positives are reported.
+
 ## siz-ai Command Hub (added 2026-05-03)
 
 A BIOS-style shell command hub built this session. Lives in `~/.local/bin/` — NOT inside any tracked git repo.
@@ -161,14 +175,15 @@ A BIOS-style shell command hub built this session. Lives in `~/.local/bin/` — 
 - **Not version-controlled.** A dotfiles backup is recommended.
 
 ## What Claude Should Prioritize Next Session
-1. **Backup siz-ai scripts** — copy `siz-ai`, `siz-claude`, `siz-codex`, `siz-gemini` from `~/.local/bin/` into a tracked dotfiles or tools repo.
-2. **Chrome Extension — Web Store submission:** Confirm $5 fee is paid, then upload `siz-extension.zip` to https://chrome.google.com/webstore/devconsole. Create 1280x800 screenshots and write description.
-3. **Chrome Extension — Bookmarklet:** Build self-contained `javascript:` URI inject script. Create minimal Cloudflare Pages landing page with drag-to-bookmark-bar UX.
-4. Add social links (TikTok, X, YouTube) on `shxdow/index.html` when the director provides them.
-5. Add more songs to `songs/` and `PLAYLIST` as the director provides a list.
-6. Collect and triage any early-access user bug reports on the main SizNexus platform.
-7. Cloud Functions planning for Net auto-rewards if the director is ready.
-8. Hosting migration planning: Porkbun DNS walkthrough when the director has access.
+1. Monitor early-access user bug reports on the main SizNexus platform.
+2. Director mobile testing confirmation — Corp Hub modal scroll and hero text layout not yet confirmed on physical hardware.
+3. **Backup siz-ai scripts** — copy `siz-ai`, `siz-claude`, `siz-codex`, `siz-gemini` from `~/.local/bin/` into a tracked dotfiles or tools repo.
+4. **Chrome Extension — Web Store submission:** Confirm $5 fee is paid, then upload `siz-extension.zip` to https://chrome.google.com/webstore/devconsole. Create 1280x800 screenshots and write description.
+5. **Chrome Extension — Bookmarklet:** Build self-contained `javascript:` URI inject script. Create minimal Cloudflare Pages landing page with drag-to-bookmark-bar UX.
+6. Add social links (TikTok, X, YouTube) on `shxdow/index.html` when the director provides them.
+7. Add more songs to `songs/` and `PLAYLIST` as the director provides a list.
+8. Cloud Functions planning for Net auto-rewards (streaks, referrals) when the director is ready.
+9. Hosting migration planning: Porkbun DNS walkthrough when the director has access.
 
 ## Director Preferences (Persistent)
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased (Black Market) or semantic (threat banner).
