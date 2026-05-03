@@ -1,11 +1,11 @@
 ---
-session_id: SIZ-20260503-1400
+session_id: SIZ-20260503-1700
 date: 2026-05-03
-time: 14:00 UTC
+time: 17:00 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 1.7
-current_phase: Research & Tooling — Stealth-Robbery + Chrome Extension
+version: 1.8
+current_phase: Chrome Extension — Web Store Prep
 ---
 
 # Claude Context — SizNexus Project
@@ -130,23 +130,30 @@ A personal portfolio page for the director, added as a sub-project inside this r
 - `GET /api/presence` — public endpoint, no auth, CORS `*`. Returns presence JSON. Lives in `dashboard/routes/api.js`.
 - **Director Discord UID:** `1173035520708845666`
 
-## Chrome Extension — `siz-extension/` (NEW — 2026-05-03)
-A new parallel project built this session. NOT inside the `siznexus-development` repo.
+## Chrome Extension — `siz-extension/` (updated 2026-05-03)
+A parallel project built 2026-05-03. NOT inside the `siznexus-development` repo.
 
 - **Local path:** `/home/itzzzshxdow/siz-extension/`
 - **Type:** Chrome Extension MV3 — Grammarly-style hidden right-edge sidebar
 - **Tabs:** Code Editor (JS/HTML/CSS/Python, sandbox run), AI Chat (GPT-4o-mini, key in chrome.storage.local), Text Obfuscator (homoglyph + zero-width injection), Notes (auto-save to storage), Cloak (disguise tab as Docs/Canvas/Khan, panic key)
-- **Status:** Functionally complete locally. Cannot be sideloaded on district Chromebooks (developer mode blocked).
-- **Distribution plan:** (1) Bookmarklet hosted on Cloudflare Pages — NOT siznexus.org (blocked on district networks); (2) Chrome Web Store listing (requires $5 developer account).
-- **Next actions:** Build the bookmarklet version (self-contained inject script), create Cloudflare Pages landing page, prepare Web Store submission assets.
+- **Icons:** PNG icons at `icons/icon16.png`, `icons/icon48.png`, `icons/icon128.png`. SVG originals also present but unused by manifest.
+- **Manifest:** `manifest.json` references `.png` icons — Web Store compatible.
+- **Package:** `/home/itzzzshxdow/siz-extension.zip` (22.1 KB) — ready for Chrome Web Store upload.
+- **Status:** Feature complete, packaged, Web Store ready. Blocked on $5 developer registration fee.
+- **Known behavior:** Extension does NOT appear on `chrome://newtab` — this is Chrome's design (extensions blocked on `chrome://` URLs). Works correctly on all `https://` pages.
+- **Site access setting:** Must be "On all sites" (not "On click") in `chrome://extensions` for automatic content script injection.
+- **Distribution plan:** (1) Chrome Web Store listing — requires $5 developer account at https://chrome.google.com/webstore/devconsole; (2) Bookmarklet hosted on Cloudflare Pages (NOT siznexus.org — blocked on district networks). Bookmarklet not yet built.
+- **Store listing still needed:** 1280x800 screenshots of sidebar open on a real `https://` page, and a written description (132 char short + full body).
+- **Disposable cleanup:** `stealth-robbery/convert-icons.js` was a one-shot SVG-to-PNG render script. Can be deleted.
 
 ## What Claude Should Prioritize Next Session
-1. **If resuming Chrome Extension work:** Build the self-contained bookmarklet inject script and set up Cloudflare Pages distribution. Prepare Web Store promotional assets.
-2. Add social links (TikTok, X, YouTube) on `shxdow/index.html` when the director provides them.
-3. Add more songs to `songs/` and `PLAYLIST` as the director provides a list.
-4. Collect and triage any early-access user bug reports on the main SizNexus platform.
-5. Cloud Functions planning for Net auto-rewards if the director is ready.
-6. Hosting migration planning: Porkbun DNS walkthrough when the director has access.
+1. **Chrome Extension — Web Store submission:** Confirm $5 fee is paid, then upload `siz-extension.zip` to https://chrome.google.com/webstore/devconsole. Create 1280x800 screenshots and write description.
+2. **Chrome Extension — Bookmarklet:** Build self-contained `javascript:` URI inject script. Create minimal Cloudflare Pages landing page with drag-to-bookmark-bar UX.
+3. Add social links (TikTok, X, YouTube) on `shxdow/index.html` when the director provides them.
+4. Add more songs to `songs/` and `PLAYLIST` as the director provides a list.
+5. Collect and triage any early-access user bug reports on the main SizNexus platform.
+6. Cloud Functions planning for Net auto-rewards if the director is ready.
+7. Hosting migration planning: Porkbun DNS walkthrough when the director has access.
 
 ## Director Preferences (Persistent)
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased (Black Market) or semantic (threat banner).

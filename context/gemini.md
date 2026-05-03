@@ -1,11 +1,11 @@
 ---
-session_id: SIZ-20260503-1400
+session_id: SIZ-20260503-1700
 date: 2026-05-03
-time: 14:00 UTC
+time: 17:00 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 1.7
-current_phase: Research & Tooling — Stealth-Robbery + Chrome Extension
+version: 1.8
+current_phase: Chrome Extension — Web Store Prep
 ---
 
 # Gemini Context — SizNexus Project
@@ -111,15 +111,19 @@ Personal portfolio added as a sub-project inside this repo (same GitHub Pages ho
 - `GET /api/presence` — public, no auth, CORS `*`.
 - **Director Discord UID:** `1173035520708845666`
 
-## Chrome Extension — `siz-extension/` (NEW — 2026-05-03)
-A new parallel project built this session. Lives outside the `siznexus-development` repo.
+## Chrome Extension — `siz-extension/` (updated 2026-05-03)
+A parallel project built 2026-05-03. Lives outside the `siznexus-development` repo.
 
 - **Local path:** `/home/itzzzshxdow/siz-extension/`
 - **Type:** Chrome Extension MV3 — Grammarly-style hidden right-edge sidebar
 - **Tabs:** Code Editor (JS/HTML/CSS/Python, sandbox run), AI Chat (GPT-4o-mini, key in chrome.storage.local), Text Obfuscator (homoglyph + zero-width injection), Notes (auto-save to storage), Cloak (disguise tab as Docs/Canvas/Khan, panic key)
-- **Status:** Functionally complete locally. Cannot be sideloaded on district Chromebooks (developer mode blocked).
-- **Distribution plan:** (1) Bookmarklet on Cloudflare Pages (NOT siznexus.org — blocked on district networks); (2) Chrome Web Store ($5 developer account needed).
-- **Next actions:** Build the bookmarklet inject script, Cloudflare Pages landing page, Web Store submission assets.
+- **Icons:** PNG at `icons/icon16.png`, `icons/icon48.png`, `icons/icon128.png`. Manifest references PNGs — Web Store compatible.
+- **Package:** `/home/itzzzshxdow/siz-extension.zip` (22.1 KB) — upload artifact for Chrome Web Store.
+- **Status:** Feature complete, packaged, Web Store ready. Blocked on $5 developer registration fee.
+- **Known behavior:** Does NOT appear on `chrome://newtab` — Chrome blocks extensions on `chrome://` URLs by design. Works on all `https://` pages.
+- **Site access:** Must be "On all sites" (not "On click") in `chrome://extensions` for automatic injection.
+- **Distribution plan:** (1) Chrome Web Store — $5 developer account at https://chrome.google.com/webstore/devconsole; (2) Bookmarklet on Cloudflare Pages (NOT siznexus.org — blocked on district networks). Bookmarklet not yet built.
+- **Next actions:** Pay $5 fee, upload zip, create 1280x800 screenshots, write store description, build bookmarklet.
 
 ## Director Preferences
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased or semantic (threat banner).
