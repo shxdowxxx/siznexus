@@ -1,11 +1,11 @@
 ---
-session_id: SIZ-20260503-1700
+session_id: SIZ-20260503-1900
 date: 2026-05-03
-time: 17:00 UTC
+time: 19:00 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 1.8
-current_phase: Chrome Extension — Web Store Prep
+version: 1.9
+current_phase: Tooling — siz-ai Command Hub
 ---
 
 # Claude Context — SizNexus Project
@@ -146,14 +146,29 @@ A parallel project built 2026-05-03. NOT inside the `siznexus-development` repo.
 - **Store listing still needed:** 1280x800 screenshots of sidebar open on a real `https://` page, and a written description (132 char short + full body).
 - **Disposable cleanup:** `stealth-robbery/convert-icons.js` was a one-shot SVG-to-PNG render script. Can be deleted.
 
+## siz-ai Command Hub (added 2026-05-03)
+
+A BIOS-style shell command hub built this session. Lives in `~/.local/bin/` — NOT inside any tracked git repo.
+
+- **Command:** `siz-ai` (in PATH via `~/.local/bin/`)
+- **Scripts:** `siz-ai` (hub), `siz-claude`, `siz-codex`, `siz-gemini`
+- **What it does:** Launches all three AI assistants in separate Windows Terminal tabs (`wt.exe -w 0 new-tab`), then shows a live BIOS-style control panel with process status, uptime, Claude stats, and utility key bindings.
+- **Key bindings in hub:** 1/2/3 = close individual AI; A = close all; S = session closeout (opens new WT tab running claude with closeout prompt); L = relaunch all; R = refresh; Q = quit hub.
+- **Uptime tracking:** `/tmp/siz-ai-{claude|codex|gemini}-start` files hold epoch seconds written at launch. Deleted on close.
+- **Claude stats:** Reads `~/.claude/history.jsonl` directly for entry count, file size, and today's message count.
+- **Visual identity:** Ultramarine blue truecolor `\033[38;2;82;130;255m`, MR BIOS aesthetic (double-rule headers, BANK rows, W=87 centered via `tput cols`).
+- **Background fallback:** If `wt.exe` is not found, AI processes launch in background within the same terminal.
+- **Not version-controlled.** A dotfiles backup is recommended.
+
 ## What Claude Should Prioritize Next Session
-1. **Chrome Extension — Web Store submission:** Confirm $5 fee is paid, then upload `siz-extension.zip` to https://chrome.google.com/webstore/devconsole. Create 1280x800 screenshots and write description.
-2. **Chrome Extension — Bookmarklet:** Build self-contained `javascript:` URI inject script. Create minimal Cloudflare Pages landing page with drag-to-bookmark-bar UX.
-3. Add social links (TikTok, X, YouTube) on `shxdow/index.html` when the director provides them.
-4. Add more songs to `songs/` and `PLAYLIST` as the director provides a list.
-5. Collect and triage any early-access user bug reports on the main SizNexus platform.
-6. Cloud Functions planning for Net auto-rewards if the director is ready.
-7. Hosting migration planning: Porkbun DNS walkthrough when the director has access.
+1. **Backup siz-ai scripts** — copy `siz-ai`, `siz-claude`, `siz-codex`, `siz-gemini` from `~/.local/bin/` into a tracked dotfiles or tools repo.
+2. **Chrome Extension — Web Store submission:** Confirm $5 fee is paid, then upload `siz-extension.zip` to https://chrome.google.com/webstore/devconsole. Create 1280x800 screenshots and write description.
+3. **Chrome Extension — Bookmarklet:** Build self-contained `javascript:` URI inject script. Create minimal Cloudflare Pages landing page with drag-to-bookmark-bar UX.
+4. Add social links (TikTok, X, YouTube) on `shxdow/index.html` when the director provides them.
+5. Add more songs to `songs/` and `PLAYLIST` as the director provides a list.
+6. Collect and triage any early-access user bug reports on the main SizNexus platform.
+7. Cloud Functions planning for Net auto-rewards if the director is ready.
+8. Hosting migration planning: Porkbun DNS walkthrough when the director has access.
 
 ## Director Preferences (Persistent)
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased (Black Market) or semantic (threat banner).

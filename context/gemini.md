@@ -1,11 +1,11 @@
 ---
-session_id: SIZ-20260503-1700
+session_id: SIZ-20260503-1900
 date: 2026-05-03
-time: 17:00 UTC
+time: 19:00 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 1.8
-current_phase: Chrome Extension — Web Store Prep
+version: 1.9
+current_phase: Tooling — siz-ai Command Hub
 ---
 
 # Gemini Context — SizNexus Project
@@ -124,6 +124,19 @@ A parallel project built 2026-05-03. Lives outside the `siznexus-development` re
 - **Site access:** Must be "On all sites" (not "On click") in `chrome://extensions` for automatic injection.
 - **Distribution plan:** (1) Chrome Web Store — $5 developer account at https://chrome.google.com/webstore/devconsole; (2) Bookmarklet on Cloudflare Pages (NOT siznexus.org — blocked on district networks). Bookmarklet not yet built.
 - **Next actions:** Pay $5 fee, upload zip, create 1280x800 screenshots, write store description, build bookmarklet.
+
+## siz-ai Command Hub (added 2026-05-03)
+
+A BIOS-style shell command hub. Lives in `~/.local/bin/` — NOT inside any tracked git repo.
+
+- **Command:** `siz-ai` (in PATH via `~/.local/bin/`)
+- **Scripts:** `siz-ai` (hub), `siz-claude`, `siz-codex`, `siz-gemini`
+- **What it does:** Launches all three AI assistants in separate Windows Terminal tabs (`wt.exe -w 0 new-tab`), then shows a live BIOS-style control panel with process status (pgrep), uptime, Claude stats, and utility key bindings.
+- **Key bindings:** 1/2/3 = close individual AI; A = close all; S = session closeout; L = relaunch all; R = refresh; Q = quit hub.
+- **Uptime tracking:** `/tmp/siz-ai-{claude|codex|gemini}-start` epoch files. Deleted on close.
+- **Claude stats:** Reads `~/.claude/history.jsonl` live for entry count, file size, today's message count.
+- **Visual identity:** Ultramarine blue truecolor `\033[38;2;82;130;255m`, MR BIOS aesthetic, W=87 centered layout.
+- **Not version-controlled** — dotfiles backup recommended.
 
 ## Director Preferences
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased or semantic (threat banner).
