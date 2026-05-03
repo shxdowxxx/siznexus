@@ -11,7 +11,7 @@ related_files:
   - context/claude.md
   - context/gemini.md
   - context/project-state.md
-github_commit: pending
+github_commit: 698d80b
 ---
 
 # Session Summary — 2026-05-02 (Portfolio Audio Fix, Presence Seeding, Song Expansion)
