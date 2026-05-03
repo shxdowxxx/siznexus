@@ -1,11 +1,11 @@
 ---
-session_id: SIZ-20260503-0244
+session_id: SIZ-20260503-1400
 date: 2026-05-03
-time: 02:44 UTC
+time: 14:00 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 1.6
-current_phase: Phase 3 — Public Launch Prep (Early Access Open) + Portfolio Sub-project
+version: 1.7
+current_phase: Research & Tooling — Stealth-Robbery + Chrome Extension
 ---
 
 # Gemini Context — SizNexus Project
@@ -99,9 +99,6 @@ Personal portfolio added as a sub-project inside this repo (same GitHub Pages ho
 - **Design:** Pure black `#090909`, silver/white, Orbitron + Share Tech Mono, 620px max-width.
 - **Discord Activity:** Polls Sentry bot `/api/presence` (Railway: `https://sentry-production-60e4.up.railway.app`) every 15s. Public endpoint.
 - **MP3 handling:** `.gitattributes` includes `*.mp3 -text`. Keep it. A prior bad commit normalized an MP3 into a 2-byte CRLF text file; if playback fails again, verify the song is a real binary.
-- **Discord Activity:** Polls Sentry bot `/api/presence` (Railway: `https://sentry-production-60e4.up.railway.app`) every 15s. Public endpoint.
-  - Prior notes saying Presence Intent was not enabled are outdated. The live endpoint is returning real data again.
-  - Sentry bot seeds presence on startup (`ready.js` → `seedOwnerPresence()`), so the endpoint has data immediately after Railway restarts.
 - **Music player:** Real `<audio>` element. Current tracks use pinned Apple-hosted cover URLs for reliable artwork. On audio failure, shows "Track file is unavailable. Re-upload the MP3 to /songs."
 - **Current playlist (5 songs):** "Al Compás De Mi Caballo" (Los Imperial's), "Distractions" (Haiti Babii), "Hot In Herre" (Nelly), "It's On" (Eazy-E), "KLK (feat. Victor Rivera Y Su Nuevo Estilo)" (Victor Mendivil / El Padrinito Toys / Kevin AMF).
 - **Open issues:** (1) social placeholders (TikTok, X, YouTube) unfilled; (2) bio text may need revision; (3) more songs can be added, and ambiguous tracks should pin `cover` URLs directly in `PLAYLIST`.
@@ -113,6 +110,16 @@ Personal portfolio added as a sub-project inside this repo (same GitHub Pages ho
 - `src/events/presenceUpdate.js` — uses shared serializer from `presenceCache.js`.
 - `GET /api/presence` — public, no auth, CORS `*`.
 - **Director Discord UID:** `1173035520708845666`
+
+## Chrome Extension — `siz-extension/` (NEW — 2026-05-03)
+A new parallel project built this session. Lives outside the `siznexus-development` repo.
+
+- **Local path:** `/home/itzzzshxdow/siz-extension/`
+- **Type:** Chrome Extension MV3 — Grammarly-style hidden right-edge sidebar
+- **Tabs:** Code Editor (JS/HTML/CSS/Python, sandbox run), AI Chat (GPT-4o-mini, key in chrome.storage.local), Text Obfuscator (homoglyph + zero-width injection), Notes (auto-save to storage), Cloak (disguise tab as Docs/Canvas/Khan, panic key)
+- **Status:** Functionally complete locally. Cannot be sideloaded on district Chromebooks (developer mode blocked).
+- **Distribution plan:** (1) Bookmarklet on Cloudflare Pages (NOT siznexus.org — blocked on district networks); (2) Chrome Web Store ($5 developer account needed).
+- **Next actions:** Build the bookmarklet inject script, Cloudflare Pages landing page, Web Store submission assets.
 
 ## Director Preferences
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased or semantic (threat banner).

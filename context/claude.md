@@ -1,11 +1,11 @@
 ---
-session_id: SIZ-20260503-0244
+session_id: SIZ-20260503-1400
 date: 2026-05-03
-time: 02:44 UTC
+time: 14:00 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 1.6
-current_phase: Phase 3 — Public Launch Prep (Early Access Open) + Portfolio Sub-project
+version: 1.7
+current_phase: Research & Tooling — Stealth-Robbery + Chrome Extension
 ---
 
 # Claude Context — SizNexus Project
@@ -110,9 +110,6 @@ A personal portfolio page for the director, added as a sub-project inside this r
 - **Design:** Pure black (`#090909`), silver/white accents, Orbitron + Share Tech Mono, 620px max-width
 - **Discord Activity:** Polls `https://sentry-production-60e4.up.railway.app/api/presence` every 15s. Public endpoint, no auth.
 - **MP3 handling:** `.gitattributes` includes `*.mp3 -text`. Keep it. A prior bad commit normalized an MP3 into a 2-byte CRLF text file; if playback breaks again, verify the asset is a real binary.
-- **Discord Activity:** Polls `https://sentry-production-60e4.up.railway.app/api/presence` every 15s. Public endpoint, no auth.
-  - Prior notes saying Presence Intent was not enabled are outdated. The live endpoint is returning real data again.
-  - Sentry bot seeds presence on startup via `seedOwnerPresence()` in `ready.js`, so the endpoint has real data after each Railway restart even before the next status change.
 - **Music player:** Real `<audio>` element. Current tracks use pinned Apple-hosted cover URLs for reliable artwork. On audio load failure, player shows "Track file is unavailable. Re-upload the MP3 to /songs."
 - **Current playlist (5 songs):**
   - "Al Compás De Mi Caballo" — Los Imperial's
@@ -133,10 +130,20 @@ A personal portfolio page for the director, added as a sub-project inside this r
 - `GET /api/presence` — public endpoint, no auth, CORS `*`. Returns presence JSON. Lives in `dashboard/routes/api.js`.
 - **Director Discord UID:** `1173035520708845666`
 
+## Chrome Extension — `siz-extension/` (NEW — 2026-05-03)
+A new parallel project built this session. NOT inside the `siznexus-development` repo.
+
+- **Local path:** `/home/itzzzshxdow/siz-extension/`
+- **Type:** Chrome Extension MV3 — Grammarly-style hidden right-edge sidebar
+- **Tabs:** Code Editor (JS/HTML/CSS/Python, sandbox run), AI Chat (GPT-4o-mini, key in chrome.storage.local), Text Obfuscator (homoglyph + zero-width injection), Notes (auto-save to storage), Cloak (disguise tab as Docs/Canvas/Khan, panic key)
+- **Status:** Functionally complete locally. Cannot be sideloaded on district Chromebooks (developer mode blocked).
+- **Distribution plan:** (1) Bookmarklet hosted on Cloudflare Pages — NOT siznexus.org (blocked on district networks); (2) Chrome Web Store listing (requires $5 developer account).
+- **Next actions:** Build the bookmarklet version (self-contained inject script), create Cloudflare Pages landing page, prepare Web Store submission assets.
+
 ## What Claude Should Prioritize Next Session
-1. Add social links (TikTok, X, YouTube) when the director provides them.
-2. Add more songs when the director provides a list — upload `.mp3` to `songs/` at repo root and add entries to `shxdow/index.html`.
-3. Keep pinning `cover` URLs directly in `PLAYLIST` for tracks that do not resolve cleanly from iTunes.
+1. **If resuming Chrome Extension work:** Build the self-contained bookmarklet inject script and set up Cloudflare Pages distribution. Prepare Web Store promotional assets.
+2. Add social links (TikTok, X, YouTube) on `shxdow/index.html` when the director provides them.
+3. Add more songs to `songs/` and `PLAYLIST` as the director provides a list.
 4. Collect and triage any early-access user bug reports on the main SizNexus platform.
 5. Cloud Functions planning for Net auto-rewards if the director is ready.
 6. Hosting migration planning: Porkbun DNS walkthrough when the director has access.
