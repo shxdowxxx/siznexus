@@ -11,7 +11,7 @@ related_files:
   - context/claude.md
   - context/gemini.md
   - context/project-state.md
-github_commit: fb1ae5b
+github_commit: bbb502d
 ---
 
 # Session Summary — 2026-05-03 (Anti-DevTools Detection)
