@@ -1,10 +1,10 @@
 ---
-session_id: SIZ-20260502-1200
+session_id: SIZ-20260502-1530
 date: 2026-05-02
-time: 12:00 UTC
+time: 15:30 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 1.5
+version: 1.6
 current_phase: Phase 3 — Public Launch Prep (Early Access Open) + Portfolio Sub-project
 ---
 
@@ -97,10 +97,20 @@ Personal portfolio added as a sub-project inside this repo (same GitHub Pages ho
 - **File:** `shxdow/index.html` (single file). Avatar: `shxdow/ShxdowKu.jpg`.
 - **Songs:** Root-level `songs/` folder (NOT inside `shxdow/`). URL: `https://siznexus.org/songs/{encodeURIComponent(filename)}.mp3`.
 - **Design:** Pure black `#090909`, silver/white, Orbitron + Share Tech Mono, 620px max-width.
-- **Discord Activity:** Polls Sentry bot `/api/presence` (Railway: `https://sentry-production-60e4.up.railway.app`) every 15s. Public endpoint. Requires Presence Intent enabled in Discord Developer Portal — **not done as of 2026-05-02**.
-- **Music player:** Real `<audio>` element, iTunes API for cover art. First song: "Al Compás De Mi Caballo" by Los Imperial's.
-- **Open issues:** Presence Intent not enabled (activity shows "Offline"); audio playback unconfirmed after `c18f004`; more songs pending.
+- **Discord Activity:** Polls Sentry bot `/api/presence` (Railway: `https://sentry-production-60e4.up.railway.app`) every 15s. Public endpoint.
+  - **Presence Intent NOT yet enabled in Discord Developer Portal** — activity card shows "Offline" until director enables it.
+  - Sentry bot now seeds presence on startup (`ready.js` → `seedOwnerPresence()`) so the endpoint has real data after each Railway restart.
+- **Music player:** Real `<audio>` element, iTunes API for cover art. On audio failure, shows "Track file is unavailable. Re-upload the MP3 to /songs."
+- **Current playlist (5 songs):** "Al Compás De Mi Caballo" (Los Imperial's), "Distractions" (Haiti Babii), "Hot In Herre" (Nelly), "It's On", "KLK" (Victor Mendivil / Padrinito Toys / Kevin AMF / Victor Rivera y Su Nuevo Estilo).
+- **Open issues:** (1) Presence Intent not enabled — activity shows "Offline"; (2) social placeholders (TikTok, X, YouTube) unfilled; (3) bio text may need revision.
 - **Song upload rule:** Strip any Windows ` (1)` suffix from filename before committing to `songs/`.
+
+## Sentry Bot — Presence Architecture (as of 2026-05-02)
+- `src/utils/presenceCache.js` — centralizes presence serialization; writes to `data/presence.json`.
+- `src/events/ready.js` — seeds owner presence on startup via `guild.members.fetch({ user: [OWNER_ID], withPresences: true })`.
+- `src/events/presenceUpdate.js` — uses shared serializer from `presenceCache.js`.
+- `GET /api/presence` — public, no auth, CORS `*`.
+- **Director Discord UID:** `1173035520708845666`
 
 ## Director Preferences
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased or semantic (threat banner).

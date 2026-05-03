@@ -1,10 +1,10 @@
 ---
-session_id: SIZ-20260502-1200
+session_id: SIZ-20260502-1530
 date: 2026-05-02
-time: 12:00 UTC
+time: 15:30 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 1.5
+version: 1.6
 current_phase: Phase 3 — Public Launch Prep (Early Access Open) + Portfolio Sub-project
 ---
 
@@ -108,15 +108,33 @@ A personal portfolio page for the director, added as a sub-project inside this r
 - **Avatar:** `shxdow/ShxdowKu.jpg`
 - **Songs:** `songs/` folder at repo root (NOT inside `shxdow/`). URL: `https://siznexus.org/songs/{encodeURIComponent(filename)}.mp3`
 - **Design:** Pure black (`#090909`), silver/white accents, Orbitron + Share Tech Mono, 620px max-width
-- **Discord Activity:** Polls `https://sentry-production-60e4.up.railway.app/api/presence` every 15s. Public endpoint, no auth. Requires Presence Intent enabled in Discord Developer Portal (NOT YET DONE as of 2026-05-02).
-- **Music player:** Real `<audio>` element. iTunes API for cover art (`https://itunes.apple.com/search?term={artist}+{track}&entity=song&limit=1`). First song: "Al Compás De Mi Caballo" by Los Imperial's.
-- **Open issues:** (1) Presence Intent not enabled — activity card shows "Offline" until director enables it in Dev Portal; (2) audio playback unconfirmed after final path fix `c18f004`; (3) more songs needed from director.
+- **Discord Activity:** Polls `https://sentry-production-60e4.up.railway.app/api/presence` every 15s. Public endpoint, no auth.
+  - **Presence Intent NOT yet enabled in Discord Developer Portal** — activity card shows "Offline" until director enables it.
+  - Sentry bot now seeds presence on startup via `seedOwnerPresence()` in `ready.js` so the endpoint has real data after each Railway restart.
+- **Music player:** Real `<audio>` element. iTunes API for cover art (`https://itunes.apple.com/search?term={artist}+{track}&entity=song&limit=1`). On audio load failure, player shows "Track file is unavailable. Re-upload the MP3 to /songs."
+- **Current playlist (5 songs):**
+  - "Al Compás De Mi Caballo" — Los Imperial's
+  - "Distractions" — Haiti Babii
+  - "Hot In Herre" — Nelly
+  - "It's On"
+  - "KLK" — Victor Mendivil / Padrinito Toys / Kevin AMF / Victor Rivera y Su Nuevo Estilo
+- **Open issues:**
+  1. Presence Intent not enabled — activity card still shows "Offline".
+  2. Social placeholders (TikTok, X, YouTube) still use `#` hrefs — director has not provided real links.
+  3. Bio text — director may want to revise.
 - **Song upload rule:** Remove any Windows ` (1)` suffix from filename before uploading to `songs/` folder.
 
+## Sentry Bot — Presence Architecture (as of 2026-05-02)
+- `src/utils/presenceCache.js` — serializes presence (status, activities, timestamps) and writes to `data/presence.json`. Source of truth for both startup seed and live updates.
+- `src/events/ready.js` — calls `seedOwnerPresence(client, logger)` on startup. Uses `guild.members.fetch({ user: [OWNER_ID], withPresences: true })` to capture current presence before any `presenceUpdate` event fires.
+- `src/events/presenceUpdate.js` — imports `OWNER_ID` and `saveOwnerPresenceSnapshot` from `presenceCache.js`. Fires on every presence change for the owner.
+- `GET /api/presence` — public endpoint, no auth, CORS `*`. Returns presence JSON. Lives in `dashboard/routes/api.js`.
+- **Director Discord UID:** `1173035520708845666`
+
 ## What Claude Should Prioritize Next Session
-1. Confirm: did audio play after `c18f004`? If not, debug — check `songs/` folder filename on GitHub and URL encoding.
-2. Director: enable Presence Intent in Discord Developer Portal to activate the activity card.
-3. Add songs to playlist as director provides them (upload `.mp3` to `songs/` at repo root; add playlist entries in `shxdow/index.html`).
+1. Confirm: did director enable Presence Intent in Discord Developer Portal? If yes, test the live activity card.
+2. Add social links (TikTok, X, YouTube) when director provides them.
+3. Add more songs when director provides a list — upload `.mp3` to `songs/` at repo root, add entries to `shxdow/index.html` playlist.
 4. Collect and triage any early-access user bug reports on the main SizNexus platform.
 5. Cloud Functions planning for Net auto-rewards if director is ready.
 6. Hosting migration planning: Porkbun DNS walkthrough when director has access.
