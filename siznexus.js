@@ -104,6 +104,33 @@
   }
 /* ── SECURITY ── */
 document.addEventListener('dragstart', e => { if (e.target && e.target.tagName === 'IMG') e.preventDefault(); });
+/* ── ANTI-DEVTOOLS ── */
+(function(){
+  function lockDown(){
+    if(document.getElementById('devtools-overlay'))return;
+    const overlay=document.createElement('div');
+    overlay.id='devtools-overlay';
+    overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#060a12,#0a0e1a);display:flex;align-items:center;justify-content:center;z-index:99999;font-family:var(--font-mono);';
+    overlay.innerHTML=`<div style="text-align:center;max-width:500px;padding:30px;background:rgba(10,14,26,0.97);border:1px solid rgba(192,192,192,0.25);border-top:1px solid rgba(212,216,226,0.35);border-radius:8px;box-shadow:0 0 30px rgba(192,192,192,0.12);"><div style="font-size:2rem;margin-bottom:20px;"><i class="fas fa-shield-alt" style="color:#C0C0C0;"></i></div><h1 style="color:#D4D8E2;margin:0 0 10px 0;font-size:1.5rem;letter-spacing:0.1em;">Access Blocked</h1><p style="color:#B0BAC9;margin:0;font-size:0.9rem;line-height:1.6;">Developer tools are not permitted on this site.</p></div>`;
+    document.body.appendChild(overlay);
+    document.body.style.overflow='hidden';
+    clearInterval(sizeTimer);
+    clearInterval(debugTimer);
+  }
+  // Window size check — catches docked DevTools
+  const sizeTimer=setInterval(()=>{
+    if(window.outerWidth-window.innerWidth>160||window.outerHeight-window.innerHeight>160) lockDown();
+  },500);
+  // Debugger timing — catches undocked/detached DevTools
+  const debugTimer=setInterval(()=>{
+    const t=performance.now();
+    // eslint-disable-next-line no-debugger
+    debugger;
+    if(performance.now()-t>150) lockDown();
+  },500);
+  // Fire immediately on load too
+  if(window.outerWidth-window.innerWidth>160||window.outerHeight-window.innerHeight>160) lockDown();
+})();
 /* ── SPLASH (Terminal Boot Sequence) ── */
 (function(){
   const splash=document.getElementById('splash');
