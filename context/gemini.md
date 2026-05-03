@@ -1,7 +1,7 @@
 ---
-session_id: SIZ-20260502-1530
-date: 2026-05-02
-time: 15:30 UTC
+session_id: SIZ-20260503-0244
+date: 2026-05-03
+time: 02:44 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
 version: 1.6
@@ -98,11 +98,13 @@ Personal portfolio added as a sub-project inside this repo (same GitHub Pages ho
 - **Songs:** Root-level `songs/` folder (NOT inside `shxdow/`). URL: `https://siznexus.org/songs/{encodeURIComponent(filename)}.mp3`.
 - **Design:** Pure black `#090909`, silver/white, Orbitron + Share Tech Mono, 620px max-width.
 - **Discord Activity:** Polls Sentry bot `/api/presence` (Railway: `https://sentry-production-60e4.up.railway.app`) every 15s. Public endpoint.
-  - **Presence Intent NOT yet enabled in Discord Developer Portal** — activity card shows "Offline" until director enables it.
-  - Sentry bot now seeds presence on startup (`ready.js` → `seedOwnerPresence()`) so the endpoint has real data after each Railway restart.
-- **Music player:** Real `<audio>` element, iTunes API for cover art. On audio failure, shows "Track file is unavailable. Re-upload the MP3 to /songs."
-- **Current playlist (5 songs):** "Al Compás De Mi Caballo" (Los Imperial's), "Distractions" (Haiti Babii), "Hot In Herre" (Nelly), "It's On", "KLK" (Victor Mendivil / Padrinito Toys / Kevin AMF / Victor Rivera y Su Nuevo Estilo).
-- **Open issues:** (1) Presence Intent not enabled — activity shows "Offline"; (2) social placeholders (TikTok, X, YouTube) unfilled; (3) bio text may need revision.
+- **MP3 handling:** `.gitattributes` includes `*.mp3 -text`. Keep it. A prior bad commit normalized an MP3 into a 2-byte CRLF text file; if playback fails again, verify the song is a real binary.
+- **Discord Activity:** Polls Sentry bot `/api/presence` (Railway: `https://sentry-production-60e4.up.railway.app`) every 15s. Public endpoint.
+  - Prior notes saying Presence Intent was not enabled are outdated. The live endpoint is returning real data again.
+  - Sentry bot seeds presence on startup (`ready.js` → `seedOwnerPresence()`), so the endpoint has data immediately after Railway restarts.
+- **Music player:** Real `<audio>` element. Current tracks use pinned Apple-hosted cover URLs for reliable artwork. On audio failure, shows "Track file is unavailable. Re-upload the MP3 to /songs."
+- **Current playlist (5 songs):** "Al Compás De Mi Caballo" (Los Imperial's), "Distractions" (Haiti Babii), "Hot In Herre" (Nelly), "It's On" (Eazy-E), "KLK (feat. Victor Rivera Y Su Nuevo Estilo)" (Victor Mendivil / El Padrinito Toys / Kevin AMF).
+- **Open issues:** (1) social placeholders (TikTok, X, YouTube) unfilled; (2) bio text may need revision; (3) more songs can be added, and ambiguous tracks should pin `cover` URLs directly in `PLAYLIST`.
 - **Song upload rule:** Strip any Windows ` (1)` suffix from filename before committing to `songs/`.
 
 ## Sentry Bot — Presence Architecture (as of 2026-05-02)

@@ -1,7 +1,7 @@
 ---
-session_id: SIZ-20260502-1530
-date: 2026-05-02
-time: 15:30 UTC
+session_id: SIZ-20260503-0244
+date: 2026-05-03
+time: 02:44 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
 version: 1.6
@@ -109,19 +109,21 @@ A personal portfolio page for the director, added as a sub-project inside this r
 - **Songs:** `songs/` folder at repo root (NOT inside `shxdow/`). URL: `https://siznexus.org/songs/{encodeURIComponent(filename)}.mp3`
 - **Design:** Pure black (`#090909`), silver/white accents, Orbitron + Share Tech Mono, 620px max-width
 - **Discord Activity:** Polls `https://sentry-production-60e4.up.railway.app/api/presence` every 15s. Public endpoint, no auth.
-  - **Presence Intent NOT yet enabled in Discord Developer Portal** — activity card shows "Offline" until director enables it.
-  - Sentry bot now seeds presence on startup via `seedOwnerPresence()` in `ready.js` so the endpoint has real data after each Railway restart.
-- **Music player:** Real `<audio>` element. iTunes API for cover art (`https://itunes.apple.com/search?term={artist}+{track}&entity=song&limit=1`). On audio load failure, player shows "Track file is unavailable. Re-upload the MP3 to /songs."
+- **MP3 handling:** `.gitattributes` includes `*.mp3 -text`. Keep it. A prior bad commit normalized an MP3 into a 2-byte CRLF text file; if playback breaks again, verify the asset is a real binary.
+- **Discord Activity:** Polls `https://sentry-production-60e4.up.railway.app/api/presence` every 15s. Public endpoint, no auth.
+  - Prior notes saying Presence Intent was not enabled are outdated. The live endpoint is returning real data again.
+  - Sentry bot seeds presence on startup via `seedOwnerPresence()` in `ready.js`, so the endpoint has real data after each Railway restart even before the next status change.
+- **Music player:** Real `<audio>` element. Current tracks use pinned Apple-hosted cover URLs for reliable artwork. On audio load failure, player shows "Track file is unavailable. Re-upload the MP3 to /songs."
 - **Current playlist (5 songs):**
   - "Al Compás De Mi Caballo" — Los Imperial's
   - "Distractions" — Haiti Babii
   - "Hot In Herre" — Nelly
-  - "It's On"
-  - "KLK" — Victor Mendivil / Padrinito Toys / Kevin AMF / Victor Rivera y Su Nuevo Estilo
+  - "It's On" — Eazy-E
+  - "KLK (feat. Victor Rivera Y Su Nuevo Estilo)" — Victor Mendivil / El Padrinito Toys / Kevin AMF
 - **Open issues:**
-  1. Presence Intent not enabled — activity card still shows "Offline".
-  2. Social placeholders (TikTok, X, YouTube) still use `#` hrefs — director has not provided real links.
-  3. Bio text — director may want to revise.
+  1. Social placeholders (TikTok, X, YouTube) still use `#` hrefs — director has not provided real links.
+  2. Bio text — director may want to revise.
+  3. More songs can be added as the director provides them. If metadata is ambiguous, pin the `cover` URL directly in `PLAYLIST` instead of relying on the iTunes search fallback.
 - **Song upload rule:** Remove any Windows ` (1)` suffix from filename before uploading to `songs/` folder.
 
 ## Sentry Bot — Presence Architecture (as of 2026-05-02)
@@ -132,12 +134,12 @@ A personal portfolio page for the director, added as a sub-project inside this r
 - **Director Discord UID:** `1173035520708845666`
 
 ## What Claude Should Prioritize Next Session
-1. Confirm: did director enable Presence Intent in Discord Developer Portal? If yes, test the live activity card.
-2. Add social links (TikTok, X, YouTube) when director provides them.
-3. Add more songs when director provides a list — upload `.mp3` to `songs/` at repo root, add entries to `shxdow/index.html` playlist.
+1. Add social links (TikTok, X, YouTube) when the director provides them.
+2. Add more songs when the director provides a list — upload `.mp3` to `songs/` at repo root and add entries to `shxdow/index.html`.
+3. Keep pinning `cover` URLs directly in `PLAYLIST` for tracks that do not resolve cleanly from iTunes.
 4. Collect and triage any early-access user bug reports on the main SizNexus platform.
-5. Cloud Functions planning for Net auto-rewards if director is ready.
-6. Hosting migration planning: Porkbun DNS walkthrough when director has access.
+5. Cloud Functions planning for Net auto-rewards if the director is ready.
+6. Hosting migration planning: Porkbun DNS walkthrough when the director has access.
 
 ## Director Preferences (Persistent)
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased (Black Market) or semantic (threat banner).

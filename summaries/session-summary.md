@@ -1,9 +1,9 @@
 ---
-session_id: SIZ-20260502-1530
-date: 2026-05-02
-time: 15:30 UTC
+session_id: SIZ-20260503-0244
+date: 2026-05-03
+time: 02:44 UTC
 project: TheSizCorporation / SizNexus
-agent: SessionCloseoutAgent
+agent: Codex
 version: 1.0
 current_phase: Phase 3 — Public Launch Prep (Early Access Open) + Portfolio Sub-project
 related_files:
@@ -11,61 +11,60 @@ related_files:
   - context/claude.md
   - context/gemini.md
   - context/project-state.md
-github_commit: 698d80b
+github_commit: 0f639cd
 ---
 
-# Session Summary — 2026-05-02 (Portfolio Audio Fix, Presence Seeding, Song Expansion)
+# Session Summary — 2026-05-03 (Portfolio Stabilization and Playlist Expansion)
 
 ## Director's Vision
-Resolve the two blockers left open at the end of the prior session — broken audio playback on the shxdow portfolio page and a presence card that always showed "Offline" — and expand the music playlist with additional songs.
+Finish stabilizing the live `siznexus.org/shxdow` portfolio page: get the music player working reliably, make the Discord Activity card show real data, expand the playlist, and tighten the presentation details that still felt unfinished.
 
 ## Decisions Made
-1. **Audio fix delegated to Codex.** The prior session's audio failure was caused by a 2-byte CRLF stub being committed in place of a real MP3 (Windows file system artifact). Codex confirmed the root cause and fixed audio error handling in `shxdow/index.html` to surface an explicit "re-upload" message rather than silently failing.
-2. **Presence seeding via startup fetch.** Rather than waiting for a `presenceUpdate` event (which would leave the endpoint dead until the owner changed status after each Railway restart), Codex architected a startup seed: `ready.js` now calls `seedOwnerPresence(client, logger)` which uses `guild.members.fetch({ user: [OWNER_ID], withPresences: true })` to capture the current presence immediately on boot.
-3. **Presence logic extracted to a shared utility.** `src/utils/presenceCache.js` was created to centralize presence serialization and storage. Both `presenceUpdate.js` and `ready.js` import from it — no duplicated logic.
-4. **Five songs added to the playlist.** The `songs/` folder at repo root now contains five tracks. The `shxdow/index.html` playlist was updated to match.
-5. **Activity elapsed time formatted as hh:mm:ss.** The Discord activity card now shows elapsed time in hours:minutes:seconds rather than raw seconds, improving readability.
-6. **Cover art pinned per track.** Song metadata corrections and cover art pinning committed so the music player displays accurate artwork regardless of iTunes API search result ordering.
-7. **Presence Intent in Discord Developer Portal still pending.** The director has not yet enabled the Presence Intent in the Discord Developer Portal. This remains the only outstanding blocker for the live activity card.
+1. **The audio failure was a corrupted asset, not a bad URL.** The original `Al Compás De Mi Caballo.mp3` committed in git was a 2-byte CRLF text file. The correct fix was to replace the binary file and prevent Git from treating MP3s as text.
+2. **`.gitattributes` must keep `*.mp3 -text`.** Without it, future Windows-side song uploads can be line-normalized and destroyed in git.
+3. **Presence should be seeded on startup, not only on future events.** The portfolio depends on Sentry’s `/api/presence`; after Railway restarts, the endpoint must already have data before the next `presenceUpdate`.
+4. **Pinned cover art is better than fuzzy lookup for known songs.** The player still supports iTunes search fallback, but the current tracks now use explicit Apple-hosted cover URLs for reliable artwork.
+5. **Elapsed time should be `HH:MM:SS`.** Long-running Discord activities were not readable enough when rendered as total minutes.
 
 ## Work Completed
-- **Audio playback restored.** Real MP3 files uploaded to `songs/` folder, replacing the prior stub. `shxdow/index.html` hardened to display a user-visible "Track file is unavailable. Re-upload the MP3 to /songs." message on audio load failure rather than silently erroring.
-- **Sentry bot presence seeding fixed (discord-bot repo):**
-  - `src/utils/presenceCache.js` — new utility file created by Codex. Centralizes presence serialization (status, activities, timestamps) and writes to `data/presence.json`.
-  - `src/events/ready.js` — updated to import and call `seedOwnerPresence(client, logger)` on startup so the `/api/presence` endpoint has real data immediately after each Railway deploy/restart.
-  - `src/events/presenceUpdate.js` — refactored to import `OWNER_ID` and `saveOwnerPresenceSnapshot` from `presenceCache.js` instead of duplicating logic inline.
-- **Discord activity card improved:** elapsed time display changed from raw seconds to `hh:mm:ss` format.
-- **Song library expanded.** Five tracks now in `songs/` folder:
-  - "Al Compás De Mi Caballo" — Los Imperial's
-  - "Distractions" — Haiti Babii
-  - "Hot In Herre" — Nelly
-  - "It's On" (artist TBD from filename)
-  - "KLK" — Victor Mendivil / Padrinito Toys / Kevin AMF / Victor Rivera y Su Nuevo Estilo
-- **Cover art and metadata corrected.** `fix: correct song metadata and pin cover art` commit ensures accurate display.
-- **Commits from this continuation session:** `75f6ec4` through `0f639cd` (5 commits post-closeout on main).
+- Replaced the broken `songs/Al Compás De Mi Caballo.mp3` with the real binary MP3 and added `*.mp3 -text` to `.gitattributes`.
+- Hardened the player UI so broken audio files show an explicit re-upload message instead of silently failing.
+- Added cache-busting to portfolio audio URLs so GitHub Pages served the fresh MP3 immediately after the fix.
+- Coordinated the cross-repo Sentry fix that restored live `/api/presence` data after restarts.
+- Updated the Discord activity elapsed formatter to `HH:MM:SS`.
+- Added four more tracks to the playlist and root `songs/` folder:
+  - `It's On.mp3`
+  - `KLK - Victor Mendivil - Padrinito Toys - Kevin AMF - Victor Rivera y Su Nuevo Estilo.mp3`
+  - `Haiti Babii - Distractions (Audio).mp3`
+  - `Hot In Herre.mp3`
+- Corrected metadata and pinned cover art for all five current tracks.
+
+## Commits Pushed
+- `75f6ec4` — `fix: restore portfolio audio playback`
+- `4208c1b` — `fix: bust cached portfolio audio asset`
+- `aebb34b` — `fix: show activity elapsed as hh:mm:ss`
+- `a551bc8` — `feat: add more portfolio songs`
+- `0f639cd` — `fix: correct song metadata and pin cover art`
 
 ## Current State
-- `siznexus.org/shxdow` is live. Profile card, social row, projects section all render correctly.
-- Music player has five songs with real audio files. Playback is confirmed working.
-- Discord Activity card polls Sentry bot `/api/presence` every 15 seconds. The endpoint now returns real presence data immediately after bot startup (presence seeding fixed). However, the card will still show "Offline" or inaccurate data until the director enables Presence Intent in the Discord Developer Portal.
-- Sentry bot is live on Railway at `https://sentry-production-60e4.up.railway.app`. The `discord-bot` repo changes (presenceCache.js, ready.js, presenceUpdate.js) are committed and deployed.
-- The main SizNexus platform (`index.html`) is unchanged.
+- `siznexus.org/shxdow` is live and updated from `main`.
+- The music player now has five working songs with real audio files and pinned artwork.
+- The Discord Activity card is receiving live data from Sentry’s public `/api/presence` endpoint.
+- The main SizNexus platform (`index.html`, `siznexus.css`, `siznexus.js`) was not changed this session.
 
 ## Blockers & Challenges
-- **Discord Presence Intent not enabled (only remaining blocker).** Director must go to Discord Developer Portal → Application → Bot → Privileged Gateway Intents → enable "Presence Intent". Until this is done, the bot cannot receive presence events and the activity card will not reflect real Discord status.
-- **Social placeholders unfilled.** TikTok, X (Twitter), and YouTube links on the portfolio page are still placeholder `#` hrefs. Director has not provided real links yet.
+- **Git can silently corrupt MP3s if they are treated as text.** This was the actual root cause of the original broken playback.
+- **GitHub Pages cache lag is real.** Even after the fixed MP3 was pushed, the old 2-byte asset was briefly still being served until a cache-busted URL was used.
+- **Some songs do not resolve cleanly through the iTunes search API.** `Distractions` required direct Apple Music artwork pinning because the simple search query returned no result.
 
 ## Next Steps
-1. Director: enable Presence Intent in Discord Developer Portal — this is the single remaining blocker for the live activity card.
-2. Director: provide real TikTok, X, and YouTube profile URLs to replace placeholders in `shxdow/index.html`.
-3. Director: provide additional songs to add to the playlist (upload `.mp3` files to `songs/` at repo root; update playlist entries in `shxdow/index.html`).
-4. Bio text in the portfolio profile card — director may want to revise.
-5. Return to main SizNexus backlog: Cloud Functions for Net rewards, App Check, Porkbun DNS migration.
-6. Director mobile testing: Corp Hub modal scroll and hero text layout still unconfirmed on physical hardware.
+1. Replace the TikTok, X, and YouTube placeholder links when the director is ready.
+2. Add more songs to `songs/` and `PLAYLIST` as the director provides them.
+3. For ambiguous tracks, keep pinning `cover` URLs directly in `PLAYLIST` instead of relying on runtime search.
+4. Revise the portfolio bio text if the director wants a different intro.
+5. Return to the main SizNexus backlog: Cloud Functions for Net rewards, App Check, and Porkbun DNS migration.
 
 ## Notes
-- Songs must be in the `songs/` folder at the ROOT of the siznexus repo, not inside `shxdow/`. URL pattern: `https://siznexus.org/songs/{encodeURIComponent(filename)}.mp3`.
-- When uploading files converted on Windows, the OS may auto-append ` (1)` to the filename if a duplicate exists. Strip this before uploading.
-- Director's Discord user ID: `1173035520708845666`. `presenceCache.js` uses this as `OWNER_ID`.
-- Sentry bot Railway URL: `https://sentry-production-60e4.up.railway.app`. The `/api/presence` endpoint is public — no token needed.
-- The audio fix and presence seeding were both delivered by Codex, not Claude. The changes in `discord-bot/` are in a separate repo (`shxdowxxx/Sentry`). Always check that repo for the latest state of presenceCache.js, ready.js, and presenceUpdate.js.
+- Songs must live in the root `songs/` folder, not inside `shxdow/`.
+- `SONGS_VER` in `shxdow/index.html` is the cache-busting knob for GitHub Pages-served audio assets.
+- The portfolio depends on the Sentry bot repo for `/api/presence`; that dependency was fixed in `discord-bot` commit `ec3ac42`.
