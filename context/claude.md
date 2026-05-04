@@ -1,23 +1,24 @@
 ---
-session_id: SIZ-20260503-2100
-date: 2026-05-03
-time: 21:00 UTC
+session_id: SIZ-20260504-0000
+date: 2026-05-04
+time: 00:00 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
 version: 2.0
-current_phase: SizNexus — Security Hardening (Anti-DevTools)
+current_phase: SizNexus — SEO / Filter Bypass + CSS Polish
 ---
 
 # Claude Context — SizNexus Project
 
 ## Project Overview
-SizNexus is a cyberpunk-themed intelligence-corp member platform built with vanilla HTML/CSS/JS on Firebase Auth + Firestore (project `thesiznexus`). The platform is live, public-facing, and open for public early access. The current focus is early-access monitoring, deferred features (Cloud Functions for Net rewards, App Check), and a hosting architecture migration.
+SizNexus is a cyberpunk-themed intelligence-corp member platform built with vanilla HTML/CSS/JS on Firebase Auth + Firestore (project `thesiznexus`). The platform is live, public-facing, and open for public early access. Current focus: early-access monitoring, deferred features (Cloud Functions for Net rewards, App Check), hosting architecture migration, and ongoing filter-bypass work to keep `siznexus.org` accessible on school networks.
 
 ## Repository
 - **Local path:** `/home/itzzzshxdow/siznexus-development/`
 - **Primary files:** `index.html`, `siznexus.css`, `siznexus.js`
 - **Static pages:** `about.html`, `privacy.html`, `terms.html`, `roadmap.html`
 - **Active feature page:** `Commission.html` (direct URL access; do not delete)
+- **New files (2026-05-04):** `robots.txt` (AI-crawler block + search crawler allowlist), `site.webmanifest` (PWA manifest)
 - **GitHub:** `https://github.com/shxdowxxx/siznexus` — target `main`
 - **Git identity:** name `ItzzzShxdow`, email `itzzzshxdow@gmail.com`
 - **Firebase config:** `firestore.indexes.json` (deployed composite index; do not delete), `firestore.rules` (canonical source of truth)
@@ -30,11 +31,52 @@ SizNexus is a cyberpunk-themed intelligence-corp member platform built with vani
 - **Long-term plan:** Update Porkbun DNS A records to Firebase Hosting IPs, then disable GitHub Pages. This requires director access to Porkbun and is deferred.
 - **`firebaserules.md`** is the doc copy of Firestore rules for human reference. `firestore.rules` is the canonical deploy source. Keep both in sync.
 
-## Current Phase — Early Access Open
-All major Phase 3 features are live. The stabilization sub-phase resolved all production breakage. The platform has been security-hardened and is open for public early access. Active priorities:
-- Monitor early-access feedback for hotfix candidates
-- Director mobile testing confirmation (Corp Hub modal, admin panel)
+## Current Phase — Early Access Open + Filter Bypass
+All major Phase 3 features are live. The current sub-focus is on improving `siznexus.org` accessibility and search visibility:
+- SEO metadata and schema.org markup live as of commit `b5db458`
+- Lightspeed recategorization pending (director must submit manually)
+- Early-access monitoring continues
 - Deferred: Cloud Functions for Net rewards, App Check, Porkbun DNS migration
+
+## SEO / Filter Bypass State (added 2026-05-04)
+
+Changes committed in `b5db458` to combat Lightspeed blocking `siznexus.org` as "games":
+
+### `index.html` changes
+- `<title>` → "TheSizNexus — Community Organization Platform"
+- `<meta name="description">` — community platform framing, no game language
+- `<meta name="keywords">` — community, organization, discord, members, platform
+- Open Graph: `og:title`, `og:description`, `og:type` (website), `og:url`, `og:image`
+- Twitter Card: `twitter:card`, `twitter:title`, `twitter:description`
+- Schema.org JSON-LD: `Organization` type with name, description, URL, social links array
+- `<link rel="canonical">` tag
+- `<meta name="theme-color">`
+- Hero eyebrow and sub-copy reworded to "Community/Social" framing
+
+### `robots.txt` (new file at repo root)
+- **Allows:** Googlebot, Bingbot, DuckDuckBot, Yandex
+- **Disallows (AI training crawlers):** GPTBot, Claude-Web, anthropic-ai, PerplexityBot, Google-Extended, Bytespider, CCBot
+- Includes `Sitemap:` directive
+
+### `site.webmanifest` improvements
+- `description` field added
+- `orientation: "portrait-primary"` added
+- Icon `purpose` fields → `"any maskable"`
+
+### `siznexus.css` polish pass
+- Hero `h1` gradient text + larger sizing
+- Stats bar: 2-column tablet breakpoint + shimmer top-border animation
+- Bubbles: `border-radius: 10px`, richer layered box-shadows
+- Nav: `backdrop-filter: saturate()` added
+- Splash: gradient text on logo
+- Modals: spring entrance animation, `border-radius: 10px`
+- Ticker: wider fade edges + `26s` scroll timing
+- Footer: top accent line
+- Guest CTA: radial glow effect
+- Global: 4px silver custom scrollbar (`::-webkit-scrollbar`)
+
+### Outstanding director action
+Submit `siznexus.org` to Lightspeed recategorization: `https://www.lightspeedsystems.com/support/submiturl/` — select "Community/Social". Review takes 5–10 business days. No guarantee of approval but the metadata now supports the submission strongly.
 
 ## Phase 3 Surfaces (All Live)
 - **Guest CTA section** — shown for logged-out visitors. Three buttons: Enlist Now, Try Demo, Discord.
@@ -71,7 +113,7 @@ All major Phase 3 features are live. The stabilization sub-phase resolved all pr
 - `corpLog`: composite index `uid ASC + createdAt DESC` deployed. Do not remove from `firestore.indexes.json`.
 - `devKeyHash` (LOW/DEFERRED): publicly readable. Deferred per director decision — only impacts internal tooling.
 
-## CSS Conventions — Lesson from This Session
+## CSS Conventions — Lesson from Prior Session
 When base styles appear AFTER media queries in a CSS file, the base always wins the cascade regardless of specificity. Mobile-first (default rules hide/collapse, min-width media queries expand for desktop) is safer than max-width overrides when the file is long and declaration order matters. Do not write mobile-specific overrides in max-width blocks if the corresponding base style is declared later in the file.
 
 ## Visual Conventions
@@ -91,6 +133,7 @@ When base styles appear AFTER media queries in a CSS file, the base always wins 
 - "Net" is canon. Do not use "points". Watch for identifier-mangling regressions from prior global replace (`attemNet`, `oNet`, `mission-Net`, `lb-Net`, `data-Net`) — restore word boundaries if found.
 
 ## Open Issues
+- **Director action needed:** Submit `siznexus.org` to Lightspeed recategorization at `https://www.lightspeedsystems.com/support/submiturl/` (select "Community/Social").
 - Director has not yet confirmed mobile fixes on a real device — Corp Hub modal scroll and hero text layout not tested on physical hardware.
 - Cloud Functions for Net auto-rewards (streaks, referrals) — deferred. Rules block client-side self-increment; server-side required.
 - Activity heatmap only populates from the stabilization session forward — past sessions not retroactively tracked.
@@ -175,15 +218,16 @@ A BIOS-style shell command hub built this session. Lives in `~/.local/bin/` — 
 - **Not version-controlled.** A dotfiles backup is recommended.
 
 ## What Claude Should Prioritize Next Session
-1. Monitor early-access user bug reports on the main SizNexus platform.
-2. Director mobile testing confirmation — Corp Hub modal scroll and hero text layout not yet confirmed on physical hardware.
-3. **Backup siz-ai scripts** — copy `siz-ai`, `siz-claude`, `siz-codex`, `siz-gemini` from `~/.local/bin/` into a tracked dotfiles or tools repo.
-4. **Chrome Extension — Web Store submission:** Confirm $5 fee is paid, then upload `siz-extension.zip` to https://chrome.google.com/webstore/devconsole. Create 1280x800 screenshots and write description.
-5. **Chrome Extension — Bookmarklet:** Build self-contained `javascript:` URI inject script. Create minimal Cloudflare Pages landing page with drag-to-bookmark-bar UX.
-6. Add social links (TikTok, X, YouTube) on `shxdow/index.html` when the director provides them.
-7. Add more songs to `songs/` and `PLAYLIST` as the director provides a list.
-8. Cloud Functions planning for Net auto-rewards (streaks, referrals) when the director is ready.
-9. Hosting migration planning: Porkbun DNS walkthrough when the director has access.
+1. **Director action reminder:** Lightspeed recategorization submission at `https://www.lightspeedsystems.com/support/submiturl/`.
+2. Monitor early-access user bug reports on the main SizNexus platform.
+3. Director mobile testing confirmation — Corp Hub modal scroll and hero text layout not yet confirmed on physical hardware.
+4. **Backup siz-ai scripts** — copy `siz-ai`, `siz-claude`, `siz-codex`, `siz-gemini` from `~/.local/bin/` into a tracked dotfiles or tools repo.
+5. **Chrome Extension — Web Store submission:** Confirm $5 fee is paid, then upload `siz-extension.zip` to https://chrome.google.com/webstore/devconsole. Create 1280x800 screenshots and write description.
+6. **Chrome Extension — Bookmarklet:** Build self-contained `javascript:` URI inject script. Create minimal Cloudflare Pages landing page with drag-to-bookmark-bar UX.
+7. Add social links (TikTok, X, YouTube) on `shxdow/index.html` when the director provides them.
+8. Add more songs to `songs/` and `PLAYLIST` as the director provides a list.
+9. Cloud Functions planning for Net auto-rewards (streaks, referrals) when the director is ready.
+10. Hosting migration planning: Porkbun DNS walkthrough when the director has access.
 
 ## Director Preferences (Persistent)
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased (Black Market) or semantic (threat banner).

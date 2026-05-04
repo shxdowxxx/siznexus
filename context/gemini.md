@@ -1,23 +1,24 @@
 ---
-session_id: SIZ-20260503-2100
-date: 2026-05-03
-time: 21:00 UTC
+session_id: SIZ-20260504-0000
+date: 2026-05-04
+time: 00:00 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
 version: 2.0
-current_phase: SizNexus — Security Hardening (Anti-DevTools)
+current_phase: SizNexus — SEO / Filter Bypass + CSS Polish
 ---
 
 # Gemini Context — SizNexus Project
 
 ## Project Overview
-SizNexus is a cyberpunk-themed intelligence-corp member platform built with vanilla HTML/CSS/JS on Firebase Auth + Firestore (project `thesiznexus`). The platform is live, public-facing, and open for public early access. The current focus is early-access monitoring, deferred features (Cloud Functions for Net rewards, App Check), and a hosting architecture migration.
+SizNexus is a cyberpunk-themed intelligence-corp member platform built with vanilla HTML/CSS/JS on Firebase Auth + Firestore (project `thesiznexus`). The platform is live, public-facing, and open for public early access. Current focus: early-access monitoring, deferred features (Cloud Functions for Net rewards, App Check), hosting architecture migration, and filter-bypass work to keep `siznexus.org` accessible on school networks.
 
 ## Repository
 - **Local path:** `/home/itzzzshxdow/siznexus-development/`
 - **Primary files:** `index.html`, `siznexus.css`, `siznexus.js`
 - **Static pages:** `about.html`, `privacy.html`, `terms.html`, `roadmap.html`
 - **Active feature page:** `Commission.html` (direct URL access; do not delete)
+- **New files (2026-05-04):** `robots.txt` (AI-crawler block + search crawler allowlist), `site.webmanifest` (PWA manifest)
 - **GitHub:** `https://github.com/shxdowxxx/siznexus` — target `main`
 - **Git identity:** name `ItzzzShxdow`, email `itzzzshxdow@gmail.com`
 - **Firebase config:** `firestore.indexes.json` (deployed; do not delete), `firestore.rules` (canonical source of truth)
@@ -30,8 +31,48 @@ SizNexus is a cyberpunk-themed intelligence-corp member platform built with vani
 - **Long-term plan:** Update Porkbun DNS to Firebase Hosting IPs, then disable GitHub Pages. Requires director Porkbun access. Deferred.
 - **`firebaserules.md`** is the doc copy of Firestore rules. `firestore.rules` is the canonical deploy source. Keep both in sync.
 
-## Current Phase — Early Access Open
-All major Phase 3 features are live and security-hardened. The platform is open for public early access. Priorities: early-access monitoring, director mobile testing confirmation, and deferred backlog items.
+## Current Phase — Early Access Open + Filter Bypass
+All major Phase 3 features are live and security-hardened. The current sub-focus is SEO metadata and filter-bypass improvements. Priorities: early-access monitoring, Lightspeed recategorization (pending director manual submission), director mobile testing confirmation, and deferred backlog items.
+
+## SEO / Filter Bypass State (added 2026-05-04)
+
+Changes committed in `b5db458` to combat Lightspeed blocking `siznexus.org` as "games":
+
+### `index.html` changes
+- `<title>` → "TheSizNexus — Community Organization Platform"
+- `<meta name="description">` — community platform framing
+- `<meta name="keywords">` — community, organization, discord, members, platform
+- Open Graph: `og:title`, `og:description`, `og:type` (website), `og:url`, `og:image`
+- Twitter Card: `twitter:card`, `twitter:title`, `twitter:description`
+- Schema.org JSON-LD: `Organization` type with name, description, URL, social links
+- `<link rel="canonical">` tag
+- `<meta name="theme-color">`
+- Hero eyebrow and sub-copy reworded to "Community/Social" framing (no game language)
+
+### `robots.txt` (new file at repo root)
+- **Allows:** Googlebot, Bingbot, DuckDuckBot, Yandex
+- **Disallows:** GPTBot, Claude-Web, anthropic-ai, PerplexityBot, Google-Extended, Bytespider, CCBot
+- Includes `Sitemap:` directive
+
+### `site.webmanifest` improvements
+- `description` field added
+- `orientation: "portrait-primary"` added
+- Icon `purpose` fields → `"any maskable"`
+
+### `siznexus.css` polish pass
+- Hero `h1` gradient text + larger sizing
+- Stats bar: 2-column tablet breakpoint + shimmer top-border animation
+- Bubbles: `border-radius: 10px`, richer layered box-shadows
+- Nav: `backdrop-filter: saturate()` added
+- Splash: gradient text on logo
+- Modals: spring entrance animation, `border-radius: 10px`
+- Ticker: wider fade edges + `26s` scroll timing
+- Footer: top accent line
+- Guest CTA: radial glow effect
+- Global: 4px silver custom scrollbar (`::-webkit-scrollbar`)
+
+### Outstanding director action
+Submit `siznexus.org` to Lightspeed recategorization: `https://www.lightspeedsystems.com/support/submiturl/` — select "Community/Social". Review takes 5–10 business days.
 
 ## Phase 3 Surfaces (All Live)
 - **Guest CTA section** — shown for logged-out visitors (Enlist Now / Try Demo / Discord).
@@ -64,7 +105,7 @@ All major Phase 3 features are live and security-hardened. The platform is open 
 - `corpLog`: composite index `uid ASC + createdAt DESC` deployed. Do not remove from `firestore.indexes.json`.
 - `devKeyHash` publicly readable — deferred (LOW, internal tooling only).
 
-## CSS Conventions — Lesson from This Session
+## CSS Conventions — Lesson from Prior Session
 When base styles appear AFTER media queries in a CSS file, the base always wins the cascade. Mobile-first (default rules hide/collapse, min-width media queries expand for desktop) is safer than max-width overrides when declaration order matters. Do not write mobile-specific overrides in max-width blocks if the corresponding base style is declared later in the file.
 
 ## Visual Conventions
@@ -81,6 +122,7 @@ When base styles appear AFTER media queries in a CSS file, the base always wins 
 - "Net" is canon (was "points"). Watch for identifier-mangling regressions (`attemNet`, `oNet`, `mission-Net`, `lb-Net`, `data-Net`) — restore word boundaries if found.
 
 ## Open Issues
+- **Director action needed:** Submit `siznexus.org` to Lightspeed recategorization at `https://www.lightspeedsystems.com/support/submiturl/` (select "Community/Social").
 - Director has not confirmed mobile fixes on a real device — Corp Hub modal and hero text layout untested on physical hardware.
 - Cloud Functions for Net auto-rewards (streaks, referrals) — deferred; rules block client-side self-increment.
 - Activity heatmap only populates from the stabilization session forward; past sessions not retroactively tracked.
@@ -101,7 +143,7 @@ Personal portfolio added as a sub-project inside this repo (same GitHub Pages ho
 - **MP3 handling:** `.gitattributes` includes `*.mp3 -text`. Keep it. A prior bad commit normalized an MP3 into a 2-byte CRLF text file; if playback fails again, verify the song is a real binary.
 - **Music player:** Real `<audio>` element. Current tracks use pinned Apple-hosted cover URLs for reliable artwork. On audio failure, shows "Track file is unavailable. Re-upload the MP3 to /songs."
 - **Current playlist (5 songs):** "Al Compás De Mi Caballo" (Los Imperial's), "Distractions" (Haiti Babii), "Hot In Herre" (Nelly), "It's On" (Eazy-E), "KLK (feat. Victor Rivera Y Su Nuevo Estilo)" (Victor Mendivil / El Padrinito Toys / Kevin AMF).
-- **Open issues:** (1) social placeholders (TikTok, X, YouTube) unfilled; (2) bio text may need revision; (3) more songs can be added, and ambiguous tracks should pin `cover` URLs directly in `PLAYLIST`.
+- **Open issues:** (1) social placeholders (TikTok, X, YouTube) unfilled; (2) bio text may need revision; (3) more songs can be added, pin `cover` URLs for ambiguous tracks.
 - **Song upload rule:** Strip any Windows ` (1)` suffix from filename before committing to `songs/`.
 
 ## Sentry Bot — Presence Architecture (as of 2026-05-02)
@@ -116,7 +158,7 @@ A parallel project built 2026-05-03. Lives outside the `siznexus-development` re
 
 - **Local path:** `/home/itzzzshxdow/siz-extension/`
 - **Type:** Chrome Extension MV3 — Grammarly-style hidden right-edge sidebar
-- **Tabs:** Code Editor (JS/HTML/CSS/Python, sandbox run), AI Chat (GPT-4o-mini, key in chrome.storage.local), Text Obfuscator (homoglyph + zero-width injection), Notes (auto-save to storage), Cloak (disguise tab as Docs/Canvas/Khan, panic key)
+- **Tabs:** Code Editor, AI Chat (GPT-4o-mini), Text Obfuscator (homoglyph + zero-width), Notes, Cloak (tab disguise + panic key)
 - **Icons:** PNG at `icons/icon16.png`, `icons/icon48.png`, `icons/icon128.png`. Manifest references PNGs — Web Store compatible.
 - **Package:** `/home/itzzzshxdow/siz-extension.zip` (22.1 KB) — upload artifact for Chrome Web Store.
 - **Status:** Feature complete, packaged, Web Store ready. Blocked on $5 developer registration fee.
@@ -145,11 +187,8 @@ A BIOS-style shell command hub. Lives in `~/.local/bin/` — NOT inside any trac
 
 - **Command:** `siz-ai` (in PATH via `~/.local/bin/`)
 - **Scripts:** `siz-ai` (hub), `siz-claude`, `siz-codex`, `siz-gemini`
-- **What it does:** Launches all three AI assistants in separate Windows Terminal tabs (`wt.exe -w 0 new-tab`), then shows a live BIOS-style control panel with process status (pgrep), uptime, Claude stats, and utility key bindings.
+- **What it does:** Launches all three AI assistants in separate Windows Terminal tabs, then shows a live BIOS-style control panel with process status (pgrep), uptime, Claude stats, and utility key bindings.
 - **Key bindings:** 1/2/3 = close individual AI; A = close all; S = session closeout; L = relaunch all; R = refresh; Q = quit hub.
-- **Uptime tracking:** `/tmp/siz-ai-{claude|codex|gemini}-start` epoch files. Deleted on close.
-- **Claude stats:** Reads `~/.claude/history.jsonl` live for entry count, file size, today's message count.
-- **Visual identity:** Ultramarine blue truecolor `\033[38;2;82;130;255m`, MR BIOS aesthetic, W=87 centered layout.
 - **Not version-controlled** — dotfiles backup recommended.
 
 ## Director Preferences
