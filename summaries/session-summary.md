@@ -11,7 +11,7 @@ related_files:
   - context/claude.md
   - context/gemini.md
   - context/project-state.md
-github_commit: b5db458
+github_commit: f5e7e37
 ---
 
 # Session Summary — 2026-05-04
