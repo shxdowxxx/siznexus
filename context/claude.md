@@ -1,11 +1,11 @@
 ---
-session_id: SIZ-20260504-0000
-date: 2026-05-04
-time: 00:00 UTC
-project: TheSizCorporation / SizNexus
+session_id: SIZ-20260505-1200
+date: 2026-05-05
+time: 12:00 UTC
+project: TheSizCorporation / SizNexus + Agentiz
 agent: SessionCloseoutAgent
 version: 2.0
-current_phase: SizNexus — SEO / Filter Bypass + CSS Polish
+current_phase: Agentiz — Proxy Rebuild + AWS S3 Deploy
 ---
 
 # Claude Context — SizNexus Project
@@ -187,7 +187,19 @@ A parallel project built 2026-05-03. NOT inside the `siznexus-development` repo.
 - **Site access setting:** Must be "On all sites" (not "On click") in `chrome://extensions` for automatic content script injection.
 - **Distribution plan:** (1) Chrome Web Store listing — requires $5 developer account at https://chrome.google.com/webstore/devconsole; (2) Bookmarklet hosted on Cloudflare Pages (NOT siznexus.org — blocked on district networks). Bookmarklet not yet built.
 - **Store listing still needed:** 1280x800 screenshots of sidebar open on a real `https://` page, and a written description (132 char short + full body).
-- **Disposable cleanup:** `stealth-robbery/convert-icons.js` was a one-shot SVG-to-PNG render script. Can be deleted.
+
+## Agentiz — Web Proxy on AWS S3 (updated 2026-05-05)
+A separate project. NOT inside the `siznexus-development` repo.
+
+- **Local path:** `/home/itzzzshxdow/agentiz/`
+- **GitHub:** `shxdowxxx/agentiz` (public), branch `main`
+- **Primary live URL:** `https://agentiz.s3.amazonaws.com/index.html`
+- **Website endpoint:** `http://agentiz.s3-website-us-east-1.amazonaws.com`
+- **Stack:** React + Vite + Tailwind (bundled), proxy engines: WebEngine + NetStream + WorkerBus + libcurl WASM + Epoxy (all renamed from Ultraviolet/Scramjet/BareMux originals)
+- **Deploy:** `./deploy.sh` from agentiz directory (AWS S3 sync)
+- **AWS account:** 329435595007. Active bucket: `agentiz` (us-east-1). Orphan bucket `agentiz-organization` — can be deleted.
+- **Filter results (18/20 pass):** Lightspeed=Education, FortiGuard=IT, Palo Alto=Computer-and-Internet-Info, Cisco Umbrella=Cloud and Data Centers, Securly=Other, AristotleK12=Allowed, ContentKeeper=Allowed. GoGuardian=Uncategorized (blocked).
+- **Why S3 passes filters:** `amazonaws.com` is pre-categorized as Education/IT — same domain inheritance mechanism as the KoopBin/eastcountywireless.com trick.
 
 ## Anti-DevTools Detection (added 2026-05-03)
 
@@ -200,7 +212,7 @@ When either method fires, a full-screen overlay appears matching the existing do
 
 - **Commit:** `fb1ae5b` — "feat: add anti-DevTools detection overlay"
 - **Live at:** `siznexus.org`
-- **Limitation:** Client-side only. Determined attackers can bypass (pause execution before timing check, use narrow DevTools panel). This deters casual inspection, not expert analysis.
+- **Limitation:** Client-side only. Determined attackers can bypass. This deters casual inspection, not expert analysis.
 - **Tuning:** 160px threshold (size check) and 150ms threshold (timing check) can be adjusted if false positives are reported.
 
 ## siz-ai Command Hub (added 2026-05-03)
@@ -219,15 +231,15 @@ A BIOS-style shell command hub built this session. Lives in `~/.local/bin/` — 
 
 ## What Claude Should Prioritize Next Session
 1. **Director action reminder:** Lightspeed recategorization submission at `https://www.lightspeedsystems.com/support/submiturl/`.
-2. Monitor early-access user bug reports on the main SizNexus platform.
-3. Director mobile testing confirmation — Corp Hub modal scroll and hero text layout not yet confirmed on physical hardware.
-4. **Backup siz-ai scripts** — copy `siz-ai`, `siz-claude`, `siz-codex`, `siz-gemini` from `~/.local/bin/` into a tracked dotfiles or tools repo.
-5. **Chrome Extension — Web Store submission:** Confirm $5 fee is paid, then upload `siz-extension.zip` to https://chrome.google.com/webstore/devconsole. Create 1280x800 screenshots and write description.
-6. **Chrome Extension — Bookmarklet:** Build self-contained `javascript:` URI inject script. Create minimal Cloudflare Pages landing page with drag-to-bookmark-bar UX.
-7. Add social links (TikTok, X, YouTube) on `shxdow/index.html` when the director provides them.
-8. Add more songs to `songs/` and `PLAYLIST` as the director provides a list.
-9. Cloud Functions planning for Net auto-rewards (streaks, referrals) when the director is ready.
-10. Hosting migration planning: Porkbun DNS walkthrough when the director has access.
+2. **Agentiz GoGuardian bypass** — GoGuardian blocks all uncategorized domains. Options: find a trusted root domain with DNS write access, or research other cloud storage providers.
+3. **Delete orphan AWS bucket `agentiz-organization`** to avoid unnecessary costs.
+4. **Test Agentiz end-to-end** on a real device — open `http://agentiz.s3-website-us-east-1.amazonaws.com`, enter a URL, verify proxy works.
+5. Monitor early-access user bug reports on the main SizNexus platform.
+6. **Backup siz-ai scripts** — copy `siz-ai`, `siz-claude`, `siz-codex`, `siz-gemini` from `~/.local/bin/` into a tracked dotfiles or tools repo.
+7. **Chrome Extension — Web Store submission:** Confirm $5 fee is paid, then upload `siz-extension.zip`. Create 1280x800 screenshots and write description.
+8. **Chrome Extension — Bookmarklet:** Build self-contained `javascript:` URI inject script on Cloudflare Pages.
+9. Add social links (TikTok, X, YouTube) on `shxdow/index.html` when the director provides them.
+10. Cloud Functions planning for Net auto-rewards (streaks, referrals) when the director is ready.
 
 ## Director Preferences (Persistent)
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased (Black Market) or semantic (threat banner).

@@ -1,17 +1,34 @@
 ---
-session_id: SIZ-20260504-0000
-date: 2026-05-04
-time: 00:00 UTC
-project: TheSizCorporation / SizNexus
+session_id: SIZ-20260505-1200
+date: 2026-05-05
+time: 12:00 UTC
+project: TheSizCorporation / SizNexus + Agentiz
 agent: SessionCloseoutAgent
 version: 2.0
-current_phase: SizNexus — SEO / Filter Bypass + CSS Polish
+current_phase: Agentiz — Proxy Rebuild + AWS S3 Deploy
 ---
 
 # Gemini Context — SizNexus Project
 
-## Project Overview
-SizNexus is a cyberpunk-themed intelligence-corp member platform built with vanilla HTML/CSS/JS on Firebase Auth + Firestore (project `thesiznexus`). The platform is live, public-facing, and open for public early access. Current focus: early-access monitoring, deferred features (Cloud Functions for Net rewards, App Check), hosting architecture migration, and filter-bypass work to keep `siznexus.org` accessible on school networks.
+This file mirrors `context/claude.md`. All content is synchronized. See `context/claude.md` for full details.
+
+## Quick Reference — What Changed This Session (2026-05-05)
+
+### Agentiz Project — Complete Rebuild
+The Agentiz repo at `/home/itzzzshxdow/agentiz/` (`shxdowxxx/agentiz`) was completely rebuilt:
+- Old Electron desktop AI companion scaffold was wiped
+- KoopBin V2 source (React + Vite + Tailwind, Ultraviolet/Scramjet/BareMux/libcurl WASM/Epoxy) loaded as base
+- All proxy tool names, variable prefixes, adult URLs, and the blooket cheat injector purged
+- Clean landing page at root `index.html`; full app at `app/index.html`
+- Deployed to AWS S3 (`agentiz` bucket, us-east-1) — 18/20 school filter checkers pass
+- `amazonaws.com` is categorized as Education/IT by major filters — same domain inheritance trick as the KoopBin/eastcountywireless.com pattern
+- Deploy: `./deploy.sh` from agentiz dir
+
+### Filter bypass discovery documented
+`amazonaws.com` pre-categorized as Education/IT. Any S3 static site inherits this. GoGuardian still blocks (categorizes as "Uncategorized" regardless of parent domain). Other cloud providers (Azure Blob, GCS, Cloudflare R2) likely worth testing if S3 ever gets recategorized.
+
+### No changes to SizNexus this session
+`siznexus.org` and all related files are unchanged from the previous session (commit `b5db458`). The Lightspeed recategorization submission is still outstanding (director action required).
 
 ## Repository
 - **Local path:** `/home/itzzzshxdow/siznexus-development/`
@@ -123,6 +140,8 @@ When base styles appear AFTER media queries in a CSS file, the base always wins 
 
 ## Open Issues
 - **Director action needed:** Submit `siznexus.org` to Lightspeed recategorization at `https://www.lightspeedsystems.com/support/submiturl/` (select "Community/Social").
+- **Agentiz GoGuardian bypass** — GoGuardian blocks all uncategorized domains; S3 subdomain doesn't help. Needs a trusted root domain or GoGuardian manual review.
+- **Delete orphan AWS bucket `agentiz-organization`** — unnecessary S3 costs.
 - Director has not confirmed mobile fixes on a real device — Corp Hub modal and hero text layout untested on physical hardware.
 - Cloud Functions for Net auto-rewards (streaks, referrals) — deferred; rules block client-side self-increment.
 - Activity heatmap only populates from the stabilization session forward; past sessions not retroactively tracked.
@@ -166,6 +185,19 @@ A parallel project built 2026-05-03. Lives outside the `siznexus-development` re
 - **Site access:** Must be "On all sites" (not "On click") in `chrome://extensions` for automatic injection.
 - **Distribution plan:** (1) Chrome Web Store — $5 developer account at https://chrome.google.com/webstore/devconsole; (2) Bookmarklet on Cloudflare Pages (NOT siznexus.org — blocked on district networks). Bookmarklet not yet built.
 - **Next actions:** Pay $5 fee, upload zip, create 1280x800 screenshots, write store description, build bookmarklet.
+
+## Agentiz — Web Proxy on AWS S3 (added 2026-05-05)
+A separate project. NOT inside the `siznexus-development` repo.
+
+- **Local path:** `/home/itzzzshxdow/agentiz/`
+- **GitHub:** `shxdowxxx/agentiz` (public), branch `main`
+- **Primary live URL:** `https://agentiz.s3.amazonaws.com/index.html`
+- **Website endpoint:** `http://agentiz.s3-website-us-east-1.amazonaws.com`
+- **Stack:** React + Vite + Tailwind (bundled), proxy engines: WebEngine + NetStream + WorkerBus + libcurl WASM + Epoxy (all renamed from Ultraviolet/Scramjet/BareMux originals)
+- **Deploy:** `./deploy.sh` from agentiz directory (AWS S3 sync)
+- **AWS account:** 329435595007. Active bucket: `agentiz` (us-east-1). Orphan bucket `agentiz-organization` — can be deleted.
+- **Filter results (18/20 pass):** Lightspeed=Education, FortiGuard=IT, Palo Alto=Computer-and-Internet-Info, Cisco Umbrella=Cloud and Data Centers, Securly=Other, AristotleK12=Allowed, ContentKeeper=Allowed. GoGuardian=Uncategorized (blocked).
+- **Why S3 passes filters:** `amazonaws.com` is pre-categorized as Education/IT — same domain inheritance mechanism as the KoopBin/eastcountywireless.com trick.
 
 ## Anti-DevTools Detection (added 2026-05-03)
 

@@ -1,25 +1,26 @@
 ---
-last_updated: 2026-05-04 00:00 UTC
-session_id: SIZ-20260504-0000
+last_updated: 2026-05-05 12:00 UTC
+session_id: SIZ-20260505-1200
 agent: SessionCloseoutAgent
 ---
 
 # Project State
 
 ## current_phase
-SizNexus — SEO / Filter Bypass + CSS Polish
+Agentiz — Proxy Rebuild + AWS S3 Deploy
 
 ## Phase Description
-The main SizNexus platform is live and in public early access. This session applied an SEO and filter-bypass hardening pass: full meta/OG/Twitter Card/schema.org markup added to `index.html`, a curated `robots.txt` created (allows search crawlers, blocks AI training bots), and `site.webmanifest` improved. A CSS polish pass was also applied to `siznexus.css`. The trigger was Lightspeed Systems categorizing `siznexus.org` as "games" and blocking it on school networks. Complementary Stealth-Robbery research on KoopBin V2 identified the `robots.txt` AI-crawler block technique now in use. This is incremental refinement work on top of the already-live Phase 3 feature set.
+The primary focus of this session was rebuilding Agentiz from a non-functional Electron scaffold into a live, school-filter-bypassing web proxy deployed to AWS S3. The KoopBin V2 source (reverse-engineered last session via Stealth-Robbery) was loaded as the base, fully de-branded with all proxy tool signatures purged, and deployed to S3 (`agentiz` bucket) where `amazonaws.com`'s trusted categorization as Education/IT causes the site to pass 18 of 20 school filter checkers. SizNexus itself was not touched this session and remains in early-access monitoring mode.
 
 ## Phase Progress
-- SEO/filter bypass changes: 100% complete and live at `siznexus.org` (commit `b5db458`).
-- CSS polish pass: 100% complete and live.
-- Lightspeed recategorization: **Pending director action** — must submit at `https://www.lightspeedsystems.com/support/submiturl/`
-- Chrome Extension (`siz-extension/`): Feature complete, packaged (22.1 KB zip). Blocked on $5 Web Store fee. Bookmarklet unbuilt. Unchanged this session.
-- SizNexus main platform (Phase 3): All features live. In early-access monitoring mode.
-- shxdow portfolio: Unchanged. Social links (TikTok, X, YouTube) still placeholder.
+- Agentiz proxy rebuild: 100% complete, live at `http://agentiz.s3-website-us-east-1.amazonaws.com`
+- Filter bypass: 18/20 pass (GoGuardian blocks uncategorized — ongoing blocker)
+- All agentiz changes committed and pushed to `shxdowxxx/agentiz` main
+- SizNexus — Early Access: Live, unchanged this session
+- SizNexus — Lightspeed recategorization: **Pending director action** — submit at `https://www.lightspeedsystems.com/support/submiturl/`
+- Chrome Extension (`siz-extension/`): Feature complete, packaged. Blocked on $5 Web Store fee. Unchanged this session.
+- shxdow portfolio: Unchanged. Social links still placeholder.
 - siz-ai command hub: Unchanged. Not yet version-controlled.
 
 ## Last Session Summary
-Session `SIZ-20260504-0000` (2026-05-04) had two workstreams. (1) Stealth-Robbery: fully reverse-engineered KoopBin V2 (school proxy disguised as a Student Learning Portal — React + Vite + Tailwind, Ultraviolet + Scramjet + libcurl WASM). ~6 MB of source extracted to `stealth-robbery/extracted/koopbin/`. Key techniques logged: tab cloaking, boot screen pattern, named theme presets, PWA manifest, wallpaper+likes system, AI-crawler `robots.txt`. (2) SizNexus SEO/filter bypass: `index.html` updated with meta description, OG tags, Twitter Card, schema.org Organization JSON-LD, canonical URL, theme-color meta, and a title/hero copy rewrite to signal "Community/Social" to Lightspeed. `robots.txt` created blocking GPTBot/Claude-Web/anthropic-ai/PerplexityBot/Google-Extended/Bytespider/CCBot. `site.webmanifest` improved. `siznexus.css` received a polish pass: hero gradient text + bigger sizing, stats bar tablet breakpoint + shimmer border, bubbles rounded to 10px, nav saturate blur, splash gradient logo, modal spring animations, ticker wider fade, footer accent line, guest CTA radial glow, 4px silver global scrollbar. All committed as `b5db458`. One outstanding director action: submit `siznexus.org` to Lightspeed recategorization form.
+Session `SIZ-20260505-1200` (2026-05-05) rebuilt Agentiz entirely. The Electron desktop AI companion was scrapped. KoopBin V2 source (React + Vite + Tailwind, Ultraviolet + Scramjet + BareMux + libcurl WASM + Epoxy, extracted via Stealth-Robbery in the prior session) was loaded as a base and fully de-branded: all proxy engine names and variable prefixes replaced (UV→WebEngine, Scramjet→NetStream, BareMux→WorkerBus, `__uv$`→`__app$`, `__kb*`→`__ag*`), 25 adult domain URLs removed, the blooket 135KB cheat injector deleted, and robots meta corrected. A clean landing page was set at root `index.html` with the full proxy app at `app/index.html`. React Router path was fixed via `history.replaceState('/')` before React loads. Netlify and Cloudflare Pages both failed (security/domain policies). AWS S3 was selected as the primary host: `amazonaws.com` is pre-categorized as Education/IT by major school filters (the same domain inheritance trick as KoopBin's eastcountywireless.com setup). Bucket `agentiz` (us-east-1) deployed with public read + website hosting. `deploy.sh` created for one-command syncs. Filter testing: 18/20 pass (Lightspeed=Education, FortiGuard=IT, Palo Alto=Computer-and-Internet-Info, Cisco Umbrella=Cloud and Data Centers, AristotleK12=Allowed, ContentKeeper=Allowed, Securly=Other; GoGuardian=Uncategorized blocked). All commits pushed to `shxdowxxx/agentiz` main (latest: `b366ef2`). AWS CLI at `~/.local/bin/aws`, account 329435595007, orphan bucket `agentiz-organization` safe to delete.
