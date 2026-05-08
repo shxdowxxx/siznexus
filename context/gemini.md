@@ -1,34 +1,32 @@
 ---
-session_id: SIZ-20260505-1200
-date: 2026-05-05
-time: 12:00 UTC
-project: TheSizCorporation / SizNexus + Agentiz
+session_id: SIZ-20260507-2200
+date: 2026-05-07
+time: 22:00 UTC
+project: TheSizCorporation / ClaudeAA
 agent: SessionCloseoutAgent
 version: 2.0
-current_phase: Agentiz — Proxy Rebuild + AWS S3 Deploy
+current_phase: ClaudeAA — Initial Build
 ---
 
 # Gemini Context — SizNexus Project
 
 This file mirrors `context/claude.md`. All content is synchronized. See `context/claude.md` for full details.
 
-## Quick Reference — What Changed This Session (2026-05-05)
+## Quick Reference — What Changed This Session (2026-05-07)
 
-### Agentiz Project — Complete Rebuild
-The Agentiz repo at `/home/itzzzshxdow/agentiz/` (`shxdowxxx/agentiz`) was completely rebuilt:
-- Old Electron desktop AI companion scaffold was wiped
-- KoopBin V2 source (React + Vite + Tailwind, Ultraviolet/Scramjet/BareMux/libcurl WASM/Epoxy) loaded as base
-- All proxy tool names, variable prefixes, adult URLs, and the blooket cheat injector purged
-- Clean landing page at root `index.html`; full app at `app/index.html`
-- Deployed to AWS S3 (`agentiz` bucket, us-east-1) — 18/20 school filter checkers pass
-- `amazonaws.com` is categorized as Education/IT by major filters — same domain inheritance trick as the KoopBin/eastcountywireless.com pattern
-- Deploy: `./deploy.sh` from agentiz dir
-
-### Filter bypass discovery documented
-`amazonaws.com` pre-categorized as Education/IT. Any S3 static site inherits this. GoGuardian still blocks (categorizes as "Uncategorized" regardless of parent domain). Other cloud providers (Azure Blob, GCS, Cloudflare R2) likely worth testing if S3 ever gets recategorized.
+### ClaudeAA — New Windows Desktop AI Assistant (built this session)
+Brand new project built entirely from scratch at `C:\Users\itzzz\ClaudeAA\` (WSL: `/mnt/c/Users/itzzz/ClaudeAA/`):
+- **Stack:** Python + PyQt6, Anthropic SDK (streaming + full agentic tool loop), pynput (global hotkeys), mss (screen capture)
+- **Concept:** Dynamic Island-style always-on-top frameless widget at top-center of Windows screen. Expands to reveal streaming chat panel. Animated orb avatar (3 Lissajous light trails, additive QPainter blending, 5 states).
+- **12 system tools:** open_app, run_powershell, create/read/delete/move file, list_directory, search_files, browse_web, web_search, system_info, screenshot
+- **Global shortcuts:** Ctrl+Alt+Space (toggle), Ctrl+Alt+V (Vision), Ctrl+Alt+N (new conv), Ctrl+Alt+E (screenshot→Claude), Ctrl+Alt+Q (collapse)
+- **Vision mode:** Polls every 8 seconds with mss screen capture
+- **Config:** API key + shortcuts in `config.json`. Run `setup.bat` to install deps.
+- **Status:** Fully written. setup.bat NOT run yet. No GitHub remote. No real tray icon. Voice deferred.
+- **Key action:** Rotate the Anthropic API key in `config.json` — it was entered live during the session.
 
 ### No changes to SizNexus this session
-`siznexus.org` and all related files are unchanged from the previous session (commit `b5db458`). The Lightspeed recategorization submission is still outstanding (director action required).
+`siznexus.org` and all related files are unchanged. The Lightspeed recategorization submission is still outstanding (director action required).
 
 ## Repository
 - **Local path:** `/home/itzzzshxdow/siznexus-development/`

@@ -1,11 +1,11 @@
 ---
-session_id: SIZ-20260505-1200
-date: 2026-05-05
-time: 12:00 UTC
-project: TheSizCorporation / SizNexus + Agentiz
+session_id: SIZ-20260507-2200
+date: 2026-05-07
+time: 22:00 UTC
+project: TheSizCorporation / ClaudeAA
 agent: SessionCloseoutAgent
 version: 2.0
-current_phase: Agentiz — Proxy Rebuild + AWS S3 Deploy
+current_phase: ClaudeAA — Initial Build
 ---
 
 # Claude Context — SizNexus Project
@@ -229,17 +229,33 @@ A BIOS-style shell command hub built this session. Lives in `~/.local/bin/` — 
 - **Background fallback:** If `wt.exe` is not found, AI processes launch in background within the same terminal.
 - **Not version-controlled.** A dotfiles backup is recommended.
 
+## ClaudeAA — New Project (added 2026-05-07)
+A new standalone Windows desktop AI assistant built in a single session.
+
+- **Local path (Windows):** `C:\Users\itzzz\ClaudeAA\`
+- **Local path (WSL):** `/mnt/c/Users/itzzz/ClaudeAA/`
+- **GitHub:** NOT configured yet — no remote, not pushed
+- **Stack:** Python + PyQt6, Anthropic SDK (streaming + tool loop), pynput, mss
+- **Concept:** Dynamic Island-style always-on-top widget at top-center of screen. Animated orb (3 Lissajous light trails, additive QPainter blending, 5 states). Expands to streaming chat panel.
+- **Tools:** 12 system tools wired (open_app, run_powershell, create/read/delete/move file, list_directory, search_files, browse_web, web_search, system_info, screenshot)
+- **Shortcuts:** Ctrl+Alt+Space (toggle), Ctrl+Alt+V (Vision), Ctrl+Alt+N (new conv), Ctrl+Alt+E (screenshot→Claude), Ctrl+Alt+Q (collapse)
+- **Status:** Fully written. setup.bat NOT run yet (dependencies not installed). No real tray icon. Voice deferred. History panel skeleton only.
+- **Color:** Ultramarine blue #3D5AFE throughout
+- **Key reminder:** Rotate the Anthropic API key in `config.json` — it was entered live during the session.
+
 ## What Claude Should Prioritize Next Session
-1. **Director action reminder:** Lightspeed recategorization submission at `https://www.lightspeedsystems.com/support/submiturl/`.
-2. **Agentiz GoGuardian bypass** — GoGuardian blocks all uncategorized domains. Options: find a trusted root domain with DNS write access, or research other cloud storage providers.
-3. **Delete orphan AWS bucket `agentiz-organization`** to avoid unnecessary costs.
-4. **Test Agentiz end-to-end** on a real device — open `http://agentiz.s3-website-us-east-1.amazonaws.com`, enter a URL, verify proxy works.
-5. Monitor early-access user bug reports on the main SizNexus platform.
-6. **Backup siz-ai scripts** — copy `siz-ai`, `siz-claude`, `siz-codex`, `siz-gemini` from `~/.local/bin/` into a tracked dotfiles or tools repo.
-7. **Chrome Extension — Web Store submission:** Confirm $5 fee is paid, then upload `siz-extension.zip`. Create 1280x800 screenshots and write description.
-8. **Chrome Extension — Bookmarklet:** Build self-contained `javascript:` URI inject script on Cloudflare Pages.
-9. Add social links (TikTok, X, YouTube) on `shxdow/index.html` when the director provides them.
-10. Cloud Functions planning for Net auto-rewards (streaks, referrals) when the director is ready.
+1. **ClaudeAA — Run `setup.bat`** from `C:\Users\itzzz\ClaudeAA\` to install dependencies and test the app for the first time.
+2. **ClaudeAA — Create GitHub remote** — `git init`, `git remote add origin`, initial push so the project is version-controlled.
+3. **ClaudeAA — Rotate API key** in `config.json` — the key entered during the session should be refreshed.
+4. **Director action reminder:** Lightspeed recategorization submission at `https://www.lightspeedsystems.com/support/submiturl/`.
+5. **Agentiz GoGuardian bypass** — GoGuardian blocks all uncategorized domains. Options: find a trusted root domain with DNS write access, or research other cloud storage providers.
+6. **Delete orphan AWS bucket `agentiz-organization`** to avoid unnecessary costs.
+7. **Test Agentiz end-to-end** on a real device — open the S3 URL, enter a URL, verify proxy works.
+8. Monitor early-access user bug reports on the main SizNexus platform.
+9. **Backup siz-ai scripts** — copy from `~/.local/bin/` into a tracked dotfiles or tools repo.
+10. **Chrome Extension — Web Store submission:** Confirm $5 fee is paid, then upload `siz-extension.zip`. Create 1280x800 screenshots and write description.
+11. Add social links (TikTok, X, YouTube) on `shxdow/index.html` when the director provides them.
+12. Cloud Functions planning for Net auto-rewards (streaks, referrals) when the director is ready.
 
 ## Director Preferences (Persistent)
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased (Black Market) or semantic (threat banner).
