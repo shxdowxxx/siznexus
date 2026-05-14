@@ -1785,6 +1785,13 @@ async function loadAdminKeys(){
         <option value="logistics">Logistics</option>
         <option value="other">Other</option>
       </select>
+      <select id="missionSubTypeInput" class="input-field" style="font-size:.75rem;">
+        <option value="key">KEY only — members submit a secret key</option>
+        <option value="link">Link only — members paste a URL (no key required)</option>
+        <option value="text">Text only — members describe their work (no key)</option>
+        <option value="key_or_link">KEY + optional link — key required, link optional</option>
+      </select>
+      <input type="text" id="missionSubPromptInput" class="input-field" placeholder='Deliverable prompt (optional, e.g. "Paste your GitHub link")' maxlength="100" style="font-size:.75rem;">
       <button class="btn-primary" id="createMissionBtn" style="justify-content:center;font-size:.75rem;padding:8px;"><i class="fas fa-plus"></i> Create Mission</button>
       <div class="success-msg" id="missionCreateMsg">Mission created!</div>
     </div>
@@ -1801,7 +1808,9 @@ async function loadAdminKeys(){
     const btn=document.getElementById('createMissionBtn');
     btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
     const category=document.getElementById('missionCategoryInput')?.value||'';
-    try{await safeExec(db.collection('missions').add({title,description:desc,secretKey:key,points:pts,category,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}),'Mission created');
+    const submissionType=document.getElementById('missionSubTypeInput')?.value||'key';
+    const submissionPrompt=document.getElementById('missionSubPromptInput')?.value.trim()||'';
+    try{await safeExec(db.collection('missions').add({title,description:desc,secretKey:key,points:pts,category,submissionType,submissionPrompt,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}),'Mission created');
       const s=document.getElementById('missionCreateMsg');s.style.display='block';setTimeout(()=>s.style.display='none',2500);
     }catch(e){}
     btn.disabled=false;btn.innerHTML='<i class="fas fa-plus"></i> Create Mission';
@@ -1822,7 +1831,10 @@ async function loadAdminKeys(){
         <span class="admin-user-name" style="flex:1;">${esc(sub.displayName||'?')} — ${esc(sub.missionTitle||'?')}</span>
         <span class="mission-status ${keyMatch?'completed':'rejected'}">${keyMatch?'Key Correct':'Wrong Key'}</span>
       </div>
-      <div style="font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);">Submitted: <strong>${esc(sub.keySubmitted||'')}</strong> &nbsp;|&nbsp; Expected: <strong style="color:${keyMatch?'#4CAF50':'#f44336'};">${esc(correctKey)}</strong></div>
+      <div style="font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);">Submitted: <strong>${esc(sub.keySubmitted||'(no key)')}</strong> &nbsp;|&nbsp; Expected: <strong style="color:${keyMatch?'#4CAF50':'#f44336'};">${esc(correctKey)}</strong></div>
+      ${sub.submissionLink?`<div style="font-family:var(--font-mono);font-size:.67rem;margin-top:4px;">Deliverable: <a href="${esc(sub.submissionLink)}" target="_blank" rel="noopener noreferrer" style="color:var(--color-primary);word-break:break-all;">${esc(sub.submissionLink)}</a></div>`:''}
+      ${sub.submissionNote?`<div style="font-family:var(--font-mono);font-size:.65rem;color:var(--color-text-muted);margin-top:2px;font-style:italic;">${esc(sub.submissionNote)}</div>`:''}
+
       <div style="display:flex;gap:6px;">
         <button class="admin-save-rank" style="border-color:rgba(76,175,80,.4);color:#4CAF50;" data-sid="${sid}" data-uid="${sub.uid}" data-pts="${sub.points||50}" data-action="approve"><i class="fas fa-check"></i> Approve +${sub.points||50}Net</button>
         <button class="admin-save-rank" style="border-color:rgba(255,68,68,.4);color:#f55;" data-sid="${sid}" data-action="reject"><i class="fas fa-times"></i> Reject</button>
@@ -2525,6 +2537,34 @@ function openMissionBriefing(mission,mySub){
     statusEl.textContent='OPEN';statusEl.className='briefing-status briefing-status-open';
     myStatus.textContent='Available';
     keySection.style.display='';
+    // Configure deliverable section based on submissionType
+    const subType=mission.submissionType||'key';
+    const delivSection=document.getElementById('briefingDeliverableSection');
+    const keyRow=document.getElementById('briefingKeyRow');
+    const keyLabel=document.getElementById('briefingKeyLabel');
+    const keyHint=document.getElementById('briefingKeyHint');
+    const delivLabel=document.getElementById('briefingDeliverableLabel');
+    const delivHint=document.getElementById('briefingDeliverableHint');
+    const delivInput=document.getElementById('briefingDeliverableInput');
+    const delivNote=document.getElementById('briefingDeliverableNote');
+    if(delivInput)delivInput.value='';
+    if(delivNote)delivNote.value='';
+    if(subType==='key'||subType==='key_or_link'){
+      if(keyRow)keyRow.style.display='';
+      if(keyLabel)keyLabel.textContent='Submit Mission KEY';
+      if(keyHint)keyHint.innerHTML='Use the <strong>/key</strong> command in Discord to retrieve the KEY for this mission.';
+    }
+    if(subType==='link'||subType==='text'){
+      if(keyRow)keyRow.style.display='none';
+    }
+    if(subType==='link'||subType==='text'||subType==='key_or_link'){
+      if(delivSection)delivSection.style.display='';
+      if(delivLabel)delivLabel.textContent=mission.submissionPrompt||'Submit Your Work';
+      if(delivHint)delivHint.textContent=subType==='text'?'Describe your submission below.':'Paste a link to your work (GitHub, live URL, file, etc.).';
+      if(delivInput)delivInput.placeholder=subType==='text'?'Describe what you did...':'https://...';
+    } else {
+      if(delivSection)delivSection.style.display='none';
+    }
   }
   openModal('briefingModal');
   runCipherEffect(document.getElementById('briefingModal'));
@@ -2543,12 +2583,23 @@ async function submitMissionBriefing(){
     const btn=document.getElementById('briefingSubmitBtn');
     btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Transmitting...';
     try{
+      const delivInput=document.getElementById('briefingDeliverableInput');
+      const delivNote=document.getElementById('briefingDeliverableNote');
+      const subType=m.submissionType||'key';
+      // Validate deliverable requirement
+      if((subType==='link'||subType==='text')&&!delivInput?.value.trim()){
+        fb.textContent='Please fill in your submission.';fb.className='briefing-feedback err';
+        btn.disabled=false;btn.innerHTML='<i class="fas fa-key"></i> Submit';
+        return;
+      }
       await db.collection('missionSubmissions').add({
         uid:currentUser.uid,
         displayName:currentUserData?.displayName||'Unknown',
         missionId:m.id,
         missionTitle:m.title||'Mission',
         keySubmitted:keyVal,
+        submissionLink:(delivInput?.value||'').trim(),
+        submissionNote:(delivNote?.value||'').trim(),
         points:m.points||50,
         status:'pending',
         submittedAt:firebase.firestore.FieldValue.serverTimestamp(),

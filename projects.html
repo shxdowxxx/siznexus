@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Projects — TheSizNexus</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Real projects built by TheSizNexus members — apps, games, tools, and more.">
+<meta property="og:title" content="Projects — TheSizNexus">
+<meta property="og:description" content="Real projects built by Corp members.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://siznexus.org/projects.html">
+<link rel="icon" href="favicon/favicon.ico">
+<link rel="stylesheet" href="siznexus.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+.projects-public-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin:24px 0;}
+.proj-cta-banner{text-align:center;padding:32px 24px;border:1px solid rgba(192,192,192,.15);border-top:1px solid rgba(212,216,226,.25);border-radius:4px;background:linear-gradient(160deg,rgba(14,20,40,.98) 0%,rgba(10,15,26,.98) 100%);margin-top:32px;}
+.proj-cta-banner h2{font-family:var(--font-main);font-size:1.1rem;color:var(--color-text-light);margin-bottom:8px;letter-spacing:.08em;}
+.proj-cta-banner p{font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);margin-bottom:16px;line-height:1.7;}
+.pub-proj-count{font-family:var(--font-mono);font-size:.68rem;color:rgba(192,192,192,.4);margin-bottom:4px;}
+.projects-empty{font-family:var(--font-mono);font-size:.78rem;color:var(--color-text-muted);padding:40px 0;text-align:center;}
+@media(max-width:768px){.projects-public-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body class="static-page">
+<nav class="static-nav">
+  <a href="/" class="static-back">← TheSizNexus</a>
+  <div class="static-nav-links">
+    <a href="/tools.html">Tools</a>
+    <a href="/projects.html" style="color:var(--color-text-light);">Projects</a>
+    <a href="/about">About</a>
+  </div>
+</nav>
+<main class="static-main" style="max-width:1100px;">
+  <p class="static-eyebrow">// PROJECTS · TheSizNexus</p>
+  <h1>Member Projects</h1>
+  <p class="static-lead">Real things built by Corp members — web apps, desktop tools, games, scripts, and experiments. No fakes, no mockups.</p>
+  <p class="pub-proj-count" id="pubProjCount">Loading...</p>
+  <div class="projects-public-grid" id="pubProjectsGrid">
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+  </div>
+  <div class="proj-cta-banner">
+    <h2>// SHIP SOMETHING</h2>
+    <p>Corp members can post their own projects to this board.<br>Join TheSizNexus to share what you're building.</p>
+    <a href="/" class="btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;"><i class="fas fa-door-open"></i>Join TheSizNexus</a>
+  </div>
+  <p class="static-foot">© 2023–2026 $iz — All rights reserved.</p>
+</main>
+<footer class="static-footer">© TheSizNexus · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  const firebaseConfig={
+    apiKey:"AIzaSyBcfVGWx4PFU__CeYkpSlmac3SasqODBx4",
+    authDomain:"thesiznexus.firebaseapp.com",
+    projectId:"thesiznexus",
+    storageBucket:"thesiznexus.firebasestorage.app",
+    messagingSenderId:"654294052068",
+    appId:"1:654294052068:web:0cc5a7d3fd79f533a710f1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db=firebase.firestore();
+
+  function esc(s){
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderCard(p,id){
+    const techPills=(p.techStack||[]).slice(0,6).map(t=>`<span class="tech-pill">${esc(t)}</span>`).join('');
+    const screenshot=p.screenshotURL?`<img class="project-card-img" src="${esc(p.screenshotURL)}" loading="lazy" onerror="this.style.display='none'" alt="">`:'' ;
+    const repoLink=p.repoURL?`<a href="${esc(p.repoURL)}" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="font-size:.62rem;padding:5px 10px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"><i class="fas fa-code-branch"></i>Repo</a>`:'';
+    const liveLink=p.liveURL?`<a href="${esc(p.liveURL)}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="font-size:.62rem;padding:5px 10px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"><i class="fas fa-external-link-alt"></i>Live</a>`:'';
+    const likes=(p.likes||[]).length;
+    return `<div class="project-card">
+      ${screenshot}
+      <div class="project-card-body">
+        <div class="project-card-title">${esc(p.title||'Untitled Project')}</div>
+        <p class="project-card-desc">${esc((p.description||'').slice(0,200))}${(p.description||'').length>200?'…':''}</p>
+        ${techPills?`<div class="tech-pills-row">${techPills}</div>`:''}
+      </div>
+      <div class="project-card-footer">
+        <span style="font-family:var(--font-mono);font-size:.6rem;color:rgba(192,192,192,.4);flex:1;">${esc(p.authorName||'Unknown')}</span>
+        ${repoLink}${liveLink}
+        ${likes?`<span style="font-family:var(--font-mono);font-size:.62rem;color:rgba(192,192,192,.4);display:inline-flex;align-items:center;gap:4px;"><i class="fas fa-heart" style="font-size:.6rem;"></i>${likes}</span>`:''}
+      </div>
+    </div>`;
+  }
+
+  db.collection('projects').where('status','==','published').orderBy('createdAt','desc').limit(60)
+    .get().then(snap=>{
+      const grid=document.getElementById('pubProjectsGrid');
+      const count=document.getElementById('pubProjCount');
+      if(!snap.docs.length){
+        grid.innerHTML='<p class="projects-empty">No projects posted yet. Check back soon.</p>';
+        if(count)count.textContent='';
+        return;
+      }
+      grid.innerHTML=snap.docs.map(d=>renderCard(d.data(),d.id)).join('');
+      if(count)count.textContent=`${snap.docs.length} project${snap.docs.length!==1?'s':''} posted`;
+    }).catch(()=>{
+      db.collection('projects').where('status','==','published').get().then(snap=>{
+        const grid=document.getElementById('pubProjectsGrid');
+        const count=document.getElementById('pubProjCount');
+        if(!snap.docs.length){
+          grid.innerHTML='<p class="projects-empty">No projects posted yet. Check back soon.</p>';
+          if(count)count.textContent='';
+          return;
+        }
+        grid.innerHTML=snap.docs.map(d=>renderCard(d.data(),d.id)).join('');
+        if(count)count.textContent=`${snap.docs.length} project${snap.docs.length!==1?'s':''} posted`;
+      }).catch(()=>{
+        document.getElementById('pubProjectsGrid').innerHTML='<p class="projects-empty">Failed to load projects.</p>';
+      });
+    });
+})();
+</script>
+</body>
+</html>

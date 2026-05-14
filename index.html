@@ -753,11 +753,17 @@
       <p id="briefingDesc" class="briefing-desc">—</p>
     </div>
     <div class="briefing-key-section" id="briefingKeySection">
-      <span class="briefing-label">Submit Mission KEY</span>
-      <p class="briefing-hint">Use the <strong>/key</strong> command in Discord to retrieve the KEY for this mission.</p>
-      <div class="briefing-key-row">
+      <span class="briefing-label" id="briefingKeyLabel">Submit Mission KEY</span>
+      <p class="briefing-hint" id="briefingKeyHint">Use the <strong>/key</strong> command in Discord to retrieve the KEY for this mission.</p>
+      <div class="briefing-key-row" id="briefingKeyRow">
         <input type="text" class="briefing-key-input" id="briefingKeyInput" placeholder="ENTER KEY..." maxlength="30" autocomplete="off">
         <button class="btn-primary" id="briefingSubmitBtn"><i class="fas fa-key"></i> Submit</button>
+      </div>
+      <div class="briefing-deliverable-section" id="briefingDeliverableSection" style="display:none;margin-top:10px;">
+        <span class="briefing-label" id="briefingDeliverableLabel">Submit Your Work</span>
+        <p class="briefing-hint" id="briefingDeliverableHint">Paste a link or describe your submission.</p>
+        <input type="url" class="briefing-key-input" id="briefingDeliverableInput" placeholder="https://..." maxlength="500" autocomplete="off" style="margin-bottom:6px;font-size:.78rem;">
+        <textarea class="briefing-key-input" id="briefingDeliverableNote" placeholder="Optional context or notes (max 300 chars)..." maxlength="300" style="min-height:52px;font-size:.75rem;resize:vertical;"></textarea>
       </div>
       <div class="briefing-feedback" id="briefingFeedback"></div>
     </div>
@@ -1179,7 +1185,7 @@
 
 <footer>
   <div class="footer-links">
-    <a href="/about">About</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/roadmap.html">Roadmap</a><a href="#" onclick="openEngagementHub('tools');return false;">Tools</a>
+    <a href="/about">About</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/roadmap.html">Roadmap</a><a href="/tools.html">Tools</a><a href="/projects.html">Projects</a>
   </div>
   <div class="footer-copy">© 2023–2026 $iz — All rights reserved</div>
 </footer>

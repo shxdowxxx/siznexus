@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tools — TheSizNexus</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Browse community-built tools and utilities from TheSizNexus members — web apps, scripts, resources, and more.">
+<meta property="og:title" content="Tools — TheSizNexus">
+<meta property="og:description" content="Community-built tools and utilities from Corp members.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://siznexus.org/tools.html">
+<link rel="icon" href="favicon/favicon.ico">
+<link rel="stylesheet" href="siznexus.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+.tools-public-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin:24px 0;}
+.tools-cta-banner{text-align:center;padding:32px 24px;border:1px solid rgba(192,192,192,.15);border-top:1px solid rgba(212,216,226,.25);border-radius:4px;background:linear-gradient(160deg,rgba(14,20,40,.98) 0%,rgba(10,15,26,.98) 100%);margin-top:32px;}
+.tools-cta-banner h2{font-family:var(--font-main);font-size:1.1rem;color:var(--color-text-light);margin-bottom:8px;letter-spacing:.08em;}
+.tools-cta-banner p{font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);margin-bottom:16px;line-height:1.7;}
+.tools-empty{font-family:var(--font-mono);font-size:.78rem;color:var(--color-text-muted);padding:40px 0;text-align:center;}
+.pub-tool-count{font-family:var(--font-mono);font-size:.68rem;color:rgba(192,192,192,.4);margin-bottom:4px;}
+</style>
+</head>
+<body class="static-page">
+<nav class="static-nav">
+  <a href="/" class="static-back">← TheSizNexus</a>
+  <div class="static-nav-links">
+    <a href="/tools.html" style="color:var(--color-text-light);">Tools</a>
+    <a href="/projects.html">Projects</a>
+    <a href="/about">About</a>
+  </div>
+</nav>
+<main class="static-main" style="max-width:1100px;">
+  <p class="static-eyebrow">// TOOLS LIBRARY · TheSizNexus</p>
+  <h1>Member Tools</h1>
+  <p class="static-lead">Utilities, scripts, apps, and resources built and curated by Corp members. All tools are reviewed before publishing.</p>
+  <p class="pub-tool-count" id="pubToolCount">Loading...</p>
+  <div class="tools-public-grid" id="pubToolsGrid">
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+  </div>
+  <div class="tools-cta-banner">
+    <h2>// BUILD SOMETHING</h2>
+    <p>Members of TheSizNexus can submit their own tools for review.<br>Join the Corp to contribute to the library and access member-only features.</p>
+    <a href="/" class="btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;"><i class="fas fa-door-open"></i>Join TheSizNexus</a>
+  </div>
+  <p class="static-foot">© 2023–2026 $iz — All rights reserved.</p>
+</main>
+<footer class="static-footer">© TheSizNexus · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+  const firebaseConfig={
+    apiKey:"AIzaSyBcfVGWx4PFU__CeYkpSlmac3SasqODBx4",
+    authDomain:"thesiznexus.firebaseapp.com",
+    projectId:"thesiznexus",
+    storageBucket:"thesiznexus.firebasestorage.app",
+    messagingSenderId:"654294052068",
+    appId:"1:654294052068:web:0cc5a7d3fd79f533a710f1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db=firebase.firestore();
+  const CAT_LABELS={utility:'Utility',script:'Script',app:'App',resource:'Resource',other:'Other'};
+
+  function esc(s){
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderCard(t,id){
+    const cat=CAT_LABELS[t.category]||'Other';
+    const tags=(t.tags||[]).slice(0,5).map(tag=>`<span class="tech-pill">${esc(tag)}</span>`).join('');
+    const screenshot=t.screenshotURL?`<img class="tool-screenshot" src="${esc(t.screenshotURL)}" loading="lazy" onerror="this.style.display='none'" alt="">`:'' ;
+    return `<div class="tool-card">
+      ${screenshot}
+      <div class="tool-card-header">
+        <div class="tool-card-icon"><i class="fas fa-wrench"></i></div>
+        <div style="flex:1;min-width:0;">
+          <div class="tool-card-title">${esc(t.title||'Untitled Tool')}</div>
+          <span class="tool-cat-badge">${cat}</span>
+        </div>
+      </div>
+      <p class="tool-card-desc">${esc(t.shortDesc||'')}</p>
+      ${tags?`<div class="tech-pills-row">${tags}</div>`:''}
+      <div class="tool-card-footer">
+        <span>${esc(t.authorName||'Unknown')}</span>
+        <span>${t.viewCount||0} views</span>
+        <a class="tool-launch-btn btn-secondary" href="${esc(t.url)}" target="_blank" rel="noopener noreferrer" style="font-size:.65rem;padding:5px 12px;text-decoration:none;">
+          <i class="fas fa-external-link-alt" style="margin-right:4px;"></i>Launch
+        </a>
+      </div>
+    </div>`;
+  }
+
+  db.collection('tools').where('status','==','published').orderBy('publishedAt','desc').limit(60)
+    .get().then(snap=>{
+      const grid=document.getElementById('pubToolsGrid');
+      const count=document.getElementById('pubToolCount');
+      if(!snap.docs.length){
+        grid.innerHTML='<p class="tools-empty">No tools published yet. Check back soon.</p>';
+        if(count)count.textContent='';
+        return;
+      }
+      grid.innerHTML=snap.docs.map(d=>renderCard(d.data(),d.id)).join('');
+      if(count)count.textContent=`${snap.docs.length} tool${snap.docs.length!==1?'s':''} published`;
+    }).catch(()=>{
+      db.collection('tools').where('status','==','published').get().then(snap=>{
+        const grid=document.getElementById('pubToolsGrid');
+        const count=document.getElementById('pubToolCount');
+        if(!snap.docs.length){
+          grid.innerHTML='<p class="tools-empty">No tools published yet. Check back soon.</p>';
+          if(count)count.textContent='';
+          return;
+        }
+        grid.innerHTML=snap.docs.map(d=>renderCard(d.data(),d.id)).join('');
+        if(count)count.textContent=`${snap.docs.length} tool${snap.docs.length!==1?'s':''} published`;
+      }).catch(err=>{
+        document.getElementById('pubToolsGrid').innerHTML='<p class="tools-empty">Failed to load tools.</p>';
+      });
+    });
+})();
+</script>
+</body>
+</html>
