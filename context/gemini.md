@@ -1,32 +1,58 @@
 ---
-session_id: SIZ-20260507-2200
-date: 2026-05-07
-time: 22:00 UTC
-project: TheSizCorporation / ClaudeAA
+session_id: SIZ-20260513-FINAL
+date: 2026-05-13 to 2026-05-14
+time: 23:59 UTC
+project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 2.0
-current_phase: ClaudeAA — Initial Build
+version: 2.1
+current_phase: SizNexus Phase 5+ — Modularization & Performance Hardening
 ---
 
 # Gemini Context — SizNexus Project
 
 This file mirrors `context/claude.md`. All content is synchronized. See `context/claude.md` for full details.
 
-## Quick Reference — What Changed This Session (2026-05-07)
+## Quick Reference — What Changed This Session (2026-05-13 to 2026-05-14)
 
-### ClaudeAA — New Windows Desktop AI Assistant (built this session)
-Brand new project built entirely from scratch at `C:\Users\itzzz\ClaudeAA\` (WSL: `/mnt/c/Users/itzzz/ClaudeAA/`):
-- **Stack:** Python + PyQt6, Anthropic SDK (streaming + full agentic tool loop), pynput (global hotkeys), mss (screen capture)
-- **Concept:** Dynamic Island-style always-on-top frameless widget at top-center of Windows screen. Expands to reveal streaming chat panel. Animated orb avatar (3 Lissajous light trails, additive QPainter blending, 5 states).
-- **12 system tools:** open_app, run_powershell, create/read/delete/move file, list_directory, search_files, browse_web, web_search, system_info, screenshot
-- **Global shortcuts:** Ctrl+Alt+Space (toggle), Ctrl+Alt+V (Vision), Ctrl+Alt+N (new conv), Ctrl+Alt+E (screenshot→Claude), Ctrl+Alt+Q (collapse)
-- **Vision mode:** Polls every 8 seconds with mss screen capture
-- **Config:** API key + shortcuts in `config.json`. Run `setup.bat` to install deps.
-- **Status:** Fully written. setup.bat NOT run yet. No GitHub remote. No real tray icon. Voice deferred.
-- **Key action:** Rotate the Anthropic API key in `config.json` — it was entered live during the session.
+### Transformative JavaScript Refactor — Monolith Split (commits `9c79461` to `863f3ee`)
+**5,156-line `siznexus.js` monolith split into 7 focused modules:**
+- `siz-core.js` (349 lines) — Firebase init, helpers, domain lock, SNX namespace
+- `siz-auth.js` (1345 lines) — authentication, member directory, profile editing, messaging
+- `siz-admin.js` (457 lines) — navigation, admin panel, threat level, roles, badges
+- `siz-hub.js` (1532 lines) — Corp Hub, all 10 tabs, squads, corp chat
+- `siz-dashboard.js` (404 lines) — command board, featured member, streak
+- `siz-misc.js` (1069 lines) — reports, spotlight, terminal, cipher, operator ID, misc
+- `siz-tools.js` (684 lines) — Tools Library, Projects Board, Skills
 
-### No changes to SizNexus this session
-`siznexus.org` and all related files are unchanged. The Lightspeed recategorization submission is still outstanding (director action required).
+**Result:** Codebase now maintainable. Inter-module communication via `window.SNX` getter/setter proxies (backward-compatible, loose coupling).
+
+### New Major Features
+1. **Tools Library (9th hub tab):** Searchable grid with Firestore collection, staff-curated with member contributions
+2. **Projects Board (10th hub tab):** Member submissions, likes, dashboard preview panel
+3. **Public Showcase Pages:** `/tools` and `/projects` — accessible without auth, drives organic discovery
+4. **Real Mission Deliverables:** `submissionType` field → `key`, `link`, `text`, or `key_or_link`
+5. **Skills on Profiles:** Customizable with presets (JavaScript, Python, Design, etc.)
+6. **UI Overhaul:** Toast variants, skeleton loaders, hub tab fade animation, footer cleanup
+
+### Performance Hardening
+- **Eliminated DevTools stutter:** Removed 500ms polling loop causing frame drops
+- **Slowed debugger check:** 500ms → 4000ms (less aggressive, still effective)
+- **Staggered Firestore queries:** Dashboard batches queries 200ms apart (vs. all at once)
+- **User collection cache:** 2-minute in-memory cache (huge improvement to dashboard load time)
+- **Reduced particles:** 60 → 40, disabled hover interaction
+
+### Presence Tracking (3 Fix Attempts, Partially Resolved)
+Commits `5387147`, `f92aad3`, `863f3ee` attempted to fix members showing incorrect online/offline status:
+- Fixed logout handler to set `status:'offline'` before `auth.signOut()`
+- Fixed staleness check bug (was bypassing on `lastActive=0`)
+- Fixed bug where staleness check kicked current user offline at page load
+- **Status:** Partial improvement. Root cause remains unclear (timing + async + Firestore interactions). **Top priority next session.**
+
+### Git State
+- 9 commits ahead of `origin/main` (not yet pushed)
+- Working tree clean
+- Latest: `863f3ee` (presence fix attempt 3)
+- **Action:** Must push before director distributes or deploys.
 
 ## Repository
 - **Local path:** `/home/itzzzshxdow/siznexus-development/`

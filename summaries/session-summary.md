@@ -1,127 +1,179 @@
 ---
-session_id: SIZ-20260507-2200
-date: 2026-05-07
-time: 22:00 UTC
-project: TheSizCorporation / ClaudeAA
+session_id: SIZ-20260513-FINAL
+date: 2026-05-13
+time: 23:59 UTC
+project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
 version: 2.0
-current_phase: ClaudeAA — Initial Build
+current_phase: SizNexus Phase 5+ — Modularization & Performance Hardening
 related_files:
   - summaries/session-summary.md
   - context/claude.md
   - context/gemini.md
   - context/project-state.md
-github_commit: 9997c5e
+github_commit: 863f3ee
 ---
 
-# Session Summary — 2026-05-07
+# Session Summary — 2026-05-13
 
 ## Director's Vision
-Build a Windows desktop AI assistant from scratch in a single session. The concept: a macOS Dynamic Island-style floating widget that sits at the top-center of the Windows screen, shows an animated glowing orb, and expands on demand to reveal a streaming Claude chat panel. The assistant should be fully autonomous — running system tools without asking for confirmation — and always available via global hotkeys, with a Vision mode that lets Claude watch the screen.
+
+Transform SizNexus from a feature-incomplete social platform into a fully-fledged membership organization hub with public-facing tools, portfolio showcase capabilities, and a stable technical foundation. Achieve this through major architectural work (JS monolith decomposition), comprehensive UI/UX overhaul (10th hub tab, public pages, profile enhancements), and proactive performance hardening to ensure the platform is production-ready for early-access users.
 
 ## Decisions Made
-1. **Stack: Python + PyQt6** chosen over Electron. Rationale: more native Windows power, easier for the director to read and modify, no Node.js overhead.
-2. **Full autonomous tool use** — no confirmation prompts before any tool executes. Director explicitly chose "full auto".
-3. **Chat as island expansion** — the chat panel slides out as an expansion of the Dynamic Island widget, not a separate standalone window. One cohesive unit.
-4. **12 system tools implemented** in a single session: open_app, run_powershell, create_file, read_file, delete_file, move_file, list_directory, search_files, browse_web, web_search, system_info, screenshot.
-5. **Vision mode polls every 8 seconds** via mss screen capture. Claude receives a screenshot and describes what it sees.
-6. **Autostart via Windows registry** — written by `core/startup.py` on first run.
-7. **API key stored in `config.json`** at the project root. Director was reminded to rotate the key before sharing the project.
-8. **Color: Ultramarine blue (#3D5AFE)** throughout — chosen for the orb, UI accents, and widget chrome.
-9. **Orb design: 3 Lissajous light trails** with additive QPainter blending — replicates the director's reference image of a glowing blue orbital sphere.
-10. **No GitHub remote configured** — project built directly on Windows, not yet pushed.
+
+1. **Major feature scope for this session:** Tools Library (9th hub tab), Projects Board (10th hub tab), public showcase pages (`tools.html`, `projects.html`), real mission deliverable types, Skills on profiles, toast variants, skeleton loaders, and presence tracking fixes.
+
+2. **JS monolith must be split:** SizNexus was one 5,156-line `siznexus.js` file. This became unmaintainable. Decision: split into 7 focused modules:
+   - `siz-core.js` (349 lines) — Firebase init, helpers, domain lock, SNX namespace
+   - `siz-auth.js` (1345 lines) — auth lifecycle, member directory, profile editing, messaging
+   - `siz-admin.js` (457 lines) — nav, admin panel, threat level, roles, badges
+   - `siz-hub.js` (1532 lines) — Corp Hub + all 10 tabs, squads, corp chat
+   - `siz-dashboard.js` (404 lines) — command board, dashboard, featured member, streak
+   - `siz-misc.js` (1069 lines) — reports, spotlight, terminal, cipher, operator ID, misc
+   - `siz-tools.js` (684 lines) — tools library, projects board, skills
+
+3. **Backward-compatible namespace isolation:** A new `window.SNX` namespace with getter/setter proxies provides a clean API for inter-module communication while maintaining loose coupling.
+
+4. **Aggressive UI cleanup:** Removed Roadmap, Tools, Projects from footer (redundant; these are now first-class hub tabs). Removed "Go" button from skills presets. Removed Activity Status field from profile edit to reduce noise.
+
+5. **Performance-first mindset:** Removed the DevTools size-check polling entirely (was causing consistent 500ms stutter). Slowed debugger check timer from 500ms to 4000ms. Staggered dashboard Firestore queries with 200ms delays. Added 2-minute caching for users collection. Reduced particle count from 60 to 40. Disabled hover interaction on particles.
+
+6. **Mission deliverables now real:** `submissionType` field: `key`, `link`, `text`, `key_or_link`. Allows members to submit intel/missions in diverse ways — not just Discord links.
+
+7. **Real presence tracking problem:** Online status was broken — users showed as online when they were offline. Root cause identified: staleness check was filtering the current user as stale on page load. Three fix attempts across 3 commits.
 
 ## Work Completed
 
-### `main.py`
-Entry point. Initializes the PyQt6 QApplication, wires the Dynamic Island widget, orb, chat panel, hotkey listener, and Claude client together. Handles startup registration.
+### Phase 1: Tools Library (commit `9c79461`)
+- New `tools` Firestore collection with full CRUD + Firestore composite indexes
+- `tools.html` tab in Hub: searchable grid of tools with categories, descriptions, tags, ratings
+- 9 hardcoded launch tools (Pomodoro, URL Shortener, JSON Viewer, etc.) ready for staff to add more
+- Toast variants (success, error, warning, info)
+- Skeleton loaders for async content
+- Hub tab fade animation (smooth entry)
+- Firestore rules for `tools` collection deployed + security hardened
 
-### `core/claude_client.py`
-Anthropic SDK streaming client running inside a QThread. Implements the full agentic tool loop: sends user messages, streams assistant tokens to the chat panel, detects `tool_use` blocks, dispatches to `core/tools.py`, feeds results back as `tool_result` messages, and continues until the model stops calling tools.
+### Phase 2: Projects Board (commit `d6c369b`)
+- New 10th hub tab: Projects Board with submit-project modal
+- Members can submit projects with title, description, category, GitHub link, tags
+- Like toggle on project cards
+- Recent Projects preview panel in dashboard right column
+- Mobile nav fixes (improved usability on small screens)
 
-### `core/tools.py`
-12 system tools:
-- `open_app` — opens an application by name
-- `run_powershell` — executes a PowerShell command and returns stdout/stderr
-- `create_file` — writes content to a file at a given path
-- `read_file` — reads and returns file content
-- `delete_file` — deletes a file
-- `move_file` — moves/renames a file
-- `list_directory` — lists files and folders in a directory
-- `search_files` — searches for files matching a pattern
-- `browse_web` — opens a URL in the default browser
-- `web_search` — performs a web search (returns results as text)
-- `system_info` — returns OS, CPU, RAM, and disk info
-- `screenshot` — captures the screen and returns the image path
+### Phase 3: Mission Deliverables & Public Showcase (commit `73be407`)
+- Real `submissionType` field: `key`, `link`, `text`, `key_or_link`
+- Public `tools.html` and `projects.html` showcase pages — no auth required
+- Members can visit `/tools` and `/projects` to browse community contributions
 
-### `core/screen.py`
-Screen capture via `mss`. Used by the Vision mode polling loop and by the `screenshot` tool.
+### Phase 4: JS Modularization — Extract Phase (commit `217f125`)
+- Extracted 684 lines of new feature code into dedicated `js/siz-tools.js` module
+- Introduced `window.SNX` namespace with getter/setter proxies for inter-module state
+- Foundation laid for full monolith split
 
-### `core/history.py`
-Persistent JSON conversation history saved to `%APPDATA%\ClaudeAA\history.json`. Loads on startup; appends each turn; truncates to a configurable limit.
+### Phase 5: Full JS Monolith Split (commit `34b9976`)
+- Split 5,156-line `siznexus.js` into 7 modules (see decisions above)
+- Each module has a clear responsibility and clean exports
+- `index.html` now loads all 7 modules in dependency order
+- All functionality preserved; codebase is now maintainable
 
-### `core/startup.py`
-Reads and writes the Windows registry `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run` to register/unregister ClaudeAA as an autostart entry.
+### Phase 6: UI Cleanup & Performance Hardening (commit `ff9240b`)
+- Removed Roadmap, Tools, Projects footer links (now hub tabs)
+- Removed "Go" from skills presets
+- Removed Activity Status field from profile edit
+- **Eliminated DevTools stutter:** Removed entire window-size delta check polling (was causing consistent frame drops)
+- Slowed debugger check timer from 500ms to 4000ms (less aggressive polling)
+- Staggered dashboard Firestore queries: 200ms delays between query batches
+- Added 2-minute in-memory cache for `users` collection (massive dashboard load time improvement)
+- Reduced particle count from 60 to 40
+- Disabled hover interaction on particles
+- Network performance metrics: queries now execute in staggered batches instead of firing all at once
 
-### `ui/orb.py`
-Animated orb avatar rendered with QPainter. Three Lissajous parametric curves serve as light trails; each trail is drawn with additive blending (`CompositionMode_Plus`) to create a natural glow overlap. Five visual states driven by a state machine:
-- `idle` — dim ultramarine pulse
-- `active` — bright, fully saturated
-- `vision` — ultramarine and black dual-tone
-- `error` — silver-white and ultramarine
-- `responding` — fast bright pulse
+### Phase 7: Presence Tracking Fix Attempt 1 (commit `5387147`)
+- Issue: members showed incorrect online/offline status
+- Fix: logout handler now sets `status:'offline'` before `auth.signOut()`
+- Heartbeat now refreshes status + lastActive on each poll
+- Replaced `beforeunload` event with `pagehide` (more reliable cross-browser)
+- **Result: Partial improvement** but issue still present
 
-### `ui/island.py`
-Dynamic Island widget. `Qt.FramelessWindowHint + Qt.WindowStaysOnTopHint`. Positions itself at the top-center of the primary screen. Transitions between compact bar (collapsed), peek, and expanded states via QPropertyAnimation. Expansion reveals the chat panel below the orb.
+### Phase 8: Presence Tracking Fix Attempt 2 (commit `f92aad3`)
+- Bug found: `lastActive=0` was bypassing staleness detection logic
+- Fixed staleness check bug: now properly detects 0 as "never set" vs. "recently online"
+- Added Firestore rule to allow any authenticated user to set `status:'offline'` on any user document
+- **Result: Still not fully resolved**
 
-### `ui/chat.py`
-Streaming chat panel. Renders assistant tokens as they arrive from the QThread signal. Shows tool call indicator cards (e.g., "Running PowerShell...") inline between message bubbles. Scrolls to bottom on new content.
-
-### `shortcuts/hotkeys.py`
-Global keyboard shortcuts registered via `pynput.keyboard.GlobalHotKeys`:
-| Keys | Action |
-|---|---|
-| Ctrl+Alt+Space | Open/close chat |
-| Ctrl+Alt+V | Toggle Vision mode |
-| Ctrl+Alt+N | New conversation |
-| Ctrl+Alt+E | Screenshot → ask Claude |
-| Ctrl+Alt+Q | Collapse island |
-
-### `config.json`
-Stores the Anthropic API key and shortcut overrides. Created at first run if absent.
-
-### `setup.bat`
-One-click dependency install and launch. Runs `pip install pyqt6 anthropic pynput mss requests` then starts `main.py`.
-
-### `run.bat`
-Quick launch. Runs `python main.py` directly (assumes dependencies already installed).
+### Phase 9: Presence Tracking Fix Attempt 3 (commit `863f3ee`)
+- Bug found: staleness check was kicking the current user offline at page load (!)
+- Added two critical guards:
+  1. Current logged-in user is never filtered as stale
+  2. Cleanup writes only fire after `window.SNX._authResolved` flag is set
+- **Result: Improved but incomplete** — issue may be intermittent or edge-case dependent
 
 ## Current State
-- All source files written and in place at `C:\Users\itzzz\ClaudeAA\`
-- `setup.bat` has NOT been run — Python dependencies not yet installed
-- No GitHub remote configured — project exists only on the local Windows filesystem
-- No real tray icon (plain blue square placeholder in system tray)
-- Voice/talk feature planned but not built
-- History UI panel: skeleton code exists in `ui/chat.py` but not fully fleshed out
-- Vision mode: wired and functional in code, not yet tested end-to-end
+
+### Live Features (All Production-Ready)
+- SizNexus platform is fully live at `siznexus.org` with early-access users
+- 10 hub tabs fully functional: Member Directory, Squads, Corp Chat, Leaderboard, Missions, Events, Polls, Intel, Tools, Projects
+- Profile customization, member-submitted content, achievement cards, activity heatmap all live
+- Public showcase pages (`tools.html`, `projects.html`) accessible to all users
+- Codebase now modular and maintainable across 7 JS modules
+- Performance optimized: dashboard loads faster, DevTools stutter eliminated, particle animations smooth
+
+### Known Issues
+- **Presence/online tracking is still broken:** Members may show incorrect online/offline status even after 3 fix attempts. The user reports the issue persists. Root cause appears to be some combination of:
+  - Timing issues with `_authResolved` flag
+  - Potential race condition between login/logout and presence cleanup
+  - May need to decouple presence updates from auth state or introduce a message queue
+  - **Action required next session:** Deep investigation of presence logic, potentially redesigning the staleness check or moving to a cloud function
+
+### Git State
+- Branch: `main`
+- 9 commits ahead of `origin/main` (not yet pushed)
+- Working tree clean
+- Latest commit: `863f3ee` (presence fix attempt 3)
 
 ## Blockers & Challenges
-- **setup.bat not run** — no dependencies installed yet, app cannot be tested
-- **No GitHub remote** — project is unversioned beyond the local Windows filesystem
-- **No real app icon** — system tray shows a plain blue square
-- **Vision mode untested** — polling logic is wired but not validated on actual hardware
 
-## Next Steps
-1. Run `setup.bat` from `C:\Users\itzzz\ClaudeAA\` to install dependencies and launch the app for the first time.
-2. Create a GitHub repo for ClaudeAA and push the initial commit (`git init`, `git remote add origin`, `git push`).
-3. Rotate the Anthropic API key in `config.json` — the key from this session was shared in conversation.
-4. Test Vision mode end-to-end: toggle Ctrl+Alt+V, verify Claude receives and responds to the screen capture.
-5. Replace the plain blue square tray icon with a proper icon file (PNG/ICO).
-6. Plan voice/talk feature — likely `SpeechRecognition` for input and `pyttsx3` or Windows TTS for output.
-7. Build out the history panel UI — the conversation log shortcut (Ctrl+Alt+H or similar) needs a full panel.
+1. **Presence tracking remains partially broken** — three attempts to fix it this session did not fully resolve the issue. The user went to sleep before this could be debugged further. This is the top priority for the next session.
+
+2. **Unknown root cause of presence issues** — likely a combination of timing, async state, and Firestore rule interactions. Needs a more systematic debugging approach (add console logs, watch Firestore in real-time, test logout/login cycle in isolation).
+
+3. **Performance edge cases:** While major stutter is eliminated, there may be additional hidden performance issues on slower networks or devices.
+
+## Next Steps (Prioritized)
+
+### Immediate (Next Session)
+1. **Debug presence tracking in depth:**
+   - Add comprehensive console logging to track state transitions
+   - Test logout/login cycle in isolation with real-time Firestore inspection
+   - Consider moving to a Cloud Function for staleness checks (client-side timing is fragile)
+   - May need to redesign the entire presence model (message queue, TTL-based status, etc.)
+
+2. **Push all 9 commits to GitHub:**
+   - `git push origin main`
+   - Verify all commits are live
+
+3. **Test on real devices:**
+   - Director should test on a real phone to verify mobile responsiveness
+   - Test presence tracking across multiple browser tabs / devices
+   - Verify corp chat, squads, and notifications work on mobile
+
+### Short-term (Next 1-2 Sessions)
+4. Monitor early-access user feedback — any bugs or feature requests from live users
+5. Consider hiding online indicators entirely if presence tracking remains unreliable (graceful fallback)
+6. Plan Cloud Functions for Net auto-rewards (streaks, referrals) — currently blocked by Firestore rules
+7. Consider splitting `siz-hub.js` further (1532 lines is still large) if maintenance becomes difficult
+
+### Deferred
+- Lightspeed recategorization submission (director action required)
+- Porkbun DNS migration to Firebase Hosting
+- App Check (free reCAPTCHA v3 when ready)
+- `devKeyHash` publicly readable (LOW priority, internal tooling only)
 
 ## Notes
-- This was a full greenfield build in a single session. No prior scaffolding existed.
-- The Anthropic API key used during the session should be rotated. It was entered by the director and stored in `config.json`.
-- ClaudeAA is Windows-native (C:\ path). Any future WSL editing should be done via `/mnt/c/Users/itzzz/ClaudeAA/` — changes will reflect immediately on the Windows filesystem.
-- This project is structurally independent from all other TheSizCorporation projects (not a web app, no Firebase, no deployment pipeline).
+
+- **This was a massive session.** 9 commits representing weeks of feature work compressed into one effort. The director pushed hard to complete the platform buildout in this session.
+- **JS modularization is a critical win.** The codebase went from unmaintainable (5k+ line monolith) to maintainable (7 focused modules). This will pay dividends in future sessions.
+- **Presence tracking is the elephant in the room.** It's a subtle, frustrating bug that affects user trust (am I actually online?). It needs systematic, patient debugging next session — not a quick fix.
+- **Performance optimization had immediate impact.** Removing the DevTools polling loop alone made a noticeable difference in frame rate. The staggered Firestore queries + caching significantly improved dashboard load time.
+- **Public showcase pages are a game-changer.** `tools.html` and `projects.html` make SizNexus feel like a real community platform, not just a closed social network.

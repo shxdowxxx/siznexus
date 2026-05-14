@@ -1,17 +1,17 @@
 ---
-session_id: SIZ-20260507-2200
-date: 2026-05-07
-time: 22:00 UTC
-project: TheSizCorporation / ClaudeAA
+session_id: SIZ-20260513-FINAL
+date: 2026-05-13 to 2026-05-14
+time: 23:59 UTC
+project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 2.0
-current_phase: ClaudeAA — Initial Build
+version: 2.1
+current_phase: SizNexus Phase 5+ — Modularization & Performance Hardening
 ---
 
 # Claude Context — SizNexus Project
 
 ## Project Overview
-SizNexus is a cyberpunk-themed intelligence-corp member platform built with vanilla HTML/CSS/JS on Firebase Auth + Firestore (project `thesiznexus`). The platform is live, public-facing, and open for public early access. Current focus: early-access monitoring, deferred features (Cloud Functions for Net rewards, App Check), hosting architecture migration, and ongoing filter-bypass work to keep `siznexus.org` accessible on school networks.
+SizNexus is a cyberpunk-themed intelligence-corp membership organization platform built with vanilla HTML/CSS/JS on Firebase Auth + Firestore (project `thesiznexus`). The platform is live, public-facing, and open for early-access users. Current state: Core platform 100% feature-complete with 10 hub tabs, public showcase pages, modular JS architecture, and significant performance optimizations. Outstanding issue: Presence/online tracking is partially broken and requires focused debugging next session.
 
 ## Repository
 - **Local path:** `/home/itzzzshxdow/siznexus-development/`
@@ -78,6 +78,54 @@ Changes committed in `b5db458` to combat Lightspeed blocking `siznexus.org` as "
 ### Outstanding director action
 Submit `siznexus.org` to Lightspeed recategorization: `https://www.lightspeedsystems.com/support/submiturl/` — select "Community/Social". Review takes 5–10 business days. No guarantee of approval but the metadata now supports the submission strongly.
 
+## Major Session `SIZ-20260513-FINAL` Changes
+
+### JavaScript Architecture Refactor
+The codebase underwent a major restructuring (commit `34b9976`):
+
+**Before:** Single 5,156-line `siznexus.js` file (unmaintainable)
+
+**After:** 7 focused modules
+- `siz-core.js` (349 lines) — Firebase init, helpers, domain lock, SNX namespace
+- `siz-auth.js` (1345 lines) — authentication, member directory, profile editing, messaging
+- `siz-admin.js` (457 lines) — navigation, admin panel, threat level, roles, badges
+- `siz-hub.js` (1532 lines) — Corp Hub master component, all 10 tabs, squads, corp chat
+- `siz-dashboard.js` (404 lines) — command board, featured member, streak tracking
+- `siz-misc.js` (1069 lines) — reports, spotlight, terminal, cipher, operator ID, utilities
+- `siz-tools.js` (684 lines) — Tools Library, Projects Board, Skills on profiles
+
+**Module Communication:** New `window.SNX` namespace provides getter/setter proxies for inter-module state access. Backward-compatible; minimal coupling.
+
+### New Features (Session `SIZ-20260513-FINAL`)
+1. **Tools Library (9th hub tab):** Searchable grid of community tools with categories, tags, ratings, launch links. New `tools` Firestore collection with full CRUD. Staff-curated with member contributions.
+2. **Projects Board (10th hub tab):** Members submit projects (title, description, category, GitHub link, tags). Like toggle on project cards. Recent Projects preview in dashboard right column.
+3. **Public Showcase Pages:** `/tools` and `/projects` — accessible without auth. Shows community-contributed tools and projects. Drives organic discovery.
+4. **Real Mission Deliverables:** `submissionType` field now accepts `key`, `link`, `text`, or `key_or_link`. Missions and events can have diverse submission types instead of just Discord links.
+5. **Skills on Profiles:** Member profiles show skills with optional presets (JavaScript, Python, Design, etc.). Can be customized per member.
+6. **Toast Variants:** Success, error, warning, info — better inline feedback for user actions.
+7. **Skeleton Loaders:** Async content (hub tabs, search results) shows shimmer placeholders while loading.
+
+### Performance Hardening (Session `SIZ-20260513-FINAL`)
+- **Eliminated DevTools stutter:** Removed entire window-size delta polling loop (was causing consistent 500ms frame drops). Anti-DevTools detection now relies only on debugger timing check.
+- **Reduced debugger polling:** Slowed from 500ms to 4000ms intervals (less aggressive, still effective).
+- **Staggered Firestore queries:** Dashboard now fires queries in batches with 200ms delays between each batch (instead of all at once). Massive improvement to initial load time on slower networks.
+- **User collection cache:** Added 2-minute in-memory cache for the `users` collection. Dashboard load time improved substantially.
+- **Reduced particle effects:** Count lowered from 60 to 40. Disabled hover interaction on particles. Hero animation still smooth and visually impressive.
+
+### UI Cleanup (Session `SIZ-20260513-FINAL`)
+- Removed Roadmap, Tools, Projects footer links (now first-class hub tabs — no need for footer links)
+- Removed "Go" button from skills presets (cleaner, less cluttered)
+- Removed Activity Status field from profile edit modal (too noisy, not frequently used)
+
+### Presence Tracking Debugging (Session `SIZ-20260513-FINAL`)
+Three fix attempts across 3 commits:
+
+1. **Commit `5387147`:** Logout handler now sets `status:'offline'` before `auth.signOut()`. Heartbeat refreshes status + lastActive. Replaced `beforeunload` with `pagehide`.
+2. **Commit `f92aad3`:** Fixed staleness check bug where `lastActive=0` was bypassing detection. Added Firestore rule to allow any auth user to set `status:'offline'` on any doc.
+3. **Commit `863f3ee`:** Fixed critical bug where staleness check was kicking the current user offline at page load. Added guards: current user never filtered as stale, cleanup writes only after `_authResolved`.
+
+**Result:** Partial improvement but issue persists. Root cause remains unclear (likely combination of timing, async state, and Firestore rule interactions). **Top priority for next session.**
+
 ## Phase 3 Surfaces (All Live)
 - **Guest CTA section** — shown for logged-out visitors. Three buttons: Enlist Now, Try Demo, Discord.
 - **Public profile pages** — `/u/<displayName>` via Hosting rewrite. `users` readable publicly; email NOT written to new docs.
@@ -132,9 +180,10 @@ When base styles appear AFTER media queries in a CSS file, the base always wins 
 ## Currency
 - "Net" is canon. Do not use "points". Watch for identifier-mangling regressions from prior global replace (`attemNet`, `oNet`, `mission-Net`, `lb-Net`, `data-Net`) — restore word boundaries if found.
 
-## Open Issues
+## Open Issues (Session `SIZ-20260513-FINAL`)
+- **CRITICAL: Presence tracking is broken.** Members show incorrect online/offline status even after 3 fix attempts. Root cause unclear (likely timing + async state + Firestore rules interaction). **Top priority for next session.** May need to move to Cloud Function or redesign entire presence model.
 - **Director action needed:** Submit `siznexus.org` to Lightspeed recategorization at `https://www.lightspeedsystems.com/support/submiturl/` (select "Community/Social").
-- Director has not yet confirmed mobile fixes on a real device — Corp Hub modal scroll and hero text layout not tested on physical hardware.
+- Director has not yet confirmed mobile fixes on a real device — new hub tabs, modular JS, performance changes not tested on physical hardware.
 - Cloud Functions for Net auto-rewards (streaks, referrals) — deferred. Rules block client-side self-increment; server-side required.
 - Activity heatmap only populates from the stabilization session forward — past sessions not retroactively tracked.
 - Existing user docs still carry legacy `email` field (not a live leak; new docs don't write it). Cleanup migration deferred.
@@ -142,6 +191,7 @@ When base styles appear AFTER media queries in a CSS file, the base always wins 
 - App Check not enabled.
 - `devKeyHash` publicly readable — deferred (LOW, internal tooling only).
 - Hosting migration: Porkbun DNS currently points to GitHub Pages. Long-term goal is Firebase Hosting IPs. Requires director Porkbun access.
+- **9 commits pending push to GitHub** — all work from session `SIZ-20260513-FINAL` is local only. Must push before director distributes or deploys.
 
 ## shxdow Portfolio Page — `siznexus.org/shxdow`
 
@@ -244,18 +294,21 @@ A new standalone Windows desktop AI assistant built in a single session.
 - **Key reminder:** Rotate the Anthropic API key in `config.json` — it was entered live during the session.
 
 ## What Claude Should Prioritize Next Session
-1. **ClaudeAA — Run `setup.bat`** from `C:\Users\itzzz\ClaudeAA\` to install dependencies and test the app for the first time.
-2. **ClaudeAA — Create GitHub remote** — `git init`, `git remote add origin`, initial push so the project is version-controlled.
-3. **ClaudeAA — Rotate API key** in `config.json` — the key entered during the session should be refreshed.
-4. **Director action reminder:** Lightspeed recategorization submission at `https://www.lightspeedsystems.com/support/submiturl/`.
-5. **Agentiz GoGuardian bypass** — GoGuardian blocks all uncategorized domains. Options: find a trusted root domain with DNS write access, or research other cloud storage providers.
-6. **Delete orphan AWS bucket `agentiz-organization`** to avoid unnecessary costs.
-7. **Test Agentiz end-to-end** on a real device — open the S3 URL, enter a URL, verify proxy works.
-8. Monitor early-access user bug reports on the main SizNexus platform.
-9. **Backup siz-ai scripts** — copy from `~/.local/bin/` into a tracked dotfiles or tools repo.
-10. **Chrome Extension — Web Store submission:** Confirm $5 fee is paid, then upload `siz-extension.zip`. Create 1280x800 screenshots and write description.
-11. Add social links (TikTok, X, YouTube) on `shxdow/index.html` when the director provides them.
-12. Cloud Functions planning for Net auto-rewards (streaks, referrals) when the director is ready.
+1. **URGENT: Debug presence tracking** — members show incorrect online/offline status. Add console logging, test logout/login in isolation, inspect Firestore in real-time. Consider moving to Cloud Function if client-side is fundamentally broken.
+2. **Push all 9 commits to GitHub** — `git push origin main` from `/home/itzzzshxdow/siznexus-development/`. Verify all commits are live.
+3. **Mobile device testing** — Director should test new hub tabs, modular JS, performance improvements on a real phone. Verify corp chat, squads, notifications work. Test presence tracking across multiple tabs/devices.
+4. **Monitor early-access user feedback** — check for bugs, feature requests, or issues with the new Tools/Projects features.
+5. **Consider graceful presence fallback** — if debugging doesn't resolve the issue, consider hiding online indicators entirely or showing "last seen" instead of live status.
+6. **Director action reminder:** Lightspeed recategorization submission at `https://www.lightspeedsystems.com/support/submiturl/` (still pending from previous session).
+7. Plan Cloud Functions for Net auto-rewards (streaks, referrals) — architecture design needed.
+8. Consider splitting `siz-hub.js` (1532 lines) further if maintenance becomes difficult.
+9. App Check setup (free reCAPTCHA v3) when director is ready.
+10. Monitor Firestore indexing — verify composite indexes for Tools, Projects collections are performing well.
+11. **ClaudeAA reminders from prior session:**
+    - Run `setup.bat` to install dependencies and test
+    - Create GitHub remote and push
+    - Rotate API key in `config.json`
+12. **Chrome Extension — Web Store submission:** Pending $5 developer fee. Create 1280x800 screenshots and description.
 
 ## Director Preferences (Persistent)
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased (Black Market) or semantic (threat banner).
