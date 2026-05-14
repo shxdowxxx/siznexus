@@ -106,6 +106,13 @@ service cloud.firestore {
             && hasOnly(['rank', 'badges', 'isBanned', 'points']))
       );
 
+      // Presence cleanup: any authenticated user can mark any user offline.
+      // Restricted to ONLY the status field and ONLY the value 'offline'.
+      // Safe — cannot be used to set online, change rank, points, or anything else.
+      allow update: if isAuthenticated()
+        && hasOnly(['status'])
+        && request.resource.data.status == 'offline';
+
       // (Black Market self-purchase rule removed 2026-04-26 — feature deleted
       //  and the rule allowed cost-free cosmetic grants without server validation.)
 

@@ -14,9 +14,11 @@ function startActiveMembersListener(){
     snap.forEach(d=>{
       const u=d.data();u.id=d.id;
       if(blockedList.includes(u.id))return;
-      // Staleness check: if lastActive is older than 3 min, user is ghost-online — auto-clean
+      // Staleness check:
+      //   - no lastActive at all → stale (login always sets it, so absence = ghost)
+      //   - lastActive exists but older than 3 min → stale (heartbeat stopped)
       const lastActive=u.lastActive?.toDate?.()?.getTime()||0;
-      const isStale=lastActive>0&&(now-lastActive)>PRESENCE_STALE_MS;
+      const isStale=!lastActive||(now-lastActive)>PRESENCE_STALE_MS;
       if(isStale){
         db.collection('users').doc(u.id).update({status:'offline'}).catch(()=>{});
         return; // exclude from the live list
