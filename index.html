@@ -244,6 +244,33 @@
         <input type="text" id="editActivityStatus" class="input-field" maxlength="60" placeholder="e.g. Grinding missions, On patrol..." autocomplete="off">
       </div>
       <div class="field-group">
+        <label class="field-label">Skills <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(max 10 tags — press Enter or comma to add)</span></label>
+        <input type="text" id="skillTagInput" class="input-field" maxlength="30" placeholder="Add a skill..." autocomplete="off" style="margin-bottom:6px;">
+        <div class="skill-pills-container" id="skillPillsContainer"></div>
+        <div class="skill-presets" id="skillPresets">
+          <span style="font-family:var(--font-mono);font-size:.56rem;color:rgba(192,192,192,.35);margin-right:4px;align-self:center;">Quick add:</span>
+          <button type="button" class="skill-preset-btn" data-skill="JavaScript">JavaScript</button>
+          <button type="button" class="skill-preset-btn" data-skill="Python">Python</button>
+          <button type="button" class="skill-preset-btn" data-skill="Rust">Rust</button>
+          <button type="button" class="skill-preset-btn" data-skill="Design">Design</button>
+          <button type="button" class="skill-preset-btn" data-skill="Video">Video</button>
+          <button type="button" class="skill-preset-btn" data-skill="Music">Music</button>
+          <button type="button" class="skill-preset-btn" data-skill="HTML/CSS">HTML/CSS</button>
+          <button type="button" class="skill-preset-btn" data-skill="Lua">Lua</button>
+          <button type="button" class="skill-preset-btn" data-skill="Go">Go</button>
+        </div>
+      </div>
+      <div class="field-group" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label class="field-label">GitHub URL <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(optional)</span></label>
+          <input type="url" id="editGithubUrl" class="input-field" maxlength="120" placeholder="https://github.com/..." autocomplete="off">
+        </div>
+        <div>
+          <label class="field-label">Portfolio URL <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(optional)</span></label>
+          <input type="url" id="editPortfolioUrl" class="input-field" maxlength="120" placeholder="https://..." autocomplete="off">
+        </div>
+      </div>
+      <div class="field-group">
         <label class="field-label">Presence Status</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="rsvp-btn yes" id="profileStatusOnline" data-pstatus="online" style="font-family:var(--font-mono);font-size:.65rem;"><span class="status-dot online" style="width:7px;height:7px;margin-right:4px;vertical-align:middle;"></span>Online</button>
@@ -341,6 +368,7 @@
       <button class="hub-tab" data-hub="polls"><i class="fas fa-poll"></i><span class="hub-tab-text"> Polls</span><span class="hub-tab-badge" id="hubBadgePolls"></span></button>
       <button class="hub-tab" data-hub="squads"><i class="fas fa-users-rectangle"></i><span class="hub-tab-text"> Squads</span></button>
       <button class="hub-tab" data-hub="opsmap"><i class="fas fa-globe"></i><span class="hub-tab-text"> Ops Map</span></button>
+      <button class="hub-tab" data-hub="tools"><i class="fas fa-wrench"></i><span class="hub-tab-text"> Tools</span><span class="hub-tab-badge" id="hubBadgeTools"></span></button>
     </div>
     <div class="hub-modal-body">
     <div class="hub-section-bar">
@@ -414,7 +442,74 @@
         <div class="opsmap-corner br"></div>
       </div>
     </div>
+    <!-- TOOLS LIBRARY -->
+    <div class="hub-section" id="hubTools">
+      <div class="tools-filter-row" id="toolsFilterRow">
+        <button class="tools-filter-btn active" data-tcat="all">All</button>
+        <button class="tools-filter-btn" data-tcat="utility">Utility</button>
+        <button class="tools-filter-btn" data-tcat="script">Script</button>
+        <button class="tools-filter-btn" data-tcat="app">App</button>
+        <button class="tools-filter-btn" data-tcat="resource">Resource</button>
+      </div>
+      <div id="toolsActionBar" style="display:none;margin-bottom:12px;">
+        <button class="btn-secondary" id="submitToolBtn" style="font-size:.72rem;padding:7px 14px;"><i class="fas fa-plus"></i> Submit a Tool</button>
+        <span id="verifiedToolNote" style="display:none;font-family:var(--font-mono);font-size:.6rem;color:var(--color-text-muted);margin-left:10px;"><i class="fas fa-check-circle" style="color:#4CAF50;margin-right:3px;"></i>Verified — your tools publish instantly</span>
+      </div>
+      <div class="hub-scroll" id="toolsList"></div>
+    </div>
     </div><!-- /hub-modal-body -->
+  </div>
+</div>
+
+<!-- SUBMIT TOOL MODAL -->
+<div class="modal" id="submitToolModal">
+  <div class="modal-container" style="max-width:540px;">
+    <button class="close-btn" id="closeSubmitTool">&#x2715;</button>
+    <h2 style="margin-bottom:4px;"><i class="fas fa-wrench" style="margin-right:8px;font-size:.85rem;color:var(--color-primary);"></i>Submit a Tool</h2>
+    <p style="font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);margin-bottom:16px;line-height:1.6;">Share a tool with the Corp. Submissions go to admin review before publishing (verified members publish instantly).</p>
+    <div class="field-group">
+      <label class="field-label">Tool Name <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(max 80 chars)</span></label>
+      <input type="text" id="toolTitle" class="input-field" maxlength="80" placeholder="e.g. Image Compressor, Color Picker..." autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Short Description <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(shown on card, max 200 chars)</span></label>
+      <input type="text" id="toolShortDesc" class="input-field" maxlength="200" placeholder="One-line summary of what this tool does..." autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Full Description <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(optional, max 2000 chars)</span></label>
+      <textarea id="toolLongDesc" class="input-field" maxlength="2000" style="min-height:70px;" placeholder="Detailed description, instructions, notes..."></textarea>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Tool URL <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(must start with https://)</span></label>
+      <input type="url" id="toolUrl" class="input-field" placeholder="https://..." autocomplete="off">
+    </div>
+    <div class="field-group" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div>
+        <label class="field-label">Category</label>
+        <select id="toolCategory" class="input-field" style="cursor:pointer;">
+          <option value="utility">Utility</option>
+          <option value="script">Script</option>
+          <option value="app">App</option>
+          <option value="resource">Resource</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">Tags <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(comma-sep, max 5)</span></label>
+        <input type="text" id="toolTags" class="input-field" maxlength="120" placeholder="e.g. image, converter, css" autocomplete="off">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Screenshot <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(optional, JPEG compressed to 800×450)</span></label>
+      <div class="banner-upload" id="toolScreenshotBox" style="height:80px;">
+        <img id="toolScreenshotPreview" alt="" style="display:none;max-height:80px;width:100%;object-fit:cover;border-radius:3px;">
+        <div class="banner-upload-cta" id="toolScreenshotCta"><i class="fas fa-image"></i><span>Click to upload screenshot</span></div>
+        <button type="button" class="banner-clear" id="toolScreenshotClearBtn" title="Remove screenshot" style="display:none;">&times;</button>
+        <input type="file" id="toolScreenshotInput" accept="image/*" style="display:none;">
+      </div>
+    </div>
+    <button class="btn-primary" id="submitToolConfirmBtn" style="width:100%;justify-content:center;margin-top:4px;"><i class="fas fa-paper-plane"></i> Submit Tool</button>
+    <div class="success-msg" id="toolSubmitSuccess" style="display:none;">Tool submitted! Awaiting admin review.</div>
   </div>
 </div>
 
@@ -474,6 +569,10 @@
           <button class="admin-tab" data-tab="bans"><i class="fas fa-gavel" style="color:#f44336;"></i> <span>Bans</span></button>
         </div>
         <div class="admin-sidebar-group">
+          <p class="admin-sidebar-label">Platform</p>
+          <button class="admin-tab" data-tab="tools"><i class="fas fa-wrench"></i> <span>Tool Review</span></button>
+        </div>
+        <div class="admin-sidebar-group">
           <p class="admin-sidebar-label">System</p>
           <button class="admin-tab" data-tab="threat"><i class="fas fa-radiation"></i> <span>Threat Level</span></button>
         </div>
@@ -504,6 +603,11 @@
     <div class="admin-panel-section" id="adminTabMissions">
       <p class="admin-section-title">Pending Mission KEY Submissions</p>
       <div id="adminKeysList" style="max-height:380px;overflow-y:auto;"></div>
+    </div>
+    <!-- TOOLS REVIEW TAB -->
+    <div class="admin-panel-section" id="adminTabTools">
+      <p class="admin-section-title"><i class="fas fa-wrench" style="margin-right:5px;color:var(--color-primary);"></i>Tool Submissions — Review Queue</p>
+      <div id="adminToolsList" style="max-height:400px;overflow-y:auto;"></div>
     </div>
     <!-- BADGES TAB -->
     <div class="admin-panel-section" id="adminTabBadges">
@@ -709,7 +813,7 @@
     <div class="nav-links">
       <a href="#home">Home</a>
       <a href="#" id="intelFeedNav" class="member-only">Intel Feed</a>
-      <a href="#projects">Projects</a>
+      <a href="#" id="toolsNavLink" onclick="openEngagementHub('tools');return false;">Tools</a>
       <a href="#join">Join</a>
     </div>
     <div class="nav-right">
@@ -1018,7 +1122,7 @@
 
 <footer>
   <div class="footer-links">
-    <a href="/about">About</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/roadmap.html">Roadmap</a>
+    <a href="/about">About</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/roadmap.html">Roadmap</a><a href="#" onclick="openEngagementHub('tools');return false;">Tools</a>
   </div>
   <div class="footer-copy">© 2023–2026 $iz — All rights reserved</div>
 </footer>

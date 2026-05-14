@@ -483,6 +483,26 @@ service cloud.firestore {
     }
 
     // ──────────────────────────────────────────────
+    //  Tools Library
+    // ──────────────────────────────────────────────
+    match /tools/{toolId} {
+      // Published tools are readable by anyone (public showcase).
+      // Staff can also read pending/rejected submissions.
+      allow read: if resource.data.status == 'published' || isModOrAbove() || isOwner();
+
+      // Any registered, non-banned member can submit a tool.
+      allow create: if isRegisteredUser()
+        && isNotBanned()
+        && request.resource.data.authorUid == request.auth.uid
+        && validString('title', 80)
+        && validString('shortDesc', 200)
+        && request.resource.data.status in ['pending', 'published'];
+
+      // Only staff can update/delete (approve, reject, feature).
+      allow update, delete: if isModOrAbove() || isOwner();
+    }
+
+    // ──────────────────────────────────────────────
     //  Catch-all deny — block all undefined collections
     // ──────────────────────────────────────────────
     match /{document=**} {
