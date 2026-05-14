@@ -14,14 +14,19 @@ function startActiveMembersListener(){
     snap.forEach(d=>{
       const u=d.data();u.id=d.id;
       if(blockedList.includes(u.id))return;
+      // Never filter the current user — they are present on this page right now
+      if(currentUser&&u.id===currentUser.uid){members.push(u);return;}
       // Staleness check:
-      //   - no lastActive at all → stale (login always sets it, so absence = ghost)
-      //   - lastActive exists but older than 3 min → stale (heartbeat stopped)
+      //   - no lastActive → stale (login always sets it, so absence = ghost account)
+      //   - lastActive older than 3 min → stale (heartbeat stopped = user is gone)
       const lastActive=u.lastActive?.toDate?.()?.getTime()||0;
       const isStale=!lastActive||(now-lastActive)>PRESENCE_STALE_MS;
       if(isStale){
-        db.collection('users').doc(u.id).update({status:'offline'}).catch(()=>{});
-        return; // exclude from the live list
+        // Only write cleanup after auth has resolved — avoids racing the login write
+        if(window.SNX._authResolved){
+          db.collection('users').doc(u.id).update({status:'offline'}).catch(()=>{});
+        }
+        return;
       }
       members.push(u);
     });
