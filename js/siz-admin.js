@@ -441,6 +441,9 @@ document.getElementById('logoutBtn').addEventListener('click',async(e)=>{
     if(currentUser?.isAnonymous){
       try{await db.collection('users').doc(currentUser.uid).delete();}catch(_){}
       try{await currentUser.delete();}catch(_){}
+    }else if(currentUser?.uid){
+      // Mark offline before signing out so the status updates reliably
+      await db.collection('users').doc(currentUser.uid).update({status:'offline'}).catch(()=>{});
     }
     sessionStorage.removeItem('_anonUid');
     await auth.signOut();

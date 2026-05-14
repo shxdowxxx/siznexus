@@ -1,4 +1,5 @@
 /* ── ACTIVE MEMBERS PANEL ── */
+const PRESENCE_STALE_MS = 3 * 60 * 1000; // 3 minutes — heartbeat is 60s, so 3 min = 3 missed beats
 function startActiveMembersListener(){
   if(activeMembersUnsub)activeMembersUnsub();
   activeMembersUnsub=db.collection('users').where('status','==','online').onSnapshot(snap=>{
@@ -8,7 +9,20 @@ function startActiveMembersListener(){
     const commandCount=document.getElementById('commandOnlineValue');
     list.innerHTML='';
     const blockedList=currentUserData?.blockedUsers||[];
-    const members=[];snap.forEach(d=>{const u=d.data();u.id=d.id;if(!blockedList.includes(u.id))members.push(u);});
+    const now=Date.now();
+    const members=[];
+    snap.forEach(d=>{
+      const u=d.data();u.id=d.id;
+      if(blockedList.includes(u.id))return;
+      // Staleness check: if lastActive is older than 3 min, user is ghost-online — auto-clean
+      const lastActive=u.lastActive?.toDate?.()?.getTime()||0;
+      const isStale=lastActive>0&&(now-lastActive)>PRESENCE_STALE_MS;
+      if(isStale){
+        db.collection('users').doc(u.id).update({status:'offline'}).catch(()=>{});
+        return; // exclude from the live list
+      }
+      members.push(u);
+    });
     countLabel.textContent=members.length;statCount.textContent=members.length;
     if(commandCount)commandCount.textContent=members.length;
     if(!members.length){list.innerHTML='<p style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-muted);padding:8px 0;">No operatives online right now.</p>';return;}
@@ -966,8 +980,13 @@ let _presenceHeartbeatId=null;
 function startPresenceHeartbeat(){
   if(_presenceHeartbeatId)clearInterval(_presenceHeartbeatId);
   _presenceHeartbeatId=setInterval(()=>{
-    if(!currentUser||document.hidden)return;
-    db.collection('users').doc(currentUser.uid).update({lastActive:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});
+    if(!currentUser||currentUser.isAnonymous)return;
+    // Refresh both lastActive AND status so staleness detection works
+    const status=document.hidden?'idle':(currentPresenceStatus||'online');
+    db.collection('users').doc(currentUser.uid).update({
+      lastActive:firebase.firestore.FieldValue.serverTimestamp(),
+      status
+    }).catch(()=>{});
   },60000);
 }
 function relativeTime(ts){
@@ -1233,7 +1252,8 @@ auth.onAuthStateChanged(async user=>{
     window.SNX._authCallbacks=[];
   }
 });
-window.addEventListener('beforeunload',()=>{
+// pagehide fires reliably on tab close, navigation, and mobile background — unlike beforeunload
+function _handlePageHide(){
   if(!currentUser)return;
   if(currentUser.isAnonymous){
     db.collection('users').doc(currentUser.uid).delete().catch(()=>{});
@@ -1242,7 +1262,9 @@ window.addEventListener('beforeunload',()=>{
   }else{
     db.collection('users').doc(currentUser.uid).update({status:'offline'}).catch(()=>{});
   }
-});
+}
+window.addEventListener('pagehide',_handlePageHide);
+window.addEventListener('beforeunload',_handlePageHide); // desktop fallback
 async function cleanupAnonBeforeUpgrade(){
   // Called before a guest upgrades to a real account (email/password or Google).
   // Removes the anonymous Auth account + Firestore user doc so we don't accumulate orphans.
