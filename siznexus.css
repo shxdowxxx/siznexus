@@ -2090,7 +2090,21 @@ footer .footer-links a:hover{color:var(--color-text-light);border-bottom-color:r
 .skill-preset-btn{font-family:var(--font-mono);font-size:.56rem;background:transparent;border:1px dashed rgba(192,192,192,.18);color:rgba(192,192,192,.45);padding:3px 8px;border-radius:2px;cursor:pointer;transition:var(--transition);}
 .skill-preset-btn:hover{border-color:rgba(192,192,192,.5);color:var(--color-text-light);}
 
+/* ══ PROJECT CARDS ══ */
+.project-board-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+.project-card{background:linear-gradient(160deg,rgba(14,20,40,.99) 0%,rgba(10,15,26,.99) 100%);border:var(--border);border-top:1px solid rgba(212,216,226,.12);border-radius:4px;overflow:hidden;display:flex;flex-direction:column;transition:var(--transition);}
+.project-card:hover{border-color:rgba(192,192,192,.35);box-shadow:var(--glow-sm);}
+.project-card-img{width:100%;height:130px;object-fit:cover;display:block;background:rgba(192,192,192,.03);}
+.project-card-body{padding:12px 14px;flex:1;display:flex;flex-direction:column;gap:6px;}
+.project-card-title{font-family:var(--font-main);font-size:.8rem;font-weight:700;color:var(--color-text-light);letter-spacing:.05em;}
+.project-card-desc{font-family:var(--font-mono);font-size:.7rem;color:var(--color-text-muted);line-height:1.6;margin:0;}
+.project-card-footer{display:flex;align-items:center;gap:6px;padding:8px 14px 12px;border-top:1px solid rgba(192,192,192,.07);flex-wrap:wrap;}
+.project-like-btn{background:none;border:var(--border);color:var(--color-text-muted);font-family:var(--font-mono);font-size:.62rem;padding:4px 9px;border-radius:2px;cursor:pointer;transition:var(--transition);display:inline-flex;align-items:center;gap:5px;margin-left:auto;}
+.project-like-btn:hover,.project-like-btn.liked{border-color:rgba(192,192,192,.5);color:var(--color-text-light);}
+.project-like-btn.liked i{color:#f44;transition:color .15s ease;}
+
 @media(max-width:768px){
   .tools-filter-row{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;}
   .tools-filter-btn{flex-shrink:0;}
+  .project-board-grid{grid-template-columns:1fr;}
 }

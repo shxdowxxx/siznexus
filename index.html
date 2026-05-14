@@ -369,6 +369,7 @@
       <button class="hub-tab" data-hub="squads"><i class="fas fa-users-rectangle"></i><span class="hub-tab-text"> Squads</span></button>
       <button class="hub-tab" data-hub="opsmap"><i class="fas fa-globe"></i><span class="hub-tab-text"> Ops Map</span></button>
       <button class="hub-tab" data-hub="tools"><i class="fas fa-wrench"></i><span class="hub-tab-text"> Tools</span><span class="hub-tab-badge" id="hubBadgeTools"></span></button>
+      <button class="hub-tab" data-hub="projects"><i class="fas fa-layer-group"></i><span class="hub-tab-text"> Projects</span></button>
     </div>
     <div class="hub-modal-body">
     <div class="hub-section-bar">
@@ -442,6 +443,13 @@
         <div class="opsmap-corner br"></div>
       </div>
     </div>
+    <!-- PROJECTS BOARD -->
+    <div class="hub-section" id="hubProjects">
+      <div id="projectsActionBar" style="display:none;margin-bottom:12px;">
+        <button class="btn-secondary" id="submitProjectBtn" style="font-size:.72rem;padding:7px 14px;"><i class="fas fa-plus"></i> Post a Project</button>
+      </div>
+      <div class="hub-scroll" id="projectsList"></div>
+    </div>
     <!-- TOOLS LIBRARY -->
     <div class="hub-section" id="hubTools">
       <div class="tools-filter-row" id="toolsFilterRow">
@@ -510,6 +518,48 @@
     </div>
     <button class="btn-primary" id="submitToolConfirmBtn" style="width:100%;justify-content:center;margin-top:4px;"><i class="fas fa-paper-plane"></i> Submit Tool</button>
     <div class="success-msg" id="toolSubmitSuccess" style="display:none;">Tool submitted! Awaiting admin review.</div>
+  </div>
+</div>
+
+<!-- SUBMIT PROJECT MODAL -->
+<div class="modal" id="submitProjectModal">
+  <div class="modal-container" style="max-width:540px;">
+    <button class="close-btn" id="closeSubmitProject">&#x2715;</button>
+    <h2 style="margin-bottom:4px;"><i class="fas fa-layer-group" style="margin-right:8px;font-size:.85rem;color:var(--color-primary);"></i>Post a Project</h2>
+    <p style="font-family:var(--font-mono);font-size:.68rem;color:var(--color-text-muted);margin-bottom:16px;line-height:1.6;">Share something you've built with the Corp. Projects publish instantly — no review needed.</p>
+    <div class="field-group">
+      <label class="field-label">Project Name <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(max 80 chars)</span></label>
+      <input type="text" id="projectTitle" class="input-field" maxlength="80" placeholder="e.g. SizNexus, AtlasOS, Dynamic Zero..." autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Description <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(max 1000 chars)</span></label>
+      <textarea id="projectDescription" class="input-field" maxlength="1000" style="min-height:80px;" placeholder="What is it, what does it do, what's interesting about it..."></textarea>
+    </div>
+    <div class="field-group" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div>
+        <label class="field-label">GitHub URL <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(optional)</span></label>
+        <input type="url" id="projectRepoUrl" class="input-field" placeholder="https://github.com/..." autocomplete="off">
+      </div>
+      <div>
+        <label class="field-label">Live URL <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(optional)</span></label>
+        <input type="url" id="projectLiveUrl" class="input-field" placeholder="https://..." autocomplete="off">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Tech Stack <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(comma-separated, max 8 items)</span></label>
+      <input type="text" id="projectTechStack" class="input-field" maxlength="200" placeholder="e.g. JavaScript, Firebase, Tauri, SolidJS" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Screenshot <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(optional, JPEG compressed to 800×450)</span></label>
+      <div class="banner-upload" id="projectScreenshotBox" style="height:80px;">
+        <img id="projectScreenshotPreview" alt="" style="display:none;max-height:80px;width:100%;object-fit:cover;border-radius:3px;">
+        <div class="banner-upload-cta" id="projectScreenshotCta"><i class="fas fa-image"></i><span>Click to upload screenshot</span></div>
+        <button type="button" class="banner-clear" id="projectScreenshotClearBtn" title="Remove screenshot" style="display:none;">&times;</button>
+        <input type="file" id="projectScreenshotInput" accept="image/*" style="display:none;">
+      </div>
+    </div>
+    <button class="btn-primary" id="submitProjectConfirmBtn" style="width:100%;justify-content:center;margin-top:4px;"><i class="fas fa-paper-plane"></i> Post Project</button>
+    <div class="success-msg" id="projectSubmitSuccess" style="display:none;">Project posted!</div>
   </div>
 </div>
 
@@ -869,7 +919,7 @@
 </div>
 
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#home">Home</a><a href="#" id="intelFeedMobile" class="member-only">Intel Feed</a><a href="#projects">Projects</a><a href="#join">Join</a>
+  <a href="#home">Home</a><a href="#" id="intelFeedMobile" class="member-only">Intel Feed</a><a href="#" onclick="openEngagementHub('projects');return false;">Projects</a><a href="#" onclick="openEngagementHub('tools');return false;">Tools</a><a href="#join">Join</a>
 </div>
 
 <!-- HERO -->
@@ -1097,6 +1147,13 @@
         <p class="featured-desc" id="featured-desc">No operative has been featured yet.</p>
         <div class="achievements" id="member-achievements"></div>
       </div>
+    </section>
+
+    <section class="bubble panel-compact" id="projects-preview-panel">
+      <p class="panel-kicker">// MEMBER BUILDS</p>
+      <h2><span class="section-icon"><i class="fas fa-layer-group"></i></span> Recent Projects</h2>
+      <div id="projectsPreviewList"></div>
+      <button type="button" class="btn-secondary" id="viewAllProjectsBtn" style="width:100%;justify-content:center;font-size:.7rem;margin-top:10px;"><i class="fas fa-arrow-right" style="margin-right:5px;"></i>View All Projects</button>
     </section>
 
     <section class="bubble panel-compact" id="join">

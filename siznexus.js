@@ -3289,6 +3289,7 @@ async function loadHubTab(tab){
   else if(tab==='squads')loadSquads();
   else if(tab==='opsmap')loadOpsMap();
   else if(tab==='tools')loadTools();
+  else if(tab==='projects')loadProjects();
 }
 
 /* ── GLOBAL OPS MAP ── */
@@ -3882,6 +3883,7 @@ function refreshDashboardSurface(){
   loadNetworkSnapshot();
   loadFeaturedMembers();
   refreshStreakPanel();
+  loadProjectsPreview();
 }
 
 /* ── DAILY CHECK-IN STREAK ── */
@@ -5549,6 +5551,200 @@ if(_origOpenMyProfile){
     if(portfolioEl)portfolioEl.value=currentUserData.portfolioURL||'';
   };
 }
+
+/* ══════════════════════════════════════════════════════
+   PROJECTS BOARD
+   ══════════════════════════════════════════════════════ */
+
+let _pendingProjectScreenshotURL=null;
+
+async function loadProjects(){
+  updateHubSectionInfo({label:'Projects Board',count:'',note:'Real projects built by Corp members — apps, tools, games, and more.'});
+  const list=document.getElementById('projectsList');
+  const actionBar=document.getElementById('projectsActionBar');
+  if(!list)return;
+  if(actionBar&&currentUser&&!currentUser.isAnonymous&&currentUserData?.rank&&currentUserData.rank!=='Unaffiliated'){
+    actionBar.style.display='flex';
+    actionBar.style.alignItems='center';
+  }
+  list.innerHTML=Array(3).fill('<div class="skeleton skeleton-card"></div>').join('');
+  try{
+    const snap=await db.collection('projects').where('status','==','published').orderBy('createdAt','desc').limit(30).get().catch(async()=>{
+      return await db.collection('projects').where('status','==','published').get();
+    });
+    if(!snap.docs.length){
+      list.innerHTML='<p style="font-family:var(--font-mono);font-size:.72rem;color:var(--color-text-muted);padding:24px;text-align:center;">No projects posted yet. Be the first to share what you\'re building!</p>';
+      return;
+    }
+    list.innerHTML=`<div class="project-board-grid">${snap.docs.map(d=>renderProjectCard(d.data(),d.id)).join('')}</div>`;
+    list.querySelectorAll('.project-like-btn').forEach(btn=>{
+      btn.addEventListener('click',e=>{e.stopPropagation();toggleProjectLike(btn.dataset.pid,btn);});
+    });
+    list.querySelectorAll('.project-card-link').forEach(a=>{a.addEventListener('click',e=>e.stopPropagation());});
+  }catch(err){
+    list.innerHTML='<p style="font-family:var(--font-mono);font-size:.72rem;color:rgba(192,192,192,.4);padding:24px;text-align:center;">Failed to load projects.</p>';
+    console.error('loadProjects:',err);
+  }
+}
+
+function renderProjectCard(project,id){
+  const isLiked=currentUser&&(project.likes||[]).includes(currentUser.uid);
+  const likeCount=(project.likes||[]).length;
+  const techPills=(project.techStack||[]).slice(0,8).map(t=>`<span class="tech-pill">${esc(t)}</span>`).join('');
+  const screenshot=project.screenshotURL?`<img class="project-card-img" src="${esc(project.screenshotURL)}" loading="lazy" onerror="this.style.display='none'" alt=""></img>`:'' ;
+  const repoLink=project.repoURL?`<a class="project-card-link btn-secondary" href="${esc(project.repoURL)}" target="_blank" rel="noopener noreferrer" style="font-size:.62rem;padding:5px 10px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"><i class="fas fa-code-branch"></i>Repo</a>`:'';
+  const liveLink=project.liveURL?`<a class="project-card-link btn-primary" href="${esc(project.liveURL)}" target="_blank" rel="noopener noreferrer" style="font-size:.62rem;padding:5px 10px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"><i class="fas fa-external-link-alt"></i>Live</a>`:'';
+  return `<div class="project-card" data-pid="${id}">
+    ${screenshot}
+    <div class="project-card-body">
+      <div class="project-card-title">${esc(project.title||'Untitled Project')}</div>
+      <p class="project-card-desc">${esc((project.description||'').slice(0,200))}${(project.description||'').length>200?'…':''}</p>
+      ${techPills?`<div class="tech-pills-row">${techPills}</div>`:''}
+    </div>
+    <div class="project-card-footer">
+      <span style="font-family:var(--font-mono);font-size:.6rem;color:rgba(192,192,192,.4);flex:1;">${esc(project.authorName||'Unknown')}</span>
+      ${repoLink}${liveLink}
+      <button class="project-like-btn${isLiked?' liked':''}" data-pid="${id}" aria-label="Like project">
+        <i class="fas fa-heart" style="font-size:.65rem;"></i>${likeCount||''}
+      </button>
+    </div>
+  </div>`;
+}
+
+async function toggleProjectLike(pid,btn){
+  if(!currentUser||currentUser.isAnonymous){showToast('Log in to like projects.','warning');return;}
+  const ref=db.collection('projects').doc(pid);
+  const snap=await ref.get().catch(()=>null);
+  if(!snap?.exists)return;
+  const likes=snap.data().likes||[];
+  const hasLiked=likes.includes(currentUser.uid);
+  try{
+    await ref.update({
+      likes:hasLiked?firebase.firestore.FieldValue.arrayRemove(currentUser.uid):firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+    });
+    const newCount=hasLiked?likes.length-1:likes.length+1;
+    btn.classList.toggle('liked',!hasLiked);
+    btn.innerHTML=`<i class="fas fa-heart" style="font-size:.65rem;"></i>${newCount||''}`;
+  }catch(err){showToast('Could not update like.','error');}
+}
+
+// Load a small preview of recent projects for the dashboard panel
+async function loadProjectsPreview(){
+  const list=document.getElementById('projectsPreviewList');
+  if(!list)return;
+  list.innerHTML='<div class="skeleton skeleton-card" style="height:60px;"></div><div class="skeleton skeleton-card" style="height:60px;"></div>';
+  try{
+    const snap=await db.collection('projects').where('status','==','published').orderBy('createdAt','desc').limit(3).get().catch(async()=>{
+      return await db.collection('projects').where('status','==','published').get();
+    });
+    if(!snap.docs.length){
+      list.innerHTML='<p style="font-family:var(--font-mono);font-size:.68rem;color:rgba(192,192,192,.35);text-align:center;padding:10px 0;">No projects yet.</p>';
+      return;
+    }
+    list.innerHTML=snap.docs.map(d=>{
+      const p=d.data();
+      const pills=(p.techStack||[]).slice(0,3).map(t=>`<span class="tech-pill">${esc(t)}</span>`).join('');
+      return `<div class="preview-row" style="cursor:pointer;" onclick="openEngagementHub('projects')">
+        <span class="preview-row-main" style="font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-light);">${esc(p.title||'Untitled')}</span>
+        <div class="tech-pills-row" style="margin-top:3px;">${pills}</div>
+        <span style="font-family:var(--font-mono);font-size:.6rem;color:rgba(192,192,192,.35);">${esc(p.authorName||'Unknown')}</span>
+      </div>`;
+    }).join('');
+  }catch(err){
+    list.innerHTML='';
+    console.error('loadProjectsPreview:',err);
+  }
+}
+
+/* ── SUBMIT PROJECT MODAL ── */
+function openSubmitProjectModal(){
+  if(!currentUser||currentUser.isAnonymous){showToast('Log in to post projects.','warning');return;}
+  _pendingProjectScreenshotURL=null;
+  ['projectTitle','projectDescription','projectRepoUrl','projectLiveUrl','projectTechStack'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const preview=document.getElementById('projectScreenshotPreview');
+  const cta=document.getElementById('projectScreenshotCta');
+  const clearBtn=document.getElementById('projectScreenshotClearBtn');
+  if(preview){preview.style.display='none';preview.src='';}
+  if(cta)cta.style.display='flex';
+  if(clearBtn)clearBtn.style.display='none';
+  const successMsg=document.getElementById('projectSubmitSuccess');
+  if(successMsg)successMsg.style.display='none';
+  openModal('submitProjectModal');
+}
+
+document.getElementById('closeSubmitProject')?.addEventListener('click',()=>closeModal('submitProjectModal'));
+document.getElementById('submitProjectModal')?.addEventListener('click',e=>{if(e.target.id==='submitProjectModal')closeModal('submitProjectModal');});
+document.getElementById('submitProjectBtn')?.addEventListener('click',openSubmitProjectModal);
+document.getElementById('viewAllProjectsBtn')?.addEventListener('click',()=>openEngagementHub('projects'));
+
+// Screenshot upload for project
+document.getElementById('projectScreenshotBox')?.addEventListener('click',e=>{
+  if(e.target.closest('.banner-clear'))return;
+  document.getElementById('projectScreenshotInput')?.click();
+});
+document.getElementById('projectScreenshotInput')?.addEventListener('change',async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  try{
+    const dataURL=await resizeImageToDataURL(file,800,450,0.75);
+    if(dataURL.length>600*1024){showToast('Image too large. Try a smaller screenshot.','warning');return;}
+    _pendingProjectScreenshotURL=dataURL;
+    const preview=document.getElementById('projectScreenshotPreview');
+    const cta=document.getElementById('projectScreenshotCta');
+    const clearBtn=document.getElementById('projectScreenshotClearBtn');
+    if(preview){preview.src=dataURL;preview.style.display='block';}
+    if(cta)cta.style.display='none';
+    if(clearBtn)clearBtn.style.display='block';
+  }catch(err){showToast('Image error: '+err.message,'error');}
+  e.target.value='';
+});
+document.getElementById('projectScreenshotClearBtn')?.addEventListener('click',e=>{
+  e.stopPropagation();
+  _pendingProjectScreenshotURL=null;
+  const preview=document.getElementById('projectScreenshotPreview');
+  const cta=document.getElementById('projectScreenshotCta');
+  const clearBtn=document.getElementById('projectScreenshotClearBtn');
+  if(preview){preview.style.display='none';preview.src='';}
+  if(cta)cta.style.display='flex';
+  if(clearBtn)clearBtn.style.display='none';
+});
+
+document.getElementById('submitProjectConfirmBtn')?.addEventListener('click',async()=>{
+  if(!currentUser||currentUser.isAnonymous){showToast('Log in to post projects.','warning');return;}
+  const title=(document.getElementById('projectTitle')?.value||'').trim();
+  const description=(document.getElementById('projectDescription')?.value||'').trim();
+  if(!title){showToast('Please enter a project name.','warning');return;}
+  const btn=document.getElementById('submitProjectConfirmBtn');
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Posting...';
+  try{
+    const repoURL=(document.getElementById('projectRepoUrl')?.value||'').trim();
+    const liveURL=(document.getElementById('projectLiveUrl')?.value||'').trim();
+    const rawStack=(document.getElementById('projectTechStack')?.value||'');
+    const techStack=rawStack.split(',').map(t=>t.trim()).filter(Boolean).slice(0,8);
+    const payload={
+      title,description,repoURL,liveURL,techStack,
+      authorUid:currentUser.uid,
+      authorName:currentUserData?.displayName||currentUser.email||'Unknown',
+      authorRank:currentUserData?.rank||'Member',
+      status:'published',
+      likes:[],
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+    };
+    if(_pendingProjectScreenshotURL)payload.screenshotURL=_pendingProjectScreenshotURL;
+    await db.collection('projects').add(payload);
+    await db.collection('users').doc(currentUser.uid).update({projectsPosted:firebase.firestore.FieldValue.increment(1)}).catch(()=>{});
+    writeCorpLog('project',`posted a new project: "${title}"`);
+    const msg=document.getElementById('projectSubmitSuccess');
+    if(msg)msg.style.display='block';
+    showToast('Project posted!','success');
+    setTimeout(()=>{loadProjects();loadProjectsPreview();},800);
+  }catch(err){
+    console.error('submitProject:',err);
+    showToast('Post failed: '+err.message,'error');
+  }finally{
+    btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> Post Project';
+  }
+});
 
 // Display skills on profile view modal
 const _origOpenViewProfile=typeof openViewProfile==='function'?openViewProfile:null;

@@ -503,6 +503,35 @@ service cloud.firestore {
     }
 
     // ──────────────────────────────────────────────
+    //  Projects Board
+    // ──────────────────────────────────────────────
+    match /projects/{projectId} {
+      // All projects are public (status is always 'published').
+      allow read: if true;
+
+      // Any registered, non-banned member can post a project.
+      allow create: if isRegisteredUser()
+        && isNotBanned()
+        && request.resource.data.authorUid == request.auth.uid
+        && validString('title', 80)
+        && request.resource.data.status == 'published';
+
+      // Author can like-toggle their own project's likes array; staff can edit anything.
+      // Author can also delete their own project.
+      allow update: if isAuthenticated()
+        && (
+          (request.auth.uid == resource.data.authorUid
+            && hasOnly(['likes', 'updatedAt']))
+          || isModOrAbove()
+          || isOwner()
+        );
+
+      allow delete: if isOwner()
+        || isModOrAbove()
+        || (isAuthenticated() && request.auth.uid == resource.data.authorUid);
+    }
+
+    // ──────────────────────────────────────────────
     //  Catch-all deny — block all undefined collections
     // ──────────────────────────────────────────────
     match /{document=**} {
