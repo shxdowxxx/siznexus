@@ -201,6 +201,8 @@ function startFeaturedRotation(){
     featuredRotationTimer=setInterval(rotateFeaturedMember,10000);
   }
 }
+// Cache the full users collection for 2 minutes to avoid repeat fetches during rotation
+let _usersCache=null,_usersCacheTime=0;
 async function loadFeaturedMembers(){
   const card=document.querySelector('#featured-member .featured-card');
   if(!card)return;
@@ -221,8 +223,18 @@ async function loadFeaturedMembers(){
         }
       }
     }
-    // 2) Heuristic fallback — score-based rotation.
-    const snap=await db.collection('users').get();
+    // 2) Heuristic fallback — score-based rotation (cached for 2 min).
+    const now=Date.now();
+    let allUsers;
+    if(_usersCache&&(now-_usersCacheTime)<120000){
+      allUsers=_usersCache;
+    }else{
+      const snap=await db.collection('users').get();
+      allUsers=snap.docs.map(d=>({...d.data(),id:d.id}));
+      _usersCache=allUsers;
+      _usersCacheTime=now;
+    }
+    const snap={forEach:(fn)=>allUsers.forEach(u=>{const fakeDoc={data:()=>u,id:u.id};fn(fakeDoc);})};
     const users=[];
     snap.forEach(d=>{
       const user=d.data();

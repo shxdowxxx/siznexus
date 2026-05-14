@@ -271,12 +271,16 @@ async function loadNetworkSnapshot(){
 }
 
 function refreshDashboardSurface(){
+  // Wave 1 (immediate): DOM-only updates, no Firestore
   updateCommandBoardIdentity();
-  loadHomePreview(homePreviewTab);
-  loadNetworkSnapshot();
-  loadFeaturedMembers();
   refreshStreakPanel();
-  loadProjectsPreview();
+  // Wave 2 (deferred): Firestore queries — yield to browser paint first
+  setTimeout(()=>{
+    loadHomePreview(homePreviewTab);
+    loadNetworkSnapshot();
+    loadFeaturedMembers();
+    loadProjectsPreview();
+  },200);
 }
 
 /* ── DAILY CHECK-IN STREAK ── */

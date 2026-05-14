@@ -701,8 +701,8 @@ function runCipherEffect(container) {
     if(!el.dataset.cipher) el.dataset.cipher = finalStr;
     const len = finalStr.length;
     let iteration = 0;
-    const maxIter = 10;
-    
+    const maxIter = 6;
+
     playSFX('cipher');
 
     const intId = setInterval(() => {
@@ -720,7 +720,7 @@ function runCipherEffect(container) {
         clearInterval(intId);
         el.textContent = finalStr;
       }
-    }, 40);
+    }, 70);
   });
 }
 

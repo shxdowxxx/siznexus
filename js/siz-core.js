@@ -114,22 +114,15 @@ document.addEventListener('dragstart', e => { if (e.target && e.target.tagName =
     overlay.innerHTML=`<div style="text-align:center;max-width:500px;padding:30px;background:rgba(10,14,26,0.97);border:1px solid rgba(192,192,192,0.25);border-top:1px solid rgba(212,216,226,0.35);border-radius:8px;box-shadow:0 0 30px rgba(192,192,192,0.12);"><div style="font-size:2rem;margin-bottom:20px;"><i class="fas fa-shield-alt" style="color:#C0C0C0;"></i></div><h1 style="color:#D4D8E2;margin:0 0 10px 0;font-size:1.5rem;letter-spacing:0.1em;">Access Blocked</h1><p style="color:#B0BAC9;margin:0;font-size:0.9rem;line-height:1.6;">Developer tools are not permitted on this site.</p></div>`;
     document.body.appendChild(overlay);
     document.body.style.overflow='hidden';
-    clearInterval(sizeTimer);
     clearInterval(debugTimer);
   }
-  // Window size check — catches docked DevTools
-  const sizeTimer=setInterval(()=>{
-    if(window.outerWidth-window.innerWidth>160||window.outerHeight-window.innerHeight>160) lockDown();
-  },500);
-  // Debugger timing — catches undocked/detached DevTools
+  // Debugger timing — catches undocked/detached DevTools (slowed to 4s to eliminate micro-stutter)
   const debugTimer=setInterval(()=>{
     const t=performance.now();
     // eslint-disable-next-line no-debugger
     debugger;
     if(performance.now()-t>150) lockDown();
-  },500);
-  // Fire immediately on load too
-  if(window.outerWidth-window.innerWidth>160||window.outerHeight-window.innerHeight>160) lockDown();
+  },4000);
 })();
 /* ── SPLASH (Terminal Boot Sequence) ── */
 (function(){
@@ -173,7 +166,7 @@ document.addEventListener('dragstart', e => { if (e.target && e.target.tagName =
   setTimeout(typeLine, 200);
 })();
 /* ── PARTICLES ── */
-particlesJS('particles-js',{particles:{number:{value:window.innerWidth<768?30:60,density:{enable:true,value_area:window.innerWidth<768?400:800}},color:{value:'#A8B2C1'},shape:{type:'circle'},opacity:{value:.15,random:true},size:{value:window.innerWidth<768?.8:1.2,random:true},line_linked:{enable:true,distance:150,color:'#A8B2C1',opacity:.05,width:1},move:{enable:true,speed:window.innerWidth<768?.3:.5,direction:'none',random:true}},interactivity:{events:{onhover:{enable:window.innerWidth>=768,mode:'repulse'}}}});
+particlesJS('particles-js',{particles:{number:{value:window.innerWidth<768?20:40,density:{enable:true,value_area:window.innerWidth<768?400:800}},color:{value:'#A8B2C1'},shape:{type:'circle'},opacity:{value:.15,random:true},size:{value:window.innerWidth<768?.8:1.2,random:true},line_linked:{enable:true,distance:150,color:'#A8B2C1',opacity:.05,width:1},move:{enable:true,speed:window.innerWidth<768?.3:.5,direction:'none',random:true}},interactivity:{events:{onhover:{enable:false}}}});
 /* ── STATS COUNTER ── */
 function animateCounters(){document.querySelectorAll('.stat-number[data-target]').forEach(el=>{const t=+el.dataset.target;let c=0;const s=Math.max(1,Math.ceil(t/30));const iv=setInterval(()=>{c+=s;if(c>=t){c=t;clearInterval(iv);}el.textContent=c;},40);});}
 const so=new IntersectionObserver(en=>{en.forEach(e=>{if(e.isIntersecting){animateCounters();so.disconnect();}});},{threshold:.5});

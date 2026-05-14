@@ -741,8 +741,6 @@ async function openMyProfile(){
     rankEl.className=rankClass(d.rank);
     document.getElementById('editDisplayName').value=d.displayName||'';
     document.getElementById('editBio').value=d.bio||'';
-    const actEl=document.getElementById('editActivityStatus');
-    if(actEl)actEl.value=d.activityStatus||'';
     const picker=document.getElementById('accentPicker');
     if(picker) picker.style.display = 'none';
 
@@ -1065,10 +1063,9 @@ document.getElementById('saveProfileBtn').addEventListener('click',async()=>{
   try{
     const newName=document.getElementById('editDisplayName').value.trim();
     const newBio=document.getElementById('editBio').value.trim();
-    const newActivity=document.getElementById('editActivityStatus')?.value.trim()||'';
     const newGithub=document.getElementById('editGithubUrl')?.value.trim()||'';
     const newPortfolio=document.getElementById('editPortfolioUrl')?.value.trim()||'';
-    const updates={bio:newBio,activityStatus:newActivity,skills:_currentSkills.slice(0,10),githubURL:newGithub,portfolioURL:newPortfolio};
+    const updates={bio:newBio,skills:_currentSkills.slice(0,10),githubURL:newGithub,portfolioURL:newPortfolio};
     if(newName)updates.displayName=newName;
     if(_pendingAvatarDataURL){updates.photoURL=_pendingAvatarDataURL;}
     if(_pendingBannerDataURL==='__CLEAR__'){updates.bannerURL='';}
@@ -1219,7 +1216,7 @@ auth.onAuthStateChanged(async user=>{
       });
     });
     db.collection('friendRequests').where('to','==',user.uid).onSnapshot(()=>updateNotifBadge());
-    refreshDashboardSurface();
+    setTimeout(()=>refreshDashboardSurface(),0);
   }else{
     currentUserData=null;
     document.getElementById('userAvatar').style.display='none';document.getElementById('defaultIcon').style.display='block';
@@ -1227,7 +1224,7 @@ auth.onAuthStateChanged(async user=>{
     document.getElementById('adminPanelBtn').style.display='none';
     applyGuestRestrictions(true); // logged-out = guest
     if(notifUnsubscribe){notifUnsubscribe();notifUnsubscribe=null;}
-    refreshDashboardSurface();
+    setTimeout(()=>refreshDashboardSurface(),0);
   }
   // Resolve SNX auth callbacks so external js/ files can gate on auth state
   if(!window.SNX._authResolved){
