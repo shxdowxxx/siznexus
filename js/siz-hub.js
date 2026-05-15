@@ -1217,6 +1217,8 @@ function highlightHubCard(targetId){
   tryFind();
 }
 async function loadHubTab(tab){
+  // Stop opsmap animation when navigating away from it
+  if(tab!=='opsmap'&&opsMapAnimId){cancelAnimationFrame(opsMapAnimId);opsMapAnimId=null;}
   if(tab==='log')loadCorpLog(document.querySelector('.log-filter-btn.active')?.dataset.filter||'all');
   else if(tab==='missions')loadMissions();
   else if(tab==='leaderboard')loadLeaderboard();
@@ -1237,6 +1239,7 @@ function loadOpsMap() {
   if(!canvas) return;
   const ctx = canvas.getContext('2d');
 
+  let _dotCache=null, _dotCacheW=0, _dotCacheH=0;
   function resize() {
     const rect = canvas.parentElement.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
@@ -1244,7 +1247,22 @@ function loadOpsMap() {
       canvas.width = rect.width*dpr;
       canvas.height = rect.height*dpr;
       ctx.setTransform(dpr,0,0,dpr,0,0);
+      _dotCache=null; // invalidate dot cache on resize
     }
+  }
+  function buildDotCache(w,h){
+    const pts=[];
+    const step=6;
+    for(let x=0;x<w;x+=step){
+      for(let y=0;y<h;y+=step){
+        const nx=x/w,ny=y/h;
+        for(const c of continents){
+          const dx=(nx-c.cx)/c.rx,dy=(ny-c.cy)/c.ry;
+          if(dx*dx+dy*dy<1){pts.push(x,y);break;}
+        }
+      }
+    }
+    return pts;
   }
 
   // Pseudo-continents: pre-baked normalized hotspots that look roughly like land masses.
@@ -1293,6 +1311,7 @@ function loadOpsMap() {
   if(nodeBadge)nodeBadge.textContent=String(NODE_COUNT);
 
   function draw() {
+    if(document.hidden){opsMapAnimId=requestAnimationFrame(draw);return;}
     const w = canvas.clientWidth, h = canvas.clientHeight;
     if(w <= 0 || h <= 0) { opsMapAnimId = requestAnimationFrame(draw); return; }
 
@@ -1308,23 +1327,13 @@ function loadOpsMap() {
     for(let lat=0; lat<=10; lat++){const y=lat*h/10;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
     for(let lon=0; lon<=14; lon++){const x=lon*w/14;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
 
-    // Continent dot-matrix
-    ctx.fillStyle = 'rgba(192,192,192,0.18)';
-    const step = 6;
-    for(let x=0; x<w; x+=step) {
-      for(let y=0; y<h; y+=step) {
-        const nx=x/w, ny=y/h;
-        let inside=false;
-        for(const c of continents){
-          const dx=(nx-c.cx)/c.rx, dy=(ny-c.cy)/c.ry;
-          if(dx*dx+dy*dy < 1){inside=true;break;}
-        }
-        if(inside){
-          ctx.beginPath();
-          ctx.arc(x,y,1,0,Math.PI*2);
-          ctx.fill();
-        }
-      }
+    // Continent dot-matrix — use cached positions, rebuilt only on resize
+    if(!_dotCache||_dotCacheW!==w||_dotCacheH!==h){
+      _dotCache=buildDotCache(w,h);_dotCacheW=w;_dotCacheH=h;
+    }
+    ctx.fillStyle='rgba(192,192,192,0.18)';
+    for(let i=0;i<_dotCache.length;i+=2){
+      ctx.beginPath();ctx.arc(_dotCache[i],_dotCache[i+1],1,0,Math.PI*2);ctx.fill();
     }
 
     // Signal arcs (animated bezier with traveling dot)
