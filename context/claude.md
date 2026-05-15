@@ -1,17 +1,17 @@
 ---
-session_id: SIZ-20260513-FINAL
-date: 2026-05-13 to 2026-05-14
-time: 23:59 UTC
+session_id: SIZ-20260514-0317
+date: 2026-05-14
+time: 03:17 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 2.1
-current_phase: SizNexus Phase 5+ — Modularization & Performance Hardening
+version: 2.2
+current_phase: SizNexus Phase 6 — Performance Optimization & Research
 ---
 
 # Claude Context — SizNexus Project
 
 ## Project Overview
-SizNexus is a cyberpunk-themed intelligence-corp membership organization platform built with vanilla HTML/CSS/JS on Firebase Auth + Firestore (project `thesiznexus`). The platform is live, public-facing, and open for early-access users. Current state: Core platform 100% feature-complete with 10 hub tabs, public showcase pages, modular JS architecture, and significant performance optimizations. Outstanding issue: Presence/online tracking is partially broken and requires focused debugging next session.
+SizNexus is a cyberpunk-themed intelligence-corp membership organization platform built with vanilla HTML/CSS/JS on Firebase Auth + Firestore (project `thesiznexus`). The platform is live, public-facing, and open for early-access users. Current state: Core platform 100% feature-complete with 10 hub tabs, public showcase pages, modular JS architecture (7 modules), and production-grade performance optimizations. Presence tracking confirmed working (user verified mid-session SIZ-20260514). All optimizations pushed to GitHub commit 887706b.
 
 ## Repository
 - **Local path:** `/home/itzzzshxdow/siznexus-development/`
@@ -180,10 +180,8 @@ When base styles appear AFTER media queries in a CSS file, the base always wins 
 ## Currency
 - "Net" is canon. Do not use "points". Watch for identifier-mangling regressions from prior global replace (`attemNet`, `oNet`, `mission-Net`, `lb-Net`, `data-Net`) — restore word boundaries if found.
 
-## Open Issues (Session `SIZ-20260513-FINAL`)
-- **CRITICAL: Presence tracking is broken.** Members show incorrect online/offline status even after 3 fix attempts. Root cause unclear (likely timing + async state + Firestore rules interaction). **Top priority for next session.** May need to move to Cloud Function or redesign entire presence model.
+## Open Issues (Session `SIZ-20260514-0317`)
 - **Director action needed:** Submit `siznexus.org` to Lightspeed recategorization at `https://www.lightspeedsystems.com/support/submiturl/` (select "Community/Social").
-- Director has not yet confirmed mobile fixes on a real device — new hub tabs, modular JS, performance changes not tested on physical hardware.
 - Cloud Functions for Net auto-rewards (streaks, referrals) — deferred. Rules block client-side self-increment; server-side required.
 - Activity heatmap only populates from the stabilization session forward — past sessions not retroactively tracked.
 - Existing user docs still carry legacy `email` field (not a live leak; new docs don't write it). Cleanup migration deferred.
@@ -191,7 +189,8 @@ When base styles appear AFTER media queries in a CSS file, the base always wins 
 - App Check not enabled.
 - `devKeyHash` publicly readable — deferred (LOW, internal tooling only).
 - Hosting migration: Porkbun DNS currently points to GitHub Pages. Long-term goal is Firebase Hosting IPs. Requires director Porkbun access.
-- **9 commits pending push to GitHub** — all work from session `SIZ-20260513-FINAL` is local only. Must push before director distributes or deploys.
+- **RESOLVED:** Presence tracking is now working (confirmed user-verified in session SIZ-20260514). Previous session's three-commit fix series resolved the issue.
+- **RESOLVED:** All commits pushed to GitHub — commit 887706b includes performance optimizations and research report.
 
 ## shxdow Portfolio Page — `siznexus.org/shxdow`
 
@@ -294,21 +293,62 @@ A new standalone Windows desktop AI assistant built in a single session.
 - **Key reminder:** Rotate the Anthropic API key in `config.json` — it was entered live during the session.
 
 ## What Claude Should Prioritize Next Session
-1. **URGENT: Debug presence tracking** — members show incorrect online/offline status. Add console logging, test logout/login in isolation, inspect Firestore in real-time. Consider moving to Cloud Function if client-side is fundamentally broken.
-2. **Push all 9 commits to GitHub** — `git push origin main` from `/home/itzzzshxdow/siznexus-development/`. Verify all commits are live.
-3. **Mobile device testing** — Director should test new hub tabs, modular JS, performance improvements on a real phone. Verify corp chat, squads, notifications work. Test presence tracking across multiple tabs/devices.
-4. **Monitor early-access user feedback** — check for bugs, feature requests, or issues with the new Tools/Projects features.
-5. **Consider graceful presence fallback** — if debugging doesn't resolve the issue, consider hiding online indicators entirely or showing "last seen" instead of live status.
-6. **Director action reminder:** Lightspeed recategorization submission at `https://www.lightspeedsystems.com/support/submiturl/` (still pending from previous session).
-7. Plan Cloud Functions for Net auto-rewards (streaks, referrals) — architecture design needed.
-8. Consider splitting `siz-hub.js` (1532 lines) further if maintenance becomes difficult.
-9. App Check setup (free reCAPTCHA v3) when director is ready.
-10. Monitor Firestore indexing — verify composite indexes for Tools, Projects collections are performing well.
-11. **ClaudeAA reminders from prior session:**
+1. **Director reviews research report** — 187+ findings synthesized in `siznexus-development/context/research-report.md`. Identify top 3-5 feature priorities for Phase 7.
+2. **Implement highest-impact research finding** — Likely candidates:
+   - Cyberpunk ID Card Generator (highest viral + growth potential)
+   - Daily Challenge Streaks (proven #1 retention driver)
+   - `content-visibility: auto` on inactive hub sections (easy perf win)
+   - Firebase offline persistence (improved UX on slow networks)
+   - Member Blog/Journal tab for profiles (creator positioning)
+3. **Monitor early-access user feedback** — check for bugs, feature requests, or issues. Verify performance optimizations are perceived as improvements.
+4. **Mobile device testing** — Director should test on real phone. Verify corp chat, squads, notifications, and new performance optimizations on mobile.
+5. **Director action reminder:** Lightspeed recategorization submission at `https://www.lightspeedsystems.com/support/submiturl/` (still pending).
+6. Plan Cloud Functions for Net auto-rewards (streaks, referrals) — architecture design needed.
+7. Consider splitting `siz-hub.js` (1532 lines) further if maintenance becomes difficult.
+8. App Check setup (free reCAPTCHA v3) when director is ready.
+9. Monitor Firestore indexing — verify composite indexes for Tools, Projects collections are performing well.
+10. **ClaudeAA reminders from prior session:**
     - Run `setup.bat` to install dependencies and test
     - Create GitHub remote and push
     - Rotate API key in `config.json`
-12. **Chrome Extension — Web Store submission:** Pending $5 developer fee. Create 1280x800 screenshots and description.
+11. **Chrome Extension — Web Store submission:** Pending $5 developer fee. Create 1280x800 screenshots and description.
+
+## Performance Optimizations — Session SIZ-20260514-0317
+
+**Commit:** `887706b`
+
+### Removed Full-Screen Overlay Repaint Loop
+- The `body::after` element had a `scanMove` animation that continuously animated `background-position`
+- This triggered a full-screen repaint on every frame (60fps = 60 repaints/sec)
+- Removed both the animation and `@keyframes scanMove` definition
+- Visual result: Static scanline effect remains identical; no visual change
+- Performance impact: Eliminated one of the largest scroll-lag culprits
+
+### Replaced `transition: all` with Specific Properties
+- The `--transition` CSS variable was `transition: all 0.3s ease` and used 74 times across the stylesheet
+- `transition: all` forces the browser to check *every CSS property* on every state change
+- Replaced with: `color .28s ease, border-color .28s ease, background-color .28s ease, box-shadow .28s ease, transform .28s ease, opacity .28s ease`
+- Performance impact: Reduces GPU scheduler work during hover/focus transitions
+
+### Reduced Backdrop-Filter Complexity
+- Nav: `blur(16px) saturate(150%)` → `blur(10px)` with opacity increased `.92` → `.95`
+- Static nav: `blur(8px)` → `blur(6px)` with opacity raised to `.95`
+- Rationale: Stacking filters requires multiple GPU compositing passes
+- Higher opacity compensates for reduced blur while maintaining visual contrast
+
+### GPU Layer Promotion
+- Added `will-change: transform` to 7 card types: `.stat-item`, `.bubble`, `.friend-card`, `.mission-card`, `.tool-card`, `.project-card`, `.active-member-row`
+- Pre-promotes elements to GPU compositor layers so hover transitions don't trigger repaints
+
+### Ops Map Canvas Optimization
+- **RAF loop stopping:** Added `cancelAnimationFrame(opsMapAnimId)` in `loadHubTab()` before loading non-opsmap tabs. Prevents continuous 60fps rendering on invisible content.
+- **Background tab pausing:** Added `document.hidden` check at start of `draw()`. Pauses animation when browser tab is in background.
+- **Geometry caching:** Removed per-frame continent ellipse intersection tests (O(w×h) complexity). Added `buildDotCache(w, h)` function that runs once on resize, storing valid dot positions as flat `[x, y, x, y, ...]` array. Draw loop now uses O(1) lookup instead of O(w×h) calculation.
+
+### Research Report
+- Completed 187+ research findings across 4 domains: 35 perf techniques, 44 feature ideas, 70 growth strategies, 38 platform strategy insights
+- Saved to: `siznexus-development/context/research-report.md`
+- Ready for director review to prioritize next-phase features (ID Card Generator, Daily Challenges, offline persistence, etc.)
 
 ## Director Preferences (Persistent)
 - Silver theme is a hard rule. No yellow/gold/violet/cyan/red in site chrome unless user-purchased (Black Market) or semantic (threat banner).
@@ -317,3 +357,4 @@ A new standalone Windows desktop AI assistant built in a single session.
 - Director catches security issues fast. Be proactive about non-reversible hashing for any user-facing identifier.
 - Director wants ideas presented in tiers with a "my pick if you do nothing else" recommendation. Pragmatism over completeness.
 - Do NOT delete the `CNAME` file from the repo. GitHub Pages depends on it for `siznexus.org`.
+- Performance optimization is foundational. Remove before adding. Always profile before and after changes.

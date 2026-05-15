@@ -1,18 +1,18 @@
 ---
-session_id: SIZ-20260513-FINAL
-date: 2026-05-13 to 2026-05-14
-time: 23:59 UTC
+session_id: SIZ-20260514-0317
+date: 2026-05-14
+time: 03:17 UTC
 project: TheSizCorporation / SizNexus
 agent: SessionCloseoutAgent
-version: 2.1
-current_phase: SizNexus Phase 5+ — Modularization & Performance Hardening
+version: 2.2
+current_phase: SizNexus Phase 6 — Performance Optimization & Research
 ---
 
 # Gemini Context — SizNexus Project
 
 This file mirrors `context/claude.md`. All content is synchronized. See `context/claude.md` for full details.
 
-## Quick Reference — What Changed This Session (2026-05-13 to 2026-05-14)
+## Quick Reference — What Changed This Session (2026-05-14)
 
 ### Transformative JavaScript Refactor — Monolith Split (commits `9c79461` to `863f3ee`)
 **5,156-line `siznexus.js` monolith split into 7 focused modules:**
@@ -41,18 +41,25 @@ This file mirrors `context/claude.md`. All content is synchronized. See `context
 - **User collection cache:** 2-minute in-memory cache (huge improvement to dashboard load time)
 - **Reduced particles:** 60 → 40, disabled hover interaction
 
-### Presence Tracking (3 Fix Attempts, Partially Resolved)
-Commits `5387147`, `f92aad3`, `863f3ee` attempted to fix members showing incorrect online/offline status:
-- Fixed logout handler to set `status:'offline'` before `auth.signOut()`
-- Fixed staleness check bug (was bypassing on `lastActive=0`)
-- Fixed bug where staleness check kicked current user offline at page load
-- **Status:** Partial improvement. Root cause remains unclear (timing + async + Firestore interactions). **Top priority next session.**
+### Presence Tracking (Confirmed Working)
+Previous session's 3-commit fix series (commits `5387147`, `f92aad3`, `863f3ee`) resolved the presence tracking issue. User verified during session SIZ-20260514 that online/offline status is now accurate. No further action needed on this front.
+
+### Performance Optimization Sprint (Session SIZ-20260514-0317)
+**Commit:** `887706b` — Major performance hardening:
+- **Removed full-screen overlay repaint loop** (body::after scanMove animation) — eliminated largest scroll-lag culprit
+- **Replaced `transition: all` with specific properties** (74 uses) — reduces GPU scheduler work on state changes
+- **Reduced backdrop-filter complexity** — nav blur 16px→10px, static nav 8px→6px with opacity compensation
+- **GPU layer promotion** — added `will-change: transform` to 7 card types
+- **Ops Map canvas optimization:**
+  - RAF loop stops when user leaves tab
+  - Canvas pauses when tab is in background (`document.hidden` check)
+  - Continent dot positions pre-cached on resize (eliminated O(w×h) geometry tests per frame)
+- **Research report completed** — 187+ findings across performance, features, growth, and platform strategy
 
 ### Git State
-- 9 commits ahead of `origin/main` (not yet pushed)
+- Latest: `887706b` (performance optimizations + research report)
+- All commits pushed to `origin/main`
 - Working tree clean
-- Latest: `863f3ee` (presence fix attempt 3)
-- **Action:** Must push before director distributes or deploys.
 
 ## Repository
 - **Local path:** `/home/itzzzshxdow/siznexus-development/`
@@ -162,11 +169,13 @@ When base styles appear AFTER media queries in a CSS file, the base always wins 
 ## Currency
 - "Net" is canon (was "points"). Watch for identifier-mangling regressions (`attemNet`, `oNet`, `mission-Net`, `lb-Net`, `data-Net`) — restore word boundaries if found.
 
-## Open Issues
+## Open Issues (Session SIZ-20260514-0317)
 - **Director action needed:** Submit `siznexus.org` to Lightspeed recategorization at `https://www.lightspeedsystems.com/support/submiturl/` (select "Community/Social").
+- **RESOLVED:** Presence tracking confirmed working (user-verified in session SIZ-20260514)
+- **RESOLVED:** All commits pushed to GitHub — commit 887706b live on `origin/main`
 - **Agentiz GoGuardian bypass** — GoGuardian blocks all uncategorized domains; S3 subdomain doesn't help. Needs a trusted root domain or GoGuardian manual review.
 - **Delete orphan AWS bucket `agentiz-organization`** — unnecessary S3 costs.
-- Director has not confirmed mobile fixes on a real device — Corp Hub modal and hero text layout untested on physical hardware.
+- Director should test on real device — verify performance optimizations on mobile
 - Cloud Functions for Net auto-rewards (streaks, referrals) — deferred; rules block client-side self-increment.
 - Activity heatmap only populates from the stabilization session forward; past sessions not retroactively tracked.
 - Existing user docs carry legacy `email` field; new docs don't. Cleanup migration deferred.
