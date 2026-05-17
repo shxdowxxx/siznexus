@@ -1089,9 +1089,7 @@ document.getElementById('saveProfileBtn').addEventListener('click',async()=>{
   try{
     const newName=document.getElementById('editDisplayName').value.trim();
     const newBio=document.getElementById('editBio').value.trim();
-    const newGithub=document.getElementById('editGithubUrl')?.value.trim()||'';
-    const newPortfolio=document.getElementById('editPortfolioUrl')?.value.trim()||'';
-    const updates={bio:newBio,skills:_currentSkills.slice(0,10),githubURL:newGithub,portfolioURL:newPortfolio};
+    const updates={bio:newBio};
     if(newName)updates.displayName=newName;
     if(_pendingAvatarDataURL){updates.photoURL=_pendingAvatarDataURL;}
     if(_pendingBannerDataURL==='__CLEAR__'){updates.bannerURL='';}
@@ -1208,9 +1206,7 @@ auth.onAuthStateChanged(async user=>{
     const isRealUser=!user.isAnonymous;
     document.getElementById('corpHubBtn').style.display=isRealUser?'flex':'none';
     document.getElementById('corpChatBtn').classList.toggle('show',isRealUser);
-    document.getElementById('navStatusWrap').style.display=isRealUser?'flex':'none';
     if(isRealUser){
-      updateNavStatusDot(currentUserData?.status||'online');
       if(!corpChatUnsub)startCorpChatListener();
       if(!currentUserData?.hasLoggedBefore){
         writeCorpLog('join','joined the corporation');

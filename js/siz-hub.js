@@ -80,8 +80,8 @@ function startIdleDetection(){
     }
   });
 }
-// Wire status picker
-document.getElementById('statusDotBtn').addEventListener('click',e=>{
+// Wire status picker (triggered from profile editor status buttons)
+document.getElementById('statusDotBtn')?.addEventListener('click',e=>{
   e.stopPropagation();
   document.getElementById('statusPicker').classList.toggle('open');
 });
@@ -301,64 +301,36 @@ async function writeCorpLog(type,message,extra={}){
   }).catch(()=>{});
 }
 let corpLogUnsub=null;
-async function loadCorpLog(filter='all'){
+async function loadCorpLog(){
   const feed=document.getElementById('corpLogFeed');
   feed.innerHTML='<div class="loading-spinner" style="grid-column:unset;padding:20px 0;"></div>';
   updateHubSectionInfo({
-    label:filter==='all'?'Activity Feed':`${filter.charAt(0).toUpperCase()+filter.slice(1)} Activity`,
+    label:'Welcome Feed',
     count:'—',
-    note:filter==='all'
-      ? 'Loading recent member actions, system updates, and internal signals.'
-      : `Loading entries filtered to ${filter} activity.`
+    note:'New operatives who have enlisted with TheSizNexus.'
   });
   if(corpLogUnsub){corpLogUnsub();corpLogUnsub=null;}
-  let q=db.collection('corpLog').orderBy('createdAt','desc').limit(50);
+  const q=db.collection('corpLog').where('type','==','join').orderBy('createdAt','desc').limit(50);
   corpLogUnsub=q.onSnapshot(snap=>{
     feed.innerHTML='';
-    let docs=snap.docs;
-    if(filter!=='all')docs=docs.filter(d=>d.data().type===filter);
+    const docs=snap.docs;
     if(!docs.length){
-      updateHubSectionInfo({
-        label:filter==='all'?'Activity Feed':`${filter.charAt(0).toUpperCase()+filter.slice(1)} Activity`,
-        count:0,
-        note:filter==='all'?'No activity has been recorded yet.':`No ${filter} activity is available yet.`
-      });
-      feed.innerHTML='<div class="hub-empty">No activity yet.</div>';return;
-    }
-    // Filter log entries
-    const isDevViewer=isDev(currentUserData);
-    const isMViewer=isMod(currentUserData);
-    const visibleDocs=docs.filter(d=>{
-      const t=d.data().type;
-      if(PRIVATE_LOG_TYPES.includes(t)&&!isDevViewer)return false;
-      return true;
-    });
-    if(!visibleDocs.length){
-      updateHubSectionInfo({
-        label:filter==='all'?'Activity Feed':`${filter.charAt(0).toUpperCase()+filter.slice(1)} Activity`,
-        count:0,
-        note:'No visible activity is available for your current access level.'
-      });
-      feed.innerHTML='<div class="hub-empty">No activity to display.</div>';return;
+      updateHubSectionInfo({label:'Welcome Feed',count:0,note:'No new operatives have enlisted yet.'});
+      feed.innerHTML='<div class="hub-empty">No new members yet. Be the first to enlist!</div>';
+      return;
     }
     updateHubSectionInfo({
-      label:filter==='all'?'Activity Feed':`${filter.charAt(0).toUpperCase()+filter.slice(1)} Activity`,
-      count:visibleDocs.length,
-      note:filter==='all'
-        ? 'Recent member actions, system updates, and internal signals.'
-        : `Showing the latest ${filter} entries across the corporation.`
+      label:'Welcome Feed',
+      count:docs.length,
+      note:'New operatives who have enlisted with TheSizNexus.'
     });
-    visibleDocs.forEach(d=>{
+    docs.forEach(d=>{
       const log=d.data();
       const item=document.createElement('div');item.className='log-item';
       item.dataset.cardId=d.id;
       const time=log.createdAt?fmtDate(log.createdAt)+' '+fmtTime(log.createdAt):'';
-      // Icon per type
-      const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn',streak:'fa-fire',motw:'fa-trophy',recruit:'fa-user-plus'};
-      const icon=typeIcon[log.type]||'fa-circle';
-      item.innerHTML=`<div class="log-item-main"><i class="fas ${icon}" style="margin-right:6px;font-size:.65rem;opacity:.6;"></i><strong>${esc(log.displayName||'Unknown')}</strong> ${esc(log.message)}</div>
-        <div class="log-item-meta"><span class="${rankClass(log.rank)}">${esc(log.rank||'Member')}</span> &middot; ${time}</div>
-        ${isMViewer&&log.extra&&Object.keys(log.extra).length?`<div class="log-item-detail"><i class="fas fa-info-circle" style="margin-right:4px;opacity:.5;font-size:.6rem;"></i>${esc(JSON.stringify(log.extra))}</div>`:''}`;
+      item.innerHTML=`<div class="log-item-main"><i class="fas fa-door-open" style="margin-right:6px;font-size:.65rem;color:#9be39b;opacity:.85;"></i><strong>${esc(log.displayName||'Unknown')}</strong> enlisted as a new operative.</div>
+        <div class="log-item-meta"><span class="${rankClass(log.rank)}">${esc(log.rank||'Member')}</span> &middot; ${time}</div>`;
       feed.appendChild(item);
     });
   },err=>{feed.innerHTML=`<div class="hub-empty" style="color:#f55;">Error: ${err.message}</div>`;});
@@ -370,14 +342,6 @@ document.querySelectorAll('.mission-cat-btn').forEach(btn=>{
     btn.classList.add('active');
     _missionCategoryFilter=btn.dataset.cat;
     loadMissions();
-  });
-});
-// Filter buttons
-document.querySelectorAll('.log-filter-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.log-filter-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    loadCorpLog(btn.dataset.filter);
   });
 });
 /* ═══════════════════════════════════════════════════════
@@ -1055,11 +1019,11 @@ document.getElementById('corpChatInput').addEventListener('keydown',e=>{if(e.key
 ═══════════════════════════════════════════════════════ */
 const HUB_SUMMARY_CONFIG={
   log:{
-    eyebrow:'Live Coordination',
-    title:'Corporation Feed',
-    meta:'Track joins, ranks, mission submissions, connections, and internal status changes in one stream.',
-    label:'Activity Feed',
-    note:'Recent member actions, system updates, and internal signals.'
+    eyebrow:'New Operatives',
+    title:'Welcome Log',
+    meta:'Every operative who has enlisted with TheSizNexus. Welcome the newest members of the corp.',
+    label:'Welcome Feed',
+    note:'New operatives who have joined TheSizNexus.'
   },
   missions:{
     eyebrow:'Objective Queue',
@@ -1219,10 +1183,9 @@ function highlightHubCard(targetId){
 async function loadHubTab(tab){
   // Stop opsmap animation when navigating away from it
   if(tab!=='opsmap'&&opsMapAnimId){cancelAnimationFrame(opsMapAnimId);opsMapAnimId=null;}
-  if(tab==='log')loadCorpLog(document.querySelector('.log-filter-btn.active')?.dataset.filter||'all');
+  if(tab==='log')loadCorpLog();
   else if(tab==='missions')loadMissions();
   else if(tab==='leaderboard')loadLeaderboard();
-  else if(tab==='calendar')loadCalendar();
   else if(tab==='intel')loadIntelBoard();
   else if(tab==='polls')loadPolls();
   else if(tab==='squads')loadSquads();

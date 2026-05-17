@@ -240,32 +240,6 @@
         <textarea id="editBio" class="input-field" maxlength="160" placeholder="Tell the corp about yourself..."></textarea>
       </div>
       <div class="field-group">
-        <label class="field-label">Skills <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(max 10 tags — press Enter or comma to add)</span></label>
-        <input type="text" id="skillTagInput" class="input-field" maxlength="30" placeholder="Add a skill..." autocomplete="off" style="margin-bottom:6px;">
-        <div class="skill-pills-container" id="skillPillsContainer"></div>
-        <div class="skill-presets" id="skillPresets">
-          <span style="font-family:var(--font-mono);font-size:.56rem;color:rgba(192,192,192,.35);margin-right:4px;align-self:center;">Quick add:</span>
-          <button type="button" class="skill-preset-btn" data-skill="JavaScript">JavaScript</button>
-          <button type="button" class="skill-preset-btn" data-skill="Python">Python</button>
-          <button type="button" class="skill-preset-btn" data-skill="Rust">Rust</button>
-          <button type="button" class="skill-preset-btn" data-skill="Design">Design</button>
-          <button type="button" class="skill-preset-btn" data-skill="Video">Video</button>
-          <button type="button" class="skill-preset-btn" data-skill="Music">Music</button>
-          <button type="button" class="skill-preset-btn" data-skill="HTML/CSS">HTML/CSS</button>
-          <button type="button" class="skill-preset-btn" data-skill="Lua">Lua</button>
-        </div>
-      </div>
-      <div class="field-group" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div>
-          <label class="field-label">GitHub URL <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(optional)</span></label>
-          <input type="url" id="editGithubUrl" class="input-field" maxlength="120" placeholder="https://github.com/..." autocomplete="off">
-        </div>
-        <div>
-          <label class="field-label">Portfolio URL <span style="font-size:.6rem;color:rgba(192,192,192,.35);">(optional)</span></label>
-          <input type="url" id="editPortfolioUrl" class="input-field" maxlength="120" placeholder="https://..." autocomplete="off">
-        </div>
-      </div>
-      <div class="field-group">
         <label class="field-label">Presence Status</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="rsvp-btn yes" id="profileStatusOnline" data-pstatus="online" style="font-family:var(--font-mono);font-size:.65rem;"><span class="status-dot online" style="width:7px;height:7px;margin-right:4px;vertical-align:middle;"></span>Online</button>
@@ -294,8 +268,7 @@
     <div class="profile-tab-section" id="profileTabPreview">
       <div id="profilePreviewContent"></div>
       <div style="display:flex;gap:6px;margin-top:12px;">
-        <button class="btn-secondary" id="downloadOperatorIdBtn" style="flex:1;justify-content:center;font-size:.7rem;"><i class="fas fa-id-card"></i> Download ID</button>
-        <button class="btn-secondary" id="shareOperatorIdBtn" style="flex:1;justify-content:center;font-size:.7rem;"><i class="fas fa-share-alt"></i> Share ID</button>
+        <button class="btn-secondary" id="downloadOperatorIdBtn" style="width:100%;justify-content:center;font-size:.7rem;"><i class="fas fa-id-card"></i> Download ID</button>
       </div>
       <button class="btn-secondary" id="shareMyProfileBtn" style="width:100%; justify-content:center; margin-top:6px; font-size:.7rem;"><i class="fas fa-share-alt"></i> Share My Profile</button>
       <button class="btn-secondary" id="shareReferralBtn" style="width:100%; justify-content:center; margin-top:6px; font-size:.7rem;"><i class="fas fa-user-plus"></i> Share Referral Link</button>
@@ -355,10 +328,10 @@
       </div>
     </div>
     <div class="hub-tabs">
-      <button class="hub-tab active" data-hub="log"><i class="fas fa-scroll"></i><span class="hub-tab-text"> Corp Log</span><span class="hub-tab-badge" id="hubBadgeLog"></span></button>
+      <button class="hub-tab active" data-hub="log"><i class="fas fa-door-open"></i><span class="hub-tab-text"> Welcome</span><span class="hub-tab-badge" id="hubBadgeLog"></span></button>
       <button class="hub-tab" data-hub="missions"><i class="fas fa-crosshairs"></i><span class="hub-tab-text"> Missions</span><span class="hub-tab-badge" id="hubBadgeMissions"></span></button>
       <button class="hub-tab" data-hub="leaderboard"><i class="fas fa-trophy"></i><span class="hub-tab-text"> Leaderboard</span></button>
-      <button class="hub-tab" data-hub="calendar"><i class="fas fa-calendar-alt"></i><span class="hub-tab-text"> Calendar</span><span class="hub-tab-badge" id="hubBadgeCalendar"></span></button>
+
       <button class="hub-tab" data-hub="intel"><i class="fas fa-satellite-dish"></i><span class="hub-tab-text"> Intel</span><span class="hub-tab-badge" id="hubBadgeIntel"></span></button>
       <button class="hub-tab" data-hub="polls"><i class="fas fa-poll"></i><span class="hub-tab-text"> Polls</span><span class="hub-tab-badge" id="hubBadgePolls"></span></button>
       <button class="hub-tab" data-hub="squads"><i class="fas fa-users-rectangle"></i><span class="hub-tab-text"> Squads</span></button>
@@ -374,15 +347,8 @@
       </div>
       <div class="hub-section-count" id="hubSectionCount">—</div>
     </div>
-    <!-- CORP LOG -->
+    <!-- WELCOME LOG -->
     <div class="hub-section active" id="hubLog">
-      <div class="log-filter-row" id="logFilterRow">
-        <button class="log-filter-btn active" data-filter="all">All</button>
-        <button class="log-filter-btn" data-filter="join">Joins</button>
-        <button class="log-filter-btn" data-filter="rank">Rank</button>
-        <button class="log-filter-btn" data-filter="mission">Missions</button>
-        <button class="log-filter-btn" data-filter="connection">Connections</button>
-      </div>
       <div class="corp-log-feed hub-scroll" id="corpLogFeed"></div>
     </div>
     <!-- MISSIONS -->
@@ -403,10 +369,7 @@
     <div class="hub-section" id="hubLeaderboard">
       <div id="leaderboardList" class="hub-scroll"></div>
     </div>
-    <!-- CALENDAR -->
-    <div class="hub-section" id="hubCalendar">
-      <div class="hub-scroll" id="calendarList"></div>
-    </div>
+
     <!-- INTEL BOARD -->
     <div class="hub-section" id="hubIntel">
       <div class="hub-scroll" id="intelList"></div>
@@ -573,10 +536,8 @@
   </div>
 </div>
 <!-- CORP CHAT BUTTON -->
-<button class="corp-chat-btn" id="corpChatBtn" aria-label="Corp Chat">
-  <span class="chat-icon-dot"></span>
-  <i class="fas fa-comments" style="font-size:.85rem;"></i>
-  <span style="font-size:.72rem;">Corp Chat</span>
+<button class="corp-chat-btn" id="corpChatBtn" aria-label="Corp Chat" title="Corp Chat">
+  <i class="fas fa-comments"></i>
   <span class="chat-unread" id="chatUnreadBadge">0</span>
 </button>
 
@@ -811,10 +772,12 @@
 <!-- NOTIFICATIONS -->
 <div class="modal" id="notifModal">
   <div class="modal-container" style="max-width:480px">
-    <button class="close-btn" id="closeNotif">&#x2715;</button>
     <div class="notif-header-row">
       <h2><i class="fas fa-bell" style="font-size:.85rem;color:var(--color-primary);"></i>Notifications</h2>
-      <button class="mark-all-read-btn" id="markAllReadBtn"><i class="fas fa-check-double"></i> Mark all read</button>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <button class="mark-all-read-btn" id="markAllReadBtn"><i class="fas fa-check-double"></i> Mark all read</button>
+        <button class="close-btn" id="closeNotif" style="position:static;font-size:1rem;padding:4px 6px;">&#x2715;</button>
+      </div>
     </div>
     <div class="notif-tabs">
       <button class="notif-tab active" data-ntab="requests"><i class="fas fa-user-plus" style="margin-right:4px;"></i>Requests<span id="reqBadge" class="notif-tab-badge"></span></button>
@@ -864,7 +827,6 @@
     <div class="nav-links">
       <a href="#home">Home</a>
       <a href="#" id="intelFeedNav" class="member-only">Intel Feed</a>
-      <a href="#" id="toolsNavLink" onclick="openEngagementHub('tools');return false;">Tools</a>
       <a href="#join">Join</a>
     </div>
     <div class="nav-right">
@@ -882,9 +844,6 @@
         <span class="notif-badge" id="notifBadge">0</span>
       </button>
       <div class="nav-status-wrap" id="navStatusWrap" style="display:none;">
-        <button id="statusDotBtn" style="background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;" title="Set status">
-          <span class="status-dot offline" id="navStatusDot"></span>
-        </button>
         <div class="status-picker" id="statusPicker">
           <div class="status-pick-item" data-status="online"><span class="status-dot online"></span> Online</div>
           <div class="status-pick-item" data-status="idle"><span class="status-dot idle"></span> Idle</div>
@@ -920,7 +879,7 @@
 </div>
 
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#home">Home</a><a href="#" id="intelFeedMobile" class="member-only">Intel Feed</a><a href="#" onclick="openEngagementHub('projects');return false;">Projects</a><a href="#" onclick="openEngagementHub('tools');return false;">Tools</a><a href="#join">Join</a>
+  <a href="#home">Home</a><a href="#" id="intelFeedMobile" class="member-only">Intel Feed</a><a href="#" onclick="openEngagementHub('projects');return false;">Projects</a><a href="#join">Join</a>
 </div>
 
 <!-- HERO -->

@@ -457,20 +457,7 @@ document.querySelectorAll('.skill-preset-btn').forEach(btn=>{
   btn.addEventListener('click',()=>addSkill(btn.dataset.skill||btn.textContent));
 });
 
-// Populate skills when profile modal opens — hooked into the existing openMyProfile()
-const _origOpenMyProfile=typeof openMyProfile==='function'?openMyProfile:null;
-if(_origOpenMyProfile){
-  openMyProfile=async function(){
-    await _origOpenMyProfile();
-    if(!currentUserData)return;
-    _currentSkills=(currentUserData.skills||[]).slice(0,10);
-    renderSkillPills(_currentSkills,document.getElementById('skillPillsContainer'),true);
-    const githubEl=document.getElementById('editGithubUrl');
-    const portfolioEl=document.getElementById('editPortfolioUrl');
-    if(githubEl)githubEl.value=currentUserData.githubURL||'';
-    if(portfolioEl)portfolioEl.value=currentUserData.portfolioURL||'';
-  };
-}
+// Skills/GitHub/Portfolio fields removed — no longer shown in profile editor
 
 /* ══════════════════════════════════════════════════════
    PROJECTS BOARD

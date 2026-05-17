@@ -760,147 +760,198 @@ function operativeIdFromUid(uid){
 }
 function generateOperatorID(user, mode='download') {
   if(!user){showToast('Sign in first.');return;}
-  const W=720, H=440;
-  const canvas = document.createElement('canvas');
+
+  // Card dimensions — classic ID card landscape proportion
+  const W=860, H=480;
+  const canvas=document.createElement('canvas');
   canvas.width=W; canvas.height=H;
-  const ctx = canvas.getContext('2d');
+  const ctx=canvas.getContext('2d');
 
-  // Background gradient
+  // ── BACKGROUND ──────────────────────────────────────────
   const bg=ctx.createLinearGradient(0,0,W,H);
-  bg.addColorStop(0,'#0c1020'); bg.addColorStop(1,'#04060e');
-  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  bg.addColorStop(0,'#0d1424');
+  bg.addColorStop(0.5,'#080d18');
+  bg.addColorStop(1,'#040810');
+  ctx.fillStyle=bg;
+  ctx.fillRect(0,0,W,H);
 
-  // Subtle dot matrix grid
-  ctx.fillStyle='rgba(192,192,192,0.05)';
-  for(let x=0;x<W;x+=14)for(let y=0;y<H;y+=14){ctx.fillRect(x,y,1,1);}
+  // Subtle horizontal scanline texture
+  ctx.fillStyle='rgba(192,192,192,0.022)';
+  for(let y=0;y<H;y+=3){ctx.fillRect(0,y,W,1);}
 
-  // Outer frame
-  ctx.strokeStyle='rgba(192,192,192,0.45)';
-  ctx.lineWidth=1.5; ctx.strokeRect(12,12,W-24,H-24);
-  // Corner brackets (silver L-marks)
-  ctx.lineWidth=2; ctx.strokeStyle='#d4d8e2';
-  const C=24;
-  function corner(x,y,dx,dy){ctx.beginPath();ctx.moveTo(x,y+dy);ctx.lineTo(x,y);ctx.lineTo(x+dx,y);ctx.stroke();}
-  corner(20,20,C,C);corner(W-20,20,-C,C);corner(20,H-20,C,-C);corner(W-20,H-20,-C,-C);
-
-  // Top header strip
-  const hg=ctx.createLinearGradient(0,30,0,75);
-  hg.addColorStop(0,'rgba(192,192,192,0.12)');hg.addColorStop(1,'rgba(192,192,192,0.02)');
-  ctx.fillStyle=hg; ctx.fillRect(28,32,W-56,46);
-  ctx.strokeStyle='rgba(192,192,192,0.18)'; ctx.lineWidth=1; ctx.strokeRect(28,32,W-56,46);
-  ctx.fillStyle='#d4d8e2';
-  ctx.font='700 18px "Share Tech Mono", monospace';
-  ctx.fillText('SIZNEXUS // IDENTIFICATION', 42, 62);
-  ctx.fillStyle='rgba(192,192,192,0.6)';
-  ctx.font='10px "Share Tech Mono", monospace';
-  ctx.fillText('CLASSIFIED', W-110, 62);
-
-  // Photo placeholder (drawn first; img replaces it)
-  const PX=42, PY=98, PW=160, PH=160;
-  function drawPlaceholder(){
-    ctx.fillStyle='#0a0e1a'; ctx.fillRect(PX,PY,PW,PH);
-    ctx.strokeStyle='rgba(192,192,192,0.4)'; ctx.lineWidth=1; ctx.strokeRect(PX,PY,PW,PH);
-    ctx.fillStyle='#a8b2c1';
-    ctx.font='700 64px "Share Tech Mono", monospace';
-    ctx.textAlign='center';
-    ctx.fillText((user.displayName||'?')[0].toUpperCase(), PX+PW/2, PY+PH/2+22);
-    ctx.textAlign='left';
-  }
-  drawPlaceholder();
-
-  // Right column: details
-  const COL=PX+PW+30;
-  ctx.font='10px "Share Tech Mono", monospace';
-  ctx.fillStyle='rgba(192,192,192,0.55)';
-  ctx.fillText('OPERATIVE NAME', COL, PY+8);
-  ctx.fillStyle='#fff';
-  ctx.font='700 22px "Share Tech Mono", monospace';
-  ctx.fillText((user.displayName||'UNKNOWN').toUpperCase(), COL, PY+34);
-
-  function row(label, val, y){
-    ctx.fillStyle='rgba(192,192,192,0.55)';
-    ctx.font='10px "Share Tech Mono", monospace';
-    ctx.fillText(label, COL, y);
-    ctx.fillStyle='#d4d8e2';
-    ctx.font='700 14px "Share Tech Mono", monospace';
-    ctx.fillText(String(val).toUpperCase(), COL, y+18);
-  }
-  row('CLEARANCE',user.rank||'MEMBER', PY+62);
-  row('OPERATOR TITLE', user.operatorTitle||'—', PY+98);
-  row('NET FUNDS', (user.points||0).toLocaleString(), PY+134);
-
-  // Bottom band: status, ID, barcode (taller so the issued footer fits cleanly)
-  const BY = H-110;
+  // Fine dot grid
   ctx.fillStyle='rgba(192,192,192,0.04)';
-  ctx.fillRect(28,BY-4,W-56,90);
-  ctx.strokeStyle='rgba(192,192,192,0.16)'; ctx.lineWidth=1; ctx.strokeRect(28,BY-4,W-56,90);
+  for(let x=0;x<W;x+=18)for(let y=0;y<H;y+=18){ctx.fillRect(x,y,1,1);}
 
-  ctx.fillStyle='rgba(192,192,192,0.55)';
-  ctx.font='10px "Share Tech Mono", monospace';
-  ctx.fillText('STATUS', 42, BY+12);
-  ctx.fillStyle = user.status==='online' ? '#9be39b' : '#999';
-  ctx.font='700 13px "Share Tech Mono", monospace';
-  ctx.fillText(user.status==='online'?'ACTIVE NETWORK':'OFFLINE', 42, BY+30);
+  // ── OUTER FRAME ─────────────────────────────────────────
+  ctx.strokeStyle='rgba(192,192,192,0.35)';
+  ctx.lineWidth=1.5;
+  ctx.strokeRect(14,14,W-28,H-28);
 
-  // Operative ID — derived from a non-reversible hash of the Firebase uid
-  ctx.fillStyle='rgba(192,192,192,0.55)';
-  ctx.font='10px "Share Tech Mono", monospace';
-  ctx.fillText('OPERATIVE ID', 42, BY+52);
-  ctx.fillStyle='#d4d8e2';
-  ctx.font='12px "Share Tech Mono", monospace';
-  ctx.fillText(operativeIdFromUid(currentUser?.uid||''), 42, BY+70);
+  // Corner L-brackets
+  const BK=28, bw=2;
+  ctx.strokeStyle='rgba(212,216,226,0.9)';
+  ctx.lineWidth=bw;
+  [[22,22,BK,0,0,BK],[W-22,22,-BK,0,0,BK],[22,H-22,BK,0,0,-BK],[W-22,H-22,-BK,0,0,-BK]].forEach(([ox,oy,ax,ay,bx,by])=>{
+    ctx.beginPath();ctx.moveTo(ox+ax,oy+ay);ctx.lineTo(ox,oy);ctx.lineTo(ox+bx,oy+by);ctx.stroke();
+  });
 
-  // Barcode on right of bottom band — right-anchored with safe padding
-  const BAR_BARS=28, BAR_STEP=6, BAR_W=BAR_BARS*BAR_STEP, BAR_RIGHT_PAD=42;
-  const BAR_X=W-BAR_RIGHT_PAD-BAR_W; // anchored to right with 42px padding from card edge
-  const BAR_Y=BY+10, BAR_H=36;
-  ctx.fillStyle='#d4d8e2';
-  for(let i=0;i<BAR_BARS;i++){
-    const w=Math.random()>0.5?2:5;
-    ctx.fillRect(BAR_X+i*BAR_STEP, BAR_Y, w, BAR_H);
+  // ── HEADER STRIP ────────────────────────────────────────
+  const hg=ctx.createLinearGradient(0,24,0,72);
+  hg.addColorStop(0,'rgba(192,192,192,0.1)');
+  hg.addColorStop(1,'rgba(192,192,192,0.02)');
+  ctx.fillStyle=hg;
+  ctx.fillRect(28,24,W-56,50);
+  ctx.strokeStyle='rgba(192,192,192,0.14)';
+  ctx.lineWidth=1;
+  ctx.strokeRect(28,24,W-56,50);
+
+  // Header text
+  ctx.fillStyle='rgba(212,216,226,0.95)';
+  ctx.font='700 17px "Share Tech Mono",monospace';
+  ctx.fillText('SIZNEXUS // IDENTIFICATION', 44, 57);
+
+  // "CLASSIFIED" badge (right-aligned)
+  const clsLabel='CLASSIFIED';
+  ctx.font='10px "Share Tech Mono",monospace';
+  const clsW=ctx.measureText(clsLabel).width+20;
+  const clsX=W-44-clsW;
+  ctx.fillStyle='rgba(244,67,54,0.12)';
+  ctx.fillRect(clsX-4,41,clsW,17);
+  ctx.strokeStyle='rgba(244,67,54,0.4)';
+  ctx.lineWidth=1;
+  ctx.strokeRect(clsX-4,41,clsW,17);
+  ctx.fillStyle='rgba(244,100,90,0.9)';
+  ctx.fillText(clsLabel,clsX+6,54);
+
+  // ── PHOTO SECTION (left column) ─────────────────────────
+  const PX=44, PY=90, PW=180, PH=230;
+
+  function drawPhoto(){
+    // Photo frame background
+    ctx.fillStyle='#070c18';
+    ctx.fillRect(PX,PY,PW,PH);
+    // Placeholder initial
+    ctx.fillStyle='rgba(168,178,193,0.3)';
+    ctx.font=`700 72px "Share Tech Mono",monospace`;
+    ctx.textAlign='center';
+    ctx.fillText((user.displayName||'?')[0].toUpperCase(),PX+PW/2,PY+PH/2+26);
+    ctx.textAlign='left';
+    ctx.strokeStyle='rgba(192,192,192,0.3)';
+    ctx.lineWidth=1;
+    ctx.strokeRect(PX,PY,PW,PH);
   }
-  // SCAN AT GATE caption — centered under the barcode
-  ctx.fillStyle='rgba(192,192,192,0.55)';
-  ctx.font='9px "Share Tech Mono", monospace';
+  drawPhoto();
+
+  // Status pill under photo
+  const isOnline=user.status==='online';
+  const statusColor=isOnline?'#4CAF50':user.status==='idle'?'#ff9800':user.status==='dnd'?'#f44336':'#555';
+  const statusText=isOnline?'● ACTIVE':'○ OFFLINE';
+  ctx.font='700 10px "Share Tech Mono",monospace';
+  const stW=ctx.measureText(statusText).width+24;
+  const stX=PX+(PW-stW)/2;
+  ctx.fillStyle=isOnline?'rgba(76,175,80,0.1)':'rgba(100,100,100,0.1)';
+  ctx.fillRect(stX,PY+PH+8,stW,20);
+  ctx.strokeStyle=isOnline?'rgba(76,175,80,0.4)':'rgba(100,100,100,0.3)';
+  ctx.lineWidth=1;
+  ctx.strokeRect(stX,PY+PH+8,stW,20);
+  ctx.fillStyle=statusColor;
   ctx.textAlign='center';
-  ctx.fillText('SCAN AT GATE', BAR_X+BAR_W/2, BAR_Y+BAR_H+14);
+  ctx.fillText(statusText,PX+PW/2,PY+PH+22);
   ctx.textAlign='left';
 
-  // Issued footer — tucked inside the bottom band so it never collides with the frame border
-  ctx.fillStyle='rgba(192,192,192,0.4)';
-  ctx.font='9px "Share Tech Mono", monospace';
-  const issued=new Date().toISOString().slice(0,10);
-  ctx.fillText(`ISSUED ${issued} · TheSizNexus`, 42, BY+82);
+  // ── DETAIL COLUMN (right of photo) ──────────────────────
+  const COL=PX+PW+40;
+  const CRIGHT=W-44;
 
-  // Now draw photo on top of placeholder if available
+  // Operative name — large
+  ctx.fillStyle='rgba(192,192,192,0.5)';
+  ctx.font='10px "Share Tech Mono",monospace';
+  ctx.fillText('OPERATIVE NAME',COL,PY+14);
+  ctx.fillStyle='#ffffff';
+  ctx.font='700 28px "Share Tech Mono",monospace';
+  // Truncate name to fit
+  let nameText=(user.displayName||'UNKNOWN').toUpperCase();
+  while(ctx.measureText(nameText).width>CRIGHT-COL&&nameText.length>4){nameText=nameText.slice(0,-1);}
+  ctx.fillText(nameText,COL,PY+48);
+
+  // Thin divider line under name
+  ctx.strokeStyle='rgba(192,192,192,0.12)';
+  ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(COL,PY+60);ctx.lineTo(CRIGHT,PY+60);ctx.stroke();
+
+  function detailRow(label,value,y){
+    ctx.fillStyle='rgba(168,178,193,0.5)';
+    ctx.font='9px "Share Tech Mono",monospace';
+    ctx.fillText(label.toUpperCase(),COL,y);
+    ctx.fillStyle='rgba(212,216,226,0.92)';
+    ctx.font='700 13px "Share Tech Mono",monospace';
+    let v=String(value||'—').toUpperCase();
+    while(ctx.measureText(v).width>CRIGHT-COL&&v.length>3)v=v.slice(0,-1)+'…';
+    ctx.fillText(v,COL,y+18);
+  }
+
+  detailRow('Clearance Level',user.rank||'Member',PY+82);
+  detailRow('Operator Title',user.operatorTitle||'—',PY+124);
+  detailRow('Net Funds',(user.points||0).toLocaleString()+' NET',PY+166);
+
+  // ── BOTTOM BAND ─────────────────────────────────────────
+  const BY=H-96;
+  ctx.fillStyle='rgba(192,192,192,0.035)';
+  ctx.fillRect(28,BY,W-56,70);
+  ctx.strokeStyle='rgba(192,192,192,0.12)';
+  ctx.lineWidth=1;
+  ctx.strokeRect(28,BY,W-56,70);
+
+  // Operative ID
+  ctx.fillStyle='rgba(168,178,193,0.5)';
+  ctx.font='9px "Share Tech Mono",monospace';
+  ctx.fillText('OPERATIVE ID',44,BY+18);
+  ctx.fillStyle='rgba(212,216,226,0.85)';
+  ctx.font='700 12px "Share Tech Mono",monospace';
+  ctx.fillText(operativeIdFromUid(currentUser?.uid||''),44,BY+36);
+
+  // Issue date
+  const issued=new Date().toISOString().slice(0,10);
+  ctx.fillStyle='rgba(168,178,193,0.38)';
+  ctx.font='9px "Share Tech Mono",monospace';
+  ctx.fillText(`ISSUED ${issued} · TheSizNexus`,44,BY+56);
+
+  // Barcode — right-anchored in bottom band
+  const BAR_COUNT=32, BAR_STEP=5, BAR_W_TOTAL=BAR_COUNT*BAR_STEP;
+  const BAR_X=W-44-BAR_W_TOTAL;
+  const BAR_Y=BY+10, BAR_H=38;
+  ctx.fillStyle='rgba(212,216,226,0.75)';
+  for(let i=0;i<BAR_COUNT;i++){
+    const bw=Math.random()>0.45?1.5:3.5;
+    ctx.fillRect(BAR_X+i*BAR_STEP,BAR_Y,bw,BAR_H);
+  }
+  ctx.fillStyle='rgba(168,178,193,0.45)';
+  ctx.font='8px "Share Tech Mono",monospace';
+  ctx.textAlign='center';
+  ctx.fillText('SCAN AT GATE',BAR_X+BAR_W_TOTAL/2,BAR_Y+BAR_H+12);
+  ctx.textAlign='left';
+
+  // ── DRAW PHOTO (async, over placeholder) ─────────────────
   const img=new Image();
   img.crossOrigin='Anonymous';
-  img.onload=()=>{ctx.drawImage(img,PX,PY,PW,PH);ctx.strokeStyle='rgba(192,192,192,0.6)';ctx.strokeRect(PX,PY,PW,PH);finalize();};
+  img.onload=()=>{
+    ctx.drawImage(img,PX,PY,PW,PH);
+    ctx.strokeStyle='rgba(192,192,192,0.4)';
+    ctx.lineWidth=1;
+    ctx.strokeRect(PX,PY,PW,PH);
+    finalize();
+  };
   img.onerror=finalize;
   if(user.photoURL)img.src=user.photoURL; else finalize();
 
   function finalize(){
     const filename=`SizNexus_ID_${(user.displayName||'Operative').replace(/[^a-z0-9]/gi,'_')}.png`;
-    if(mode==='share' && navigator.canShare){
-      canvas.toBlob(async(blob)=>{
-        if(!blob){fallbackDownload();return;}
-        const file=new File([blob],filename,{type:'image/png'});
-        const payload={files:[file],title:'TheSizNexus Operator ID',text:`I just enlisted with TheSizNexus. ${location.origin}/u/${encodeURIComponent(user.displayName||'')}`};
-        if(navigator.canShare(payload)){
-          try{await navigator.share(payload);showToast('Operator ID shared.');}
-          catch(_){fallbackDownload();}
-        }else fallbackDownload();
-      },'image/png');
-    }else{
-      fallbackDownload();
-    }
-    function fallbackDownload(){
-      const a=document.createElement('a');
-      a.download=filename;
-      a.href=canvas.toDataURL('image/png');
-      a.click();
-      showToast(mode==='share'?'Sharing not supported — downloaded instead.':'Operator ID downloaded.');
-    }
+    const a=document.createElement('a');
+    a.download=filename;
+    a.href=canvas.toDataURL('image/png');
+    a.click();
+    showToast('Operator ID downloaded.');
   }
 }
 document.getElementById('downloadOperatorIdBtn')?.addEventListener('click',()=>generateOperatorID(currentUserData));
@@ -957,7 +1008,6 @@ async function shareMyProfile(){
 }
 document.getElementById('shareMyProfileBtn')?.addEventListener('click',shareMyProfile);
 document.getElementById('shareReferralBtn')?.addEventListener('click',shareReferralLink);
-document.getElementById('shareOperatorIdBtn')?.addEventListener('click',()=>generateOperatorID(currentUserData,'share'));
 
 /* ── ACHIEVEMENT CARDS ── */
 function generateAchievementCard(title,subtitle,iconName){
