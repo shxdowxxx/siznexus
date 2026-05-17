@@ -144,10 +144,16 @@ nav a:hover{color:var(--color-text-light);}nav a:hover::after{width:100%;}
   width:100%;
   align-items:stretch;
 }
-.dashboard-column{display:flex;flex-direction:column;gap:20px;min-width:0;}
+.dashboard-column{display:flex;flex-direction:column;gap:20px;min-width:0;min-height:0;}
 .dashboard-column-left{grid-area:left;}
 .dashboard-center{grid-area:center;}
 .dashboard-column-right{grid-area:right;}
+/* Equal-height columns: center card fills its stretched column;
+   side columns' last card expands to use remaining space */
+.dashboard-center>.command-board{flex:1;display:flex;flex-direction:column;}
+.dashboard-center>.command-board .command-preview-list{flex:1;min-height:80px;}
+.dashboard-column-left>section:last-child,
+.dashboard-column-right>section:last-child{flex:1;}
 .bubble{
   background:linear-gradient(160deg,rgba(14,20,40,.99) 0%,rgba(10,15,26,.99) 100%);
   padding:32px;
