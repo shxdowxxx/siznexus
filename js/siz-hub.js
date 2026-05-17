@@ -310,10 +310,11 @@ async function loadCorpLog(){
     note:'New operatives who have enlisted with TheSizNexus.'
   });
   if(corpLogUnsub){corpLogUnsub();corpLogUnsub=null;}
-  const q=db.collection('corpLog').where('type','==','join').orderBy('createdAt','desc').limit(50);
+  // No composite index needed — filter join entries client-side
+  const q=db.collection('corpLog').orderBy('createdAt','desc').limit(200);
   corpLogUnsub=q.onSnapshot(snap=>{
     feed.innerHTML='';
-    const docs=snap.docs;
+    const docs=snap.docs.filter(d=>d.data().type==='join');
     if(!docs.length){
       updateHubSectionInfo({label:'Welcome Feed',count:0,note:'No new operatives have enlisted yet.'});
       feed.innerHTML='<div class="hub-empty">No new members yet. Be the first to enlist!</div>';

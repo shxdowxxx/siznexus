@@ -3,10 +3,10 @@
 ═══════════════════════════════════════════════════════ */
 const HOME_PREVIEW_CONFIG={
   log:{
-    eyebrow:'Live Activity',
-    title:'Corporation Feed',
-    meta:'Recent signals and ongoing work across the corporation.',
-    openLabel:'Open Activity'
+    eyebrow:'New Operatives',
+    title:'Welcome Log',
+    meta:'Operatives who have recently enlisted with TheSizNexus.',
+    openLabel:'Open Welcome Log'
   },
   missions:{
     eyebrow:'Mission Queue',
@@ -99,23 +99,19 @@ async function loadHomeLogPreview(){
     {icon:'fa-shield-alt',title:'Access Model',text:'Full corp activity, missions, and internal boards unlock through a free account and clearance rank.',meta:'Member access',badge:'Invite-led'}
   ];
   if(isGuestViewer())return guestItems.map(buildPreviewRow).join('');
-  const snap=await db.collection('corpLog').orderBy('createdAt','desc').limit(5).get();
-  const visibleDocs=snap.docs.filter(d=>{
-    const t=d.data().type;
-    if(PRIVATE_LOG_TYPES.includes(t)&&!isDev(currentUserData))return false;
-    return true;
-  });
-  if(!visibleDocs.length)return '<div class="hub-empty">No activity yet.</div>';
-  const typeIcon={join:'fa-door-open',rank:'fa-id-badge',mission:'fa-crosshairs',connection:'fa-user-friends',status:'fa-circle',profile:'fa-user-edit',intel:'fa-satellite-dish',poll:'fa-poll',announcement:'fa-bullhorn',streak:'fa-fire',motw:'fa-trophy',recruit:'fa-user-plus'};
-  return visibleDocs.map(d=>{
+  // Fetch recent entries and filter join type client-side (no composite index needed)
+  const snap=await db.collection('corpLog').orderBy('createdAt','desc').limit(100).get();
+  const joinDocs=snap.docs.filter(d=>d.data().type==='join').slice(0,5);
+  if(!joinDocs.length)return '<div class="hub-empty">No new operatives have enlisted yet.</div>';
+  return joinDocs.map(d=>{
     const log=d.data();
     const time=log.createdAt?`${fmtDate(log.createdAt)} ${fmtTime(log.createdAt)}`:'Recent';
     return buildPreviewRow({
-      icon:typeIcon[log.type]||'fa-circle',
+      icon:'fa-door-open',
       title:esc(log.displayName||'Unknown'),
-      text:esc(log.message||'No details available.'),
+      text:'Enlisted as a new operative.',
       meta:`${esc(log.rank||'Member')} • ${time}`,
-      badge:esc(log.type||'update'),
+      badge:'New',
       targetId:d.id
     });
   }).join('');
